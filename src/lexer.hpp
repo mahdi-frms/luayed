@@ -19,6 +19,10 @@ enum class TokenKind
     Colon,
     LeftBracket,
     RightBracket,
+    LeftParen,
+    RightParen,
+    LeftBrace,
+    RightBrace,
 
     Not,
     Negate,
@@ -35,7 +39,7 @@ enum class TokenKind
     BinOr,
     RightShift,
     LeftShift,
-    Concat,
+    DotDot,
     Less,
     LessEqual,
     Greater,
@@ -70,7 +74,9 @@ enum class TokenKind
     Number,
     Literal,
 
-    Eof
+    Eof,
+
+    None, // returned as error
 };
 
 struct Token
@@ -89,11 +95,26 @@ private:
     string &text;
     vector<Token> tokens;
     size_t pos;
+    size_t offset;
+    size_t line;
+
+    char peek();
+    char read();
+    void skip_line();
+    Token pop();
+    Token op_equal(char c);
+    Token op_dot(char c);
+    Token op_negate(char c);
+    Token op_divide(char c);
+    Token op_less(char c);
+    Token op_greater(char c);
+    Token token(string text, TokenKind kind);
+    Token token_eof();
 
 public:
     Lexer(string &text);
     Token next();
-    vector<Token> lex();
+    vector<Token> drain();
 };
 
 #endif
