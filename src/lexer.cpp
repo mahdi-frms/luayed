@@ -107,6 +107,7 @@ bool is_alphanumeric(char c)
 
 char Lexer::read()
 {
+    this->offset++;
     return this->text[this->pos++];
 }
 
@@ -120,6 +121,8 @@ Lexer::Lexer(string &text) : text(text)
     this->pos = 0;
     this->line = 0;
     this->offset = 0;
+    this->prev_line = 0;
+    this->prev_offset = 0;
     this->tokens = vector<Token>();
 }
 
@@ -133,36 +136,29 @@ Token::Token(string text, size_t line, size_t offset, TokenKind kind)
 
 Token Lexer::next()
 {
-    size_t pos = this->pos;
     Token token = this->pop();
-    this->sync(pos);
+    this->sync();
     return token;
 }
 
-void Lexer::sync(size_t pos)
+void Lexer::sync()
 {
-    for (size_t i = pos; i < this->pos; i++)
-    {
-        if (this->text[i] == '\n')
-        {
-            this->line++;
-            this->offset = 0;
-        }
-        else
-        {
-            this->offset++;
-        }
-    }
+    this->prev_line = this->line;
+    this->prev_offset = this->offset;
 }
 
 Token Lexer::pop()
 {
     while (this->peek() != '\0')
     {
-        size_t pos = this->pos;
         char c = this->read();
         while (c == ' ' || c == '\n')
         {
+            if (c == '\n')
+            {
+                this->offset = 0;
+                this->line++;
+            }
             c = this->read();
         }
         TokenKind tk = single_op(c);
@@ -181,20 +177,89 @@ Token Lexer::pop()
         {
             return this->keyword_identifier(c);
         }
-        this->sync(pos);
+        if (is_digit(c))
+        {
+            return this->number(c, NumberScanPhase::Integer);
+        }
+        this->sync();
     }
     return this->token_eof();
+}
+
+Token Lexer::number(char c, NumberScanPhase phase)
+{
+    const char *number_error = "malformed number";
+    string num = string(1, c);
+    while (true)
+    {
+        c = this->peek();
+        if (phase == NumberScanPhase::Integer)
+        {
+            if (c == '.')
+            {
+                phase = NumberScanPhase::Decimal;
+            }
+            else if (c == 'e')
+            {
+                phase = NumberScanPhase::EarlyExponent;
+            }
+            else if (is_alphanumeric(c))
+            {
+                return this->error(number_error);
+            }
+            if (!is_digit(c))
+                break;
+            num.push_back(this->read());
+        }
+        else if (phase == NumberScanPhase::Decimal)
+        {
+            if (c == 'e')
+            {
+                phase = NumberScanPhase::EarlyExponent;
+            }
+            else if (is_alphanumeric(c))
+            {
+                return this->error(number_error);
+            }
+            if (!is_digit(c))
+                break;
+            num.push_back(this->read());
+        }
+        else if (phase == NumberScanPhase::EarlyExponent)
+        {
+            if (c == '-')
+            {
+                num.push_back(this->read());
+            }
+            phase = NumberScanPhase::Exponent;
+        }
+        else // Exponent
+        {
+            if (is_alphanumeric(c))
+            {
+                return this->error(number_error);
+            }
+            if (!is_digit(c))
+                break;
+            num.push_back(this->read());
+        }
+    }
+    return this->token(num, TokenKind::Number);
+}
+
+Token Lexer::error(string message)
+{
+    Token err = Token(message, this->line, this->offset, TokenKind::Error);
+    this->skip_line();
+    return err;
 }
 
 Token Lexer::keyword_identifier(char c)
 {
     string id = string(1, c);
-    while (true)
+    while (is_alphanumeric(this->peek()))
     {
-        c = this->read();
-        if (!is_alphanumeric(c))
-            break;
-        id.push_back(c);
+        id.push_back(this->read());
     }
     TokenKind tk = keyword(id);
     if (tk != TokenKind::None)
@@ -221,10 +286,10 @@ vector<Token> Lexer::drain()
 
 Token Lexer::token(string text, TokenKind kind)
 {
-    return Token(text, this->line, this->offset, kind);
+    return Token(text, this->prev_line, this->prev_offset, kind);
 }
 
-void Lexer::skip_comment()
+void Lexer::skip_line()
 {
     char c = this->peek();
     while (c != '\n' && c != '\0')
@@ -296,12 +361,12 @@ Token Lexer::op_minus(char c)
                 }
                 else
                 {
-                    this->skip_comment();
+                    this->skip_line();
                 }
             }
             else
             {
-                this->skip_comment();
+                this->skip_line();
             }
         }
         else

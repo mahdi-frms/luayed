@@ -76,7 +76,8 @@ enum class TokenKind
 
     Eof,
 
-    None, // returned as error
+    None,  // returned as error
+    Error, // returned as lexical error
 };
 
 struct Token
@@ -89,6 +90,14 @@ struct Token
     Token(string text, size_t line, size_t offset, TokenKind kind);
 };
 
+enum class NumberScanPhase
+{
+    Integer,
+    Decimal,
+    Exponent,
+    EarlyExponent,
+};
+
 class Lexer
 {
 private:
@@ -98,12 +107,16 @@ private:
     size_t offset;
     size_t line;
 
+    size_t prev_offset;
+    size_t prev_line;
+
     char peek();
     char read();
-    void skip_comment();
+    void skip_line();
     Token keyword_identifier(char c);
+    Token number(char c, NumberScanPhase phase);
     void skip_comment_block();
-    void sync(size_t pos);
+    void sync();
     Token pop();
     Token op_equal(char c);
     Token op_dot(char c);
@@ -114,6 +127,7 @@ private:
     Token op_minus(char c);
     Token token(string text, TokenKind kind);
     Token token_eof();
+    Token error(string message);
     Token none();
 
 public:
