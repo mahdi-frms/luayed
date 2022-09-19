@@ -100,7 +100,10 @@ private:
 
     char peek();
     char read();
-    void skip_line();
+    void skip_comment();
+    Token keyword_identifier(char c);
+    void skip_comment_block();
+    void sync(size_t pos);
     Token pop();
     Token op_equal(char c);
     Token op_dot(char c);
@@ -108,8 +111,10 @@ private:
     Token op_divide(char c);
     Token op_less(char c);
     Token op_greater(char c);
+    Token op_minus(char c);
     Token token(string text, TokenKind kind);
     Token token_eof();
+    Token none();
 
 public:
     Lexer(string &text);
