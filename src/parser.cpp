@@ -2,11 +2,6 @@
 #include <utility>
 using namespace ast;
 
-Noderef noderef(Node node)
-{
-    return std::make_shared<Node>(std::move(node));
-}
-
 uint16_t priorities(uint8_t l, uint8_t r)
 {
     return l * 256 + r;
@@ -19,56 +14,9 @@ uint8_t check_prefix(TokenKind kind)
     return 255;
 }
 
-Noderef make_binary(Noderef lexpr, Noderef rexpr, Token op)
-{
-    return noderef(Node(Binary{.lexpr = lexpr, .rexpr = rexpr, .op = op}, NodeKind::Binary));
-}
-
-Noderef make_unary(Noderef expr, Token op)
-{
-    return noderef(Node(Unary{.expr = expr, .op = op}, NodeKind::Unary));
-}
-
-Noderef make_primary(Token token)
-{
-    return noderef(Node(Primary{.token = token}, NodeKind::Primary));
-}
-
-Ast::Ast(Noderef root) : root(root)
-{
-}
-
 Token errtoken()
 {
     return Token("", 0, 0, TokenKind::Error);
-}
-
-Parser::Parser(Lexer &lexer) : lexer(lexer)
-{
-    this->tokens = this->lexer.drain();
-}
-
-Node::Node(Gnode inner, NodeKind kind) : inner(inner), kind(kind)
-{
-}
-
-/*
-    11 12       or
-    13 14       and
-    15 16       < > <= >= ~= ==
-    17 18       |
-    19 20       ~
-    21 22       &
-    23 24       >> <<
-    26 25       ..
-    27 28       + -
-    29 30       * /
-    31          not -(unary) ~(unary)
-    34 33       ^
-*/
-Noderef Parser::expr()
-{
-    return this->expr_p(0);
 }
 
 bool is_primary(TokenKind kind)
@@ -121,6 +69,34 @@ uint16_t check_binary(TokenKind kind)
     if (kind == TokenKind::Power)
         return priorities(34, 33);
     return (uint16_t)-1;
+}
+
+Parser::Parser(Lexer &lexer) : lexer(lexer)
+{
+    this->tokens = this->lexer.drain();
+}
+
+Node::Node(Gnode inner, NodeKind kind) : inner(inner), kind(kind)
+{
+}
+
+/*
+    11 12       or
+    13 14       and
+    15 16       < > <= >= ~= ==
+    17 18       |
+    19 20       ~
+    21 22       &
+    23 24       >> <<
+    26 25       ..
+    27 28       + -
+    29 30       * /
+    31          not -(unary) ~(unary)
+    34 33       ^
+*/
+Noderef Parser::expr()
+{
+    return this->expr_p(0);
 }
 
 Noderef Parser::expr_p(uint8_t pwr)

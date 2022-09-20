@@ -6,6 +6,7 @@ add_executable(luayed
     src/main.cpp
     src/lexer.cpp
     src/parser.cpp
+    src/ast.cpp
 )
 
 set_property(TARGET luayed PROPERTY CXX_STANDARD 17)
