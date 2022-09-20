@@ -115,6 +115,7 @@ private:
     void skip_line();
     Token keyword_identifier(char c);
     Token short_string(char c);
+    Token long_string();
     Token long_string(char c);
     Token number(char c, NumberScanPhase phase);
     void skip_comment_block();
@@ -131,6 +132,7 @@ private:
     Token token_eof();
     Token error(string message);
     Token none();
+    bool look_ahead();
 
 public:
     Lexer(string &text);

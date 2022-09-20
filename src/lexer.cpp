@@ -66,7 +66,7 @@ TokenKind keyword(string &str)
         return TokenKind::Break;
     if (str.compare("return"))
         return TokenKind::Return;
-    if (str.compare("Nil"))
+    if (str.compare("nil"))
         return TokenKind::Nil;
     if (str.compare("do"))
         return TokenKind::Do;
@@ -185,9 +185,83 @@ Token Lexer::pop()
         {
             return this->short_string(c);
         }
+        if (c == '[')
+        {
+            if (this->look_ahead())
+            {
+                return this->long_string();
+            }
+            else
+            {
+                return this->token(string("["), TokenKind::LeftBracket);
+            }
+        }
         this->sync();
     }
     return this->token_eof();
+}
+
+Token Lexer::long_string()
+{
+    string str = "[";
+    size_t level = 0;
+    while (this->read() != '[')
+    {
+        level++;
+        str.push_back('=');
+    }
+    str.push_back('[');
+
+    string error = string("missing symbol `]") + string(level, '=') + string("]`");
+
+    while (true)
+    {
+        char c = this->read();
+        if (c == '\0')
+        {
+            return this->error(error);
+        }
+        str.push_back(c);
+        if (c == ']')
+        {
+            size_t lvl = level;
+            while (true)
+            {
+                c = this->peek();
+                if (c == '\0')
+                    break;
+                str.push_back(this->read());
+                if (c == '=')
+                    lvl--;
+                else
+                    break;
+            }
+            if (lvl == 0 && c == ']')
+            {
+                break;
+            }
+        }
+    }
+
+    return this->token(str, TokenKind::Literal);
+}
+
+bool Lexer::look_ahead()
+{
+    size_t pos = this->pos;
+    while (true)
+    {
+        char c = this->text[pos];
+        if (c == '[')
+        {
+            return true;
+        }
+        else if (c != '=')
+        {
+            return false;
+        }
+        pos++;
+    }
 }
 
 Token Lexer::short_string(char c)
