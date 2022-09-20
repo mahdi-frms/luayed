@@ -80,6 +80,8 @@ enum class TokenKind
     Error, // returned as lexical error
 };
 
+string token_kind_stringify(TokenKind kind);
+
 struct Token
 {
     string text;

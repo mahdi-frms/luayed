@@ -43,15 +43,18 @@ namespace ast
     private:
         Gnode inner;
         NodeKind kind;
+        void stringify(int depth, string &buffer);
 
     public:
         Node(Gnode inner, NodeKind kind);
+        string to_string();
     };
 
     class Ast
     {
     public:
         Ast(Noderef root);
+        Noderef get_root();
 
     private:
         Noderef root;

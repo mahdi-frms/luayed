@@ -1,5 +1,5 @@
 #include <iostream>
-#include "lexer.hpp"
+#include "parser.hpp"
 
 string readfile(const char *path)
 {
@@ -19,19 +19,33 @@ string readfile(const char *path)
     return text;
 }
 
+// int main(int argc, char **argv)
+// {
+//     string text = readfile(argv[1]);
+//     printf("%s\n", text.c_str());
+//     Lexer lxr = Lexer(text);
+//     for (;;)
+//     {
+//         Token tkn = lxr.next();
+//         if (tkn.kind == TokenKind::Eof)
+//         {
+//             break;
+//         }
+//         printf("--> %s (%s) [%lu,%lu]\n", tkn.text.c_str(), token_kind_stringify(tkn.kind).c_str(), tkn.line, tkn.offset);
+//     }
+//     return 0;
+// }
+
 int main(int argc, char **argv)
 {
     string text = readfile(argv[1]);
     printf("%s\n", text.c_str());
     Lexer lxr = Lexer(text);
-    for (;;)
+    Parser parser = Parser(lxr);
+    ast::Noderef tree = parser.parse().get_root();
+    if (tree != nullptr)
     {
-        Token tkn = lxr.next();
-        if (tkn.kind == TokenKind::Eof)
-        {
-            break;
-        }
-        printf("--> %s [%lu,%lu]\n", tkn.text.c_str(), tkn.line, tkn.offset);
+        printf("%s", tree->to_string().c_str());
     }
     return 0;
 }

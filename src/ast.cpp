@@ -25,3 +25,49 @@ Noderef make_primary(Token token)
 Ast::Ast(Noderef root) : root(root)
 {
 }
+
+string at_depth(string text, int depth)
+{
+    string t = string(depth, '-');
+    t += "> ";
+    t += text;
+    return t;
+}
+
+string Node::to_string()
+{
+    string text = "";
+    this->stringify(1, text);
+    return text;
+}
+
+void Node::stringify(int depth, string &buffer)
+{
+    string text = "";
+    NodeKind kind = this->kind;
+    if (kind == NodeKind::Binary)
+    {
+        Binary node = std::get<Binary>(this->inner);
+        buffer += at_depth("Binary Node\n", depth);
+        node.lexpr->stringify(depth + 3, buffer);
+        buffer += at_depth(node.op.text + "\n", depth + 3);
+        node.rexpr->stringify(depth + 3, buffer);
+    }
+    if (kind == NodeKind::Unary)
+    {
+        Unary node = std::get<Unary>(this->inner);
+        buffer += at_depth("Unary Node\n", depth);
+        buffer += at_depth(node.op.text + "\n", depth + 3);
+        node.expr->stringify(depth + 3, buffer);
+    }
+    if (kind == NodeKind::Primary)
+    {
+        Primary node = std::get<Primary>(this->inner);
+        buffer += at_depth("Primary Node\n", depth);
+        buffer += at_depth(node.token.text + "\n", depth + 3);
+    }
+}
+Noderef Ast::get_root()
+{
+    return this->root;
+}

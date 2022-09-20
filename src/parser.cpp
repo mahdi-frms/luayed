@@ -21,7 +21,7 @@ Token errtoken()
 
 bool is_primary(TokenKind kind)
 {
-    TokenKind accpet[] = {
+    TokenKind accept[] = {
         TokenKind::Nil,
         TokenKind::True,
         TokenKind::False,
@@ -29,9 +29,9 @@ bool is_primary(TokenKind kind)
         TokenKind::Literal,
         TokenKind::DotDotDot,
     };
-    for (int i = 0; i < sizeof(accpet) / sizeof(TokenKind); i++)
+    for (int i = 0; i < sizeof(accept) / sizeof(TokenKind); i++)
     {
-        if (accpet[i] == kind)
+        if (accept[i] == kind)
         {
             return true;
         }
