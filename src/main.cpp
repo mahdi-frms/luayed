@@ -1,14 +1,37 @@
 #include <iostream>
 #include "lexer.hpp"
 
-int main()
+string readfile(const char *path)
 {
-    string text = "local a = 3";
-    Lexer lxr = Lexer(text);
-    vector<Token> tkns = lxr.drain();
-    for (size_t i = 0; i < tkns.size(); i++)
+    string text = "";
+    int bsize = 1024;
+    FILE *file = fopen(path, "r");
+    char buffer[bsize + 1];
+    while (true)
     {
-        printf("%s\n", tkns[i].text.c_str());
+        int rsl = fread(buffer, 1, bsize, file);
+        buffer[rsl] = '\0';
+        text += string(buffer);
+        if (rsl < bsize)
+            break;
+    }
+    fclose(file);
+    return text;
+}
+
+int main(int argc, char **argv)
+{
+    string text = readfile(argv[1]);
+    printf("%s\n", text.c_str());
+    Lexer lxr = Lexer(text);
+    for (;;)
+    {
+        Token tkn = lxr.next();
+        if (tkn.kind == TokenKind::Eof)
+        {
+            break;
+        }
+        printf("--> %s\n", tkn.text.c_str());
     }
     return 0;
 }

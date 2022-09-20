@@ -107,8 +107,18 @@ bool is_alphanumeric(char c)
 
 char Lexer::read()
 {
-    this->offset++;
-    return this->text[this->pos++];
+    char c = this->text[this->pos];
+    if (c == '\n')
+    {
+        this->offset = 0;
+        this->line++;
+    }
+    else
+    {
+        this->offset++;
+    }
+    this->pos++;
+    return c;
 }
 
 char Lexer::peek()
@@ -154,13 +164,9 @@ Token Lexer::pop()
         char c = this->read();
         while (c == ' ' || c == '\n')
         {
-            if (c == '\n')
-            {
-                this->offset = 0;
-                this->line++;
-            }
             c = this->read();
         }
+        this->sync();
         TokenKind tk = single_op(c);
         if (tk != TokenKind::None)
         {
@@ -272,7 +278,7 @@ Token Lexer::short_string(char c)
     while (true)
     {
         char ch = this->read();
-        if (ch == '\n')
+        if (ch == '\n' || ch == '\0')
         {
             string message = string("missing symbol `");
             message.push_back(c);
@@ -296,7 +302,7 @@ Token Lexer::short_string(char c)
                 {
                     if (ch == *ptr)
                     {
-                        escape = true;
+                        exists = true;
                         break;
                     }
                 }
@@ -306,6 +312,7 @@ Token Lexer::short_string(char c)
                 }
                 str.push_back(ch);
             }
+            escape = false;
         }
         else
         {
@@ -314,8 +321,13 @@ Token Lexer::short_string(char c)
                 escape = true;
             }
             str.push_back(ch);
+            if (ch == c)
+            {
+                break;
+            }
         }
     }
+    return this->token(str, TokenKind::Literal);
 }
 
 Token Lexer::number(char c, NumberScanPhase phase)
@@ -335,11 +347,11 @@ Token Lexer::number(char c, NumberScanPhase phase)
             {
                 phase = NumberScanPhase::EarlyExponent;
             }
-            else if (is_alphanumeric(c))
+            else if (is_alphabetic(c))
             {
                 return this->error(number_error);
             }
-            if (!is_digit(c))
+            else if (!is_digit(c))
                 break;
             num.push_back(this->read());
         }
@@ -349,11 +361,11 @@ Token Lexer::number(char c, NumberScanPhase phase)
             {
                 phase = NumberScanPhase::EarlyExponent;
             }
-            else if (is_alphanumeric(c))
+            else if (is_alphabetic(c))
             {
                 return this->error(number_error);
             }
-            if (!is_digit(c))
+            else if (!is_digit(c))
                 break;
             num.push_back(this->read());
         }
@@ -367,11 +379,11 @@ Token Lexer::number(char c, NumberScanPhase phase)
         }
         else // Exponent
         {
-            if (is_alphanumeric(c))
+            if (is_alphabetic(c))
             {
                 return this->error(number_error);
             }
-            if (!is_digit(c))
+            else if (!is_digit(c))
                 break;
             num.push_back(this->read());
         }
@@ -425,7 +437,7 @@ void Lexer::skip_line()
 {
     char c = this->peek();
     while (c != '\n' && c != '\0')
-        this->read();
+        c = this->read();
 }
 
 void Lexer::skip_comment_block()
@@ -454,12 +466,12 @@ void Lexer::skip_comment_block()
 
 Token Lexer::token_eof()
 {
-    return this->token(string(""), TokenKind::Eof);
+    return this->token("", TokenKind::Eof);
 }
 
 Token Lexer::none()
 {
-    return this->token(string(""), TokenKind::None);
+    return this->token("", TokenKind::None);
 }
 
 Token Lexer::op_equal(char c)
@@ -500,6 +512,7 @@ Token Lexer::op_minus(char c)
             {
                 this->skip_line();
             }
+            this->sync();
         }
         else
             return this->token(string("-"), TokenKind::Minus);
