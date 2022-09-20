@@ -164,9 +164,9 @@ Token Lexer::pop()
         char c = this->read();
         while (c == ' ' || c == '\n')
         {
+            this->sync();
             c = this->read();
         }
-        this->sync();
         TokenKind tk = single_op(c);
         if (tk != TokenKind::None)
         {

@@ -31,7 +31,7 @@ int main(int argc, char **argv)
         {
             break;
         }
-        printf("--> %s\n", tkn.text.c_str());
+        printf("--> %s [%lu,%lu]\n", tkn.text.c_str(), tkn.line, tkn.offset);
     }
     return 0;
 }
