@@ -114,6 +114,8 @@ private:
     char read();
     void skip_line();
     Token keyword_identifier(char c);
+    Token short_string(char c);
+    Token long_string(char c);
     Token number(char c, NumberScanPhase phase);
     void skip_comment_block();
     void sync();

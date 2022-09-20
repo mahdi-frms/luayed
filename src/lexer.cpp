@@ -181,9 +181,67 @@ Token Lexer::pop()
         {
             return this->number(c, NumberScanPhase::Integer);
         }
+        if (c == '\'' || c == '"')
+        {
+            return this->short_string(c);
+        }
         this->sync();
     }
     return this->token_eof();
+}
+
+Token Lexer::short_string(char c)
+{
+    const char *escape_list = "abfnrtx\\\"'[]";
+    bool escape = false;
+    string str = string(1, c);
+    while (true)
+    {
+        char ch = this->read();
+        if (ch == '\n')
+        {
+            string message = string("missing symbol `");
+            message.push_back(c);
+            message.push_back('`');
+            return this->error(message);
+        }
+        if (escape)
+        {
+            if (ch == 'z')
+            {
+                str.push_back(ch);
+                while (this->peek() == '\n')
+                {
+                    str.push_back(this->read());
+                }
+            }
+            else
+            {
+                bool exists = false;
+                for (const char *ptr = escape_list; *ptr != '\0'; ptr++)
+                {
+                    if (ch == *ptr)
+                    {
+                        escape = true;
+                        break;
+                    }
+                }
+                if (!exists)
+                {
+                    return this->error("invalid escape sequence");
+                }
+                str.push_back(ch);
+            }
+        }
+        else
+        {
+            if (ch == '\\')
+            {
+                escape = true;
+            }
+            str.push_back(ch);
+        }
+    }
 }
 
 Token Lexer::number(char c, NumberScanPhase phase)
