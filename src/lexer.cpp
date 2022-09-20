@@ -32,6 +32,8 @@ TokenKind single_op(char c)
         return TokenKind::LeftBrace;
     if (c == '}')
         return TokenKind::RightBrace;
+    if (c == ']')
+        return TokenKind::RightBracket;
     if (c == ';')
         return TokenKind::Semicolon;
     if (c == ',')
