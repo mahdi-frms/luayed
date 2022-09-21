@@ -38,12 +38,43 @@ namespace ast
         Noderef field;
         Noderef value;
     };
+    struct Property
+    {
+        Noderef table;
+        Token field;
+    };
+    struct Index
+    {
+        Noderef table;
+        Noderef idx;
+    };
+    struct Call
+    {
+        Noderef callee;
+        Noderef arg;
+    };
+    struct Arglist
+    {
+        vector<Noderef> args;
+    };
     struct Table
     {
         vector<Noderef> items;
     };
 
-    typedef std::variant<Primary, Binary, Unary, IdField, ExprField, Table> Gnode;
+    typedef std::variant<
+        Primary,
+        Binary,
+        Unary,
+        IdField,
+        ExprField,
+        Table,
+        Arglist,
+        Call,
+        Property,
+        Index>
+
+        Gnode;
 
     enum class NodeKind
     {
@@ -52,7 +83,11 @@ namespace ast
         Primary,
         IdField,
         ExprField,
-        Table
+        Table,
+        Property,
+        Index,
+        Call,
+        Arglist
     };
 
     struct Node
@@ -87,5 +122,10 @@ Noderef make_primary(Token token);
 Noderef make_id_field(Token field, Noderef value);
 Noderef make_expr_field(Noderef field, Noderef value);
 Noderef make_table(vector<Noderef> items);
+
+Noderef make_arglist(vector<Noderef> args);
+Noderef make_call(Noderef callee, Noderef arg);
+Noderef make_index(Noderef table, Noderef index);
+Noderef make_property(Noderef table, Token field);
 
 #endif

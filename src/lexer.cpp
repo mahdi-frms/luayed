@@ -23,7 +23,7 @@ string token_kind_stringify(TokenKind kind)
     if (kind == TokenKind::ColonColon)
         return "colon colon";
     if (kind == TokenKind::Comma)
-        return "oomma";
+        return "comma";
     if (kind == TokenKind::Do)
         return "do";
     if (kind == TokenKind::Dot)
@@ -150,9 +150,9 @@ TokenKind single_op(char c)
     if (c == '|')
         return TokenKind::BinOr;
     if (c == '(')
-        return TokenKind::RightParen;
-    if (c == ')')
         return TokenKind::LeftParen;
+    if (c == ')')
+        return TokenKind::RightParen;
     if (c == '{')
         return TokenKind::LeftBrace;
     if (c == '}')

@@ -39,6 +39,18 @@ bool is_primary(TokenKind kind)
     }
     return false;
 }
+uint8_t check_postfix(TokenKind kind)
+{
+    if (kind == TokenKind::LeftBrace ||
+        kind == TokenKind::LeftParen ||
+        kind == TokenKind::LeftBracket ||
+        kind == TokenKind::Dot ||
+        kind == TokenKind::Literal)
+    {
+        return 35;
+    }
+    return 255;
+}
 
 uint16_t check_binary(TokenKind kind)
 {
@@ -164,7 +176,8 @@ Noderef Parser::table()
         }
         else
         {
-            throw string("missing symbol '}'");
+            items.push_back(this->expr());
+            // throw string("missing symbol '}'");
         }
 
         t = this->peek();
@@ -180,6 +193,22 @@ Noderef Parser::table()
         }
     }
     return make_table(std::move(items));
+}
+
+Noderef Parser::arglist()
+{
+    vector<Noderef> args;
+    while (this->peek().kind != TokenKind::RightParen)
+    {
+        args.push_back(this->expr());
+        if (this->peek().kind == TokenKind::RightParen)
+        {
+            break;
+        }
+        this->consume(TokenKind::Comma);
+    }
+    this->pop();
+    return make_arglist(args);
 }
 
 Noderef Parser::expr_p(uint8_t pwr)
@@ -200,6 +229,11 @@ Noderef Parser::expr_p(uint8_t pwr)
     {
         lhs = this->table();
     }
+    else if (t.kind == TokenKind::LeftParen)
+    {
+        lhs = this->expr();
+        this->consume(TokenKind::RightParen);
+    }
     else
     {
         throw string("expression expected");
@@ -207,20 +241,58 @@ Noderef Parser::expr_p(uint8_t pwr)
 
     while (true)
     {
-        Token t = this->peek();
-        uint16_t p = check_binary(t.kind);
-        if (p == (uint16_t)-1)
-            break;
-        uint8_t lp = p >> 8;
-        uint8_t rp = p % 256;
-
-        if (pwr > lp)
+        Token op = this->peek();
+        uint8_t p = check_postfix(op.kind);
+        if (p != 255)
         {
-            break;
+            if (t.kind == TokenKind::Identifier || t.kind == TokenKind::RightParen)
+                break;
+            if (p < pwr)
+                break;
+            this->pop();
+            if (op.kind == TokenKind::Dot)
+            {
+                Token field = this->consume(TokenKind::Identifier);
+                lhs = make_property(lhs, field);
+            }
+            else if (op.kind == TokenKind::LeftBracket)
+            {
+                Noderef rhs = this->expr();
+                this->consume(TokenKind::RightBracket);
+                lhs = make_index(lhs, rhs);
+            }
+            else if (op.kind == TokenKind::Literal)
+            {
+                Noderef rhs = make_primary(op);
+                lhs = make_call(lhs, rhs);
+            }
+            else if (op.kind == TokenKind::LeftBrace)
+            {
+                Noderef rhs = this->table();
+                lhs = make_call(lhs, rhs);
+            }
+            else // left parenthese
+            {
+                Noderef rhs = this->arglist();
+                lhs = make_call(lhs, rhs);
+            }
         }
-        this->pop();
-        Noderef rhs = expr_p(rp);
-        lhs = make_binary(lhs, rhs, t);
+        else
+        {
+            uint16_t p = check_binary(op.kind);
+            if (p == (uint16_t)-1)
+                break;
+            uint8_t lp = p >> 8;
+            uint8_t rp = p % 256;
+
+            if (pwr > lp)
+            {
+                break;
+            }
+            this->pop();
+            Noderef rhs = expr_p(rp);
+            lhs = make_binary(lhs, rhs, op);
+        }
     }
 
     return lhs;
