@@ -273,6 +273,18 @@ Noderef Parser::statement()
         this->pop();
         return make_break_stmt();
     }
+    if (this->peek().kind == TokenKind::Goto)
+    {
+        this->pop();
+        return make_goto_stmt(this->consume(TokenKind::Identifier));
+    }
+    if (this->peek().kind == TokenKind::Do)
+    {
+        this->pop();
+        Noderef blk = this->block(true);
+        this->consume(TokenKind::End);
+        return blk;
+    }
     Noderef s = this->expr();
     if (s->get_kind() == NodeKind::Call)
     {
@@ -291,10 +303,10 @@ Noderef Parser::statement()
     }
 }
 
-Noderef Parser::block()
+Noderef Parser::block(bool end)
 {
     vector<Noderef> stmts;
-    while (this->peek().kind != TokenKind::Eof)
+    while (this->peek().kind != (end ? TokenKind::End : TokenKind::Eof))
     {
         Noderef stmt = this->statement();
         if (stmt == nullptr)
@@ -303,7 +315,6 @@ Noderef Parser::block()
         }
         stmts.push_back(stmt);
     }
-    this->pop();
     return make_block(stmts);
 }
 
@@ -419,7 +430,7 @@ Ast Parser::parse()
 {
     try
     {
-        return Ast(this->block());
+        return Ast(this->block(false));
     }
     catch (string message)
     {

@@ -81,6 +81,10 @@ namespace ast
     struct BreakStmt
     {
     };
+    struct GotoStmt
+    {
+        Token identifier;
+    };
 
     typedef std::variant<
         Primary,
@@ -97,6 +101,7 @@ namespace ast
         AssignStmt,
         LabelStmt,
         BreakStmt,
+        GotoStmt,
         Block>
 
         Gnode;
@@ -117,6 +122,7 @@ namespace ast
         AssignStmt,
         LabelStmt,
         BreakStmt,
+        GotoStmt,
         Block
     };
 
@@ -168,5 +174,6 @@ Noderef make_block(vector<Noderef> args);
 Noderef make_assign_stmt(Noderef varlist, Noderef explist);
 Noderef make_label_stmt(Token identifier);
 Noderef make_break_stmt();
+Noderef make_goto_stmt(Token identifier);
 
 #endif

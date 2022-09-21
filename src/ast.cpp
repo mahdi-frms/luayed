@@ -81,6 +81,11 @@ Noderef make_break_stmt()
     return noderef(Node(BreakStmt{}, NodeKind::BreakStmt));
 }
 
+Noderef make_goto_stmt(Token identifier)
+{
+    return noderef(Node(GotoStmt{.identifier = identifier}, NodeKind::GotoStmt));
+}
+
 Ast::Ast(Noderef root) : root(root)
 {
 }
@@ -204,6 +209,12 @@ void Node::stringify(int depth, string &buffer)
     {
         BreakStmt node = std::get<BreakStmt>(this->inner);
         buffer += at_depth("Break Statement\n", depth);
+    }
+    else if (kind == NodeKind::GotoStmt)
+    {
+        GotoStmt node = std::get<GotoStmt>(this->inner);
+        buffer += at_depth("Goto Statement\n", depth);
+        buffer += at_depth(node.identifier.text + "\n", depth + 3);
     }
 }
 Noderef Ast::get_root()

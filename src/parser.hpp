@@ -21,7 +21,7 @@ private:
     Noderef table();
     Noderef id_field();
     Noderef expr_field();
-    Noderef block();
+    Noderef block(bool end);
     Noderef statement();
     Noderef arglist();
     Noderef varlist(Noderef var);
