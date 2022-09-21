@@ -310,6 +310,7 @@ Token Lexer::pop()
         RET(this->op_negate(c));
         RET(this->op_divide(c));
         RET(this->op_minus(c));
+        RET(this->op_colon(c));
         if (is_alphabetic(c))
         {
             return this->keyword_identifier(c);
@@ -616,6 +617,20 @@ Token Lexer::op_equal(char c)
         }
         else
             return this->token(string("="), TokenKind::Equal);
+    }
+    return this->none();
+}
+Token Lexer::op_colon(char c)
+{
+    if (c == ':')
+    {
+        if (this->peek() == ':')
+        {
+            read();
+            return this->token(string("::"), TokenKind::ColonColon);
+        }
+        else
+            return this->token(string(":"), TokenKind::Colon);
     }
     return this->none();
 }

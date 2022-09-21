@@ -124,6 +124,7 @@ private:
     void sync();
     Token pop();
     Token op_equal(char c);
+    Token op_colon(char c);
     Token op_dot(char c);
     Token op_negate(char c);
     Token op_divide(char c);

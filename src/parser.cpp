@@ -261,6 +261,18 @@ Noderef Parser::statement()
             return nullptr;
         }
     }
+    if (this->peek().kind == TokenKind::ColonColon)
+    {
+        this->pop();
+        Token id = this->consume(TokenKind::Identifier);
+        this->consume(TokenKind::ColonColon);
+        return make_label_stmt(id);
+    }
+    if (this->peek().kind == TokenKind::Break)
+    {
+        this->pop();
+        return make_break_stmt();
+    }
     Noderef s = this->expr();
     if (s->get_kind() == NodeKind::Call)
     {

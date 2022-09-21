@@ -60,6 +60,7 @@ Noderef make_call_stmt(Noderef call)
 {
     return noderef(Node(CallStmt{.call = call}, NodeKind::CallStmt));
 }
+
 Noderef make_block(vector<Noderef> stmts)
 {
     return noderef(Node(Block{.stmts = stmts}, NodeKind::Block));
@@ -68,6 +69,16 @@ Noderef make_block(vector<Noderef> stmts)
 Noderef make_assign_stmt(Noderef varlist, Noderef explist)
 {
     return noderef(Node(AssignStmt{.varlist = varlist, .explist = explist}, NodeKind::AssignStmt));
+}
+
+Noderef make_label_stmt(Token identifier)
+{
+    return noderef(Node(LabelStmt{.identifier = identifier}, NodeKind::LabelStmt));
+}
+
+Noderef make_break_stmt()
+{
+    return noderef(Node(BreakStmt{}, NodeKind::BreakStmt));
 }
 
 Ast::Ast(Noderef root) : root(root)
@@ -182,6 +193,17 @@ void Node::stringify(int depth, string &buffer)
         buffer += at_depth("Assign Statement\n", depth);
         node.varlist->stringify(depth + 3, buffer);
         node.explist->stringify(depth + 3, buffer);
+    }
+    else if (kind == NodeKind::LabelStmt)
+    {
+        LabelStmt node = std::get<LabelStmt>(this->inner);
+        buffer += at_depth("Label Statement\n", depth);
+        buffer += at_depth(node.identifier.text + "\n", depth + 3);
+    }
+    else if (kind == NodeKind::BreakStmt)
+    {
+        BreakStmt node = std::get<BreakStmt>(this->inner);
+        buffer += at_depth("Break Statement\n", depth);
     }
 }
 Noderef Ast::get_root()

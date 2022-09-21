@@ -74,6 +74,13 @@ namespace ast
         Noderef varlist;
         Noderef explist;
     };
+    struct LabelStmt
+    {
+        Token identifier;
+    };
+    struct BreakStmt
+    {
+    };
 
     typedef std::variant<
         Primary,
@@ -88,6 +95,8 @@ namespace ast
         Index,
         CallStmt,
         AssignStmt,
+        LabelStmt,
+        BreakStmt,
         Block>
 
         Gnode;
@@ -106,6 +115,8 @@ namespace ast
         Explist,
         CallStmt,
         AssignStmt,
+        LabelStmt,
+        BreakStmt,
         Block
     };
 
@@ -155,5 +166,7 @@ Noderef make_property(Noderef table, Token field);
 Noderef make_call_stmt(Noderef call);
 Noderef make_block(vector<Noderef> args);
 Noderef make_assign_stmt(Noderef varlist, Noderef explist);
+Noderef make_label_stmt(Token identifier);
+Noderef make_break_stmt();
 
 #endif
