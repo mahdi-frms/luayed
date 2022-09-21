@@ -39,6 +39,10 @@ string readfile(const char *path)
 int main(int argc, char **argv)
 {
     string text = readfile(argv[1]);
+    text.erase(text.begin());
+    text.erase(text.begin());
+    text.erase(text.begin());
+    text.erase(text.begin());
     printf("%s\n", text.c_str());
     Lexer lxr = Lexer(text);
     Parser parser = Parser(lxr);

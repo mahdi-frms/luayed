@@ -17,6 +17,10 @@ private:
     Noderef primary();
     Token pop();
     Token peek();
+    Noderef table();
+    Noderef id_field(Token identifier);
+    Noderef expr_field();
+    Token consume(TokenKind kind);
 
 public:
     Parser(Lexer &lexer);

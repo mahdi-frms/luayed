@@ -99,6 +99,61 @@ Noderef Parser::expr()
     return this->expr_p(0);
 }
 
+Token Parser::consume(TokenKind kind)
+{
+    Token t = this->pop();
+    if (t.kind != kind)
+    {
+        throw string("expected '") + token_kind_stringify(kind) + "'";
+    }
+    return t;
+}
+
+Noderef Parser::id_field(Token identifier)
+{
+    this->consume(TokenKind::Equal);
+    return make_id_field(identifier, this->expr());
+}
+
+Noderef Parser::expr_field()
+{
+    Noderef field = this->expr();
+    this->consume(TokenKind::RightBracket);
+    this->consume(TokenKind::Equal);
+    return make_expr_field(field, this->expr());
+}
+
+Noderef Parser::table()
+{
+    vector<Noderef> items;
+    while (true)
+    {
+        Token t = this->pop();
+        if (t.kind == TokenKind::RightBrace)
+            break;
+        if (t.kind == TokenKind::Identifier)
+        {
+            items.push_back(this->id_field(t));
+        }
+        else if (t.kind == TokenKind::LeftBracket)
+        {
+            items.push_back(this->expr_field());
+        }
+        t = this->peek();
+        if (t.kind != TokenKind::Comma &&
+            t.kind != TokenKind::Semicolon &&
+            t.kind != TokenKind::RightBrace)
+        {
+            throw string("expected ',' or ';'");
+        }
+        else if (t.kind != TokenKind::RightBrace)
+        {
+            this->pop();
+        }
+    }
+    return make_table(std::move(items));
+}
+
 Noderef Parser::expr_p(uint8_t pwr)
 {
     Token t = this->pop();
@@ -112,6 +167,10 @@ Noderef Parser::expr_p(uint8_t pwr)
     else if (is_primary(t.kind))
     {
         lhs = make_primary(t);
+    }
+    else if (t.kind == TokenKind::LeftBrace)
+    {
+        lhs = this->table();
     }
     else
     {

@@ -28,14 +28,31 @@ namespace ast
     {
         Token token;
     };
+    struct IdField
+    {
+        Token field;
+        Noderef value;
+    };
+    struct ExprField
+    {
+        Noderef field;
+        Noderef value;
+    };
+    struct Table
+    {
+        vector<Noderef> items;
+    };
 
-    typedef std::variant<Primary, Binary, Unary> Gnode;
+    typedef std::variant<Primary, Binary, Unary, IdField, ExprField, Table> Gnode;
 
     enum class NodeKind
     {
         Binary,
         Unary,
         Primary,
+        IdField,
+        ExprField,
+        Table
     };
 
     struct Node
@@ -67,5 +84,8 @@ Noderef noderef(Node node);
 Noderef make_binary(Noderef lexpr, Noderef rexpr, Token op);
 Noderef make_unary(Noderef expr, Token op);
 Noderef make_primary(Token token);
+Noderef make_id_field(Token field, Noderef value);
+Noderef make_expr_field(Noderef field, Noderef value);
+Noderef make_table(vector<Noderef> items);
 
 #endif
