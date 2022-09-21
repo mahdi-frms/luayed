@@ -436,6 +436,25 @@ Noderef Parser::block(bool end)
     return make_block(stmts);
 }
 
+Noderef Parser::function_body()
+{
+    this->consume(TokenKind::LeftParen);
+    vector<Token> parlist;
+    if (this->peek().kind == TokenKind::Identifier)
+    {
+        parlist.push_back(this->pop());
+    }
+    while (this->peek().kind == TokenKind::Comma)
+    {
+        this->pop();
+        parlist.push_back(this->consume(TokenKind::Identifier));
+    }
+    this->consume(TokenKind::RightParen);
+    Noderef block = this->block(true);
+    this->consume(TokenKind::End);
+    return make_function_body(std::move(parlist), block);
+}
+
 Noderef Parser::expr_p(uint8_t pwr)
 {
     Token t = this->pop();
@@ -458,6 +477,10 @@ Noderef Parser::expr_p(uint8_t pwr)
     {
         lhs = this->expr();
         t = this->consume(TokenKind::RightParen);
+    }
+    else if (t.kind == TokenKind::Function)
+    {
+        lhs = this->function_body();
     }
     else
     {

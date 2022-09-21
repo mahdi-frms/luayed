@@ -31,6 +31,7 @@ private:
     Noderef arglist();
     Noderef varlist(Noderef var);
     Noderef explist();
+    Noderef function_body();
     Token consume(TokenKind kind);
 
 public:

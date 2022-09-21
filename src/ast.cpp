@@ -121,6 +121,11 @@ Noderef make_return_stmt(Noderef expr)
                         NodeKind::ReturnStmt));
 }
 
+Noderef make_function_body(vector<Token> parlist, Noderef block)
+{
+    return noderef(Node(FunctionBody{.parlist = parlist, .block = block}, NodeKind::FunctionBody));
+}
+
 Ast::Ast(Noderef root) : root(root)
 {
 }
@@ -300,6 +305,14 @@ void Node::stringify(int depth, string &buffer)
         node.expr_from->stringify(depth + 3, buffer);
         node.expr_to->stringify(depth + 3, buffer);
         node.expr_step->stringify(depth + 3, buffer);
+        node.block->stringify(depth + 3, buffer);
+    }
+    else if (kind == NodeKind::FunctionBody)
+    {
+        FunctionBody node = std::get<FunctionBody>(this->inner);
+        buffer += at_depth("Function Body\n", depth);
+        for (int i = 0; i < node.parlist.size(); i++)
+            buffer += at_depth(node.parlist[i].text + "\n", depth + 3);
         node.block->stringify(depth + 3, buffer);
     }
 }
