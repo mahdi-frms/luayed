@@ -23,6 +23,11 @@ private:
     Noderef expr_field();
     Noderef block(bool end);
     Noderef statement();
+    Noderef while_stmt();
+    Noderef repeat_stmt();
+    Noderef if_stmt();
+    Noderef generic_for_stmt(Token identifier);
+    Noderef numeric_for_stmt(Token identifier);
     Noderef arglist();
     Noderef varlist(Noderef var);
     Noderef explist();

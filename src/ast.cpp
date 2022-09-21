@@ -85,6 +85,34 @@ Noderef make_goto_stmt(Token identifier)
 {
     return noderef(Node(GotoStmt{.identifier = identifier}, NodeKind::GotoStmt));
 }
+Noderef make_if_stmt(vector<Noderef> exprs, vector<Noderef> blocks)
+{
+    return noderef(Node(IfStmt{.exprs = exprs, .blocks = blocks}, NodeKind::IfStmt));
+}
+Noderef make_white_stmt(Noderef expr, Noderef block)
+{
+    return noderef(Node(WhileStmt{.expr = expr, .block = block}, NodeKind::WhileStmt));
+}
+Noderef make_repeat_stmt(Noderef expr, Noderef block)
+{
+    return noderef(Node(RepeatStmt{.expr = expr, .block = block}, NodeKind::RepeatStmt));
+}
+Noderef make_generic_for_stmt(vector<Token> namelist, Noderef explist, Noderef block)
+{
+    return noderef(Node(GenericFor{.namelist = namelist,
+                                   .explist = explist,
+                                   .block = block},
+                        NodeKind::GenericFor));
+}
+Noderef make_numeric_for_stmt(Token identifier, Noderef expr_from, Noderef expr_to, Noderef expr_step, Noderef block)
+{
+    return noderef(Node(NumericFor{.identifier = identifier,
+                                   .expr_from = expr_from,
+                                   .expr_to = expr_to,
+                                   .expr_step = expr_step,
+                                   .block = block},
+                        NodeKind::NumericFor));
+}
 
 Ast::Ast(Noderef root) : root(root)
 {
@@ -215,6 +243,51 @@ void Node::stringify(int depth, string &buffer)
         GotoStmt node = std::get<GotoStmt>(this->inner);
         buffer += at_depth("Goto Statement\n", depth);
         buffer += at_depth(node.identifier.text + "\n", depth + 3);
+    }
+    else if (kind == NodeKind::WhileStmt)
+    {
+        WhileStmt node = std::get<WhileStmt>(this->inner);
+        buffer += at_depth("While Statement\n", depth);
+        node.expr->stringify(depth + 3, buffer);
+        node.block->stringify(depth + 3, buffer);
+    }
+    else if (kind == NodeKind::RepeatStmt)
+    {
+        RepeatStmt node = std::get<RepeatStmt>(this->inner);
+        buffer += at_depth("Repeat Statement\n", depth);
+        node.expr->stringify(depth + 3, buffer);
+        node.block->stringify(depth + 3, buffer);
+    }
+    else if (kind == NodeKind::IfStmt)
+    {
+        IfStmt node = std::get<IfStmt>(this->inner);
+        buffer += at_depth("If Statement\n", depth);
+        for (int i = 0; i < node.exprs.size(); i++)
+        {
+            if (node.exprs[i])
+                node.exprs[i]->stringify(depth + 3, buffer);
+            node.blocks[i]->stringify(depth + 3, buffer);
+        }
+    }
+    else if (kind == NodeKind::GenericFor)
+    {
+        GenericFor node = std::get<GenericFor>(this->inner);
+        buffer += at_depth("Generic For Statement\n", depth);
+        for (int i = 0; i < node.namelist.size(); i++)
+            buffer += at_depth(node.namelist[i].text + "\n", depth + 3);
+
+        node.explist->stringify(depth + 3, buffer);
+        node.block->stringify(depth + 3, buffer);
+    }
+    else if (kind == NodeKind::NumericFor)
+    {
+        NumericFor node = std::get<NumericFor>(this->inner);
+        buffer += at_depth("Numeric For Statement\n", depth);
+        buffer += at_depth(node.identifier.text + "\n", depth + 3);
+        node.expr_from->stringify(depth + 3, buffer);
+        node.expr_to->stringify(depth + 3, buffer);
+        node.expr_step->stringify(depth + 3, buffer);
+        node.block->stringify(depth + 3, buffer);
     }
 }
 Noderef Ast::get_root()

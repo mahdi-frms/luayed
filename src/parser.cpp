@@ -248,6 +248,83 @@ Noderef Parser::explist()
     return make_explist(items);
 }
 
+Noderef Parser::generic_for_stmt(Token identifier)
+{
+    vector<Token> namelist;
+    namelist.push_back(identifier);
+    while (this->peek().kind == TokenKind::Comma)
+    {
+        this->pop();
+        namelist.push_back(this->consume(TokenKind::Identifier));
+    }
+    this->consume(TokenKind::In);
+    Noderef explist = this->explist();
+    this->consume(TokenKind::Do);
+    Noderef block = this->block(true);
+    this->consume(TokenKind::End);
+    return make_generic_for_stmt(std::move(namelist), explist, block);
+}
+
+Noderef Parser::numeric_for_stmt(Token identifier)
+{
+    this->pop(); // =
+    Noderef from = this->expr();
+    this->consume(TokenKind::Comma);
+    Noderef to = this->expr();
+    Noderef step = nullptr;
+    if (this->peek().kind == TokenKind::Comma)
+    {
+        this->pop();
+        step = this->expr();
+    }
+    this->consume(TokenKind::Do);
+    Noderef block = this->block(true);
+    this->consume(TokenKind::End);
+    return make_numeric_for_stmt(identifier, from, to, step, block);
+}
+
+Noderef Parser::while_stmt()
+{
+    this->pop();
+    Noderef expr = this->expr();
+    this->consume(TokenKind::Do);
+    Noderef blk = this->block(true);
+    this->consume(TokenKind::End);
+    return make_white_stmt(expr, blk);
+}
+Noderef Parser::repeat_stmt()
+{
+    this->pop();
+    Noderef blk = this->block(true);
+    this->consume(TokenKind::Until);
+    Noderef expr = this->expr();
+    return make_repeat_stmt(expr, blk);
+}
+Noderef Parser::if_stmt()
+{
+    vector<Noderef> exprs;
+    vector<Noderef> blocks;
+    this->pop();
+    exprs.push_back(this->expr());
+    this->consume(TokenKind::Then);
+    blocks.push_back(this->block(true));
+    while (this->peek().kind == TokenKind::ElseIf)
+    {
+        this->pop();
+        exprs.push_back(this->expr());
+        this->consume(TokenKind::Then);
+        blocks.push_back(this->block(true));
+    }
+    if (this->peek().kind == TokenKind::Else)
+    {
+        this->pop();
+        exprs.push_back(nullptr);
+        blocks.push_back(this->block(true));
+    }
+    this->consume(TokenKind::End);
+    return make_if_stmt(exprs, blocks);
+}
+
 Noderef Parser::statement()
 {
     if (this->peek().kind == TokenKind::Semicolon)
@@ -284,6 +361,31 @@ Noderef Parser::statement()
         Noderef blk = this->block(true);
         this->consume(TokenKind::End);
         return blk;
+    }
+    if (this->peek().kind == TokenKind::While)
+    {
+        return this->while_stmt();
+    }
+    if (this->peek().kind == TokenKind::Repeat)
+    {
+        return this->repeat_stmt();
+    }
+    if (this->peek().kind == TokenKind::If)
+    {
+        return this->if_stmt();
+    }
+    if (this->peek().kind == TokenKind::For)
+    {
+        this->pop();
+        Token id = this->consume(TokenKind::Identifier);
+        if (this->peek().kind == TokenKind::Equal)
+        {
+            return this->numeric_for_stmt(id);
+        }
+        else
+        {
+            return this->generic_for_stmt(id);
+        }
     }
     Noderef s = this->expr();
     if (s->get_kind() == NodeKind::Call)

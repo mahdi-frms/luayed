@@ -85,6 +85,35 @@ namespace ast
     {
         Token identifier;
     };
+    struct WhileStmt
+    {
+        Noderef expr;
+        Noderef block;
+    };
+    struct RepeatStmt
+    {
+        Noderef expr;
+        Noderef block;
+    };
+    struct IfStmt
+    {
+        vector<Noderef> exprs;
+        vector<Noderef> blocks;
+    };
+    struct NumericFor
+    {
+        Token identifier;
+        Noderef expr_from;
+        Noderef expr_to;
+        Noderef expr_step;
+        Noderef block;
+    };
+    struct GenericFor
+    {
+        vector<Token> namelist;
+        Noderef explist;
+        Noderef block;
+    };
 
     typedef std::variant<
         Primary,
@@ -102,6 +131,11 @@ namespace ast
         LabelStmt,
         BreakStmt,
         GotoStmt,
+        WhileStmt,
+        RepeatStmt,
+        IfStmt,
+        NumericFor,
+        GenericFor,
         Block>
 
         Gnode;
@@ -123,6 +157,11 @@ namespace ast
         LabelStmt,
         BreakStmt,
         GotoStmt,
+        WhileStmt,
+        RepeatStmt,
+        IfStmt,
+        NumericFor,
+        GenericFor,
         Block
     };
 
@@ -175,5 +214,10 @@ Noderef make_assign_stmt(Noderef varlist, Noderef explist);
 Noderef make_label_stmt(Token identifier);
 Noderef make_break_stmt();
 Noderef make_goto_stmt(Token identifier);
+Noderef make_if_stmt(vector<Noderef> exprs, vector<Noderef> blocks);
+Noderef make_white_stmt(Noderef expr, Noderef block);
+Noderef make_repeat_stmt(Noderef expr, Noderef block);
+Noderef make_generic_for_stmt(vector<Token> namelist, Noderef explist, Noderef block);
+Noderef make_numeric_for_stmt(Token identifier, Noderef expr_from, Noderef expr_to, Noderef expr_step, Noderef block);
 
 #endif
