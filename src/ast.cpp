@@ -37,9 +37,9 @@ Noderef make_table(vector<Noderef> items)
     return noderef(Node(Table{.items = std::move(items)}, NodeKind::Table));
 }
 
-Noderef make_arglist(vector<Noderef> args)
+Noderef make_explist(vector<Noderef> items)
 {
-    return noderef(Node(Arglist{.args = std::move(args)}, NodeKind::Arglist));
+    return noderef(Node(Explist{.items = std::move(items)}, NodeKind::Explist));
 }
 
 Noderef make_call(Noderef callee, Noderef arg)
@@ -63,6 +63,11 @@ Noderef make_call_stmt(Noderef call)
 Noderef make_block(vector<Noderef> stmts)
 {
     return noderef(Node(Block{.stmts = stmts}, NodeKind::Block));
+}
+
+Noderef make_assign_stmt(Noderef varlist, Noderef explist)
+{
+    return noderef(Node(AssignStmt{.varlist = varlist, .explist = explist}, NodeKind::AssignStmt));
 }
 
 Ast::Ast(Noderef root) : root(root)
@@ -130,12 +135,12 @@ void Node::stringify(int depth, string &buffer)
         node.field->stringify(depth + 3, buffer);
         node.value->stringify(depth + 3, buffer);
     }
-    else if (kind == NodeKind::Arglist)
+    else if (kind == NodeKind::Explist)
     {
-        Arglist node = std::get<Arglist>(this->inner);
-        buffer += at_depth("Arglist\n", depth);
-        for (int i = 0; i < node.args.size(); i++)
-            node.args[i]->stringify(depth + 3, buffer);
+        Explist node = std::get<Explist>(this->inner);
+        buffer += at_depth("Explist\n", depth);
+        for (int i = 0; i < node.items.size(); i++)
+            node.items[i]->stringify(depth + 3, buffer);
     }
     else if (kind == NodeKind::Call)
     {
@@ -170,6 +175,13 @@ void Node::stringify(int depth, string &buffer)
         CallStmt node = std::get<CallStmt>(this->inner);
         buffer += at_depth("Call Statement\n", depth);
         node.call->stringify(depth + 3, buffer);
+    }
+    else if (kind == NodeKind::AssignStmt)
+    {
+        AssignStmt node = std::get<AssignStmt>(this->inner);
+        buffer += at_depth("Assign Statement\n", depth);
+        node.varlist->stringify(depth + 3, buffer);
+        node.explist->stringify(depth + 3, buffer);
     }
 }
 Noderef Ast::get_root()

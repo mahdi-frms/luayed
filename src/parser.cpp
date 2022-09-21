@@ -39,6 +39,16 @@ bool is_primary(TokenKind kind)
     }
     return false;
 }
+
+bool is_var(Noderef node)
+{
+    if (node->get_kind() == NodeKind::Index || node->get_kind() == NodeKind::Property)
+        return true;
+    if (node->get_kind() != NodeKind::Primary)
+        return false;
+    return node->as<Primary>().token.kind == TokenKind::Identifier;
+}
+
 uint8_t check_postfix(TokenKind kind)
 {
     if (kind == TokenKind::LeftBrace ||
@@ -208,7 +218,34 @@ Noderef Parser::arglist()
         this->consume(TokenKind::Comma);
     }
     this->pop();
-    return make_arglist(args);
+    return make_explist(args);
+}
+
+Noderef Parser::varlist(Noderef var)
+{
+    vector<Noderef> items;
+    items.push_back(var);
+    while (this->peek().kind == TokenKind::Comma)
+    {
+        this->pop();
+        Noderef var = this->expr();
+        if (!is_var(var))
+            throw string("expected variable");
+        items.push_back(var);
+    }
+    return make_explist(items);
+}
+
+Noderef Parser::explist()
+{
+    vector<Noderef> items;
+    items.push_back(this->expr());
+    while (this->peek().kind == TokenKind::Comma)
+    {
+        this->pop();
+        items.push_back(this->expr());
+    }
+    return make_explist(items);
 }
 
 Noderef Parser::statement()
@@ -228,6 +265,13 @@ Noderef Parser::statement()
     if (s->get_kind() == NodeKind::Call)
     {
         return make_call_stmt(s);
+    }
+    else if (is_var(s))
+    {
+        Noderef vars = this->varlist(s);
+        this->consume(TokenKind::Equal);
+        Noderef vals = this->explist();
+        return make_assign_stmt(vars, vals);
     }
     else
     {

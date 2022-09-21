@@ -53,9 +53,9 @@ namespace ast
         Noderef callee;
         Noderef arg;
     };
-    struct Arglist
+    struct Explist
     {
-        vector<Noderef> args;
+        vector<Noderef> items;
     };
     struct Table
     {
@@ -69,6 +69,11 @@ namespace ast
     {
         Noderef call;
     };
+    struct AssignStmt
+    {
+        Noderef varlist;
+        Noderef explist;
+    };
 
     typedef std::variant<
         Primary,
@@ -77,11 +82,12 @@ namespace ast
         IdField,
         ExprField,
         Table,
-        Arglist,
+        Explist,
         Call,
         Property,
         Index,
         CallStmt,
+        AssignStmt,
         Block>
 
         Gnode;
@@ -97,8 +103,9 @@ namespace ast
         Property,
         Index,
         Call,
-        Arglist,
+        Explist,
         CallStmt,
+        AssignStmt,
         Block
     };
 
@@ -113,6 +120,12 @@ namespace ast
         NodeKind get_kind();
         Node(Gnode inner, NodeKind kind);
         string to_string();
+
+        template <typename T>
+        T &as()
+        {
+            return std::get<T>(this->inner);
+        }
     };
 
     class Ast
@@ -135,11 +148,12 @@ Noderef make_primary(Token token);
 Noderef make_id_field(Token field, Noderef value);
 Noderef make_expr_field(Noderef field, Noderef value);
 Noderef make_table(vector<Noderef> items);
-Noderef make_arglist(vector<Noderef> args);
+Noderef make_explist(vector<Noderef> items);
 Noderef make_call(Noderef callee, Noderef arg);
 Noderef make_index(Noderef table, Noderef index);
 Noderef make_property(Noderef table, Token field);
 Noderef make_call_stmt(Noderef call);
 Noderef make_block(vector<Noderef> args);
+Noderef make_assign_stmt(Noderef varlist, Noderef explist);
 
 #endif
