@@ -56,6 +56,14 @@ Noderef make_property(Noderef table, Token field)
 {
     return noderef(Node(Property{.table = table, .field = field}, NodeKind::Property));
 }
+Noderef make_call_stmt(Noderef call)
+{
+    return noderef(Node(CallStmt{.call = call}, NodeKind::CallStmt));
+}
+Noderef make_block(vector<Noderef> stmts)
+{
+    return noderef(Node(Block{.stmts = stmts}, NodeKind::Block));
+}
 
 Ast::Ast(Noderef root) : root(root)
 {
@@ -88,70 +96,88 @@ void Node::stringify(int depth, string &buffer)
         buffer += at_depth(node.op.text + "\n", depth + 3);
         node.rexpr->stringify(depth + 3, buffer);
     }
-    if (kind == NodeKind::Unary)
+    else if (kind == NodeKind::Unary)
     {
         Unary node = std::get<Unary>(this->inner);
         buffer += at_depth("Unary Node\n", depth);
         buffer += at_depth(node.op.text + "\n", depth + 3);
         node.expr->stringify(depth + 3, buffer);
     }
-    if (kind == NodeKind::Primary)
+    else if (kind == NodeKind::Primary)
     {
         Primary node = std::get<Primary>(this->inner);
         buffer += at_depth("Primary Node\n", depth);
         buffer += at_depth(node.token.text + "\n", depth + 3);
     }
-    if (kind == NodeKind::Table)
+    else if (kind == NodeKind::Table)
     {
         Table node = std::get<Table>(this->inner);
         buffer += at_depth("Table\n", depth);
         for (int i = 0; i < node.items.size(); i++)
             node.items[i]->stringify(depth + 3, buffer);
     }
-    if (kind == NodeKind::IdField)
+    else if (kind == NodeKind::IdField)
     {
         IdField node = std::get<IdField>(this->inner);
         buffer += at_depth("Id Field\n", depth);
         buffer += at_depth(node.field.text + "\n", depth + 3);
         node.value->stringify(depth + 3, buffer);
     }
-    if (kind == NodeKind::ExprField)
+    else if (kind == NodeKind::ExprField)
     {
         ExprField node = std::get<ExprField>(this->inner);
         buffer += at_depth("Expression Field\n", depth);
         node.field->stringify(depth + 3, buffer);
         node.value->stringify(depth + 3, buffer);
     }
-    if (kind == NodeKind::Arglist)
+    else if (kind == NodeKind::Arglist)
     {
         Arglist node = std::get<Arglist>(this->inner);
         buffer += at_depth("Arglist\n", depth);
         for (int i = 0; i < node.args.size(); i++)
             node.args[i]->stringify(depth + 3, buffer);
     }
-    if (kind == NodeKind::Call)
+    else if (kind == NodeKind::Call)
     {
         Call node = std::get<Call>(this->inner);
         buffer += at_depth("Call\n", depth);
         node.callee->stringify(depth + 3, buffer);
         node.arg->stringify(depth + 3, buffer);
     }
-    if (kind == NodeKind::Index)
+    else if (kind == NodeKind::Index)
     {
         Index node = std::get<Index>(this->inner);
         buffer += at_depth("Index\n", depth);
         node.table->stringify(depth + 3, buffer);
         node.idx->stringify(depth + 3, buffer);
     }
-    if (kind == NodeKind::Property)
+    else if (kind == NodeKind::Property)
     {
         Property node = std::get<Property>(this->inner);
         buffer += at_depth("Property\n", depth);
         node.table->stringify(depth + 3, buffer);
         buffer += at_depth(node.field.text + "\n", depth + 3);
     }
+    else if (kind == NodeKind::Block)
+    {
+        Block node = std::get<Block>(this->inner);
+        buffer += at_depth("Block\n", depth);
+        for (int i = 0; i < node.stmts.size(); i++)
+            node.stmts[i]->stringify(depth + 3, buffer);
+    }
+    else if (kind == NodeKind::CallStmt)
+    {
+        CallStmt node = std::get<CallStmt>(this->inner);
+        buffer += at_depth("Call Statement\n", depth);
+        node.call->stringify(depth + 3, buffer);
+    }
 }
 Noderef Ast::get_root()
 {
     return this->root;
+}
+
+NodeKind Node::get_kind()
+{
+    return this->kind;
 }

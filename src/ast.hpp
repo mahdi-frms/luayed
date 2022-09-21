@@ -61,6 +61,14 @@ namespace ast
     {
         vector<Noderef> items;
     };
+    struct Block
+    {
+        vector<Noderef> stmts;
+    };
+    struct CallStmt
+    {
+        Noderef call;
+    };
 
     typedef std::variant<
         Primary,
@@ -72,7 +80,9 @@ namespace ast
         Arglist,
         Call,
         Property,
-        Index>
+        Index,
+        CallStmt,
+        Block>
 
         Gnode;
 
@@ -87,7 +97,9 @@ namespace ast
         Property,
         Index,
         Call,
-        Arglist
+        Arglist,
+        CallStmt,
+        Block
     };
 
     struct Node
@@ -98,6 +110,7 @@ namespace ast
         void stringify(int depth, string &buffer);
 
     public:
+        NodeKind get_kind();
         Node(Gnode inner, NodeKind kind);
         string to_string();
     };
@@ -122,10 +135,11 @@ Noderef make_primary(Token token);
 Noderef make_id_field(Token field, Noderef value);
 Noderef make_expr_field(Noderef field, Noderef value);
 Noderef make_table(vector<Noderef> items);
-
 Noderef make_arglist(vector<Noderef> args);
 Noderef make_call(Noderef callee, Noderef arg);
 Noderef make_index(Noderef table, Noderef index);
 Noderef make_property(Noderef table, Token field);
+Noderef make_call_stmt(Noderef call);
+Noderef make_block(vector<Noderef> args);
 
 #endif

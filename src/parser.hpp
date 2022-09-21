@@ -22,6 +22,8 @@ private:
     Noderef id_field();
     Noderef expr_field();
     Noderef arglist();
+    Noderef block();
+    Noderef statement();
     Token consume(TokenKind kind);
 
 public:

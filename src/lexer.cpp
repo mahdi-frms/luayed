@@ -294,6 +294,10 @@ Token Lexer::pop()
             this->sync();
             c = this->read();
         }
+        if (c == '\0')
+        {
+            break;
+        }
         TokenKind tk = single_op(c);
         if (tk != TokenKind::None)
         {

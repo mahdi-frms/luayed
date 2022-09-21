@@ -211,6 +211,46 @@ Noderef Parser::arglist()
     return make_arglist(args);
 }
 
+Noderef Parser::statement()
+{
+    if (this->peek().kind == TokenKind::Semicolon)
+    {
+        while (this->peek().kind == TokenKind::Semicolon)
+        {
+            this->pop();
+        }
+        if (this->peek().kind == TokenKind::Eof)
+        {
+            return nullptr;
+        }
+    }
+    Noderef s = this->expr();
+    if (s->get_kind() == NodeKind::Call)
+    {
+        return make_call_stmt(s);
+    }
+    else
+    {
+        throw string("unexpected expression");
+    }
+}
+
+Noderef Parser::block()
+{
+    vector<Noderef> stmts;
+    while (this->peek().kind != TokenKind::Eof)
+    {
+        Noderef stmt = this->statement();
+        if (stmt == nullptr)
+        {
+            break;
+        }
+        stmts.push_back(stmt);
+    }
+    this->pop();
+    return make_block(stmts);
+}
+
 Noderef Parser::expr_p(uint8_t pwr)
 {
     Token t = this->pop();
@@ -232,7 +272,7 @@ Noderef Parser::expr_p(uint8_t pwr)
     else if (t.kind == TokenKind::LeftParen)
     {
         lhs = this->expr();
-        this->consume(TokenKind::RightParen);
+        t = this->consume(TokenKind::RightParen);
     }
     else
     {
@@ -245,7 +285,7 @@ Noderef Parser::expr_p(uint8_t pwr)
         uint8_t p = check_postfix(op.kind);
         if (p != 255)
         {
-            if (t.kind == TokenKind::Identifier || t.kind == TokenKind::RightParen)
+            if (t.kind != TokenKind::Identifier && t.kind != TokenKind::RightParen)
                 break;
             if (p < pwr)
                 break;
@@ -323,7 +363,7 @@ Ast Parser::parse()
 {
     try
     {
-        return Ast(this->expr());
+        return Ast(this->block());
     }
     catch (string message)
     {
