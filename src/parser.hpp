@@ -17,8 +17,9 @@ private:
     Noderef primary();
     Token pop();
     Token peek();
+    Token ahead();
     Noderef table();
-    Noderef id_field(Token identifier);
+    Noderef id_field();
     Noderef expr_field();
     Token consume(TokenKind kind);
 

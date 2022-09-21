@@ -28,6 +28,7 @@ bool is_primary(TokenKind kind)
         TokenKind::Number,
         TokenKind::Literal,
         TokenKind::DotDotDot,
+        TokenKind::Identifier,
     };
     for (int i = 0; i < sizeof(accept) / sizeof(TokenKind); i++)
     {
@@ -109,18 +110,30 @@ Token Parser::consume(TokenKind kind)
     return t;
 }
 
-Noderef Parser::id_field(Token identifier)
+Noderef Parser::id_field()
 {
+    Token id = this->pop();
     this->consume(TokenKind::Equal);
-    return make_id_field(identifier, this->expr());
+    return make_id_field(id, this->expr());
 }
 
 Noderef Parser::expr_field()
 {
+    this->pop(); // [
     Noderef field = this->expr();
     this->consume(TokenKind::RightBracket);
     this->consume(TokenKind::Equal);
     return make_expr_field(field, this->expr());
+}
+
+Token Parser::ahead()
+{
+    Token t = this->tokens[1];
+    if (t.kind == TokenKind::Error)
+    {
+        throw t.text;
+    }
+    return t;
 }
 
 Noderef Parser::table()
@@ -128,17 +141,32 @@ Noderef Parser::table()
     vector<Noderef> items;
     while (true)
     {
-        Token t = this->pop();
+        Token t = this->peek();
         if (t.kind == TokenKind::RightBrace)
-            break;
-        if (t.kind == TokenKind::Identifier)
         {
-            items.push_back(this->id_field(t));
+            this->pop();
+            break;
+        }
+        else if (t.kind == TokenKind::Identifier)
+        {
+            if (this->ahead().kind == TokenKind::Equal)
+            {
+                items.push_back(this->id_field());
+            }
+            else
+            {
+                items.push_back(this->expr());
+            }
         }
         else if (t.kind == TokenKind::LeftBracket)
         {
             items.push_back(this->expr_field());
         }
+        else
+        {
+            throw string("missing symbol '}'");
+        }
+
         t = this->peek();
         if (t.kind != TokenKind::Comma &&
             t.kind != TokenKind::Semicolon &&
