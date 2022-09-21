@@ -114,6 +114,10 @@ namespace ast
         Noderef explist;
         Noderef block;
     };
+    struct ReturnStmt
+    {
+        Noderef expr;
+    };
 
     typedef std::variant<
         Primary,
@@ -136,6 +140,7 @@ namespace ast
         IfStmt,
         NumericFor,
         GenericFor,
+        ReturnStmt,
         Block>
 
         Gnode;
@@ -162,6 +167,7 @@ namespace ast
         IfStmt,
         NumericFor,
         GenericFor,
+        ReturnStmt,
         Block
     };
 
@@ -213,6 +219,7 @@ Noderef make_block(vector<Noderef> args);
 Noderef make_assign_stmt(Noderef varlist, Noderef explist);
 Noderef make_label_stmt(Token identifier);
 Noderef make_break_stmt();
+Noderef make_return_stmt(Noderef expr);
 Noderef make_goto_stmt(Token identifier);
 Noderef make_if_stmt(vector<Noderef> exprs, vector<Noderef> blocks);
 Noderef make_white_stmt(Noderef expr, Noderef block);

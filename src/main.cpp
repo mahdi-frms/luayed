@@ -23,7 +23,6 @@ int main(int argc, char **argv)
 {
     bool parse = true;
     string text = readfile(argv[1]);
-    printf("%s\n", text.c_str());
     Lexer lxr = Lexer(text);
     if (parse)
     {

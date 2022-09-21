@@ -408,8 +408,24 @@ Noderef Parser::statement()
 Noderef Parser::block(bool end)
 {
     vector<Noderef> stmts;
-    while (this->peek().kind != (end ? TokenKind::End : TokenKind::Eof))
+    TokenKind ending = (end ? TokenKind::End : TokenKind::Eof);
+    while (true)
     {
+        if (this->peek().kind == ending)
+        {
+            break;
+        }
+        if (this->peek().kind == TokenKind::Return)
+        {
+            this->pop();
+            Noderef val = nullptr;
+            if (this->peek().kind != ending)
+                val = this->expr();
+            while (this->peek().kind == TokenKind::Semicolon)
+                this->pop();
+            stmts.push_back(make_return_stmt(val));
+            break;
+        }
         Noderef stmt = this->statement();
         if (stmt == nullptr)
         {
@@ -532,7 +548,9 @@ Ast Parser::parse()
 {
     try
     {
-        return Ast(this->block(false));
+        Ast tree = Ast(this->block(false));
+        this->consume(TokenKind::Eof);
+        return tree;
     }
     catch (string message)
     {

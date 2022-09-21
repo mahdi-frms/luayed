@@ -113,6 +113,13 @@ Noderef make_numeric_for_stmt(Token identifier, Noderef expr_from, Noderef expr_
                                    .block = block},
                         NodeKind::NumericFor));
 }
+Noderef make_return_stmt(Noderef expr)
+{
+    return noderef(Node(ReturnStmt{
+                            .expr = expr,
+                        },
+                        NodeKind::ReturnStmt));
+}
 
 Ast::Ast(Noderef root) : root(root)
 {
@@ -243,6 +250,12 @@ void Node::stringify(int depth, string &buffer)
         GotoStmt node = std::get<GotoStmt>(this->inner);
         buffer += at_depth("Goto Statement\n", depth);
         buffer += at_depth(node.identifier.text + "\n", depth + 3);
+    }
+    else if (kind == NodeKind::ReturnStmt)
+    {
+        ReturnStmt node = std::get<ReturnStmt>(this->inner);
+        buffer += at_depth("Return Statement\n", depth);
+        node.expr->stringify(depth + 3, buffer);
     }
     else if (kind == NodeKind::WhileStmt)
     {
