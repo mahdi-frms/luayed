@@ -126,6 +126,14 @@ Noderef make_function_body(vector<Token> parlist, Noderef block)
     return noderef(Node(FunctionBody{.parlist = parlist, .block = block}, NodeKind::FunctionBody));
 }
 
+Noderef make_declaration(vector<Token> namelist, vector<Token> attriblist, Noderef explist)
+{
+    return noderef(Node(Declaration{.namelist = namelist,
+                                    .attriblist = attriblist,
+                                    .explist = explist},
+                        NodeKind::Declaration));
+}
+
 Ast::Ast(Noderef root) : root(root)
 {
 }
@@ -314,6 +322,21 @@ void Node::stringify(int depth, string &buffer)
         for (int i = 0; i < node.parlist.size(); i++)
             buffer += at_depth(node.parlist[i].text + "\n", depth + 3);
         node.block->stringify(depth + 3, buffer);
+    }
+    else if (kind == NodeKind::Declaration)
+    {
+        Declaration node = std::get<Declaration>(this->inner);
+        buffer += at_depth("Declaration\n", depth);
+        for (int i = 0; i < node.namelist.size(); i++)
+        {
+            buffer += at_depth(node.namelist[i].text + "\n", depth + 3);
+            if (node.attriblist[i].kind != TokenKind::None)
+            {
+                buffer += at_depth(node.attriblist[i].text + "\n", depth + 3);
+            }
+        }
+        if (node.explist)
+            node.explist->stringify(depth + 3, buffer);
     }
 }
 Noderef Ast::get_root()

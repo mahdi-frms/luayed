@@ -25,6 +25,8 @@ private:
     Noderef statement();
     Noderef while_stmt();
     Noderef repeat_stmt();
+    Noderef vardecl();
+    Token name_attrib(Token *attrib);
     Noderef if_stmt();
     Noderef generic_for_stmt(Token identifier);
     Noderef numeric_for_stmt(Token identifier);

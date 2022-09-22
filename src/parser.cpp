@@ -19,6 +19,11 @@ Token errtoken()
     return Token("", 0, 0, TokenKind::Error);
 }
 
+Token token_none()
+{
+    return Token("", 0, 0, TokenKind::None);
+}
+
 bool is_primary(TokenKind kind)
 {
     TokenKind accept[] = {
@@ -374,6 +379,11 @@ Noderef Parser::statement()
     {
         return this->if_stmt();
     }
+    if (this->peek().kind == TokenKind::Local)
+    {
+        this->pop();
+        return this->vardecl();
+    }
     if (this->peek().kind == TokenKind::For)
     {
         this->pop();
@@ -453,6 +463,40 @@ Noderef Parser::function_body()
     Noderef block = this->block(true);
     this->consume(TokenKind::End);
     return make_function_body(std::move(parlist), block);
+}
+Token Parser::name_attrib(Token *attrib)
+{
+    *attrib = token_none();
+    Token id = this->consume(TokenKind::Identifier);
+    if (this->peek().kind == TokenKind::Less)
+    {
+        this->pop();
+        *attrib = this->consume(TokenKind::Identifier);
+        this->consume(TokenKind::Greater);
+    }
+    return id;
+}
+
+Noderef Parser::vardecl()
+{
+    vector<Token> names;
+    vector<Token> attribs;
+    Noderef explist = nullptr;
+    Token att = token_none();
+    names.push_back(this->name_attrib(&att));
+    attribs.push_back(att);
+    while (this->peek().kind == TokenKind::Comma)
+    {
+        this->pop();
+        names.push_back(this->name_attrib(&att));
+        attribs.push_back(att);
+    }
+    if (this->peek().kind == TokenKind::Equal)
+    {
+        this->pop();
+        explist = this->explist();
+    }
+    return make_declaration(std::move(names), std::move(attribs), explist);
 }
 
 Noderef Parser::expr_p(uint8_t pwr)

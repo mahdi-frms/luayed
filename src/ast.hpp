@@ -123,6 +123,12 @@ namespace ast
         vector<Token> parlist;
         Noderef block;
     };
+    struct Declaration
+    {
+        vector<Token> namelist;
+        vector<Token> attriblist;
+        Noderef explist;
+    };
 
     typedef std::variant<
         Primary,
@@ -147,6 +153,7 @@ namespace ast
         GenericFor,
         ReturnStmt,
         FunctionBody,
+        Declaration,
         Block>
 
         Gnode;
@@ -175,6 +182,7 @@ namespace ast
         GenericFor,
         ReturnStmt,
         FunctionBody,
+        Declaration,
         Block
     };
 
@@ -234,5 +242,6 @@ Noderef make_repeat_stmt(Noderef expr, Noderef block);
 Noderef make_generic_for_stmt(vector<Token> namelist, Noderef explist, Noderef block);
 Noderef make_numeric_for_stmt(Token identifier, Noderef expr_from, Noderef expr_to, Noderef expr_step, Noderef block);
 Noderef make_function_body(vector<Token> parlist, Noderef block);
+Noderef make_declaration(vector<Token> namelist, vector<Token> attriblist, Noderef explist);
 
 #endif
