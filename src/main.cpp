@@ -45,7 +45,11 @@ bool parse(const char *path)
             {
                 break;
             }
-            printf("--> %s (%s) [%lu,%lu]\n", tkn.text.c_str(), token_kind_stringify(tkn.kind).c_str(), tkn.line, tkn.offset);
+            if (tkn.kind == TokenKind::Eof)
+            {
+                break;
+            }
+            printf("--> %s (%s) [%lu,%lu]\n", tkn.text.c_str(), token_kind_stringify(tkn.kind).c_str(), tkn.line + 1, tkn.offset + 1);
         }
         return true;
     }

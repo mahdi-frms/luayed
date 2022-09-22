@@ -1,11 +1,13 @@
 #include "lexer.hpp"
 
-#define RET(T)                           \
-    {                                    \
-        auto tmp = T;                    \
-        if (tmp.kind != TokenKind::None) \
-            return tmp;                  \
-    }                                    \
+#define RET(T)                            \
+    {                                     \
+        auto tmp = T;                     \
+        if (tmp.kind == TokenKind::Empty) \
+            continue;                     \
+        if (tmp.kind != TokenKind::None)  \
+            return tmp;                   \
+    }                                     \
     0
 
 string token_kind_stringify(TokenKind kind)
@@ -46,6 +48,8 @@ string token_kind_stringify(TokenKind kind)
         return "equal equal";
     if (kind == TokenKind::Error)
         return "!error";
+    if (kind == TokenKind::Empty)
+        return "_empty_";
     if (kind == TokenKind::False)
         return "false";
     if (kind == TokenKind::FloatDivision)
@@ -141,8 +145,6 @@ TokenKind single_op(char c)
         return TokenKind::Power;
     if (c == '*')
         return TokenKind::Multiply;
-    if (c == '#')
-        return TokenKind::Length;
     if (c == '%')
         return TokenKind::Modulo;
     if (c == '&')
@@ -239,6 +241,11 @@ bool is_alphanumeric(char c)
     return is_alphabetic(c) || is_digit(c);
 }
 
+Token Lexer::empty()
+{
+    return Token("", 0, 0, TokenKind::Empty);
+}
+
 char Lexer::read()
 {
     char c = this->text[this->pos];
@@ -246,6 +253,10 @@ char Lexer::read()
     {
         this->offset = 0;
         this->line++;
+    }
+    else if (c == '\t')
+    {
+        this->offset += 4;
     }
     else
     {
@@ -295,8 +306,9 @@ Token Lexer::pop()
 {
     while (this->peek() != '\0')
     {
+        this->sync();
         char c = this->read();
-        while (c == ' ' || c == '\n')
+        while (c == ' ' || c == '\n' || c == '\t')
         {
             this->sync();
             c = this->read();
@@ -318,6 +330,7 @@ Token Lexer::pop()
         RET(this->op_divide(c));
         RET(this->op_minus(c));
         RET(this->op_colon(c));
+        RET(this->op_length(c));
         if (is_alphabetic(c))
         {
             return this->keyword_identifier(c);
@@ -341,7 +354,7 @@ Token Lexer::pop()
                 return this->token(string("["), TokenKind::LeftBracket);
             }
         }
-        this->sync();
+        return this->error(string("invalid character '") + string(1, c) + string("'"));
     }
     return this->token_eof();
 }
@@ -554,7 +567,7 @@ Token Lexer::number(char c, NumberScanPhase phase)
 
 Token Lexer::error(string message)
 {
-    Token err = Token(message, this->line, this->offset, TokenKind::Error);
+    Token err = Token(message, this->prev_line, this->prev_offset, TokenKind::Error);
     this->skip_line();
     return err;
 }
@@ -649,6 +662,21 @@ Token Lexer::op_equal(char c)
     }
     return this->none();
 }
+Token Lexer::op_length(char c)
+{
+    if (c == '#')
+    {
+        if (this->pos == 1 && this->peek() == '!')
+        {
+            read();
+            this->skip_line();
+            return this->empty();
+        }
+        else
+            return this->token(string("#"), TokenKind::Length);
+    }
+    return this->none();
+}
 Token Lexer::op_colon(char c)
 {
     if (c == ':')
@@ -688,6 +716,7 @@ Token Lexer::op_minus(char c)
                 this->skip_line();
             }
             this->sync();
+            return this->empty();
         }
         else
             return this->token(string("-"), TokenKind::Minus);

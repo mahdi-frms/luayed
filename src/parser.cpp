@@ -437,7 +437,7 @@ Noderef Parser::statement()
     }
     else
     {
-        this->error("unexpected expression", this->peek());
+        this->error(string("unexpected expression before"), this->peek());
     }
     return nullptr; // never reaches here
 }

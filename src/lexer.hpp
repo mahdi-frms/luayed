@@ -78,6 +78,7 @@ enum class TokenKind
 
     None,  // returned as error
     Error, // returned as lexical error
+    Empty, // control purpose
 };
 
 string token_kind_stringify(TokenKind kind);
@@ -132,10 +133,12 @@ private:
     Token op_less(char c);
     Token op_greater(char c);
     Token op_minus(char c);
+    Token op_length(char c);
     Token token(string text, TokenKind kind);
     Token token_eof();
     Token error(string message);
     Token none();
+    Token empty();
     bool look_ahead();
 
 public:
