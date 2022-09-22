@@ -14,14 +14,9 @@ uint8_t check_prefix(TokenKind kind)
     return 255;
 }
 
-Token errtoken()
-{
-    return Token("", 0, 0, TokenKind::Error);
-}
-
 Token token_none()
 {
-    return Token("", 0, 0, TokenKind::None);
+    return Token(nullptr, 0, 0, 0, TokenKind::None);
 }
 
 bool is_primary(TokenKind kind)
@@ -158,16 +153,6 @@ Noderef Parser::expr_field()
     this->consume(TokenKind::RightBracket);
     this->consume(TokenKind::Equal);
     return make_expr_field(field, this->expr());
-}
-
-Token Parser::ahead()
-{
-    Token t = this->tokens[1];
-    if (t.kind == TokenKind::Error)
-    {
-        throw t.text;
-    }
-    return t;
 }
 
 Noderef Parser::table()
@@ -407,7 +392,7 @@ Noderef Parser::statement()
         if (identifier.kind == TokenKind::Identifier)
         {
             FunctionBody &fn = body->as<FunctionBody>();
-            fn.parlist.insert(fn.parlist.begin(), Token("self", 0, 0, TokenKind::Identifier));
+            fn.parlist.insert(fn.parlist.begin(), Token("self", 4, 0, 0, TokenKind::Identifier));
         }
         return make_assign_stmt({name}, {body});
     }
@@ -672,7 +657,7 @@ Token Parser::pop()
     this->tokens.erase(this->tokens.begin());
     if (t.kind == TokenKind::Error)
     {
-        this->error(t.text, t);
+        this->error(t.text(), t);
     }
     return t;
 }
@@ -682,7 +667,17 @@ Token Parser::peek()
     Token t = this->tokens.front();
     if (t.kind == TokenKind::Error)
     {
-        this->error(t.text, t);
+        this->error(t.text(), t);
+    }
+    return t;
+}
+
+Token Parser::ahead()
+{
+    Token t = this->tokens[1];
+    if (t.kind == TokenKind::Error)
+    {
+        this->error(t.text(), t);
     }
     return t;
 }

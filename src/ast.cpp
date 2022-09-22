@@ -166,21 +166,21 @@ void Node::stringify(int depth, string &buffer)
         Binary node = std::get<Binary>(this->inner);
         buffer += at_depth("Binary Node\n", depth);
         node.lexpr->stringify(depth + 3, buffer);
-        buffer += at_depth(node.op.text + "\n", depth + 3);
+        buffer += at_depth(node.op.text() + "\n", depth + 3);
         node.rexpr->stringify(depth + 3, buffer);
     }
     else if (kind == NodeKind::Unary)
     {
         Unary node = std::get<Unary>(this->inner);
         buffer += at_depth("Unary Node\n", depth);
-        buffer += at_depth(node.op.text + "\n", depth + 3);
+        buffer += at_depth(node.op.text() + "\n", depth + 3);
         node.expr->stringify(depth + 3, buffer);
     }
     else if (kind == NodeKind::Primary)
     {
         Primary node = std::get<Primary>(this->inner);
         buffer += at_depth("Primary Node\n", depth);
-        buffer += at_depth(node.token.text + "\n", depth + 3);
+        buffer += at_depth(node.token.text() + "\n", depth + 3);
     }
     else if (kind == NodeKind::Table)
     {
@@ -193,7 +193,7 @@ void Node::stringify(int depth, string &buffer)
     {
         IdField node = std::get<IdField>(this->inner);
         buffer += at_depth("Id Field\n", depth);
-        buffer += at_depth(node.field.text + "\n", depth + 3);
+        buffer += at_depth(node.field.text() + "\n", depth + 3);
         node.value->stringify(depth + 3, buffer);
     }
     else if (kind == NodeKind::ExprField)
@@ -222,7 +222,7 @@ void Node::stringify(int depth, string &buffer)
         MethodCall node = std::get<MethodCall>(this->inner);
         buffer += at_depth("Method Call\n", depth);
         node.callee->stringify(depth + 3, buffer);
-        buffer += at_depth(node.name.text + "\n", depth + 3);
+        buffer += at_depth(node.name.text() + "\n", depth + 3);
         node.arg->stringify(depth + 3, buffer);
     }
     else if (kind == NodeKind::Index)
@@ -237,7 +237,7 @@ void Node::stringify(int depth, string &buffer)
         Property node = std::get<Property>(this->inner);
         buffer += at_depth("Property\n", depth);
         node.table->stringify(depth + 3, buffer);
-        buffer += at_depth(node.field.text + "\n", depth + 3);
+        buffer += at_depth(node.field.text() + "\n", depth + 3);
     }
     else if (kind == NodeKind::Block)
     {
@@ -263,7 +263,7 @@ void Node::stringify(int depth, string &buffer)
     {
         LabelStmt node = std::get<LabelStmt>(this->inner);
         buffer += at_depth("Label Statement\n", depth);
-        buffer += at_depth(node.identifier.text + "\n", depth + 3);
+        buffer += at_depth(node.identifier.text() + "\n", depth + 3);
     }
     else if (kind == NodeKind::BreakStmt)
     {
@@ -274,7 +274,7 @@ void Node::stringify(int depth, string &buffer)
     {
         GotoStmt node = std::get<GotoStmt>(this->inner);
         buffer += at_depth("Goto Statement\n", depth);
-        buffer += at_depth(node.identifier.text + "\n", depth + 3);
+        buffer += at_depth(node.identifier.text() + "\n", depth + 3);
     }
     else if (kind == NodeKind::ReturnStmt)
     {
@@ -313,7 +313,7 @@ void Node::stringify(int depth, string &buffer)
         GenericFor node = std::get<GenericFor>(this->inner);
         buffer += at_depth("Generic For Statement\n", depth);
         for (int i = 0; i < node.namelist.size(); i++)
-            buffer += at_depth(node.namelist[i].text + "\n", depth + 3);
+            buffer += at_depth(node.namelist[i].text() + "\n", depth + 3);
 
         node.explist->stringify(depth + 3, buffer);
         node.block->stringify(depth + 3, buffer);
@@ -322,7 +322,7 @@ void Node::stringify(int depth, string &buffer)
     {
         NumericFor node = std::get<NumericFor>(this->inner);
         buffer += at_depth("Numeric For Statement\n", depth);
-        buffer += at_depth(node.identifier.text + "\n", depth + 3);
+        buffer += at_depth(node.identifier.text() + "\n", depth + 3);
         node.expr_from->stringify(depth + 3, buffer);
         node.expr_to->stringify(depth + 3, buffer);
         if (node.expr_step)
@@ -336,7 +336,7 @@ void Node::stringify(int depth, string &buffer)
         FunctionBody node = std::get<FunctionBody>(this->inner);
         buffer += at_depth("Function Body\n", depth);
         for (int i = 0; i < node.parlist.size(); i++)
-            buffer += at_depth(node.parlist[i].text + "\n", depth + 3);
+            buffer += at_depth(node.parlist[i].text() + "\n", depth + 3);
         node.block->stringify(depth + 3, buffer);
     }
     else if (kind == NodeKind::Declaration)
@@ -345,10 +345,10 @@ void Node::stringify(int depth, string &buffer)
         buffer += at_depth("Declaration\n", depth);
         for (int i = 0; i < node.namelist.size(); i++)
         {
-            buffer += at_depth(node.namelist[i].text + "\n", depth + 3);
+            buffer += at_depth(node.namelist[i].text() + "\n", depth + 3);
             if (node.attriblist[i].kind != TokenKind::None)
             {
-                buffer += at_depth(node.attriblist[i].text + "\n", depth + 3);
+                buffer += at_depth(node.attriblist[i].text() + "\n", depth + 3);
             }
         }
         if (node.explist)

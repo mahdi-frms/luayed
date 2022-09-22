@@ -85,12 +85,15 @@ string token_kind_stringify(TokenKind kind);
 
 struct Token
 {
-    string text;
+    const char *str;
+    size_t len;
     size_t line;
     size_t offset;
     TokenKind kind;
 
-    Token(string text, size_t line, size_t offset, TokenKind kind);
+    Token(const char *str, size_t len, size_t line, size_t offset, TokenKind kind);
+    ~Token();
+    string text();
 };
 
 enum class NumberScanPhase
@@ -113,9 +116,10 @@ private:
 
     size_t prev_offset;
     size_t prev_line;
+    size_t prev_pos;
 
     char peek();
-    char read();
+    char pop();
     void skip_line();
     Token keyword_identifier(char c);
     Token short_string(char c);
@@ -124,7 +128,7 @@ private:
     Token number(char c, NumberScanPhase phase);
     Token skip_comment_block();
     void sync();
-    Token pop();
+    Token read();
     Token op_equal(char c);
     Token op_colon(char c);
     Token op_dot(char c);
@@ -134,9 +138,9 @@ private:
     Token op_greater(char c);
     Token op_minus(char c);
     Token op_length(char c);
-    Token token(string text, TokenKind kind);
+    Token token(TokenKind kind);
     Token token_eof();
-    Token error(string message);
+    Token error(const char *message);
     Token none();
     Token empty();
     bool look_ahead();

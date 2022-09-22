@@ -1,13 +1,12 @@
 #include "lexer.hpp"
+#include <cstring>
 
-#define RET(T)                            \
-    {                                     \
-        auto tmp = T;                     \
-        if (tmp.kind == TokenKind::Empty) \
-            continue;                     \
-        if (tmp.kind != TokenKind::None)  \
-            return tmp;                   \
-    }                                     \
+#define RET(T)                           \
+    {                                    \
+        auto tmp = T;                    \
+        if (tmp.kind != TokenKind::None) \
+            return tmp;                  \
+    }                                    \
     0
 
 string token_kind_stringify(TokenKind kind)
@@ -137,6 +136,52 @@ string token_kind_stringify(TokenKind kind)
     return "while";
 }
 
+char *error_missing(const char *symbols)
+{
+    const char *p1 = "missing symbol '";
+    size_t l1 = strlen(p1);
+    size_t ls = strlen(symbols);
+
+    char *buf = (char *)malloc(l1 + ls + 1);
+    strcpy(buf, p1);
+    strcpy(buf + l1, symbols);
+    buf[l1 + ls] = '\'';
+    return buf;
+}
+
+char *error_missing_ch(char ch)
+{
+    const char *p1 = "missing symbol 'X'";
+    size_t l1 = strlen(p1);
+
+    char *buf = strdup(p1);
+    buf[l1 - 2] = ch;
+    return buf;
+}
+
+char *error_missing_ls(size_t level)
+{
+    const char *p1 = "missing symbol '[";
+    size_t l1 = strlen(p1);
+
+    char *buf = (char *)malloc(l1 + level + 2);
+    strcpy(buf, p1);
+    memset(buf + l1, level, '=');
+    buf[l1 + level] = ']';
+    buf[l1 + level + 1] = '\'';
+    return buf;
+}
+
+char *error_invalid(char c)
+{
+    const char *p1 = "invalid character 'X'";
+    size_t l1 = strlen(p1);
+
+    char *buf = strdup(p1);
+    buf[l1 - 2] = c;
+    return buf;
+}
+
 TokenKind single_op(char c)
 {
     if (c == '+')
@@ -216,6 +261,21 @@ TokenKind keyword(string &str)
     return TokenKind::None;
 }
 
+string Token::text()
+{
+    string str = string(this->len, 0);
+    memcpy((void *)str.c_str(), this->str, this->len);
+    return str;
+}
+
+Token::~Token()
+{
+    if (this->kind == TokenKind::Error)
+    {
+        free((void *)this->str);
+    }
+}
+
 bool is_letter(char c)
 {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
@@ -243,10 +303,10 @@ bool is_alphanumeric(char c)
 
 Token Lexer::empty()
 {
-    return Token("", 0, 0, TokenKind::Empty);
+    return Token(nullptr, 0, 0, 0, TokenKind::Empty);
 }
 
-char Lexer::read()
+char Lexer::pop()
 {
     char c = this->text[this->pos];
     if (c == '\n')
@@ -276,22 +336,28 @@ Lexer::Lexer(string &text) : text(text)
     this->pos = 0;
     this->line = 0;
     this->offset = 0;
+    this->prev_pos = 0;
     this->prev_line = 0;
     this->prev_offset = 0;
     this->tokens = vector<Token>();
 }
 
-Token::Token(string text, size_t line, size_t offset, TokenKind kind)
+Token::Token(const char *str, size_t len, size_t line, size_t offset, TokenKind kind)
 {
-    this->kind = kind;
-    this->offset = offset;
+    this->str = str;
+    this->len = len;
     this->line = line;
-    this->text = text;
+    this->offset = offset;
+    this->kind = kind;
 }
 
 Token Lexer::next()
 {
-    Token token = this->pop();
+    Token token = this->read();
+    while (token.kind == TokenKind::Empty)
+    {
+        token = this->read();
+    }
     this->sync();
     return token;
 }
@@ -300,86 +366,83 @@ void Lexer::sync()
 {
     this->prev_line = this->line;
     this->prev_offset = this->offset;
+    this->prev_pos = this->pos;
 }
 
-Token Lexer::pop()
+bool is_space(char c)
 {
-    while (this->peek() != '\0')
+    return c == ' ' || c == '\n' || c == '\t' || c == '\v' || c == '\r';
+}
+
+Token Lexer::read()
+{
+    char c = this->pop();
+    if (c == '\0')
     {
-        this->sync();
-        char c = this->read();
-        while (c == ' ' || c == '\n' || c == '\t')
-        {
-            this->sync();
-            c = this->read();
-        }
-        if (c == '\0')
-        {
-            break;
-        }
-        TokenKind tk = single_op(c);
-        if (tk != TokenKind::None)
-        {
-            return this->token(string(1, c), tk);
-        }
-        RET(this->op_dot(c));
-        RET(this->op_equal(c));
-        RET(this->op_less(c));
-        RET(this->op_greater(c));
-        RET(this->op_negate(c));
-        RET(this->op_divide(c));
-        RET(this->op_minus(c));
-        RET(this->op_colon(c));
-        RET(this->op_length(c));
-        if (is_alphabetic(c))
-        {
-            return this->keyword_identifier(c);
-        }
-        if (is_digit(c))
-        {
-            return this->number(c, NumberScanPhase::Integer);
-        }
-        if (c == '\'' || c == '"')
-        {
-            return this->short_string(c);
-        }
-        if (c == '[')
-        {
-            if (this->look_ahead())
-            {
-                return this->long_string();
-            }
-            else
-            {
-                return this->token(string("["), TokenKind::LeftBracket);
-            }
-        }
-        return this->error(string("invalid character '") + string(1, c) + string("'"));
+        return this->token_eof();
     }
-    return this->token_eof();
+    if (is_space(c))
+    {
+        while (is_space(this->peek()))
+            this->pop();
+        return this->empty();
+    }
+    TokenKind tk = single_op(c);
+    if (tk != TokenKind::None)
+    {
+        return this->token(tk);
+    }
+    RET(this->op_dot(c));
+    RET(this->op_equal(c));
+    RET(this->op_less(c));
+    RET(this->op_greater(c));
+    RET(this->op_negate(c));
+    RET(this->op_divide(c));
+    RET(this->op_minus(c));
+    RET(this->op_colon(c));
+    RET(this->op_length(c));
+    if (is_alphabetic(c))
+    {
+        return this->keyword_identifier(c);
+    }
+    if (is_digit(c))
+    {
+        return this->number(c, NumberScanPhase::Integer);
+    }
+    if (c == '\'' || c == '"')
+    {
+        return this->short_string(c);
+    }
+    if (c == '[')
+    {
+        if (this->look_ahead())
+        {
+            return this->long_string();
+        }
+        else
+        {
+            return this->token(TokenKind::LeftBracket);
+        }
+    }
+    return this->error(error_invalid(c));
 }
 
 Token Lexer::long_string()
 {
-    string str = "[";
     size_t level = 0;
-    while (this->read() != '[')
+    while (this->pop() != '[')
     {
         level++;
-        str.push_back('=');
     }
-    str.push_back('[');
-
-    string error = string("missing symbol `]") + string(level, '=') + string("]`");
 
     while (true)
     {
         char c = this->peek();
         if (c == '\0')
         {
-            return this->error(error);
+            return this->error(error_missing_ls(level));
         }
-        str.push_back(this->read());
+        this->pop();
         if (c == ']')
         {
             size_t lvl = level;
@@ -387,10 +450,10 @@ Token Lexer::long_string()
             {
                 c = this->peek();
                 if (c == '\0')
-                    return this->error(error);
+                    return this->error(error_missing_ls(level));
                 if (c == '=')
                 {
-                    str.push_back(this->read());
+                    this->pop();
                     lvl--;
                 }
                 else
@@ -398,12 +461,12 @@ Token Lexer::long_string()
             }
             if (lvl == 0 && c == ']')
             {
-                str.push_back(this->read());
+                this->pop();
                 break;
             }
         }
     }
-    return this->token(str, TokenKind::Literal);
+    return this->token(TokenKind::Literal);
 }
 
 bool Lexer::look_ahead()
@@ -427,17 +490,15 @@ bool Lexer::look_ahead()
 Token Lexer::short_string(char c)
 {
     const char *escape_list = "abfnrtxv\\\"\n'[]";
+    const char *error_invescape = "invalid escape sequence";
     bool escape = false;
     string str = string(1, c);
     while (true)
     {
-        char ch = this->read();
+        char ch = this->pop();
         if ((ch == '\n' && !escape) || ch == '\0')
         {
-            string message = string("missing symbol `");
-            message.push_back(c);
-            message.push_back('`');
-            return this->error(message);
+            return this->error(error_missing_ch(ch));
         }
         if (escape)
         {
@@ -446,7 +507,7 @@ Token Lexer::short_string(char c)
                 str.push_back(ch);
                 while (this->peek() == '\n')
                 {
-                    str.push_back(this->read());
+                    str.push_back(this->pop());
                 }
             }
             else if (is_digit(ch))
@@ -454,11 +515,11 @@ Token Lexer::short_string(char c)
                 str.push_back(ch);
                 if (isdigit(this->peek()))
                 {
-                    char ch2 = this->read();
+                    char ch2 = this->pop();
                     str.push_back(ch2);
                     if (is_digit(this->peek()))
                     {
-                        char ch3 = this->read();
+                        char ch3 = this->pop();
                         str.push_back(ch3);
                         ch -= '0';
                         ch2 -= '0';
@@ -466,7 +527,7 @@ Token Lexer::short_string(char c)
                         int n = ch * 100 + ch2 * 10 + ch3;
                         if (n > 255)
                         {
-                            return this->error("invalid escape sequence");
+                            return this->error(strdup(error_invescape));
                         }
                     }
                 }
@@ -484,7 +545,7 @@ Token Lexer::short_string(char c)
                 }
                 if (!exists)
                 {
-                    return this->error("invalid escape sequence");
+                    return this->error(strdup(error_invescape));
                 }
                 str.push_back(ch);
             }
@@ -503,7 +564,7 @@ Token Lexer::short_string(char c)
             }
         }
     }
-    return this->token(str, TokenKind::Literal);
+    return this->token(TokenKind::Literal);
 }
 
 Token Lexer::number(char c, NumberScanPhase phase)
@@ -529,11 +590,11 @@ Token Lexer::number(char c, NumberScanPhase phase)
             }
             else if (is_alphabetic(c))
             {
-                return this->error(number_error);
+                return this->error(strdup(number_error));
             }
             else if (!is_digit(c))
                 break;
-            num.push_back(this->read());
+            num.push_back(this->pop());
         }
         else if (phase == NumberScanPhase::HEX)
         {
@@ -547,11 +608,11 @@ Token Lexer::number(char c, NumberScanPhase phase)
             }
             else if (is_alphabetic(c) && !is_hex(c))
             {
-                return this->error(number_error);
+                return this->error(strdup(number_error));
             }
             else if (!is_digit(c) && !is_hex(c))
                 break;
-            num.push_back(this->read());
+            num.push_back(this->pop());
         }
         else if (phase == NumberScanPhase::Decimal)
         {
@@ -561,17 +622,17 @@ Token Lexer::number(char c, NumberScanPhase phase)
             }
             else if (is_alphabetic(c))
             {
-                return this->error(number_error);
+                return this->error(strdup(number_error));
             }
             else if (!is_digit(c))
                 break;
-            num.push_back(this->read());
+            num.push_back(this->pop());
         }
         else if (phase == NumberScanPhase::EarlyExponent)
         {
             if (c == '-')
             {
-                num.push_back(this->read());
+                num.push_back(this->pop());
             }
             phase = NumberScanPhase::Exponent;
         }
@@ -579,19 +640,19 @@ Token Lexer::number(char c, NumberScanPhase phase)
         {
             if (is_alphabetic(c))
             {
-                return this->error(number_error);
+                return this->error(strdup(number_error));
             }
             else if (!is_digit(c))
                 break;
-            num.push_back(this->read());
+            num.push_back(this->pop());
         }
     }
-    return this->token(num, TokenKind::Number);
+    return this->token(TokenKind::Number);
 }
 
-Token Lexer::error(string message)
+Token Lexer::error(const char *message)
 {
-    Token err = Token(message, this->prev_line, this->prev_offset, TokenKind::Error);
+    Token err = Token(message, 0, this->prev_line, this->prev_offset, TokenKind::Error);
     this->skip_line();
     return err;
 }
@@ -601,16 +662,16 @@ Token Lexer::keyword_identifier(char c)
     string id = string(1, c);
     while (is_alphanumeric(this->peek()))
     {
-        id.push_back(this->read());
+        id.push_back(this->pop());
     }
     TokenKind tk = keyword(id);
     if (tk != TokenKind::None)
     {
-        return this->token(id, tk);
+        return this->token(tk);
     }
     else
     {
-        return this->token(id, TokenKind::Identifier);
+        return this->token(TokenKind::Identifier);
     }
 }
 
@@ -626,41 +687,42 @@ vector<Token> Lexer::drain()
     return std::move(this->tokens);
 }
 
-Token Lexer::token(string text, TokenKind kind)
+Token Lexer::token(TokenKind kind)
 {
-    return Token(text, this->prev_line, this->prev_offset, kind);
+    return Token((char *)this->text.c_str() + this->pos, this->pos - this->prev_pos, this->prev_line, this->prev_offset, kind);
 }
 
 void Lexer::skip_line()
 {
     char c = this->peek();
     while (c != '\n' && c != '\0')
-        c = this->read();
+        c = this->pop();
 }
 
 Token Lexer::skip_comment_block()
 {
+    const char *error_miscom = "missing end of comment";
     size_t level = 0;
     while (this->peek() == '=')
     {
-        this->read();
+        this->pop();
         level++;
     }
     while (true)
     {
-        char c = this->read();
+        char c = this->pop();
         if (c == ']')
         {
             size_t lvl = level;
             while (this->peek() == '=')
             {
-                this->read();
+                this->pop();
                 lvl--;
             }
             char l = this->peek();
             if (l == '\0')
             {
-                return this->error("missing end of comment");
+                return this->error(strdup(error_miscom));
             }
             if (l == ']' && lvl == 0)
             {
@@ -669,22 +731,21 @@ Token Lexer::skip_comment_block()
         }
         else if (c == '\0')
         {
-            return this->error("missing end of comment");
+            return this->error(strdup(error_miscom));
         }
     }
-    this->read();
-    this->sync();
+    this->pop();
     return this->empty();
 }
 
 Token Lexer::token_eof()
 {
-    return this->token("", TokenKind::Eof);
+    return this->token(TokenKind::Eof);
 }
 
 Token Lexer::none()
 {
-    return this->token("", TokenKind::None);
+    return this->token(TokenKind::None);
 }
 
 Token Lexer::op_equal(char c)
@@ -693,11 +754,11 @@ Token Lexer::op_equal(char c)
     {
         if (this->peek() == '=')
         {
-            read();
-            return this->token(string("=="), TokenKind::EqualEqual);
+            pop();
+            return this->token(TokenKind::EqualEqual);
         }
         else
-            return this->token(string("="), TokenKind::Equal);
+            return this->token(TokenKind::Equal);
     }
     return this->none();
 }
@@ -707,12 +768,12 @@ Token Lexer::op_length(char c)
     {
         if (this->pos == 1 && this->peek() == '!')
         {
-            read();
+            pop();
             this->skip_line();
             return this->empty();
         }
         else
-            return this->token(string("#"), TokenKind::Length);
+            return this->token(TokenKind::Length);
     }
     return this->none();
 }
@@ -722,11 +783,11 @@ Token Lexer::op_colon(char c)
     {
         if (this->peek() == ':')
         {
-            read();
-            return this->token(string("::"), TokenKind::ColonColon);
+            pop();
+            return this->token(TokenKind::ColonColon);
         }
         else
-            return this->token(string(":"), TokenKind::Colon);
+            return this->token(TokenKind::Colon);
     }
     return this->none();
 }
@@ -736,10 +797,10 @@ Token Lexer::op_minus(char c)
     {
         if (this->peek() == '-')
         {
-            this->read();
+            this->pop();
             if (this->peek() == '[')
             {
-                this->read();
+                this->pop();
                 if (this->look_ahead())
                 {
                     return this->skip_comment_block();
@@ -753,11 +814,10 @@ Token Lexer::op_minus(char c)
             {
                 this->skip_line();
             }
-            this->sync();
             return this->empty();
         }
         else
-            return this->token(string("-"), TokenKind::Minus);
+            return this->token(TokenKind::Minus);
     }
     return this->none();
 }
@@ -767,11 +827,11 @@ Token Lexer::op_negate(char c)
     {
         if (this->peek() == '=')
         {
-            this->read();
-            return this->token(string("~="), TokenKind::NotEqual);
+            this->pop();
+            return this->token(TokenKind::NotEqual);
         }
         else
-            return this->token(string("~"), TokenKind::Negate);
+            return this->token(TokenKind::Negate);
     }
     return this->none();
 }
@@ -781,15 +841,15 @@ Token Lexer::op_dot(char c)
     {
         if (this->peek() == '.')
         {
-            this->read();
+            this->pop();
             if (this->peek() == '.')
             {
-                this->read();
-                return this->token(string("..."), TokenKind::DotDotDot);
+                this->pop();
+                return this->token(TokenKind::DotDotDot);
             }
             else
             {
-                return this->token(string(".."), TokenKind::DotDot);
+                return this->token(TokenKind::DotDot);
             }
         }
         else if (is_digit(this->peek()))
@@ -797,7 +857,7 @@ Token Lexer::op_dot(char c)
             return this->number(c, NumberScanPhase::Decimal);
         }
         else
-            return this->token(string("."), TokenKind::Dot);
+            return this->token(TokenKind::Dot);
     }
     return this->none();
 }
@@ -807,11 +867,11 @@ Token Lexer::op_divide(char c)
     {
         if (this->peek() == '/')
         {
-            read();
-            return this->token(string("//"), TokenKind::FloorDivision);
+            pop();
+            return this->token(TokenKind::FloorDivision);
         }
         else
-            return this->token(string("/"), TokenKind::FloatDivision);
+            return this->token(TokenKind::FloatDivision);
     }
     return this->none();
 }
@@ -821,16 +881,16 @@ Token Lexer::op_less(char c)
     {
         if (this->peek() == '<')
         {
-            read();
-            return this->token(string("<<"), TokenKind::LeftShift);
+            pop();
+            return this->token(TokenKind::LeftShift);
         }
         else if (this->peek() == '=')
         {
-            read();
-            return this->token(string("<="), TokenKind::LessEqual);
+            pop();
+            return this->token(TokenKind::LessEqual);
         }
         else
-            return this->token(string("<"), TokenKind::Less);
+            return this->token(TokenKind::Less);
     }
     return this->none();
 }
@@ -840,16 +900,16 @@ Token Lexer::op_greater(char c)
     {
         if (this->peek() == '>')
         {
-            read();
-            return this->token(string(">>"), TokenKind::RightShift);
+            pop();
+            return this->token(TokenKind::RightShift);
         }
         else if (this->peek() == '=')
         {
-            read();
-            return this->token(string(">="), TokenKind::GreaterEqual);
+            pop();
+            return this->token(TokenKind::GreaterEqual);
         }
         else
-            return this->token(string(">"), TokenKind::Greater);
+            return this->token(TokenKind::Greater);
     }
     return this->none();
 }

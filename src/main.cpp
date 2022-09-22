@@ -50,7 +50,7 @@ bool parse(const char *path)
                 break;
             }
             if (!silence)
-                printf("--> %s (%s) [%lu,%lu]\n", tkn.text.c_str(), token_kind_stringify(tkn.kind).c_str(), tkn.line + 1, tkn.offset + 1);
+                printf("--> %s (%s) [%lu,%lu]\n", tkn.text().c_str(), token_kind_stringify(tkn.kind).c_str(), tkn.line + 1, tkn.offset + 1);
         }
         return true;
     }
@@ -64,7 +64,7 @@ int main(int argc, char **argv)
     {
         if (!parse(argv[i]))
         {
-            return 1;
+            // return 1;
         }
     }
     printf("PARSING DONE!\n");
