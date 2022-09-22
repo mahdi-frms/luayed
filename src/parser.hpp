@@ -26,6 +26,7 @@ private:
     Noderef while_stmt();
     Noderef repeat_stmt();
     Noderef vardecl();
+    void error(string message, Token token);
     Token name_attrib(Token *attrib);
     Noderef if_stmt();
     Noderef generic_for_stmt(Token identifier);

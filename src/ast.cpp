@@ -268,7 +268,8 @@ void Node::stringify(int depth, string &buffer)
     {
         ReturnStmt node = std::get<ReturnStmt>(this->inner);
         buffer += at_depth("Return Statement\n", depth);
-        node.expr->stringify(depth + 3, buffer);
+        if (node.expr)
+            node.expr->stringify(depth + 3, buffer);
     }
     else if (kind == NodeKind::WhileStmt)
     {
@@ -312,7 +313,10 @@ void Node::stringify(int depth, string &buffer)
         buffer += at_depth(node.identifier.text + "\n", depth + 3);
         node.expr_from->stringify(depth + 3, buffer);
         node.expr_to->stringify(depth + 3, buffer);
-        node.expr_step->stringify(depth + 3, buffer);
+        if (node.expr_step)
+        {
+            node.expr_step->stringify(depth + 3, buffer);
+        }
         node.block->stringify(depth + 3, buffer);
     }
     else if (kind == NodeKind::FunctionBody)

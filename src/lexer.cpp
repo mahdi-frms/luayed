@@ -209,6 +209,8 @@ TokenKind keyword(string &str)
         return TokenKind::In;
     if (str.compare("then") == 0)
         return TokenKind::Then;
+    if (str.compare("not") == 0)
+        return TokenKind::Not;
     return TokenKind::None;
 }
 

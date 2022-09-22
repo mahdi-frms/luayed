@@ -132,7 +132,10 @@ Token Parser::consume(TokenKind kind)
     Token t = this->pop();
     if (t.kind != kind)
     {
-        throw string("expected '") + token_kind_stringify(kind) + "'";
+        this->error(string("expected '") +
+                        token_kind_stringify(kind) +
+                        "'",
+                    t);
     }
     return t;
 }
@@ -192,7 +195,6 @@ Noderef Parser::table()
         else
         {
             items.push_back(this->expr());
-            // throw string("missing symbol '}'");
         }
 
         t = this->peek();
@@ -200,7 +202,7 @@ Noderef Parser::table()
             t.kind != TokenKind::Semicolon &&
             t.kind != TokenKind::RightBrace)
         {
-            throw string("expected ',' or ';'");
+            this->error(string("expected ',' or ';'"), t);
         }
         else if (t.kind != TokenKind::RightBrace)
         {
@@ -235,7 +237,7 @@ Noderef Parser::varlist(Noderef var)
         this->pop();
         Noderef var = this->expr();
         if (!is_var(var))
-            throw string("expected variable");
+            this->error("expected variable", this->peek());
         items.push_back(var);
     }
     return make_explist(items);
@@ -334,14 +336,8 @@ Noderef Parser::statement()
 {
     if (this->peek().kind == TokenKind::Semicolon)
     {
-        while (this->peek().kind == TokenKind::Semicolon)
-        {
-            this->pop();
-        }
-        if (this->peek().kind == TokenKind::Eof)
-        {
-            return nullptr;
-        }
+        this->pop();
+        return nullptr;
     }
     if (this->peek().kind == TokenKind::ColonColon)
     {
@@ -368,21 +364,35 @@ Noderef Parser::statement()
         return blk;
     }
     if (this->peek().kind == TokenKind::While)
-    {
         return this->while_stmt();
-    }
     if (this->peek().kind == TokenKind::Repeat)
-    {
         return this->repeat_stmt();
-    }
     if (this->peek().kind == TokenKind::If)
-    {
         return this->if_stmt();
-    }
     if (this->peek().kind == TokenKind::Local)
     {
         this->pop();
-        return this->vardecl();
+        if (this->peek().kind == TokenKind::Function)
+        {
+            Token t = this->consume(TokenKind::Identifier);
+            return make_declaration({t}, {token_none()}, this->function_body());
+        }
+        else
+        {
+            return this->vardecl();
+        }
+    }
+    if (this->peek().kind == TokenKind::Function)
+    {
+        this->pop();
+        Noderef name = make_primary(this->consume(TokenKind::Identifier));
+        while (this->peek().kind == TokenKind::Dot)
+        {
+            this->pop();
+            name = make_property(name, this->consume(TokenKind::Identifier));
+        }
+        Noderef body = this->function_body();
+        return make_assign_stmt({name}, {body});
     }
     if (this->peek().kind == TokenKind::For)
     {
@@ -399,9 +409,8 @@ Noderef Parser::statement()
     }
     Noderef s = this->expr();
     if (s->get_kind() == NodeKind::Call)
-    {
         return make_call_stmt(s);
-    }
+
     else if (is_var(s))
     {
         Noderef vars = this->varlist(s);
@@ -411,8 +420,18 @@ Noderef Parser::statement()
     }
     else
     {
-        throw string("unexpected expression");
+        this->error("unexpected expression", this->peek());
     }
+    return nullptr; // never reaches here
+}
+
+void Parser::error(string message, Token token)
+{
+    throw message + " (line " +
+        std::to_string(token.line + 1) +
+        ", at " +
+        std::to_string(token.offset + 1) +
+        ")";
 }
 
 Noderef Parser::block(bool end)
@@ -437,11 +456,10 @@ Noderef Parser::block(bool end)
             break;
         }
         Noderef stmt = this->statement();
-        if (stmt == nullptr)
+        if (stmt != nullptr)
         {
-            break;
+            stmts.push_back(stmt);
         }
-        stmts.push_back(stmt);
     }
     return make_block(stmts);
 }
@@ -457,6 +475,11 @@ Noderef Parser::function_body()
     while (this->peek().kind == TokenKind::Comma)
     {
         this->pop();
+        if (this->peek().kind == TokenKind::DotDotDot)
+        {
+            parlist.push_back(this->pop());
+            break;
+        }
         parlist.push_back(this->consume(TokenKind::Identifier));
     }
     this->consume(TokenKind::RightParen);
@@ -528,7 +551,7 @@ Noderef Parser::expr_p(uint8_t pwr)
     }
     else
     {
-        throw string("expression expected");
+        this->error("expression expected", t);
     }
 
     while (true)
@@ -593,6 +616,10 @@ Noderef Parser::expr_p(uint8_t pwr)
 Token Parser::pop()
 {
     Token t = this->tokens.front();
+    if (t.kind == TokenKind::Eof)
+    {
+        error("PARSER CRASH: illegal consumption of EOF", t);
+    }
     this->tokens.erase(this->tokens.begin());
     if (t.kind == TokenKind::Error)
     {
@@ -616,7 +643,10 @@ Ast Parser::parse()
     try
     {
         Ast tree = Ast(this->block(false));
-        this->consume(TokenKind::Eof);
+        if (this->peek().kind != TokenKind::Eof)
+        {
+            this->error("EOF expected", this->pop());
+        }
         return tree;
     }
     catch (string message)

@@ -19,16 +19,18 @@ string readfile(const char *path)
     return text;
 }
 
-int main(int argc, char **argv)
+void parse(const char *path)
 {
+    bool silence = true;
     bool parse = true;
-    string text = readfile(argv[1]);
+    string text = readfile(path);
+    printf("===== %s =====\n", path);
     Lexer lxr = Lexer(text);
     if (parse)
     {
         Parser parser = Parser(lxr);
         ast::Noderef tree = parser.parse().get_root();
-        if (tree != nullptr)
+        if (tree != nullptr && !silence)
         {
             printf("%s", tree->to_string().c_str());
         }
@@ -42,8 +44,19 @@ int main(int argc, char **argv)
             {
                 break;
             }
-            printf("--> %s (%s) [%lu,%lu]\n", tkn.text.c_str(), token_kind_stringify(tkn.kind).c_str(), tkn.line, tkn.offset);
+            if (!silence)
+                printf("--> %s (%s) [%lu,%lu]\n", tkn.text.c_str(), token_kind_stringify(tkn.kind).c_str(), tkn.line, tkn.offset);
         }
+    }
+}
+
+int main(int argc, char **argv)
+{
+    if (argc == 1)
+        return 1;
+    for (int i = 1; i < argc; i++)
+    {
+        parse(argv[i]);
     }
     return 0;
 }
