@@ -447,6 +447,28 @@ Token Lexer::short_string(char c)
                     str.push_back(this->read());
                 }
             }
+            else if (is_digit(ch))
+            {
+                str.push_back(ch);
+                if (isdigit(this->peek()))
+                {
+                    char ch2 = this->read();
+                    str.push_back(ch2);
+                    if (is_digit(this->peek()))
+                    {
+                        char ch3 = this->read();
+                        str.push_back(ch3);
+                        ch -= '0';
+                        ch2 -= '0';
+                        ch3 -= '0';
+                        int n = ch * 100 + ch2 * 10 + ch3;
+                        if (n > 255)
+                        {
+                            return this->error("invalid escape sequence");
+                        }
+                    }
+                }
+            }
             else
             {
                 bool exists = false;
