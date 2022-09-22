@@ -46,6 +46,10 @@ Noderef make_call(Noderef callee, Noderef arg)
 {
     return noderef(Node(Call{.callee = callee, .arg = arg}, NodeKind::Call));
 }
+Noderef make_method_call(Noderef callee, Token name, Noderef arg)
+{
+    return noderef(Node(MethodCall{.callee = callee, .name = name, .arg = arg}, NodeKind::Call));
+}
 
 Noderef make_index(Noderef table, Noderef idx)
 {
@@ -211,6 +215,14 @@ void Node::stringify(int depth, string &buffer)
         Call node = std::get<Call>(this->inner);
         buffer += at_depth("Call\n", depth);
         node.callee->stringify(depth + 3, buffer);
+        node.arg->stringify(depth + 3, buffer);
+    }
+    else if (kind == NodeKind::MethodCall)
+    {
+        MethodCall node = std::get<MethodCall>(this->inner);
+        buffer += at_depth("Method Call\n", depth);
+        node.callee->stringify(depth + 3, buffer);
+        buffer += at_depth(node.name.text + "\n", depth + 3);
         node.arg->stringify(depth + 3, buffer);
     }
     else if (kind == NodeKind::Index)

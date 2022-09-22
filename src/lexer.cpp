@@ -673,7 +673,7 @@ Token Lexer::op_negate(char c)
     {
         if (this->peek() == '=')
         {
-            read();
+            this->read();
             return this->token(string("~="), TokenKind::NotEqual);
         }
         else
@@ -690,12 +690,17 @@ Token Lexer::op_dot(char c)
             this->read();
             if (this->peek() == '.')
             {
+                this->read();
                 return this->token(string("..."), TokenKind::DotDotDot);
             }
             else
             {
                 return this->token(string(".."), TokenKind::DotDot);
             }
+        }
+        else if (is_digit(this->peek()))
+        {
+            return this->number(c, NumberScanPhase::Decimal);
         }
         else
             return this->token(string("."), TokenKind::Dot);

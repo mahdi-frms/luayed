@@ -129,6 +129,12 @@ namespace ast
         vector<Token> attriblist;
         Noderef explist;
     };
+    struct MethodCall
+    {
+        Noderef callee;
+        Token name;
+        Noderef arg;
+    };
 
     typedef std::variant<
         Primary,
@@ -154,6 +160,7 @@ namespace ast
         ReturnStmt,
         FunctionBody,
         Declaration,
+        MethodCall,
         Block>
 
         Gnode;
@@ -183,6 +190,7 @@ namespace ast
         ReturnStmt,
         FunctionBody,
         Declaration,
+        MethodCall,
         Block
     };
 
@@ -227,6 +235,7 @@ Noderef make_expr_field(Noderef field, Noderef value);
 Noderef make_table(vector<Noderef> items);
 Noderef make_explist(vector<Noderef> items);
 Noderef make_call(Noderef callee, Noderef arg);
+Noderef make_method_call(Noderef callee, Token name, Noderef arg);
 Noderef make_index(Noderef table, Noderef index);
 Noderef make_property(Noderef table, Token field);
 Noderef make_call_stmt(Noderef call);

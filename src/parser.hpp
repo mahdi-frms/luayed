@@ -7,12 +7,21 @@
 
 using namespace ast;
 
+enum class BlockEnd
+{
+    Eof,
+    End,
+    Else,
+    Until,
+};
+
 class Parser
 {
 private:
     Lexer &lexer;
     vector<Token> tokens;
     Noderef expr();
+    Noderef fncall(Token op);
     Noderef expr_p(uint8_t);
     Noderef primary();
     Token pop();
@@ -21,7 +30,7 @@ private:
     Noderef table();
     Noderef id_field();
     Noderef expr_field();
-    Noderef block(bool end);
+    Noderef block(BlockEnd end);
     Noderef statement();
     Noderef while_stmt();
     Noderef repeat_stmt();

@@ -19,7 +19,7 @@ string readfile(const char *path)
     return text;
 }
 
-void parse(const char *path)
+bool parse(const char *path)
 {
     bool silence = true;
     bool parse = true;
@@ -34,6 +34,7 @@ void parse(const char *path)
         {
             printf("%s", tree->to_string().c_str());
         }
+        return tree != nullptr;
     }
     else
     {
@@ -47,6 +48,7 @@ void parse(const char *path)
             if (!silence)
                 printf("--> %s (%s) [%lu,%lu]\n", tkn.text.c_str(), token_kind_stringify(tkn.kind).c_str(), tkn.line, tkn.offset);
         }
+        return true;
     }
 }
 
@@ -56,7 +58,11 @@ int main(int argc, char **argv)
         return 1;
     for (int i = 1; i < argc; i++)
     {
-        parse(argv[i]);
+        if (!parse(argv[i]))
+        {
+            return 1;
+        }
     }
+    printf("PARSING DONE!\n");
     return 0;
 }
