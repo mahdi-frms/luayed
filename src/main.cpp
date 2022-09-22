@@ -45,8 +45,7 @@ bool parse(const char *path)
             {
                 break;
             }
-            if (!silence)
-                printf("--> %s (%s) [%lu,%lu]\n", tkn.text.c_str(), token_kind_stringify(tkn.kind).c_str(), tkn.line, tkn.offset);
+            printf("--> %s (%s) [%lu,%lu]\n", tkn.text.c_str(), token_kind_stringify(tkn.kind).c_str(), tkn.line, tkn.offset);
         }
         return true;
     }

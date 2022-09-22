@@ -229,6 +229,11 @@ bool is_digit(char c)
     return c <= '9' && c >= '0';
 }
 
+bool is_hex(char c)
+{
+    return (c <= '9' && c >= '0') || (c <= 'f' && c >= 'a') || (c <= 'F' && c >= 'A');
+}
+
 bool is_alphanumeric(char c)
 {
     return is_alphabetic(c) || is_digit(c);
@@ -481,11 +486,33 @@ Token Lexer::number(char c, NumberScanPhase phase)
             {
                 phase = NumberScanPhase::EarlyExponent;
             }
+            else if (c == 'x' && num.size() == 1 && num[0] == '0')
+            {
+                phase = NumberScanPhase::HEX;
+            }
             else if (is_alphabetic(c))
             {
                 return this->error(number_error);
             }
             else if (!is_digit(c))
+                break;
+            num.push_back(this->read());
+        }
+        else if (phase == NumberScanPhase::HEX)
+        {
+            if (c == '.')
+            {
+                phase = NumberScanPhase::Decimal;
+            }
+            else if (c == 'e')
+            {
+                phase = NumberScanPhase::EarlyExponent;
+            }
+            else if (is_alphabetic(c) && !is_hex(c))
+            {
+                return this->error(number_error);
+            }
+            else if (!is_digit(c) && !is_hex(c))
                 break;
             num.push_back(this->read());
         }

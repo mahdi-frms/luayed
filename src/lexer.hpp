@@ -95,6 +95,7 @@ struct Token
 enum class NumberScanPhase
 {
     Integer,
+    HEX,
     Decimal,
     Exponent,
     EarlyExponent,

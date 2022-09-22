@@ -672,7 +672,7 @@ Token Parser::pop()
     this->tokens.erase(this->tokens.begin());
     if (t.kind == TokenKind::Error)
     {
-        throw t.text;
+        this->error(t.text, t);
     }
     return t;
 }
@@ -682,7 +682,7 @@ Token Parser::peek()
     Token t = this->tokens.front();
     if (t.kind == TokenKind::Error)
     {
-        throw t.text;
+        this->error(t.text, t);
     }
     return t;
 }
