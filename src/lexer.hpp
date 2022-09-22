@@ -122,7 +122,7 @@ private:
     Token long_string();
     Token long_string(char c);
     Token number(char c, NumberScanPhase phase);
-    void skip_comment_block();
+    Token skip_comment_block();
     void sync();
     Token pop();
     Token op_equal(char c);

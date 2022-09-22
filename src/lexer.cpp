@@ -374,12 +374,12 @@ Token Lexer::long_string()
 
     while (true)
     {
-        char c = this->read();
+        char c = this->peek();
         if (c == '\0')
         {
             return this->error(error);
         }
-        str.push_back(c);
+        str.push_back(this->read());
         if (c == ']')
         {
             size_t lvl = level;
@@ -387,20 +387,22 @@ Token Lexer::long_string()
             {
                 c = this->peek();
                 if (c == '\0')
-                    break;
-                str.push_back(this->read());
+                    return this->error(error);
                 if (c == '=')
+                {
+                    str.push_back(this->read());
                     lvl--;
+                }
                 else
                     break;
             }
             if (lvl == 0 && c == ']')
             {
+                str.push_back(this->read());
                 break;
             }
         }
     }
-
     return this->token(str, TokenKind::Literal);
 }
 
@@ -636,28 +638,43 @@ void Lexer::skip_line()
         c = this->read();
 }
 
-void Lexer::skip_comment_block()
+Token Lexer::skip_comment_block()
 {
-    bool rb = false;
+    size_t level = 0;
+    while (this->peek() == '=')
+    {
+        this->read();
+        level++;
+    }
     while (true)
     {
         char c = this->read();
         if (c == ']')
         {
-            if (rb)
+            size_t lvl = level;
+            while (this->peek() == '=')
+            {
+                this->read();
+                lvl--;
+            }
+            char l = this->peek();
+            if (l == '\0')
+            {
+                return this->error("missing end of comment");
+            }
+            if (l == ']' && lvl == 0)
             {
                 break;
             }
-            else
-            {
-                rb = true;
-            }
         }
-        else
+        else if (c == '\0')
         {
-            rb = false;
+            return this->error("missing end of comment");
         }
     }
+    this->read();
+    this->sync();
+    return this->empty();
 }
 
 Token Lexer::token_eof()
@@ -723,10 +740,9 @@ Token Lexer::op_minus(char c)
             if (this->peek() == '[')
             {
                 this->read();
-                if (this->peek() == '[')
+                if (this->look_ahead())
                 {
-                    this->read();
-                    this->skip_comment_block();
+                    return this->skip_comment_block();
                 }
                 else
                 {
