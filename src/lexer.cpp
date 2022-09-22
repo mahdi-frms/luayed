@@ -424,7 +424,7 @@ bool Lexer::look_ahead()
 
 Token Lexer::short_string(char c)
 {
-    const char *escape_list = "abfnrtx\\\"\n'[]";
+    const char *escape_list = "abfnrtxv\\\"\n'[]";
     bool escape = false;
     string str = string(1, c);
     while (true)
