@@ -9,6 +9,14 @@
     }                                    \
     0
 
+#define RETK(T)                     \
+    {                               \
+        auto tmp = T;               \
+        if (tmp != TokenKind::None) \
+            return tmp;             \
+    }                               \
+    0
+
 string token_kind_stringify(TokenKind kind)
 {
     if (kind == TokenKind::And)
@@ -172,6 +180,11 @@ char *error_missing_ls(size_t level)
     return buf;
 }
 
+char Lexer::ch(size_t offset)
+{
+    return this->text[this->prev_pos + offset];
+}
+
 char *error_invalid(char c)
 {
     const char *p1 = "invalid character 'X'";
@@ -212,52 +225,81 @@ TokenKind single_op(char c)
         return TokenKind::Comma;
     return TokenKind::None;
 }
-TokenKind keyword(string &str)
+TokenKind Lexer::kw(const char *str, size_t idx, TokenKind kind)
 {
-    if (str.compare("and") == 0)
-        return TokenKind::And;
-    if (str.compare("or") == 0)
-        return TokenKind::Or;
-    if (str.compare("true") == 0)
-        return TokenKind::True;
-    if (str.compare("false") == 0)
-        return TokenKind::False;
-    if (str.compare("while") == 0)
-        return TokenKind::While;
-    if (str.compare("goto") == 0)
-        return TokenKind::Goto;
-    if (str.compare("repeat") == 0)
-        return TokenKind::Repeat;
-    if (str.compare("until") == 0)
-        return TokenKind::Until;
-    if (str.compare("for") == 0)
-        return TokenKind::For;
-    if (str.compare("local") == 0)
-        return TokenKind::Local;
-    if (str.compare("function") == 0)
-        return TokenKind::Function;
-    if (str.compare("break") == 0)
-        return TokenKind::Break;
-    if (str.compare("return") == 0)
-        return TokenKind::Return;
-    if (str.compare("nil") == 0)
-        return TokenKind::Nil;
-    if (str.compare("do") == 0)
-        return TokenKind::Do;
-    if (str.compare("end") == 0)
-        return TokenKind::End;
-    if (str.compare("if") == 0)
-        return TokenKind::If;
-    if (str.compare("else") == 0)
-        return TokenKind::Else;
-    if (str.compare("elseif") == 0)
-        return TokenKind::ElseIf;
-    if (str.compare("in") == 0)
-        return TokenKind::In;
-    if (str.compare("then") == 0)
-        return TokenKind::Then;
-    if (str.compare("not") == 0)
-        return TokenKind::Not;
+    if (this->pos - this->prev_pos != strlen(str))
+        return TokenKind::None;
+    for (size_t i = 0; i < this->pos - this->prev_pos - idx; i++)
+        if (this->ch(idx + i) != str[idx + i])
+            return TokenKind::None;
+    return kind;
+}
+TokenKind Lexer::keyword()
+{
+    if (this->ch(0) == 'a')
+    {
+        return this->kw("and", 1, TokenKind::And);
+    }
+    else if (this->ch(0) == 'b')
+    {
+        return this->kw("break", 1, TokenKind::Break);
+    }
+    else if (this->ch(0) == 'd')
+    {
+        return this->kw("do", 1, TokenKind::Do);
+    }
+    else if (this->ch(0) == 'e')
+    {
+        RETK(this->kw("end", 1, TokenKind::End));
+        RETK(this->kw("else", 1, TokenKind::Else));
+        return this->kw("elseif", 1, TokenKind::ElseIf);
+    }
+    else if (this->ch(0) == 'f')
+    {
+        RETK(this->kw("for", 1, TokenKind::For));
+        RETK(this->kw("false", 1, TokenKind::False));
+        return this->kw("function", 1, TokenKind::Function);
+    }
+    else if (this->ch(0) == 'g')
+    {
+        return this->kw("goto", 1, TokenKind::Goto);
+    }
+    else if (this->ch(0) == 'i')
+    {
+        RETK(this->kw("in", 1, TokenKind::In));
+        return this->kw("if", 1, TokenKind::If);
+    }
+    else if (this->ch(0) == 'l')
+    {
+        return this->kw("local", 1, TokenKind::Local);
+    }
+    else if (this->ch(0) == 'n')
+    {
+        RETK(this->kw("not", 1, TokenKind::Not));
+        return this->kw("nil", 1, TokenKind::Nil);
+    }
+    else if (this->ch(0) == 'o')
+    {
+        return this->kw("or", 1, TokenKind::Or);
+    }
+    else if (this->ch(0) == 'r')
+    {
+        RETK(this->kw("return", 1, TokenKind::Return));
+        return this->kw("repeat", 1, TokenKind::Repeat);
+    }
+    else if (this->ch(0) == 't')
+    {
+        RETK(this->kw("then", 1, TokenKind::Then));
+        return this->kw("true", 1, TokenKind::True);
+    }
+    else if (this->ch(0) == 'u')
+    {
+        return this->kw("until", 1, TokenKind::Until);
+    }
+    else if (this->ch(0) == 'w')
+    {
+        return this->kw("while", 1, TokenKind::While);
+    }
     return TokenKind::None;
 }
 
@@ -652,12 +694,11 @@ Token Lexer::error(const char *message)
 
 Token Lexer::keyword_identifier(char c)
 {
-    string id = string(1, c);
     while (is_alphanumeric(this->peek()))
     {
-        id.push_back(this->pop());
+        this->pop();
     }
-    TokenKind tk = keyword(id);
+    TokenKind tk = this->keyword();
     if (tk != TokenKind::None)
     {
         return this->token(tk);

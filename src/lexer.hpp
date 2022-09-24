@@ -120,8 +120,11 @@ private:
 
     char peek();
     char pop();
+    char ch(size_t offset);
     void skip_line();
     Token keyword_identifier(char c);
+    TokenKind keyword();
+    TokenKind kw(const char *str, size_t idx, TokenKind kind);
     Token short_string(char c);
     Token long_string();
     Token long_string(char c);
