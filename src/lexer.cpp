@@ -356,6 +356,7 @@ Token Lexer::next()
     Token token = this->read();
     while (token.kind == TokenKind::Empty)
     {
+        this->sync();
         token = this->read();
     }
     this->sync();
@@ -492,7 +493,6 @@ Token Lexer::short_string(char c)
     const char *escape_list = "abfnrtxv\\\"\n'[]";
     const char *error_invescape = "invalid escape sequence";
     bool escape = false;
-    string str = string(1, c);
     while (true)
     {
         char ch = this->pop();
@@ -504,23 +504,19 @@ Token Lexer::short_string(char c)
         {
             if (ch == 'z')
             {
-                str.push_back(ch);
                 while (this->peek() == '\n')
                 {
-                    str.push_back(this->pop());
+                    this->pop();
                 }
             }
             else if (is_digit(ch))
             {
-                str.push_back(ch);
                 if (isdigit(this->peek()))
                 {
                     char ch2 = this->pop();
-                    str.push_back(ch2);
                     if (is_digit(this->peek()))
                     {
                         char ch3 = this->pop();
-                        str.push_back(ch3);
                         ch -= '0';
                         ch2 -= '0';
                         ch3 -= '0';
@@ -547,7 +543,6 @@ Token Lexer::short_string(char c)
                 {
                     return this->error(strdup(error_invescape));
                 }
-                str.push_back(ch);
             }
             escape = false;
         }
@@ -557,7 +552,6 @@ Token Lexer::short_string(char c)
             {
                 escape = true;
             }
-            str.push_back(ch);
             if (ch == c)
             {
                 break;
@@ -570,7 +564,6 @@ Token Lexer::short_string(char c)
 Token Lexer::number(char c, NumberScanPhase phase)
 {
     const char *number_error = "malformed number";
-    string num = string(1, c);
     while (true)
     {
         c = this->peek();
@@ -584,7 +577,7 @@ Token Lexer::number(char c, NumberScanPhase phase)
             {
                 phase = NumberScanPhase::EarlyExponent;
             }
-            else if (c == 'x' && num.size() == 1 && num[0] == '0')
+            else if (c == 'x' && this->pos - this->prev_pos == 1 && this->text[this->prev_pos] == '0')
             {
                 phase = NumberScanPhase::HEX;
             }
@@ -594,7 +587,7 @@ Token Lexer::number(char c, NumberScanPhase phase)
             }
             else if (!is_digit(c))
                 break;
-            num.push_back(this->pop());
+            this->pop();
         }
         else if (phase == NumberScanPhase::HEX)
         {
@@ -612,7 +605,7 @@ Token Lexer::number(char c, NumberScanPhase phase)
             }
             else if (!is_digit(c) && !is_hex(c))
                 break;
-            num.push_back(this->pop());
+            this->pop();
         }
         else if (phase == NumberScanPhase::Decimal)
         {
@@ -626,13 +619,13 @@ Token Lexer::number(char c, NumberScanPhase phase)
             }
             else if (!is_digit(c))
                 break;
-            num.push_back(this->pop());
+            this->pop();
         }
         else if (phase == NumberScanPhase::EarlyExponent)
         {
             if (c == '-')
             {
-                num.push_back(this->pop());
+                this->pop();
             }
             phase = NumberScanPhase::Exponent;
         }
@@ -644,7 +637,7 @@ Token Lexer::number(char c, NumberScanPhase phase)
             }
             else if (!is_digit(c))
                 break;
-            num.push_back(this->pop());
+            this->pop();
         }
     }
     return this->token(TokenKind::Number);
@@ -689,7 +682,7 @@ vector<Token> Lexer::drain()
 
 Token Lexer::token(TokenKind kind)
 {
-    return Token((char *)this->text.c_str() + this->pos, this->pos - this->prev_pos, this->prev_line, this->prev_offset, kind);
+    return Token((char *)this->text.c_str() + this->prev_pos, this->pos - this->prev_pos, this->prev_line, this->prev_offset, kind);
 }
 
 void Lexer::skip_line()
