@@ -160,4 +160,6 @@ public:
     vector<Token> drain();
 };
 
+Token token_none();
+
 #endif

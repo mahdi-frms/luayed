@@ -29,13 +29,15 @@ bool parse(const char *path)
     if (parse)
     {
         Parser parser = Parser(lxr);
-        ast::Noderef tree = parser.parse().get_root();
-        if (tree != nullptr && !silence)
+        ast::Ast tree = parser.parse();
+        ast::Noderef root = tree.root();
+        if (root != nullptr && !silence)
         {
-            std::cout << tree->to_string();
+            std::cout << root->to_string();
             std::cout.flush();
         }
-        return tree != nullptr;
+        tree.destroy();
+        return root != nullptr;
     }
     else
     {

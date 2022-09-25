@@ -978,3 +978,8 @@ Token Lexer::op_greater(char c)
     }
     return this->none();
 }
+
+Token token_none()
+{
+    return Token(nullptr, 0, 0, 0, TokenKind::None);
+}
