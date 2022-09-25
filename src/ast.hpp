@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <vector>
 #include "lexer.hpp"
+#include "monoheap.hpp"
 
 namespace ast
 {
@@ -74,12 +75,12 @@ namespace ast
     {
     private:
         Noderef tree;
-        void destroy_node(Noderef node);
+        Monoheap heap;
 
     public:
         void destroy();
         Noderef root();
-        Ast(Noderef tree);
+        Ast(Noderef tree, Monoheap heap);
     };
 }
 

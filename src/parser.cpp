@@ -120,67 +120,83 @@ Token Parser::consume(TokenKind kind)
     return t;
 }
 
-Noderef make(NodeKind kind)
+Noderef Parser::make(NodeKind kind)
 {
-    Noderef node = new Node(token_none(), kind);
+    Noderef node = (Noderef)this->heap.alloc(sizeof(Node));
+    *node = Node(token_none(), kind);
     return node;
 }
-Noderef make(vector<Noderef> &nodes, NodeKind kind)
+Noderef Parser::make(vector<Noderef> &nodes, NodeKind kind)
 {
-    Noderef node = new Node(nodes, kind);
-    nodes.clear();
+    Noderef *children = (Noderef *)this->heap.alloc(sizeof(Noderef) * nodes.size());
+    for (size_t i = 0; i < nodes.size(); i++)
+        children[i] = nodes[i];
+    Noderef node = (Noderef)this->heap.alloc(sizeof(Node));
+    *node = Node(children, nodes.size(), kind);
     return node;
 }
-Noderef make(Token token, NodeKind kind)
+Noderef Parser::make(Token token, NodeKind kind)
 {
-    return new Node(token, kind);
+    Noderef node = (Noderef)this->heap.alloc(sizeof(Node));
+    *node = Node(token, kind);
+    return node;
 }
-Noderef make(Noderef c1, NodeKind kind)
+Noderef Parser::make(Noderef c1, NodeKind kind)
 {
-    Noderef *nodes = new Noderef[1];
+    Noderef *nodes = (Noderef *)this->heap.alloc(sizeof(Noderef));
     nodes[0] = c1;
-    return new Node(nodes, 1, kind);
+    Noderef node = (Noderef)this->heap.alloc(sizeof(Node));
+    *node = Node(nodes, 1, kind);
+    return node;
 }
-Noderef make(Noderef c1, Noderef c2, NodeKind kind)
+Noderef Parser::make(Noderef c1, Noderef c2, NodeKind kind)
 {
-    Noderef *nodes = new Noderef[2];
+    Noderef *nodes = (Noderef *)this->heap.alloc(sizeof(Noderef) * 2);
     nodes[0] = c1;
     nodes[1] = c2;
-    return new Node(nodes, 2, kind);
+    Noderef node = (Noderef)this->heap.alloc(sizeof(Node));
+    *node = Node(nodes, 2, kind);
+    return node;
 }
-Noderef make(Noderef c1, Noderef c2, Noderef c3, NodeKind kind)
+Noderef Parser::make(Noderef c1, Noderef c2, Noderef c3, NodeKind kind)
 {
-    Noderef *nodes = new Noderef[3];
+    Noderef *nodes = (Noderef *)this->heap.alloc(sizeof(Noderef) * 3);
     nodes[0] = c1;
     nodes[1] = c2;
     nodes[2] = c3;
-    return new Node(nodes, 3, kind);
+    Noderef node = (Noderef)this->heap.alloc(sizeof(Node));
+    *node = Node(nodes, 3, kind);
+    return node;
 }
-Noderef make(Noderef c1, Noderef c2, Noderef c3, Noderef c4, NodeKind kind)
+Noderef Parser::make(Noderef c1, Noderef c2, Noderef c3, Noderef c4, NodeKind kind)
 {
-    Noderef *nodes = new Noderef[4];
+    Noderef *nodes = (Noderef *)this->heap.alloc(sizeof(Noderef) * 4);
     nodes[0] = c1;
     nodes[1] = c2;
     nodes[2] = c3;
     nodes[3] = c4;
-    return new Node(nodes, 4, kind);
+    Noderef node = (Noderef)this->heap.alloc(sizeof(Node));
+    *node = Node(nodes, 4, kind);
+    return node;
 }
-Noderef make(Noderef c1, Noderef c2, Noderef c3, Noderef c4, Noderef c5, NodeKind kind)
+Noderef Parser::make(Noderef c1, Noderef c2, Noderef c3, Noderef c4, Noderef c5, NodeKind kind)
 {
-    Noderef *nodes = new Noderef[5];
+    Noderef *nodes = (Noderef *)this->heap.alloc(sizeof(Noderef) * 5);
     nodes[0] = c1;
     nodes[1] = c2;
     nodes[2] = c3;
     nodes[3] = c4;
     nodes[4] = c5;
-    return new Node(nodes, 5, kind);
+    Noderef node = (Noderef)this->heap.alloc(sizeof(Node));
+    *node = Node(nodes, 5, kind);
+    return node;
 }
 
 Noderef Parser::id_field()
 {
-    Noderef id = make(this->pop(), NodeKind::Name);
+    Noderef id = this->make(this->pop(), NodeKind::Name);
     this->consume(TokenKind::Equal);
-    return make(id, this->expr(), NodeKind::IdField);
+    return this->make(id, this->expr(), NodeKind::IdField);
 }
 
 Noderef Parser::expr_field()
@@ -189,7 +205,7 @@ Noderef Parser::expr_field()
     Noderef field = this->expr();
     this->consume(TokenKind::RightBracket);
     this->consume(TokenKind::Equal);
-    return make(field, this->expr(), NodeKind::ExprField);
+    return this->make(field, this->expr(), NodeKind::ExprField);
 }
 
 Noderef Parser::table()
@@ -235,7 +251,7 @@ Noderef Parser::table()
             this->pop();
         }
     }
-    return make(items, NodeKind::Table);
+    return this->make(items, NodeKind::Table);
 }
 
 Noderef Parser::arglist()
@@ -251,7 +267,7 @@ Noderef Parser::arglist()
         this->consume(TokenKind::Comma);
     }
     this->pop();
-    return make(args, NodeKind::Explist);
+    return this->make(args, NodeKind::Explist);
 }
 
 Noderef Parser::varlist(Noderef var)
@@ -266,7 +282,7 @@ Noderef Parser::varlist(Noderef var)
             this->error("expected variable", this->peek());
         items.push_back(var);
     }
-    return make(items, NodeKind::Explist);
+    return this->make(items, NodeKind::Explist);
 }
 
 Noderef Parser::explist()
@@ -278,24 +294,24 @@ Noderef Parser::explist()
         this->pop();
         items.push_back(this->expr());
     }
-    return make(items, NodeKind::Explist);
+    return this->make(items, NodeKind::Explist);
 }
 
 Noderef Parser::generic_for_stmt(Token identifier)
 {
     vector<Noderef> namelist;
-    namelist.push_back(make(identifier, NodeKind::Name));
+    namelist.push_back(this->make(identifier, NodeKind::Name));
     while (this->peek().kind == TokenKind::Comma)
     {
         this->pop();
-        namelist.push_back(make(this->consume(TokenKind::Identifier), NodeKind::Name));
+        namelist.push_back(this->make(this->consume(TokenKind::Identifier), NodeKind::Name));
     }
     this->consume(TokenKind::In);
     Noderef explist = this->explist();
     this->consume(TokenKind::Do);
     Noderef block = this->block(BlockEnd::End);
     this->consume(TokenKind::End);
-    return make(make(namelist, NodeKind::NameList), explist, block, NodeKind::GenericFor);
+    return this->make(this->make(namelist, NodeKind::NameList), explist, block, NodeKind::GenericFor);
 }
 
 Noderef Parser::numeric_for_stmt(Token identifier)
@@ -314,9 +330,9 @@ Noderef Parser::numeric_for_stmt(Token identifier)
     Noderef block = this->block(BlockEnd::End);
     this->consume(TokenKind::End);
     if (step)
-        return make(make(identifier, NodeKind::Name), from, to, step, block, NodeKind::NumericFor);
+        return this->make(this->make(identifier, NodeKind::Name), from, to, step, block, NodeKind::NumericFor);
     else
-        return make(make(identifier, NodeKind::Name), from, to, block, NodeKind::NumericFor);
+        return this->make(this->make(identifier, NodeKind::Name), from, to, block, NodeKind::NumericFor);
 }
 
 Noderef Parser::while_stmt()
@@ -326,7 +342,7 @@ Noderef Parser::while_stmt()
     this->consume(TokenKind::Do);
     Noderef blk = this->block(BlockEnd::End);
     this->consume(TokenKind::End);
-    return make(expr, blk, NodeKind::WhileStmt);
+    return this->make(expr, blk, NodeKind::WhileStmt);
 }
 Noderef Parser::repeat_stmt()
 {
@@ -334,7 +350,7 @@ Noderef Parser::repeat_stmt()
     Noderef blk = this->block(BlockEnd::Until);
     this->consume(TokenKind::Until);
     Noderef expr = this->expr();
-    return make(expr, blk, NodeKind::RepeatStmt);
+    return this->make(expr, blk, NodeKind::RepeatStmt);
 }
 Noderef Parser::if_stmt()
 {
@@ -343,22 +359,22 @@ Noderef Parser::if_stmt()
     Noderef expr = this->expr();
     this->consume(TokenKind::Then);
     Noderef block = this->block(BlockEnd::Else);
-    clauses.push_back(make(expr, block, NodeKind::IfClause));
+    clauses.push_back(this->make(expr, block, NodeKind::IfClause));
     while (this->peek().kind == TokenKind::ElseIf)
     {
         this->pop();
         expr = this->expr();
         this->consume(TokenKind::Then);
         block = this->block(BlockEnd::Else);
-        clauses.push_back(make(expr, block, NodeKind::ElseIfClause));
+        clauses.push_back(this->make(expr, block, NodeKind::ElseIfClause));
     }
     if (this->peek().kind == TokenKind::Else)
     {
         this->pop();
-        clauses.push_back(make(this->block(BlockEnd::End), NodeKind::ElseClause));
+        clauses.push_back(this->make(this->block(BlockEnd::End), NodeKind::ElseClause));
     }
     this->consume(TokenKind::End);
-    return make(clauses, NodeKind::IfStmt);
+    return this->make(clauses, NodeKind::IfStmt);
 }
 
 Noderef Parser::statement()
@@ -367,14 +383,14 @@ Noderef Parser::statement()
     {
         Noderef s = this->expr();
         if (s->get_kind() == NodeKind::Call || s->get_kind() == NodeKind::MethodCall)
-            return make(s, NodeKind::CallStmt);
+            return this->make(s, NodeKind::CallStmt);
 
         else if (is_var(s))
         {
             Noderef vars = this->varlist(s);
             this->consume(TokenKind::Equal);
             Noderef vals = this->explist();
-            return make(vars, vals, NodeKind::AssignStmt);
+            return this->make(vars, vals, NodeKind::AssignStmt);
         }
         else
         {
@@ -391,17 +407,17 @@ Noderef Parser::statement()
         this->pop();
         Token id = this->consume(TokenKind::Identifier);
         this->consume(TokenKind::ColonColon);
-        return make(id, NodeKind::LabelStmt);
+        return this->make(id, NodeKind::LabelStmt);
     }
     if (this->peek().kind == TokenKind::Break)
     {
         this->pop();
-        return make(NodeKind::BreakStmt);
+        return this->make(NodeKind::BreakStmt);
     }
     if (this->peek().kind == TokenKind::Goto)
     {
         this->pop();
-        return make(this->consume(TokenKind::Identifier), NodeKind::GotoStmt);
+        return this->make(this->consume(TokenKind::Identifier), NodeKind::GotoStmt);
     }
     if (this->peek().kind == TokenKind::Do)
     {
@@ -424,10 +440,10 @@ Noderef Parser::statement()
             this->pop();
             Token t = this->consume(TokenKind::Identifier);
 
-            return make(
-                make(
-                    make(
-                        make(t, NodeKind::Name), NodeKind::VarDecl),
+            return this->make(
+                this->make(
+                    this->make(
+                        this->make(t, NodeKind::Name), NodeKind::VarDecl),
                     NodeKind::VarList),
                 this->function_body(false), NodeKind::Declaration);
         }
@@ -439,23 +455,23 @@ Noderef Parser::statement()
     if (this->peek().kind == TokenKind::Function)
     {
         this->pop();
-        Noderef var = make(this->consume(TokenKind::Identifier), NodeKind::Primary);
+        Noderef var = this->make(this->consume(TokenKind::Identifier), NodeKind::Primary);
         bool is_method = false;
         while (this->peek().kind == TokenKind::Dot)
         {
             this->pop();
             Token token = this->consume(TokenKind::Identifier);
-            var = make(var, make(token, NodeKind::Name), NodeKind::Property);
+            var = this->make(var, this->make(token, NodeKind::Name), NodeKind::Property);
         }
         if (this->peek().kind == TokenKind::Colon)
         {
             is_method = true;
             this->pop();
             Token token = this->consume(TokenKind::Identifier);
-            var = make(var, make(token, NodeKind::Name), NodeKind::Property);
+            var = this->make(var, this->make(token, NodeKind::Name), NodeKind::Property);
         }
         Noderef body = this->function_body(is_method);
-        return make(var, body, NodeKind::AssignStmt);
+        return this->make(var, body, NodeKind::AssignStmt);
     }
     if (this->peek().kind == TokenKind::For)
     {
@@ -523,9 +539,9 @@ Noderef Parser::block(BlockEnd end)
             while (this->peek().kind == TokenKind::Semicolon)
                 this->pop();
             if (val)
-                stmts.push_back(make(val, NodeKind::ReturnStmt));
+                stmts.push_back(this->make(val, NodeKind::ReturnStmt));
             else
-                stmts.push_back(make(NodeKind::ReturnStmt));
+                stmts.push_back(this->make(NodeKind::ReturnStmt));
             break;
         }
         Noderef stmt = this->statement();
@@ -534,7 +550,7 @@ Noderef Parser::block(BlockEnd end)
             stmts.push_back(stmt);
         }
     }
-    return make(stmts, NodeKind::Block);
+    return this->make(stmts, NodeKind::Block);
 }
 
 Noderef Parser::function_body(bool is_method)
@@ -544,11 +560,11 @@ Noderef Parser::function_body(bool is_method)
     bool ddd = false;
     if (this->peek().kind == TokenKind::Identifier)
     {
-        parlist.push_back(make(this->pop(), NodeKind::Name));
+        parlist.push_back(this->make(this->pop(), NodeKind::Name));
     }
     else if (this->peek().kind == TokenKind::DotDotDot)
     {
-        parlist.push_back(make(this->pop(), NodeKind::Name));
+        parlist.push_back(this->make(this->pop(), NodeKind::Name));
         ddd = true;
     }
     if (!ddd)
@@ -557,15 +573,15 @@ Noderef Parser::function_body(bool is_method)
             this->pop();
             if (this->peek().kind == TokenKind::DotDotDot)
             {
-                parlist.push_back(make(this->pop(), NodeKind::Name));
+                parlist.push_back(this->make(this->pop(), NodeKind::Name));
                 break;
             }
-            parlist.push_back(make(this->consume(TokenKind::Identifier), NodeKind::Name));
+            parlist.push_back(this->make(this->consume(TokenKind::Identifier), NodeKind::Name));
         }
     this->consume(TokenKind::RightParen);
     Noderef block = this->block(BlockEnd::End);
     this->consume(TokenKind::End);
-    return make(make(parlist, NodeKind::NameList), block, is_method ? NodeKind::MethodBody : NodeKind::FunctionBody);
+    return this->make(this->make(parlist, NodeKind::NameList), block, is_method ? NodeKind::MethodBody : NodeKind::FunctionBody);
 }
 Noderef Parser::name_attrib()
 {
@@ -573,14 +589,14 @@ Noderef Parser::name_attrib()
     if (this->peek().kind == TokenKind::Less)
     {
         this->pop();
-        Noderef name = make(this->consume(TokenKind::Identifier), NodeKind::Name);
-        Noderef att = make(this->consume(TokenKind::Identifier), NodeKind::Name);
+        Noderef name = this->make(this->consume(TokenKind::Identifier), NodeKind::Name);
+        Noderef att = this->make(this->consume(TokenKind::Identifier), NodeKind::Name);
         this->consume(TokenKind::Greater);
-        return make(name, att, NodeKind::VarDecl);
+        return this->make(name, att, NodeKind::VarDecl);
     }
     else
     {
-        return make(make(id, NodeKind::Name), NodeKind::VarDecl);
+        return this->make(this->make(id, NodeKind::Name), NodeKind::VarDecl);
     }
 }
 
@@ -600,15 +616,15 @@ Noderef Parser::vardecl()
         explist = this->explist();
     }
     if (explist)
-        return make(make(vars, NodeKind::VarList), explist, NodeKind::Declaration);
+        return this->make(this->make(vars, NodeKind::VarList), explist, NodeKind::Declaration);
     else
-        return make(make(vars, NodeKind::VarList), NodeKind::Declaration);
+        return this->make(this->make(vars, NodeKind::VarList), NodeKind::Declaration);
 }
 
 Noderef Parser::fncall(Token op)
 {
     if (op.kind == TokenKind::Literal)
-        return make(op, NodeKind::Primary);
+        return this->make(op, NodeKind::Primary);
     else if (op.kind == TokenKind::LeftBrace)
         return this->table();
     else // left parenthese
@@ -623,11 +639,11 @@ Noderef Parser::expr_p(uint8_t pwr)
     if (prefix != 255)
     {
         Noderef rhs = this->expr_p(prefix);
-        lhs = make(make(t, NodeKind::Operator), rhs, NodeKind::Unary);
+        lhs = this->make(this->make(t, NodeKind::Operator), rhs, NodeKind::Unary);
     }
     else if (TOKEN_IS_PRIMARY(t.kind))
     {
-        lhs = make(t, NodeKind::Primary);
+        lhs = this->make(t, NodeKind::Primary);
     }
     else if (t.kind == TokenKind::LeftBrace)
     {
@@ -661,22 +677,22 @@ Noderef Parser::expr_p(uint8_t pwr)
             if (op.kind == TokenKind::Dot)
             {
                 Token field = this->consume(TokenKind::Identifier);
-                lhs = make(lhs, make(field, NodeKind::Name), NodeKind::Property);
+                lhs = this->make(lhs, this->make(field, NodeKind::Name), NodeKind::Property);
             }
             else if (op.kind == TokenKind::Colon)
             {
                 Token fname = this->consume(TokenKind::Identifier);
                 Noderef rhs = this->fncall(this->pop());
-                lhs = make(lhs, rhs, NodeKind::MethodCall);
+                lhs = this->make(lhs, rhs, NodeKind::MethodCall);
             }
             else if (op.kind == TokenKind::LeftBracket)
             {
                 Noderef rhs = this->expr();
                 this->consume(TokenKind::RightBracket);
-                lhs = make(lhs, rhs, NodeKind::Index);
+                lhs = this->make(lhs, rhs, NodeKind::Index);
             }
             else
-                lhs = make(lhs, this->fncall(op), NodeKind::Call);
+                lhs = this->make(lhs, this->fncall(op), NodeKind::Call);
         }
         else
         {
@@ -692,7 +708,7 @@ Noderef Parser::expr_p(uint8_t pwr)
             }
             this->pop();
             Noderef rhs = expr_p(rp);
-            lhs = make(lhs, make(op, NodeKind::Operator), rhs, NodeKind::Binary);
+            lhs = this->make(lhs, this->make(op, NodeKind::Operator), rhs, NodeKind::Binary);
         }
     }
 
@@ -739,7 +755,7 @@ Ast Parser::parse()
 {
     try
     {
-        Ast tree = Ast(this->block(BlockEnd::Eof));
+        Ast tree = Ast(this->block(BlockEnd::Eof), this->heap);
         if (this->peek().kind != TokenKind::Eof)
         {
             this->error("EOF expected", this->pop());
@@ -749,6 +765,6 @@ Ast Parser::parse()
     catch (string message)
     {
         printf("lua: %s\n", message.c_str());
-        return Ast(nullptr);
+        return Ast(nullptr, this->heap);
     }
 }

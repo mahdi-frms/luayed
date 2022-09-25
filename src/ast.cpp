@@ -44,22 +44,6 @@ Node::Node(Token token, NodeKind kind) : token(token),
 {
 }
 
-Node::Node(std::vector<Noderef> &children, NodeKind kind) : token(token_none()), kind(kind)
-{
-    this->count = children.size();
-    this->children = new Noderef[children.size()];
-    for (size_t i = 0; i < children.size(); i++)
-        this->children[i] = children[i];
-}
-
-Node::Node(std::vector<Noderef> &children, Token token, NodeKind kind) : token(token), kind(kind)
-{
-    this->count = children.size();
-    this->children = new Noderef[children.size()];
-    for (size_t i = 0; i < children.size(); i++)
-        this->children[i] = children[i];
-}
-
 string at_depth(string text, int depth)
 {
     string t = string(depth, '-');
@@ -114,22 +98,12 @@ size_t Node::child_count()
     return this->count;
 }
 
-void Ast::destroy_node(Noderef node)
-{
-    for (size_t i = 0; i < node->child_count(); i++)
-    {
-        this->destroy_node(node->get_children()[i]);
-    }
-    delete[] node->get_children();
-    delete node;
-}
-
 void Ast::destroy()
 {
-    this->destroy_node(this->tree);
+    this->heap.destroy();
 }
 
-Ast::Ast(Noderef tree) : tree(tree)
+Ast::Ast(Noderef tree, Monoheap heap) : tree(tree), heap(heap)
 {
 }
 
