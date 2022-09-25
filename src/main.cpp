@@ -32,7 +32,8 @@ bool parse(const char *path)
         ast::Noderef tree = parser.parse().get_root();
         if (tree != nullptr && !silence)
         {
-            printf("%s", tree->to_string().c_str());
+            std::cout << tree->to_string();
+            std::cout.flush();
         }
         return tree != nullptr;
     }

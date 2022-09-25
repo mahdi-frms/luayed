@@ -317,6 +317,37 @@ Token::~Token()
         free((void *)this->str);
     }
 }
+Token &Token::operator=(const Token &other)
+{
+    if (other.kind == TokenKind::Error)
+    {
+        this->str = strdup(other.str);
+    }
+    else
+    {
+        this->str = other.str;
+    }
+    this->kind = other.kind;
+    this->len = other.len;
+    this->line = other.line;
+    this->offset = other.offset;
+    return *this;
+}
+Token::Token(const Token &other)
+{
+    if (other.kind == TokenKind::Error)
+    {
+        this->str = strdup(other.str);
+    }
+    else
+    {
+        this->str = other.str;
+    }
+    this->kind = other.kind;
+    this->len = other.len;
+    this->line = other.line;
+    this->offset = other.offset;
+}
 
 bool is_letter(char c)
 {

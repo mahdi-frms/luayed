@@ -19,14 +19,16 @@ class Parser
 {
 private:
     Lexer &lexer;
-    vector<Token> tokens;
+    Token current;
+    Token ahead;
+
     Noderef expr();
     Noderef fncall(Token op);
     Noderef expr_p(uint8_t);
     Noderef primary();
     Token pop();
     Token peek();
-    Token ahead();
+    Token look_ahead();
     Noderef table();
     Noderef id_field();
     Noderef expr_field();

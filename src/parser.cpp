@@ -2,14 +2,63 @@
 #include <utility>
 using namespace ast;
 
-uint16_t priorities(uint8_t l, uint8_t r)
-{
-    return l * 256 + r;
-}
+#define BINPWR(L, R) (L * 256 + R)
+
+constexpr uint16_t binpwr[21] = {
+    // Plus = 0x0400,
+    BINPWR(27, 28),
+    // Multiply = 0x0401,
+    BINPWR(29, 30),
+    // FloatDivision = 0x0402,
+    BINPWR(29, 30),
+    // FloorDivision = 0x0403,
+    BINPWR(29, 30),
+    // Modulo = 0x0404,
+    BINPWR(29, 30),
+    // Power = 0x0405,
+    BINPWR(34, 33),
+    // BinAnd = 0x0406,
+    BINPWR(21, 22),
+    // BinOr = 0x0407,
+    BINPWR(17, 18),
+    // RightShift = 0x0408,
+    BINPWR(23, 24),
+    // LeftShift = 0x0409,
+    BINPWR(23, 24),
+    // DotDot = 0x040a,
+    BINPWR(26, 25),
+    // Less = 0x040b,
+    BINPWR(15, 16),
+    // LessEqual = 0x040c,
+    BINPWR(15, 16),
+    // Greater = 0x040d,
+    BINPWR(15, 16),
+    // GreaterEqual = 0x040e,
+    BINPWR(15, 16),
+    // EqualEqual = 0x040f,
+    BINPWR(15, 16),
+    // NotEqual = 0x0410,
+    BINPWR(15, 16),
+    // And = 0x0411,
+    BINPWR(13, 14),
+    // Or = 0x0412,
+    BINPWR(11, 12),
+    // Minus = 0x0c13,
+    BINPWR(27, 28),
+    // Negate = 0x0c14,
+    BINPWR(19, 20),
+};
+
+#define TOKEN_IS_PRIMARY(K) (K & 0x0100)
+#define TOKEN_IS_POSTFIX(K) (K & 0x0200)
+#define TOKEN_IS_BINARY(K) (K & 0x0400)
+#define TOKEN_IS_PREFIX(K) (K & 0x0800)
+#define TOKEN_IS_CONTROL(K) (K & 0x1000)
+#define TOKEN_IS_STATEMENT(K) (K & 0x2000)
 
 uint8_t check_prefix(TokenKind kind)
 {
-    if (kind == TokenKind::Not || kind == TokenKind::Negate || kind == TokenKind::Minus || kind == TokenKind::Length)
+    if (TOKEN_IS_PREFIX(kind))
         return 31;
     return 255;
 }
@@ -17,27 +66,6 @@ uint8_t check_prefix(TokenKind kind)
 Token token_none()
 {
     return Token(nullptr, 0, 0, 0, TokenKind::None);
-}
-
-bool is_primary(TokenKind kind)
-{
-    TokenKind accept[] = {
-        TokenKind::Nil,
-        TokenKind::True,
-        TokenKind::False,
-        TokenKind::Number,
-        TokenKind::Literal,
-        TokenKind::DotDotDot,
-        TokenKind::Identifier,
-    };
-    for (int i = 0; i < sizeof(accept) / sizeof(TokenKind); i++)
-    {
-        if (accept[i] == kind)
-        {
-            return true;
-        }
-    }
-    return false;
 }
 
 bool is_var(Noderef node)
@@ -51,56 +79,18 @@ bool is_var(Noderef node)
 
 uint8_t check_postfix(TokenKind kind)
 {
-    if (kind == TokenKind::LeftBrace ||
-        kind == TokenKind::LeftParen ||
-        kind == TokenKind::LeftBracket ||
-        kind == TokenKind::Dot ||
-        kind == TokenKind::Colon ||
-        kind == TokenKind::Literal)
-    {
+    if (TOKEN_IS_POSTFIX(kind))
         return 35;
-    }
     return 255;
 }
 
-uint16_t check_binary(TokenKind kind)
+Parser::Parser(Lexer &lexer) : lexer(lexer), current(token_none()), ahead(token_none())
 {
-    if (kind == TokenKind::Or)
-        return priorities(11, 12);
-    if (kind == TokenKind::And)
-        return priorities(13, 14);
-    if (kind == TokenKind::EqualEqual ||
-        kind == TokenKind::NotEqual ||
-        kind == TokenKind::Greater ||
-        kind == TokenKind::Less ||
-        kind == TokenKind::GreaterEqual ||
-        kind == TokenKind::LessEqual)
-        return priorities(15, 16);
-    if (kind == TokenKind::BinOr)
-        return priorities(17, 18);
-    if (kind == TokenKind::Negate)
-        return priorities(19, 20);
-    if (kind == TokenKind::BinAnd)
-        return priorities(21, 22);
-    if (kind == TokenKind::RightShift || kind == TokenKind::LeftShift)
-        return priorities(23, 24);
-    if (kind == TokenKind::DotDot)
-        return priorities(26, 25);
-    if (kind == TokenKind::Plus || kind == TokenKind::Minus)
-        return priorities(27, 28);
-    if (kind == TokenKind::Multiply ||
-        kind == TokenKind::FloatDivision ||
-        kind == TokenKind::FloorDivision ||
-        kind == TokenKind::Modulo)
-        return priorities(29, 30);
-    if (kind == TokenKind::Power)
-        return priorities(34, 33);
-    return (uint16_t)-1;
-}
-
-Parser::Parser(Lexer &lexer) : lexer(lexer)
-{
-    this->tokens = this->lexer.drain();
+    this->current = this->lexer.next();
+    if (this->current.kind != TokenKind::Eof)
+    {
+        this->ahead = this->lexer.next();
+    }
 }
 
 Node::Node(Gnode inner, NodeKind kind) : inner(inner), kind(kind)
@@ -168,7 +158,7 @@ Noderef Parser::table()
         }
         else if (t.kind == TokenKind::Identifier)
         {
-            if (this->ahead().kind == TokenKind::Equal)
+            if (this->look_ahead().kind == TokenKind::Equal)
             {
                 items.push_back(this->id_field());
             }
@@ -323,6 +313,24 @@ Noderef Parser::if_stmt()
 
 Noderef Parser::statement()
 {
+    if (!TOKEN_IS_STATEMENT(this->peek().kind))
+    {
+        Noderef s = this->expr();
+        if (s->get_kind() == NodeKind::Call || s->get_kind() == NodeKind::MethodCall)
+            return make_call_stmt(s);
+
+        else if (is_var(s))
+        {
+            Noderef vars = this->varlist(s);
+            this->consume(TokenKind::Equal);
+            Noderef vals = this->explist();
+            return make_assign_stmt(vars, vals);
+        }
+        else
+        {
+            this->error(string("unexpected expression before"), this->peek());
+        }
+    }
     if (this->peek().kind == TokenKind::Semicolon)
     {
         this->pop();
@@ -408,21 +416,6 @@ Noderef Parser::statement()
         {
             return this->generic_for_stmt(id);
         }
-    }
-    Noderef s = this->expr();
-    if (s->get_kind() == NodeKind::Call || s->get_kind() == NodeKind::MethodCall)
-        return make_call_stmt(s);
-
-    else if (is_var(s))
-    {
-        Noderef vars = this->varlist(s);
-        this->consume(TokenKind::Equal);
-        Noderef vals = this->explist();
-        return make_assign_stmt(vars, vals);
-    }
-    else
-    {
-        this->error(string("unexpected expression before"), this->peek());
     }
     return nullptr; // never reaches here
 }
@@ -573,7 +566,7 @@ Noderef Parser::expr_p(uint8_t pwr)
         Noderef rhs = this->expr_p(prefix);
         lhs = make_unary(rhs, t);
     }
-    else if (is_primary(t.kind))
+    else if (TOKEN_IS_PRIMARY(t.kind))
     {
         lhs = make_primary(t);
     }
@@ -628,9 +621,9 @@ Noderef Parser::expr_p(uint8_t pwr)
         }
         else
         {
-            uint16_t p = check_binary(op.kind);
-            if (p == (uint16_t)-1)
+            if (!TOKEN_IS_BINARY(op.kind))
                 break;
+            uint16_t p = binpwr[op.kind % 256];
             uint8_t lp = p >> 8;
             uint8_t rp = p % 256;
 
@@ -649,22 +642,23 @@ Noderef Parser::expr_p(uint8_t pwr)
 
 Token Parser::pop()
 {
-    Token t = this->tokens.front();
-    if (t.kind == TokenKind::Eof)
-    {
-        error("PARSER CRASH: illegal consumption of EOF", t);
-    }
-    this->tokens.erase(this->tokens.begin());
+    Token t = this->current;
     if (t.kind == TokenKind::Error)
     {
         this->error(t.text(), t);
     }
+    if (t.kind == TokenKind::Eof)
+    {
+        error("PARSER CRASH: illegal consumption of EOF", t);
+    }
+    this->current = ahead;
+    this->ahead = this->lexer.next();
     return t;
 }
 
 Token Parser::peek()
 {
-    Token t = this->tokens.front();
+    Token t = this->current;
     if (t.kind == TokenKind::Error)
     {
         this->error(t.text(), t);
@@ -672,9 +666,9 @@ Token Parser::peek()
     return t;
 }
 
-Token Parser::ahead()
+Token Parser::look_ahead()
 {
-    Token t = this->tokens[1];
+    Token t = this->ahead;
     if (t.kind == TokenKind::Error)
     {
         this->error(t.text(), t);
