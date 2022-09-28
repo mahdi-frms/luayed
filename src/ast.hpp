@@ -6,6 +6,8 @@
 #include "lexer.hpp"
 #include "monoheap.hpp"
 
+extern const char *node_names[34];
+
 namespace ast
 {
     enum NodeKind
@@ -49,6 +51,38 @@ namespace ast
     class Node;
     typedef Node *Noderef;
 
+    enum MetaKind
+    {
+        Decl = 55,
+        Memory = 1,
+        Label = 2
+    };
+
+    struct MetaNode
+    {
+        MetaNode *next;
+        MetaKind kind;
+    };
+
+    struct MetaDeclaration
+    {
+        MetaNode header;
+        Noderef decnode;
+    };
+
+    struct MetaLabel
+    {
+        MetaNode header;
+        Noderef label_node;
+    };
+
+    struct MetaMemory
+    {
+        MetaNode header;
+        size_t offset;
+        bool is_stack;
+    };
+
     class Node
     {
     private:
@@ -56,6 +90,7 @@ namespace ast
         Noderef *children;
         size_t count;
         NodeKind kind;
+        MetaNode *meta = nullptr;
 
         void stringify(int depth, std::string &buffer);
 
@@ -63,12 +98,15 @@ namespace ast
         NodeKind get_kind();
         Token get_token();
         Noderef *get_children();
+        Noderef child(size_t index);
         size_t child_count();
         Node(Token token, NodeKind kind);
         Node(Noderef *children, size_t count, NodeKind kind);
         Node(std::vector<Noderef> &children, NodeKind kind);
         Node(std::vector<Noderef> &children, Token token, NodeKind kind);
         std::string to_string();
+        void annotate(MetaNode *md);
+        MetaNode *getannot(MetaKind kind);
     };
 
     class Ast
@@ -78,6 +116,7 @@ namespace ast
         Monoheap heap;
 
     public:
+        Monoheap &get_heap();
         void destroy();
         Noderef root();
         Ast(Noderef tree, Monoheap heap);

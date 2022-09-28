@@ -1,5 +1,6 @@
 #include <iostream>
 #include "parser.hpp"
+#include "resolve.hpp"
 
 string readfile(const char *path)
 {
@@ -31,10 +32,16 @@ bool parse(const char *path)
         Parser parser = Parser(lxr);
         ast::Ast tree = parser.parse();
         ast::Noderef root = tree.root();
-        if (root != nullptr && !silence)
+        if (root != nullptr)
         {
-            std::cout << root->to_string();
-            std::cout.flush();
+            SemanticAnalyzer sem = SemanticAnalyzer(tree);
+            sem.analyze();
+            if (!silence)
+            {
+
+                std::cout << root->to_string();
+                std::cout.flush();
+            }
         }
         tree.destroy();
         return root != nullptr;

@@ -8,6 +8,7 @@ add_executable(luayed
     src/parser.cpp
     src/ast.cpp
     src/monoheap.cpp
+    src/resolve.cpp
 )
 
 set_property(TARGET luayed PROPERTY CXX_STANDARD 17)

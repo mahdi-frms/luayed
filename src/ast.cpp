@@ -111,3 +111,27 @@ Noderef Ast::root()
 {
     return this->tree;
 }
+
+void Node::annotate(MetaNode *md)
+{
+    md->next = this->meta;
+    this->meta = md;
+}
+
+Noderef Node::child(size_t index)
+{
+    return this->children[index];
+}
+
+Monoheap &Ast::get_heap()
+{
+    return this->heap;
+}
+
+MetaNode *Node::getannot(MetaKind kind)
+{
+    MetaNode *tmp = this->meta;
+    while (tmp != nullptr && tmp->kind != kind)
+        tmp = tmp->next;
+    return tmp;
+}

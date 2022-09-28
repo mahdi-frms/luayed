@@ -300,11 +300,11 @@ Noderef Parser::explist()
 Noderef Parser::generic_for_stmt(Token identifier)
 {
     vector<Noderef> namelist;
-    namelist.push_back(this->make(identifier, NodeKind::Name));
+    namelist.push_back(this->make(this->make(identifier, NodeKind::Name), NodeKind::VarDecl));
     while (this->peek().kind == TokenKind::Comma)
     {
         this->pop();
-        namelist.push_back(this->make(this->consume(TokenKind::Identifier), NodeKind::Name));
+        namelist.push_back(this->make(this->make(this->consume(TokenKind::Identifier), NodeKind::Name), NodeKind::VarDecl));
     }
     this->consume(TokenKind::In);
     Noderef explist = this->explist();
@@ -330,9 +330,9 @@ Noderef Parser::numeric_for_stmt(Token identifier)
     Noderef block = this->block(BlockEnd::End);
     this->consume(TokenKind::End);
     if (step)
-        return this->make(this->make(identifier, NodeKind::Name), from, to, step, block, NodeKind::NumericFor);
+        return this->make(this->make(this->make(identifier, NodeKind::Name), NodeKind::VarDecl), from, to, step, block, NodeKind::NumericFor);
     else
-        return this->make(this->make(identifier, NodeKind::Name), from, to, block, NodeKind::NumericFor);
+        return this->make(this->make(this->make(identifier, NodeKind::Name), NodeKind::VarDecl), from, to, block, NodeKind::NumericFor);
 }
 
 Noderef Parser::while_stmt()
@@ -560,11 +560,11 @@ Noderef Parser::function_body(bool is_method)
     bool ddd = false;
     if (this->peek().kind == TokenKind::Identifier)
     {
-        parlist.push_back(this->make(this->pop(), NodeKind::Name));
+        parlist.push_back(this->make(this->make(this->pop(), NodeKind::Name), NodeKind::VarDecl));
     }
     else if (this->peek().kind == TokenKind::DotDotDot)
     {
-        parlist.push_back(this->make(this->pop(), NodeKind::Name));
+        parlist.push_back(this->make(this->make(this->pop(), NodeKind::Name), NodeKind::VarDecl));
         ddd = true;
     }
     if (!ddd)
@@ -576,7 +576,7 @@ Noderef Parser::function_body(bool is_method)
                 parlist.push_back(this->make(this->pop(), NodeKind::Name));
                 break;
             }
-            parlist.push_back(this->make(this->consume(TokenKind::Identifier), NodeKind::Name));
+            parlist.push_back(this->make(this->make(this->consume(TokenKind::Identifier), NodeKind::Name), NodeKind::VarDecl));
         }
     this->consume(TokenKind::RightParen);
     Noderef block = this->block(BlockEnd::End);
@@ -589,7 +589,7 @@ Noderef Parser::name_attrib()
     if (this->peek().kind == TokenKind::Less)
     {
         this->pop();
-        Noderef name = this->make(this->consume(TokenKind::Identifier), NodeKind::Name);
+        Noderef name = this->make(id, NodeKind::Name);
         Noderef att = this->make(this->consume(TokenKind::Identifier), NodeKind::Name);
         this->consume(TokenKind::Greater);
         return this->make(name, att, NodeKind::VarDecl);
