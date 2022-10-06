@@ -722,10 +722,6 @@ Token Parser::pop()
     {
         this->error(t.text(), t);
     }
-    if (t.kind == TokenKind::Eof)
-    {
-        error("PARSER CRASH: illegal consumption of EOF", t);
-    }
     this->current = ahead;
     this->ahead = this->lexer.next();
     return t;
