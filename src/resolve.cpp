@@ -127,29 +127,30 @@ void SemanticAnalyzer::analyze_label(Noderef node)
 void SemanticAnalyzer::analyze_node(Noderef node)
 {
     if (node->get_kind() == NodeKind::LabelStmt)
-    {
         this->analyze_label(node);
-    }
     else if (node->get_kind() == NodeKind::GotoStmt)
-    {
         gotolist.push_back(node);
-    }
     else if (node->get_kind() == NodeKind::VarDecl)
-    {
         this->analyze_var_decl(node);
-    }
+    else if (node->get_kind() == NodeKind::Declaration)
+        this->analyze_declaration(node);
     else if (node->get_kind() == NodeKind::Primary)
-    {
         this->analyze_identifier(node);
-    }
     else if (node->get_kind() == NodeKind::BreakStmt)
-    {
         this->analyze_break(node);
-    }
     else
-    {
         this->analyze_etc(node);
+}
+
+void SemanticAnalyzer::analyze_declaration(Noderef node)
+{
+    if (node->child_count() > 1)
+    {
+        Noderef exps = node->child(1);
+        this->analyze_etc(exps);
     }
+    Noderef vars = node->child(0);
+    this->analyze_etc(vars);
 }
 
 void SemanticAnalyzer::finalize()

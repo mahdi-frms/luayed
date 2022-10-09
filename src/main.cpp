@@ -38,7 +38,6 @@ bool parse(const char *path)
             sem.analyze();
             if (!silence)
             {
-
                 std::cout << root->to_string();
                 std::cout.flush();
             }

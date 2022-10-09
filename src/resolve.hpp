@@ -30,6 +30,7 @@ private:
     void analyze_etc(Noderef node);
     void analyze_break(Noderef node);
     void analyze_label(Noderef node);
+    void analyze_declaration(Noderef node);
     void finalize();
 
 public:
