@@ -18,7 +18,7 @@ class SemanticAnalyzer
 {
 private:
     vector<Varmap> maps;
-    vector<NodeKind> node_kind;
+    vector<Noderef> nodes;
     Varmap labels;
     vector<Noderef> gotolist;
     vector<SemanticError> errors;

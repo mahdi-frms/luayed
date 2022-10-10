@@ -2,12 +2,7 @@
 
 vector<SemanticError> SemanticAnalyzer::analyze()
 {
-
-    maps.push_back(Varmap());
-    node_kind.push_back(NodeKind::Block);
     this->analyze_node(ast.root());
-    maps.pop_back();
-    node_kind.pop_back();
     this->finalize();
     return std::move(this->errors);
 }
@@ -35,7 +30,7 @@ void SemanticAnalyzer::analyze_identifier(Noderef node)
         while (true)
         {
             func_past |= func;
-            func = (node_kind[idx] == NodeKind::FunctionBody);
+            func = (nodes[idx]->get_kind() == NodeKind::FunctionBody);
             if (maps[idx].find(t.text()) != maps[idx].cend())
             {
                 dec = maps[idx][t.text()];
@@ -58,6 +53,30 @@ void SemanticAnalyzer::analyze_identifier(Noderef node)
             }
         }
     }
+    else if (t.kind == TokenKind::DotDotDot)
+    {
+        bool valid = true;
+        size_t idx = this->nodes.size() - 1;
+        while (true)
+        {
+            if (this->nodes[idx]->get_kind() == NodeKind::FunctionBody)
+            {
+                break;
+            }
+            if (idx == 0)
+            {
+                break;
+            }
+            idx--;
+        }
+        if (!valid)
+        {
+            SemanticError error;
+            error.node = node;
+            error.text = "cannot use '...' outside a vararg function";
+            this->errors.push_back(error);
+        }
+    }
 }
 
 void SemanticAnalyzer::analyze_etc(Noderef node)
@@ -71,7 +90,7 @@ void SemanticAnalyzer::analyze_etc(Noderef node)
     if (new_scope)
     {
         maps.push_back(Varmap());
-        node_kind.push_back(node->get_kind());
+        nodes.push_back(node);
     }
     for (size_t i = 0; i < node->child_count(); i++)
     {
@@ -90,7 +109,7 @@ void SemanticAnalyzer::analyze_etc(Noderef node)
         }
 
         maps.pop_back();
-        node_kind.pop_back();
+        nodes.pop_back();
     }
 }
 
@@ -104,10 +123,10 @@ bool is_loop(NodeKind kind)
 
 void SemanticAnalyzer::analyze_break(Noderef node)
 {
-    auto it = this->node_kind.cend();
-    while (it != this->node_kind.cbegin() && !is_loop(*it))
+    auto it = --this->nodes.cend();
+    while (it != this->nodes.cbegin() && !is_loop((*it)->get_kind()))
         it--;
-    if (it == this->node_kind.cbegin())
+    if (it == this->nodes.cbegin())
         this->errors.push_back(SemanticError{.node = node, .text = "break statement not in a loop"});
 }
 
@@ -147,10 +166,10 @@ void SemanticAnalyzer::analyze_declaration(Noderef node)
     if (node->child_count() > 1)
     {
         Noderef exps = node->child(1);
-        this->analyze_etc(exps);
+        this->analyze_node(exps);
     }
     Noderef vars = node->child(0);
-    this->analyze_etc(vars);
+    this->analyze_node(vars);
 }
 
 void SemanticAnalyzer::finalize()
