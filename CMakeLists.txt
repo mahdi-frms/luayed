@@ -12,6 +12,7 @@ add_executable(luayed
 )
 
 add_executable(luaytest
+    src/lexer.cpp
     test/test.cpp
     lib/tap/tap.c
 )
@@ -20,5 +21,6 @@ enable_testing()
 add_test(NAME "luayedtests" COMMAND luaytest)
 
 target_include_directories(luaytest PRIVATE lib)
+target_include_directories(luaytest PRIVATE src)
 
 set_property(TARGET luayed PROPERTY CXX_STANDARD 17)

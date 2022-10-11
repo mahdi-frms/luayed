@@ -404,7 +404,7 @@ char Lexer::peek()
     return this->text[this->pos];
 }
 
-Lexer::Lexer(string &text) : text(text)
+Lexer::Lexer(const char *text) : text(text)
 {
     this->pos = 0;
     this->line = 0;
@@ -754,7 +754,7 @@ vector<Token> Lexer::drain()
 
 Token Lexer::token(TokenKind kind)
 {
-    return Token((char *)this->text.c_str() + this->prev_pos, this->pos - this->prev_pos, this->prev_line, this->prev_offset, kind);
+    return Token((char *)this->text + this->prev_pos, this->pos - this->prev_pos, this->prev_line, this->prev_offset, kind);
 }
 
 void Lexer::skip_line()

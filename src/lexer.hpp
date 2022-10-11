@@ -114,7 +114,7 @@ enum class NumberScanPhase
 class Lexer
 {
 private:
-    string &text;
+    const char *text;
     vector<Token> tokens;
     size_t pos;
     size_t offset;
@@ -155,7 +155,7 @@ private:
     bool look_ahead();
 
 public:
-    Lexer(string &text);
+    Lexer(const char *text);
     Token next();
     vector<Token> drain();
 };

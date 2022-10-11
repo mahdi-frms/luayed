@@ -1,10 +1,12 @@
 #include <iostream>
+#include <cstdlib>
+#include <cstring>
 #include "parser.hpp"
 #include "resolve.hpp"
 
-string readfile(const char *path)
+char *readfile(const char *path)
 {
-    string text = "";
+    string str = "";
     int bsize = 1024;
     FILE *file = fopen(path, "r");
     char buffer[bsize + 1];
@@ -12,19 +14,22 @@ string readfile(const char *path)
     {
         int rsl = fread(buffer, 1, bsize, file);
         buffer[rsl] = '\0';
-        text += string(buffer);
+        str += string(buffer);
         if (rsl < bsize)
             break;
     }
     fclose(file);
+    char *text = (char *)malloc(str.size() + 1);
+    text[str.size()] = '\0';
+    strcpy(text, str.c_str());
     return text;
 }
 
 bool parse(const char *path)
 {
-    bool silence = true;
-    bool parse = true;
-    string text = readfile(path);
+    bool silence = false;
+    bool parse = false;
+    char *text = readfile(path);
     printf("===== %s =====\n", path);
     Lexer lxr = Lexer(text);
     if (parse)
@@ -43,6 +48,7 @@ bool parse(const char *path)
             }
         }
         tree.destroy();
+        free(text);
         return root != nullptr;
     }
     else
@@ -61,6 +67,7 @@ bool parse(const char *path)
             if (!silence)
                 printf("--> %s (%s) [%lu,%lu]\n", tkn.text().c_str(), token_kind_stringify(tkn.kind).c_str(), tkn.line + 1, tkn.offset + 1);
         }
+        free(text);
         return true;
     }
 }
