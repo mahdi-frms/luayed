@@ -11,4 +11,14 @@ add_executable(luayed
     src/resolve.cpp
 )
 
+add_executable(luaytest
+    test/test.cpp
+    lib/tap/tap.c
+)
+
+enable_testing()
+add_test(NAME "luayedtests" COMMAND luaytest)
+
+target_include_directories(luaytest PRIVATE lib)
+
 set_property(TARGET luayed PROPERTY CXX_STANDARD 17)
