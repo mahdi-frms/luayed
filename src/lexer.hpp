@@ -102,15 +102,6 @@ struct Token
     string text();
 };
 
-enum class NumberScanPhase
-{
-    Integer,
-    HEX,
-    Decimal,
-    Exponent,
-    EarlyExponent,
-};
-
 class Lexer
 {
 private:
@@ -134,7 +125,11 @@ private:
     Token short_string(char c);
     Token long_string();
     Token long_string(char c);
-    Token number(char c, NumberScanPhase phase);
+    Token number(char c);
+    Token integer();
+    Token decimal();
+    Token power();
+    Token hex();
     Token skip_comment_block();
     void sync();
     Token read();

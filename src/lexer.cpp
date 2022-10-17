@@ -481,7 +481,7 @@ Token Lexer::read()
     }
     if (is_digit(c))
     {
-        return this->number(c, NumberScanPhase::Integer);
+        return this->number(c);
     }
     if (c == '\'' || c == '"')
     {
@@ -634,84 +634,72 @@ Token Lexer::short_string(char c)
     return this->token(TokenKind::Literal);
 }
 
-Token Lexer::number(char c, NumberScanPhase phase)
+const char *number_error = "malformed number";
+
+Token Lexer::hex()
 {
-    const char *number_error = "malformed number";
-    while (true)
+    this->pop();
+    if (!is_hex(this->peek()))
+        return this->error(strdup(number_error));
+    while (is_hex(this->peek()))
+        this->pop();
+    char c = this->peek();
+    if (is_alphabetic(c) || c == '.')
+        return this->error(strdup(number_error));
+    return this->none();
+}
+
+Token Lexer::integer()
+{
+    while (is_digit(this->peek()))
+        this->pop();
+    char c = this->peek();
+    if (is_alphabetic(c) && c != 'e')
+        return this->error(strdup(number_error));
+    return this->none();
+}
+Token Lexer::decimal()
+{
+    if (this->peek() == '.')
     {
-        c = this->peek();
-        if (phase == NumberScanPhase::Integer)
-        {
-            if (c == '.')
-            {
-                phase = NumberScanPhase::Decimal;
-            }
-            else if (c == 'e')
-            {
-                phase = NumberScanPhase::EarlyExponent;
-            }
-            else if (c == 'x' && this->pos - this->prev_pos == 1 && this->text[this->prev_pos] == '0')
-            {
-                phase = NumberScanPhase::HEX;
-            }
-            else if (is_alphabetic(c))
-            {
-                return this->error(strdup(number_error));
-            }
-            else if (!is_digit(c))
-                break;
+        this->pop();
+        while (is_digit(this->peek()))
             this->pop();
-        }
-        else if (phase == NumberScanPhase::HEX)
-        {
-            if (c == '.')
-            {
-                phase = NumberScanPhase::Decimal;
-            }
-            else if (c == 'e')
-            {
-                phase = NumberScanPhase::EarlyExponent;
-            }
-            else if (is_alphabetic(c) && !is_hex(c))
-            {
-                return this->error(strdup(number_error));
-            }
-            else if (!is_digit(c) && !is_hex(c))
-                break;
+        char c = this->peek();
+        if ((is_alphabetic(c) && c != 'e') || c == '.')
+            return this->error(strdup(number_error));
+    }
+    return this->none();
+}
+Token Lexer::power()
+{
+    if (this->peek() == 'e')
+    {
+        this->pop();
+        if (this->peek() == '-')
             this->pop();
-        }
-        else if (phase == NumberScanPhase::Decimal)
-        {
-            if (c == 'e')
-            {
-                phase = NumberScanPhase::EarlyExponent;
-            }
-            else if (is_alphabetic(c))
-            {
-                return this->error(strdup(number_error));
-            }
-            else if (!is_digit(c))
-                break;
+        if (!is_digit(this->peek()))
+            return this->error(strdup(number_error));
+        while (is_digit(this->peek()))
             this->pop();
-        }
-        else if (phase == NumberScanPhase::EarlyExponent)
-        {
-            if (c == '-')
-            {
-                this->pop();
-            }
-            phase = NumberScanPhase::Exponent;
-        }
-        else // Exponent
-        {
-            if (is_alphabetic(c))
-            {
-                return this->error(strdup(number_error));
-            }
-            else if (!is_digit(c))
-                break;
-            this->pop();
-        }
+        char c = this->peek();
+        if (is_alphabetic(c) || c == '.')
+            return this->error(strdup(number_error));
+    }
+    return this->none();
+}
+
+Token Lexer::number(char c)
+{
+    if (c == '0' && this->peek() == 'x')
+    {
+        RET(this->hex());
+    }
+    else
+    {
+        RET(this->integer());
+        RET(this->decimal());
+        RET(this->power());
     }
     return this->token(TokenKind::Number);
 }
@@ -919,7 +907,7 @@ Token Lexer::op_dot(char c)
         }
         else if (is_digit(this->peek()))
         {
-            return this->number(c, NumberScanPhase::Decimal);
+            return this->number(c);
         }
         else
             return this->token(TokenKind::Dot);
