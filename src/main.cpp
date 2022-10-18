@@ -27,8 +27,8 @@ char *readfile(const char *path)
 
 bool parse(const char *path)
 {
-    bool silence = false;
-    bool parse = false;
+    bool silence = true;
+    bool parse = true;
     char *text = readfile(path);
     printf("===== %s =====\n", path);
     Lexer lxr = Lexer(text);
@@ -56,10 +56,6 @@ bool parse(const char *path)
         for (;;)
         {
             Token tkn = lxr.next();
-            if (tkn.kind == TokenKind::Eof)
-            {
-                break;
-            }
             if (tkn.kind == TokenKind::Eof)
             {
                 break;

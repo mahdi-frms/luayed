@@ -723,7 +723,8 @@ Token Parser::pop()
         this->error(t.text(), t);
     }
     this->current = ahead;
-    this->ahead = this->lexer.next();
+    if (current.kind != TokenKind::Eof)
+        this->ahead = this->lexer.next();
     return t;
 }
 
