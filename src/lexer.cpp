@@ -563,7 +563,7 @@ bool Lexer::look_ahead()
 
 Token Lexer::short_string(char c)
 {
-    const char *escape_list = "abfnrtxv\\\"\n'[]";
+    const char *escape_list = "abfnrtv\\\"\n'[]";
     const char *error_invescape = "invalid escape sequence";
     bool escape = false;
     while (true)
@@ -579,6 +579,15 @@ Token Lexer::short_string(char c)
             {
                 while (this->peek() == '\n')
                 {
+                    this->pop();
+                }
+            }
+            else if (ch == 'x')
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    if (!is_hex(this->peek()))
+                        this->error(strdup(error_invescape));
                     this->pop();
                 }
             }

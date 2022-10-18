@@ -178,11 +178,13 @@ int main()
     lxtest("equal & colon", "$=$ $==$ $:$ $::$", Equal, EqualEqual, Colon, ColonColon);
     lxtest("negate", "$~$ $~=$", Negate, NotEqual);
     lxtest("minus", "$-$", Minus);
+    lxerrr("invalid char", "@");
 
     lxtest("comment", "$+$ -- .", Plus);
     lxtest("single line comment", "-- .\n$.$", Dot);
     lxtest("multiline comment", "$+$--[[\n .-- \n]]$.$", Plus, Dot);
     lxtest("multilevel comment", "$&$--[==[ + ] %]==]$)$", BinAnd, RightParen);
+    lxtest("exec path", "#!/usr/bin/lua");
 
     lxtest("identifier", "$foo$", Identifier);
     lxtest("multiple ids", "  $foo$ \n$bar$ ", Identifier, Identifier);
@@ -228,6 +230,22 @@ int main()
     lxtest("hex", "$0x3$", Number);
     lxerrr("hex without digits", "0x");
     lxerrr("hex followed by dot", "0x34.");
+
+    lxtest("empty literal", "$''$ $\"\"$", Literal, Literal);
+    lxtest("basic literal", "$'text'$", Literal);
+    lxerrr("unclosed literal", "'");
+    lxerrr("closed literal after endline", "'\n'");
+    lxtest("escapes", "$'\\a\\b\\t\\n\\v\\r\\f \\\\ \\' \\\" \\\n \\[ \\] '$", Literal);
+    lxerrr("invalid escape", "'\\s'");
+    lxtest("escape \\\"", "$\"\\\"\"$", Literal);
+    lxtest("escape \\z", "$'\\z\n\n\n\nstr'$", Literal);
+    lxtest("escape byte", "$\" \\234 \"$", Literal);
+    lxerrr("invalid byte", "'\\256'");
+    lxtest("escape hex", "$'\\x4e'$", Literal);
+    lxerrr("invalid hex", "'\\x4t'");
+    lxtest("multiline literal", "$[[]]$ $[[  \n  str ]]$", Literal, Literal);
+    lxtest("multilevel literal", "$[===[ ]==] ]===]$", Literal);
+    lxerrr("unclosed multilevel literal", "[===[ ]==]");
 
     done_testing();
     return 0;
