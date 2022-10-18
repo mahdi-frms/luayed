@@ -13,6 +13,7 @@ add_executable(luayed
 
 add_executable(luaytest
     src/lexer.cpp
+    test/lexer.cpp
     test/test.cpp
     lib/tap/tap.c
 )
