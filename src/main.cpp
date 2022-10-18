@@ -34,7 +34,7 @@ bool parse(const char *path)
     Lexer lxr = Lexer(text);
     if (parse)
     {
-        Parser parser = Parser(lxr);
+        Parser parser = Parser((ILexer &)lxr);
         ast::Ast tree = parser.parse();
         ast::Noderef root = tree.root();
         if (root != nullptr)

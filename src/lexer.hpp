@@ -102,7 +102,13 @@ struct Token
     string text();
 };
 
-class Lexer
+class ILexer
+{
+public:
+    virtual Token next() = 0;
+};
+
+class Lexer : ILexer
 {
 private:
     const char *text;

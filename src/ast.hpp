@@ -46,6 +46,7 @@ namespace ast
         VarList = 31,
         MethodBody = 32,
         Operator = 33, // token
+        NEND = 34,
     };
 
     class Node;
@@ -102,8 +103,6 @@ namespace ast
         size_t child_count();
         Node(Token token, NodeKind kind);
         Node(Noderef *children, size_t count, NodeKind kind);
-        Node(std::vector<Noderef> &children, NodeKind kind);
-        Node(std::vector<Noderef> &children, Token token, NodeKind kind);
         std::string to_string();
         void annotate(MetaNode *md);
         MetaNode *getannot(MetaKind kind);

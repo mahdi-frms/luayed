@@ -13,8 +13,12 @@ add_executable(luayed
 
 add_executable(luaytest
     src/lexer.cpp
+    src/parser.cpp
+    src/ast.cpp
+    src/monoheap.cpp
     test/lexer.cpp
     test/test.cpp
+    test/parser.cpp
     lib/tap/tap.c
 )
 
