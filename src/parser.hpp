@@ -60,6 +60,7 @@ private:
 public:
     Parser(ILexer &lexer);
     Ast parse();
+    Ast parse_exp();
 };
 
 #endif

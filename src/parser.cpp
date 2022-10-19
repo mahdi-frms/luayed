@@ -765,3 +765,21 @@ Ast Parser::parse()
         return Ast(nullptr, this->heap);
     }
 }
+
+Ast Parser::parse_exp()
+{
+    try
+    {
+        Ast tree = Ast(this->expr(), this->heap);
+        if (this->peek().kind != TokenKind::Eof)
+        {
+            this->error("EOF expected", this->pop());
+        }
+        return tree;
+    }
+    catch (string message)
+    {
+        printf("lua: %s\n", message.c_str());
+        return Ast(nullptr, this->heap);
+    }
+}

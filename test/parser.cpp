@@ -2,6 +2,8 @@
 #include <ast.hpp>
 #include <parser.hpp>
 
+#define T(K) NodeKind::TKN, K
+
 class MockLexer : ILexer
 {
 private:
@@ -13,8 +15,8 @@ public:
     }
     Token next()
     {
-        Token last = this->tkns.back();
-        this->tkns.pop_back();
+        Token last = this->tkns.front();
+        this->tkns.erase(this->tkns.begin());
         return last;
     }
 };
@@ -37,7 +39,15 @@ public:
     {
         Noderef node = (Noderef)this->heap.alloc(sizeof(Node));
         *node = Node(t, kind);
-        nodes.back().push_back(node);
+
+        if (nodes.size() == 0)
+        {
+            this->root = node;
+        }
+        else
+        {
+            nodes.back().push_back(node);
+        }
     }
     void close()
     {
@@ -93,7 +103,7 @@ Token tokenk(TokenKind k)
 
 char *concat(const char *s1, const char *s2);
 
-void partest(const char *message, ...)
+void partest(bool exp, const char *message, ...)
 {
     va_list args;
     va_start(args, message);
@@ -106,9 +116,16 @@ void partest(const char *message, ...)
         NodeKind nk = (NodeKind)va_arg(args, int);
         if (is_token_node(nk))
         {
+            va_arg(args, int); // TKN
             TokenKind tk = (TokenKind)va_arg(args, int);
             Token token = tokenk(tk);
             am.add(token, nk);
+            tkns.push_back(token);
+        }
+        else if (nk == TKN)
+        {
+            TokenKind tk = (TokenKind)va_arg(args, int);
+            Token token = tokenk(tk);
             tkns.push_back(token);
         }
         else if (nk == NEND)
@@ -127,7 +144,7 @@ void partest(const char *message, ...)
 
     MockLexer mlx = MockLexer(tkns);
     Parser parser = Parser((ILexer &)mlx);
-    Ast parser_ast = parser.parse();
+    Ast parser_ast = exp ? parser.parse_exp() : parser.parse();
     Ast maker_ast = am.get_tree();
     char *mes = concat("parser : ", message);
     ok(cmp_node(parser_ast.root(), maker_ast.root()), mes);
@@ -136,7 +153,53 @@ void partest(const char *message, ...)
     free(mes);
 }
 
+#define exptest(MES, ...) partest(true, MES, __VA_ARGS__)
+#define chunktest(MES, ...) partest(false, MES, __VA_ARGS__)
+
 void parser_tests()
 {
-    partest("empty source", Block, NEND);
+    exptest("number",
+            Primary,
+            /**/ T(Number));
+    exptest("string",
+            Primary,
+            /**/ T(Literal));
+    exptest("boolean - true",
+            Primary,
+            /**/ T(True));
+    exptest("boolean - false",
+            Primary,
+            /**/ T(False));
+    exptest("nil",
+            Primary,
+            /**/ T(Nil));
+    exptest("Identifier",
+            Primary,
+            /**/ T(Identifier));
+
+    exptest("simple binary",
+            Binary,
+            /**/ Primary,
+            /*  */ T(Identifier),
+            /**/ Operator,
+            /*  */ T(Plus),
+            /**/ Primary,
+            /*  */ T(Identifier),
+            NEND);
+
+    exptest("two binaries",
+            Binary,
+            /**/ Primary,
+            /*  */ T(Number),
+            /**/ Operator,
+            /*  */ T(Plus),
+            /**/ Binary,
+            /*  */ Primary,
+            /*      */ T(Number),
+            /*  */ Operator,
+            /*      */ T(Multiply),
+            /*  */ Primary,
+            /*      */ T(True),
+            /**/ NEND,
+            NEND);
 }

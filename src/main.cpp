@@ -27,7 +27,7 @@ char *readfile(const char *path)
 
 bool parse(const char *path)
 {
-    bool silence = true;
+    bool silence = false;
     bool parse = true;
     char *text = readfile(path);
     printf("===== %s =====\n", path);

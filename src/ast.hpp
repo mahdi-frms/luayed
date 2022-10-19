@@ -46,7 +46,8 @@ namespace ast
         VarList = 31,
         MethodBody = 32,
         Operator = 33, // token
-        NEND = 34,
+        NEND = 34,     // ctrl
+        TKN = 35,      // ctrl
     };
 
     class Node;
