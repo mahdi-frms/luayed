@@ -259,7 +259,13 @@ void Compiler::compile_explist(Noderef node, size_t vcount)
         if (vcount)
             vcount--;
     }
-    this->compile_exp_e(node->child(node->child_count() - 1), vcount);
+    if (node->child_count())
+        this->compile_exp_e(node->child(node->child_count() - 1), vcount);
+    else
+    {
+        while (--vcount)
+            this->emit(Opcode(Instruction::INil));
+    }
 }
 
 void Compiler::compile_varlist(Noderef node)
@@ -318,18 +324,7 @@ void Compiler::compile_block(Noderef node)
 
 void Compiler::compile_decl(Noderef node)
 {
-    Noderef dec = node->child(0)->child(0);
-    if (node->child_count() == 1)
-    {
-        this->emit(Instruction::INil);
-    }
-    else
-    {
-        this->compile_exp(node->child(1)->child(0));
-    }
-    size_t offset = ((MetaMemory *)dec->getannot(MetaKind::MMemory))->offset;
-    this->emit(Opcode(Instruction::INil));
-    this->emit(Opcode(Instruction::ILStore, offset));
+    this->compile_assignment(node);
 }
 
 void Compiler::compile_node(Noderef node)
