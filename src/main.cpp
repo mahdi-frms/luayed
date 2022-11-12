@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
+#include "compiler.hpp"
 #include "parser.hpp"
 #include "resolve.hpp"
 
@@ -29,6 +30,7 @@ bool parse(const char *path)
 {
     bool silence = false;
     bool parse = true;
+    bool compile = true;
     char *text = readfile(path);
     printf("===== %s =====\n", path);
     Lexer lxr = Lexer(text);
@@ -41,6 +43,15 @@ bool parse(const char *path)
         {
             SemanticAnalyzer sem = SemanticAnalyzer(tree);
             sem.analyze();
+            if (compile)
+            {
+                Compiler compiler;
+                vector<Lfunction> bin = compiler.compile(tree);
+                if (!silence)
+                {
+                    std::cout << "binary size : " << bin[0].clen() << "\n";
+                }
+            }
             if (!silence)
             {
                 std::cout << root->to_string();

@@ -49,13 +49,6 @@ constexpr uint16_t binpwr[21] = {
     BINPWR(19, 20),
 };
 
-#define TOKEN_IS_PRIMARY(K) (K & 0x0100)
-#define TOKEN_IS_POSTFIX(K) (K & 0x0200)
-#define TOKEN_IS_BINARY(K) (K & 0x0400)
-#define TOKEN_IS_PREFIX(K) (K & 0x0800)
-#define TOKEN_IS_CONTROL(K) (K & 0x1000)
-#define TOKEN_IS_STATEMENT(K) (K & 0x2000)
-
 uint8_t check_prefix(TokenKind kind)
 {
     if (TOKEN_IS_PREFIX(kind))

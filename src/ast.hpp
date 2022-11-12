@@ -55,9 +55,10 @@ namespace ast
 
     enum MetaKind
     {
-        Decl = 55,
-        Memory = 1,
-        Label = 2
+        MDecl = 55,
+        MMemory = 1,
+        MLabel = 2,
+        MScope = 3
     };
 
     struct MetaNode
@@ -83,6 +84,12 @@ namespace ast
         MetaNode header;
         size_t offset;
         bool is_stack;
+    };
+
+    struct MetaScope
+    {
+        MetaNode header;
+        size_t size;
     };
 
     class Node

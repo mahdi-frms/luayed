@@ -6,6 +6,7 @@ add_executable(luayed
     src/main.cpp
     src/lexer.cpp
     src/parser.cpp
+    src/compiler.cpp
     src/ast.cpp
     src/monoheap.cpp
     src/resolve.cpp
