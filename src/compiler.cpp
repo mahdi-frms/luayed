@@ -52,21 +52,6 @@ Lfunction::~Lfunction()
     for (size_t i = 0; i < this->sconst.size(); i++)
         free((void *)this->sconst[i]);
 }
-void Lfunction::push_int(lbyte b, size_t i)
-{
-    if (i >= 256)
-    {
-        b |= 0x1;
-        this->push(b);
-        this->push(i % 256);
-        this->push(i >> 8);
-    }
-    else
-    {
-        this->push(b);
-        this->push(i);
-    }
-}
 
 vector<Lfunction> Compiler::compile(Ast ast)
 {
@@ -121,7 +106,7 @@ void Compiler::compile_identifier(Noderef node)
     if (!md)
     {
         size_t idx = this->const_string(token_cstring(node->get_token()));
-        this->emit_int(Instruction::ISConst, idx);
+        this->emit(Opcode(Instruction::ISConst, idx));
         this->emit(Instruction::IGGet);
     }
     else
@@ -130,7 +115,7 @@ void Compiler::compile_identifier(Noderef node)
         MetaMemory *dmd = (MetaMemory *)decl->getannot(MetaKind::MMemory);
         if (dmd->is_stack)
         {
-            this->emit_int(Instruction::ILocal, dmd->offset);
+            this->emit(Opcode(Instruction::ILocal, dmd->offset));
         }
         else
         {
@@ -151,21 +136,22 @@ void Compiler::compile_primary(Noderef node)
     else if (tkn.kind == TokenKind::Number)
     {
         size_t idx = this->const_number(token_number(tkn));
-        this->emit_int(Instruction::INConst, idx);
+        this->emit(Opcode(Instruction::INConst, idx));
     }
     else if (tkn.kind == TokenKind::Literal)
     {
         size_t idx = this->const_string(token_lstring(tkn));
-        this->emit_int(Instruction::ISConst, idx);
+        this->emit(Opcode(Instruction::ISConst, idx));
     }
     else if (tkn.kind == TokenKind::Identifier)
     {
         this->compile_identifier(node);
     }
 }
-
-void Compiler::compile_exp(Noderef node)
+void Compiler::compile_exp_e(Noderef node, size_t expect)
 {
+    if (!expect)
+        return;
     if (node->get_kind() == NodeKind::Binary)
     {
         this->compile_exp(node->child(0));
@@ -181,7 +167,7 @@ void Compiler::compile_exp(Noderef node)
     {
         this->compile_exp(node->child(0));
         size_t idx = this->const_string(token_cstring(node->child(1)->get_token()));
-        this->emit_int(ISConst, idx);
+        this->emit(Opcode(ISConst, idx));
         this->emit(ITGet);
     }
     else if (node->get_kind() == NodeKind::Index)
@@ -194,30 +180,38 @@ void Compiler::compile_exp(Noderef node)
     {
         this->compile_primary(node);
     }
+    while (--expect)
+        this->emit(Opcode(Instruction::INil));
 }
 
-void Compiler::compile_assignment_primary(Noderef node)
+void Compiler::compile_exp(Noderef node)
 {
-    Noderef lvalue = node->child(0)->child(0);
-    Noderef rvalue = node->child(1)->child(0);
-    MetaDeclaration *md = (MetaDeclaration *)node->getannot(MetaKind::MDecl);
+    this->compile_exp_e(node, 1);
+}
 
+MetaMemory *Compiler::varmem(Noderef lvalue)
+{
+    MetaDeclaration *md = (MetaDeclaration *)lvalue->getannot(MetaKind::MDecl);
+    Noderef dec = md ? md->decnode : lvalue;
+    return (MetaMemory *)dec->getannot(MetaKind::MMemory);
+}
+
+void Compiler::compile_lvalue_primary(Noderef node)
+{
+    MetaMemory *md = this->varmem(node);
     if (!md)
     {
-        const char *str = token_cstring(lvalue->get_token());
+        const char *str = token_cstring(node->get_token());
         size_t idx = this->const_string(str);
-        this->emit_int(Instruction::ISConst, idx);
-        this->compile_exp(rvalue);
-        this->emit(Instruction::IGGet);
+        this->emit(Opcode(Instruction::ISConst, idx));
+        this->ops_push(Instruction::IGGet);
+        this->vstack.push_back(1);
     }
     else
     {
-        this->compile_exp(rvalue);
-        Noderef decl = md->decnode;
-        MetaMemory *dmd = (MetaMemory *)decl->getannot(MetaKind::MMemory);
-        if (dmd->is_stack)
+        if (md->is_stack)
         {
-            this->emit_int(Instruction::ILStore, dmd->offset);
+            this->ops_push(Opcode(Instruction::ILStore, md->offset));
         }
         else
         {
@@ -226,51 +220,100 @@ void Compiler::compile_assignment_primary(Noderef node)
     }
 }
 
-void Compiler::compile_assignment(Noderef node)
+void Compiler::compile_lvalue(Noderef node)
 {
-    Noderef lvalue = node->child(0)->child(0);
-    Noderef rvalue = node->child(1)->child(0);
-    lbyte op;
-    size_t op_idx;
-    if (lvalue->get_kind() == NodeKind::Primary)
+    if (node->get_kind() == NodeKind::Primary)
     {
-        this->compile_assignment_primary(node);
+        this->compile_lvalue_primary(node);
         return;
     }
-    if (lvalue->get_kind() == NodeKind::Property)
+    if (node->get_kind() == NodeKind::Property)
     {
-        Noderef lexp = lvalue->child(0);
-        Noderef prop = lvalue->child(1);
+        Noderef lexp = node->child(0);
+        Noderef prop = node->child(1);
         this->compile_exp(lexp);
         const char *prop_str = token_cstring(prop->get_token());
         size_t idx = this->const_string(prop_str);
-        this->emit_int(Instruction::ISConst, idx);
-        op = Instruction::ITSet;
+        this->emit(Opcode(Instruction::ISConst, idx));
+        this->ops_push(Opcode(Instruction::ITSet));
+        this->vstack.push_back(1);
+        this->vstack.push_back(1);
     }
-    if (lvalue->get_kind() == NodeKind::Index)
+    if (node->get_kind() == NodeKind::Index)
     {
-        Noderef lexp = lvalue->child(0);
-        Noderef iexp = lvalue->child(1);
+        Noderef lexp = node->child(0);
+        Noderef iexp = node->child(1);
         this->compile_exp(lexp);
         this->compile_exp(iexp);
-        op = Instruction::ITSet;
+        this->ops_push(Opcode(Instruction::ITSet));
+        this->vstack.push_back(1);
+        this->vstack.push_back(1);
     }
-    this->compile_exp(rvalue);
-    if (op == Instruction::ILStore)
-        this->emit_int(op, op_idx);
+}
+
+void Compiler::compile_explist(Noderef node, size_t vcount)
+{
+    for (size_t i = 0; i < node->child_count() - 1; i++)
+    {
+        this->compile_exp_e(node->child(i), vcount ? 1 : 0);
+        if (vcount)
+            vcount--;
+    }
+    this->compile_exp_e(node->child(node->child_count() - 1), vcount);
+}
+
+void Compiler::compile_varlist(Noderef node)
+{
+    if (node->child_count() == 1)
+    {
+        this->compile_lvalue(node->child(0));
+    }
     else
-        this->emit(op);
+    {
+        for (size_t i = 0; i < node->child_count(); i++)
+        {
+            this->compile_lvalue(node->child(i));
+            this->emit(Opcode(Instruction::INil));
+            this->vstack.push_back(0);
+        }
+    }
+}
+
+size_t Compiler::vstack_nearest_nil()
+{
+    size_t i = this->vstack.size() - 1;
+    while (this->vstack[i])
+        i--;
+    this->vstack[i] = 1;
+    return this->vstack.size() - 1 - i;
+}
+
+void Compiler::compile_assignment(Noderef node)
+{
+    size_t vcount = node->child(0)->child_count();
+    this->compile_varlist(node->child(0));
+    this->compile_explist(node->child(1), vcount);
+    if (vcount > 1)
+    {
+        while (vcount--)
+        {
+            this->emit(Opcode(Instruction::IBLStore, vcount + this->vstack_nearest_nil()));
+        }
+        this->emit(Opcode(Instruction::IPop, vcount));
+    }
+    this->vstack.clear();
+    this->ops_flush();
 }
 
 void Compiler::compile_block(Noderef node)
 {
     MetaScope *md = (MetaScope *)node->getannot(MetaKind::MScope);
     if (md->size)
-        this->emit_int(Instruction::IPush, md->size);
+        this->emit(Opcode(Instruction::IPush, md->size));
     for (size_t i = 0; i < node->child_count(); i++)
         this->compile_node(node->child(i));
     if (md->size)
-        this->emit_int(Instruction::IPop, md->size);
+        this->emit(Opcode(Instruction::IPop, md->size));
 }
 
 void Compiler::compile_decl(Noderef node)
@@ -285,8 +328,8 @@ void Compiler::compile_decl(Noderef node)
         this->compile_exp(node->child(1)->child(0));
     }
     size_t offset = ((MetaMemory *)dec->getannot(MetaKind::MMemory))->offset;
-    this->emit(Instruction::INil);
-    this->emit_int(Instruction::ILStore, offset);
+    this->emit(Opcode(Instruction::INil));
+    this->emit(Opcode(Instruction::ILStore, offset));
 }
 
 void Compiler::compile_node(Noderef node)
@@ -329,12 +372,44 @@ size_t Compiler::const_string(const char *s)
     return this->cur().cstr(s);
 }
 
-void Compiler::emit_int(lbyte b, size_t i)
+void Compiler::emit(Opcode op)
 {
-    this->cur().push_int(b, i);
+    for (int i = 0; i < op.count; i++)
+        this->cur().push(op.bytes[i]);
 }
 
-void Compiler::emit(lbyte b)
+void Compiler::ops_flush()
 {
-    this->cur().push(b);
+    while (this->ops.size())
+    {
+        this->emit(this->ops.back());
+        this->ops.pop_back();
+    }
+}
+
+void Compiler::ops_push(Opcode op)
+{
+    this->ops.push_back(op);
+}
+
+Opcode::Opcode(lbyte op, size_t idx)
+{
+    if (idx >= 256)
+    {
+        this->count = 3;
+        this->bytes[0] = op | 0x1;
+        this->bytes[1] = idx % 256;
+        this->bytes[2] = idx >> 8;
+    }
+    else
+    {
+        this->count = 2;
+        this->bytes[0] = op;
+        this->bytes[1] = idx;
+    }
+}
+Opcode::Opcode(lbyte op)
+{
+    this->bytes[0] = op;
+    this->count = 1;
 }

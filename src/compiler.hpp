@@ -56,11 +56,13 @@ enum Instruction
 
     ILocal = 0x70,
     ILStore = 0x72,
-    IUpvalue = 0x74,
-    IUStore = 0x76,
+    IBLocal = 0x74,
+    IBLStore = 0x76,
+    IUpvalue = 0x78,
+    IUStore = 0x7a,
 
-    IPush = 0x78,
-    IPop = 0x7a
+    IPush = 0x7c,
+    IPop = 0x7e
 };
 
 class Lfunction
@@ -75,7 +77,6 @@ public:
     size_t number(lnumber n);
     size_t cstr(const char *s);
     size_t clen();
-    void push_int(lbyte b, size_t i);
     lbyte opcode(size_t index);
     ~Lfunction();
     Lfunction &operator=(const Lfunction &other) = delete;
@@ -86,16 +87,31 @@ public:
     Lfunction() = default;
 };
 
+struct Opcode
+{
+    lbyte count;
+    lbyte bytes[3];
+
+    Opcode(lbyte op, size_t idx);
+    Opcode(lbyte op);
+};
+
 class Compiler
 {
 private:
     vector<Lfunction> funcs;
     vector<Lfunction> current;
+    vector<Opcode> ops;
+    vector<lbyte> vstack;
+
     Lfunction &cur();
-    void emit(lbyte b);
-    void emit_int(lbyte b, size_t i);
+    void emit(Opcode op);
+    void ops_flush();
+    void ops_push(Opcode op);
     size_t const_number(lnumber n);
     size_t const_string(const char *s);
+    size_t vstack_nearest_nil();
+    MetaMemory *varmem(Noderef lvalue);
     void newf();
     void endf();
     void compile_node(Noderef node);
@@ -104,8 +120,12 @@ private:
     void compile_primary(Noderef node);
     void compile_identifier(Noderef node);
     void compile_assignment(Noderef node);
-    void compile_assignment_primary(Noderef node);
+    void compile_lvalue(Noderef node);
+    void compile_varlist(Noderef node);
+    void compile_explist(Noderef node, size_t vcount);
+    void compile_lvalue_primary(Noderef node);
     void compile_exp(Noderef node);
+    void compile_exp_e(Noderef node, size_t expect);
     lbyte translate_token(TokenKind kind, bool bin);
 
 public:
