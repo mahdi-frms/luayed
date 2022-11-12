@@ -99,9 +99,12 @@ private:
     void newf();
     void endf();
     void compile_node(Noderef node);
+    void compile_decl(Noderef node);
     void compile_block(Noderef node);
     void compile_primary(Noderef node);
+    void compile_identifier(Noderef node);
     void compile_assignment(Noderef node);
+    void compile_assignment_primary(Noderef node);
     void compile_exp(Noderef node);
     lbyte translate_token(TokenKind kind, bool bin);
 

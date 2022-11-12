@@ -115,6 +115,30 @@ lbyte Compiler::translate_token(TokenKind kind, bool bin)
     }
 }
 
+void Compiler::compile_identifier(Noderef node)
+{
+    MetaDeclaration *md = (MetaDeclaration *)node->getannot(MetaKind::MDecl);
+    if (!md)
+    {
+        size_t idx = this->const_string(token_cstring(node->get_token()));
+        this->emit_int(Instruction::ISConst, idx);
+        this->emit(Instruction::IGGet);
+    }
+    else
+    {
+        Noderef decl = md->decnode;
+        MetaMemory *dmd = (MetaMemory *)decl->getannot(MetaKind::MMemory);
+        if (dmd->is_stack)
+        {
+            this->emit_int(Instruction::ILocal, dmd->offset);
+        }
+        else
+        {
+            // upval
+        }
+    }
+}
+
 void Compiler::compile_primary(Noderef node)
 {
     Token tkn = node->get_token();
@@ -136,26 +160,7 @@ void Compiler::compile_primary(Noderef node)
     }
     else if (tkn.kind == TokenKind::Identifier)
     {
-        MetaDeclaration *md = (MetaDeclaration *)node->getannot(MetaKind::MDecl);
-        if (!md)
-        {
-            size_t idx = this->const_string(token_cstring(tkn));
-            this->emit_int(Instruction::ISConst, idx);
-            this->emit(Instruction::IGGet);
-        }
-        else
-        {
-            Noderef decl = md->decnode;
-            MetaMemory *dmd = (MetaMemory *)decl->getannot(MetaKind::MMemory);
-            if (dmd->is_stack)
-            {
-                this->emit_int(Instruction::ILocal, dmd->offset);
-            }
-            else
-            {
-                // upval
-            }
-        }
+        this->compile_identifier(node);
     }
 }
 
@@ -191,6 +196,36 @@ void Compiler::compile_exp(Noderef node)
     }
 }
 
+void Compiler::compile_assignment_primary(Noderef node)
+{
+    Noderef lvalue = node->child(0)->child(0);
+    Noderef rvalue = node->child(1)->child(0);
+    MetaDeclaration *md = (MetaDeclaration *)node->getannot(MetaKind::MDecl);
+
+    if (!md)
+    {
+        const char *str = token_cstring(lvalue->get_token());
+        size_t idx = this->const_string(str);
+        this->emit_int(Instruction::ISConst, idx);
+        this->compile_exp(rvalue);
+        this->emit(Instruction::IGGet);
+    }
+    else
+    {
+        this->compile_exp(rvalue);
+        Noderef decl = md->decnode;
+        MetaMemory *dmd = (MetaMemory *)decl->getannot(MetaKind::MMemory);
+        if (dmd->is_stack)
+        {
+            this->emit_int(Instruction::ILStore, dmd->offset);
+        }
+        else
+        {
+            // upval
+        }
+    }
+}
+
 void Compiler::compile_assignment(Noderef node)
 {
     Noderef lvalue = node->child(0)->child(0);
@@ -199,28 +234,8 @@ void Compiler::compile_assignment(Noderef node)
     size_t op_idx;
     if (lvalue->get_kind() == NodeKind::Primary)
     {
-        MetaDeclaration *md = (MetaDeclaration *)node->getannot(MetaKind::MDecl);
-        if (!md)
-        {
-            const char *str = token_cstring(lvalue->get_token());
-            size_t idx = this->const_string(str);
-            this->emit_int(Instruction::ISConst, idx);
-            op = Instruction::IGSet;
-        }
-        else
-        {
-            Noderef decl = md->decnode;
-            MetaMemory *dmd = (MetaMemory *)decl->getannot(MetaKind::MMemory);
-            if (dmd->is_stack)
-            {
-                op = Instruction::ILStore;
-                op_idx = dmd->offset;
-            }
-            else
-            {
-                // upval
-            }
-        }
+        this->compile_assignment_primary(node);
+        return;
     }
     if (lvalue->get_kind() == NodeKind::Property)
     {
@@ -258,12 +273,30 @@ void Compiler::compile_block(Noderef node)
         this->emit_int(Instruction::IPop, md->size);
 }
 
+void Compiler::compile_decl(Noderef node)
+{
+    Noderef dec = node->child(0)->child(0);
+    if (node->child_count() == 1)
+    {
+        this->emit(Instruction::INil);
+    }
+    else
+    {
+        this->compile_exp(node->child(1)->child(0));
+    }
+    size_t offset = ((MetaMemory *)dec->getannot(MetaKind::MMemory))->offset;
+    this->emit(Instruction::INil);
+    this->emit_int(Instruction::ILStore, offset);
+}
+
 void Compiler::compile_node(Noderef node)
 {
     if (node->get_kind() == NodeKind::AssignStmt)
         this->compile_assignment(node);
     else if (node->get_kind() == NodeKind::Block)
         this->compile_block(node);
+    else if (node->get_kind() == NodeKind::Declaration)
+        this->compile_decl(node);
     else
     {
         exit(4);
