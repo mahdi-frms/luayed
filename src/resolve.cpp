@@ -7,15 +7,30 @@ vector<SemanticError> SemanticAnalyzer::analyze()
     return std::move(this->errors);
 }
 
+Scope &SemanticAnalyzer::curscope()
+{
+    return this->scopes.back();
+}
+
 void SemanticAnalyzer::analyze_var_decl(Noderef node)
 {
-    string name = node->child(0)->get_token().text();
-    maps.back()[name] = node;
-    MetaMemory *meta = (MetaMemory *)ast.get_heap().alloc(sizeof(MetaMemory));
-    meta->is_stack = true;
-    meta->header.next = nullptr;
-    meta->header.kind = MetaKind::Memory;
-    node->annotate(&meta->header);
+    Token tkn = node->child(0)->get_token();
+    if (tkn.kind == TokenKind::Identifier)
+    {
+        string name = tkn.text();
+        this->curscope().map[name] = node;
+        MetaMemory *meta = (MetaMemory *)ast.get_heap().alloc(sizeof(MetaMemory));
+        meta->is_stack = true;
+        meta->header.next = nullptr;
+        meta->header.kind = MetaKind::MMemory;
+        meta->offset = this->curscope().stack_size++;
+        node->annotate(&meta->header);
+    }
+    else // DotDotDot
+    {
+        this->curscope().variadic = true;
+        this->curscope().stack_size = 256;
+    }
 }
 
 void SemanticAnalyzer::analyze_identifier(Noderef node)
@@ -26,14 +41,14 @@ void SemanticAnalyzer::analyze_identifier(Noderef node)
         Noderef dec = nullptr;
         bool func = false;
         bool func_past = false;
-        size_t idx = maps.size() - 1;
+        size_t idx = scopes.size() - 1;
         while (true)
         {
             func_past |= func;
-            func = (nodes[idx]->get_kind() == NodeKind::FunctionBody);
-            if (maps[idx].find(t.text()) != maps[idx].cend())
+            func = (this->scopes[idx].node->get_kind() == NodeKind::FunctionBody);
+            if (this->scopes[idx].map.find(t.text()) != this->scopes[idx].map.cend())
             {
-                dec = maps[idx][t.text()];
+                dec = this->scopes[idx].map[t.text()];
                 break;
             }
             if (idx == 0)
@@ -44,24 +59,25 @@ void SemanticAnalyzer::analyze_identifier(Noderef node)
         {
             MetaDeclaration *meta = (MetaDeclaration *)ast.get_heap().alloc(sizeof(MetaDeclaration));
             meta->decnode = dec;
-            meta->header.kind = MetaKind::Decl;
+            meta->header.kind = MetaKind::MDecl;
             meta->header.next = nullptr;
             node->annotate(&meta->header);
             if (func_past)
             {
-                ((MetaMemory *)dec->getannot(MetaKind::Memory))->is_stack = false;
+                ((MetaMemory *)dec->getannot(MetaKind::MMemory))->is_stack = false;
             }
         }
     }
     else if (t.kind == TokenKind::DotDotDot)
     {
         bool valid = true;
-        size_t idx = this->nodes.size() - 1;
+        size_t idx = this->scopes.size() - 1;
         while (true)
         {
-            if (this->nodes[idx]->get_kind() == NodeKind::FunctionBody)
+            Scope &sc = this->scopes[idx];
+            if (sc.node->get_kind() == NodeKind::FunctionBody)
             {
-                break;
+                valid = sc.variadic;
             }
             if (idx == 0)
             {
@@ -85,31 +101,32 @@ void SemanticAnalyzer::analyze_etc(Noderef node)
         node->get_kind() == NodeKind::Block ||
         node->get_kind() == NodeKind::GenericFor ||
         node->get_kind() == NodeKind::NumericFor ||
+        node->get_kind() == NodeKind::WhileStmt ||
+        node->get_kind() == NodeKind::RepeatStmt ||
+        node->get_kind() == NodeKind::IfClause ||
+        node->get_kind() == NodeKind::ElseClause ||
+        node->get_kind() == NodeKind::ElseIfClause ||
         node->get_kind() == NodeKind::FunctionBody;
 
     if (new_scope)
-    {
-        maps.push_back(Varmap());
-        nodes.push_back(node);
-    }
+        this->scopes.push_back(Scope{
+            .node = node,
+            .map = Varmap(),
+            .stack_size = this->scopes.size() ? this->curscope().stack_size : 0});
+
     for (size_t i = 0; i < node->child_count(); i++)
     {
         this->analyze_node(node->child(i));
     }
     if (new_scope)
     {
-        size_t offset = 0;
-        for (auto it = maps.back().cbegin(); it != maps.back().cend(); it++)
-        {
-            MetaMemory *meta = (MetaMemory *)it->second->getannot(MetaKind::Memory);
-            if (meta && meta->is_stack)
-            {
-                meta->offset = offset++;
-            }
-        }
-
-        maps.pop_back();
-        nodes.pop_back();
+        MetaScope *md = (MetaScope *)this->ast.get_heap().alloc(sizeof(MetaScope));
+        size_t prevsize = this->scopes.size() > 1 ? this->scopes[this->scopes.size() - 2].stack_size : 0;
+        md->size = this->curscope().stack_size - prevsize;
+        md->header.kind = MetaKind::MScope;
+        md->header.next = nullptr;
+        this->curscope().node->annotate(&md->header);
+        this->scopes.pop_back();
     }
 }
 
@@ -123,10 +140,10 @@ bool is_loop(NodeKind kind)
 
 void SemanticAnalyzer::analyze_break(Noderef node)
 {
-    auto it = --this->nodes.cend();
-    while (it != this->nodes.cbegin() && !is_loop((*it)->get_kind()))
+    auto it = --this->scopes.cend();
+    while (it != this->scopes.cbegin() && !is_loop(it->node->get_kind()))
         it--;
-    if (it == this->nodes.cbegin())
+    if (it == this->scopes.cbegin())
         this->errors.push_back(SemanticError{.node = node, .text = "break statement not in a loop"});
 }
 
@@ -182,7 +199,7 @@ void SemanticAnalyzer::finalize()
         {
             MetaLabel *label = (MetaLabel *)this->ast.get_heap().alloc(sizeof(MetaLabel));
             label->header.next = nullptr;
-            label->header.kind = MetaKind::Label;
+            label->header.kind = MetaKind::MLabel;
             label->label_node = node;
             node->annotate(&label->header);
         }

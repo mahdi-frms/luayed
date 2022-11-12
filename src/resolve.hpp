@@ -14,11 +14,18 @@ struct SemanticError
     string text;
 };
 
+struct Scope
+{
+    Noderef node;
+    Varmap map;
+    size_t stack_size;
+    bool variadic;
+};
+
 class SemanticAnalyzer
 {
 private:
-    vector<Varmap> maps;
-    vector<Noderef> nodes;
+    vector<Scope> scopes;
     Varmap labels;
     vector<Noderef> gotolist;
     vector<SemanticError> errors;
@@ -31,6 +38,7 @@ private:
     void analyze_break(Noderef node);
     void analyze_label(Noderef node);
     void analyze_declaration(Noderef node);
+    Scope &curscope();
     void finalize();
 
 public:
