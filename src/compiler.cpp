@@ -150,11 +150,18 @@ void Compiler::compile_identifier(Noderef node)
     }
 }
 
-void Compiler::compile_primary(Noderef node)
+void Compiler::compile_primary(Noderef node, size_t expect)
 {
     Token tkn = node->get_token();
     if (tkn.kind == TokenKind::True)
         this->emit(Instruction::ITrue);
+    else if (tkn.kind == TokenKind::DotDotDot)
+    {
+        if (expect == EXPECT_FREE)
+            this->emit(Instruction::IFVargs);
+        else
+            this->emit(Opcode(Instruction::IVargs, expect));
+    }
     else if (tkn.kind == TokenKind::False)
         this->emit(Instruction::IFalse);
     else if (tkn.kind == TokenKind::Nil)
@@ -204,7 +211,7 @@ void Compiler::compile_exp_e(Noderef node, size_t expect)
     }
     else if (node->get_kind() == NodeKind::Primary)
     {
-        this->compile_primary(node);
+        this->compile_primary(node, expect);
     }
     else if (node->get_kind() == NodeKind::Call)
     {
@@ -214,7 +221,9 @@ void Compiler::compile_exp_e(Noderef node, size_t expect)
     {
         this->compile_methcall(node, expect);
     }
-    if (node->get_kind() != NodeKind::Call && expect != EXPECT_FREE)
+    bool is_vargs = node->get_kind() == NodeKind::Primary && node->get_token().kind == TokenKind::DotDotDot;
+    bool is_fncall = node->get_kind() == NodeKind::Call || node->get_kind() == NodeKind::MethodCall;
+    if (!is_fncall && !is_vargs && expect != EXPECT_FREE)
         while (--expect)
             this->emit(Opcode(Instruction::INil));
 }
@@ -493,12 +502,14 @@ string Lfunction::stringify()
     opnames[INil] = "nil";
     opnames[ITrue] = "true";
     opnames[IFalse] = "false";
-    opnames[ICall] = "call";
+    opnames[IFVargs] = "fvargs";
     opnames[IFCall] = "fcall";
     opnames[IJmp] = "jmp";
     opnames[ICjmp] = "cjmp";
-    opnames[Iret] = "ret";
+    opnames[IRet] = "ret";
 
+    opnames[IVargs] = opnames[IVargs + 1] = "vargs";
+    opnames[ICall] = opnames[ICall + 1] = "call";
     opnames[INConst] = opnames[INConst + 1] = "NC";
     opnames[ISConst] = opnames[ISConst + 1] = "SC";
     opnames[IFConst] = opnames[IFConst + 1] = "FC";

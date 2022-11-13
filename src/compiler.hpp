@@ -48,9 +48,11 @@ enum Instruction
     IFCall = 0x50,
     IJmp = 0x51,
     ICjmp = 0x52,
-    Iret = 0x53,
+    IRet = 0x53,
+    IFVargs = 0x54,
 
     ICall = 0xd0,
+    IVargs = 0xd2,
 
     INConst = 0xe0,
     ISConst = 0xe2,
@@ -121,7 +123,7 @@ private:
     void compile_node(Noderef node);
     void compile_decl(Noderef node);
     void compile_block(Noderef node);
-    void compile_primary(Noderef node);
+    void compile_primary(Noderef node, size_t expect);
     void compile_identifier(Noderef node);
     void compile_call(Noderef node, size_t expect);
     void compile_methcall(Noderef node, size_t expect);
