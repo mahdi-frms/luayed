@@ -1,5 +1,7 @@
 #include "compiler.hpp"
 
+#define EXPECT_FREE 0xffff
+
 char *token_cstring(Token t)
 {
     char *str = (char *)malloc(t.len + 1);
@@ -99,7 +101,31 @@ lbyte Compiler::translate_token(TokenKind kind, bool bin)
         return kind == TokenKind::Not ? Instruction::INot : Instruction::ILength;
     }
 }
+void Compiler::compile_methcall(Noderef node, size_t expect)
+{
+    this->compile_exp(node->child(0));
+    Noderef arglist = node->child(2);
+    this->compile_explist(arglist, EXPECT_FREE);
+    this->emit(Opcode(Instruction::IBLocal, arglist->child_count() + 1));
 
+    size_t idx = this->const_string(token_cstring(node->child(1)->get_token()));
+    this->emit(Opcode(Instruction::ISConst, idx));
+    this->emit(Opcode(Instruction::ITGet));
+    if (expect == EXPECT_FREE)
+        this->emit(Opcode(Instruction::IFCall));
+    else
+        this->emit(Opcode(Instruction::ICall, expect));
+}
+void Compiler::compile_call(Noderef node, size_t expect)
+{
+    Noderef arglist = node->child(1);
+    this->compile_explist(arglist, EXPECT_FREE);
+    this->compile_exp(node->child(0));
+    if (expect == EXPECT_FREE)
+        this->emit(Opcode(Instruction::IFCall));
+    else
+        this->emit(Opcode(Instruction::ICall, expect));
+}
 void Compiler::compile_identifier(Noderef node)
 {
     MetaDeclaration *md = (MetaDeclaration *)node->getannot(MetaKind::MDecl);
@@ -180,8 +206,17 @@ void Compiler::compile_exp_e(Noderef node, size_t expect)
     {
         this->compile_primary(node);
     }
-    while (--expect)
-        this->emit(Opcode(Instruction::INil));
+    else if (node->get_kind() == NodeKind::Call)
+    {
+        this->compile_call(node, expect);
+    }
+    else if (node->get_kind() == NodeKind::MethodCall)
+    {
+        this->compile_methcall(node, expect);
+    }
+    if (node->get_kind() != NodeKind::Call && expect != EXPECT_FREE)
+        while (--expect)
+            this->emit(Opcode(Instruction::INil));
 }
 
 void Compiler::compile_exp(Noderef node)
@@ -222,7 +257,7 @@ void Compiler::compile_lvalue_primary(Noderef node)
 
 void Compiler::compile_lvalue(Noderef node)
 {
-    if (node->get_kind() == NodeKind::Primary)
+    if (node->get_kind() == NodeKind::Primary || node->get_kind() == NodeKind::Name)
     {
         this->compile_lvalue_primary(node);
         return;
@@ -253,32 +288,47 @@ void Compiler::compile_lvalue(Noderef node)
 
 void Compiler::compile_explist(Noderef node, size_t vcount)
 {
-    for (size_t i = 0; i < node->child_count() - 1; i++)
+    if (vcount == EXPECT_FREE)
     {
-        this->compile_exp_e(node->child(i), vcount ? 1 : 0);
-        if (vcount)
-            vcount--;
-    }
-    if (node->child_count())
+        if (!node || node->child_count() == 0)
+            return;
+        for (size_t i = 0; i < node->child_count() - 1; i++)
+        {
+            this->compile_exp(node->child(i));
+        }
         this->compile_exp_e(node->child(node->child_count() - 1), vcount);
+    }
     else
     {
-        while (--vcount)
-            this->emit(Opcode(Instruction::INil));
+        if (!node || node->child_count() == 0)
+        {
+            while (vcount--)
+                this->emit(Opcode(Instruction::INil));
+        }
+        else
+        {
+            for (size_t i = 0; i < node->child_count() - 1; i++)
+            {
+                this->compile_exp_e(node->child(i), vcount ? 1 : 0);
+                if (vcount)
+                    vcount--;
+            }
+            this->compile_exp_e(node->child(node->child_count() - 1), vcount);
+        }
     }
 }
 
-void Compiler::compile_varlist(Noderef node)
+void Compiler::compile_varlist(Noderef node, bool attrib)
 {
     if (node->child_count() == 1)
     {
-        this->compile_lvalue(node->child(0));
+        this->compile_lvalue(attrib ? node->child(0)->child(0) : node->child(0));
     }
     else
     {
         for (size_t i = 0; i < node->child_count(); i++)
         {
-            this->compile_lvalue(node->child(i));
+            this->compile_lvalue(attrib ? node->child(i)->child(0) : node->child(i));
             this->emit(Opcode(Instruction::INil));
             this->vstack.push_back(0);
         }
@@ -294,18 +344,20 @@ size_t Compiler::vstack_nearest_nil()
     return this->vstack.size() - 1 - i;
 }
 
-void Compiler::compile_assignment(Noderef node)
+void Compiler::compile_assignment(Noderef node, bool attrib)
 {
     size_t vcount = node->child(0)->child_count();
-    this->compile_varlist(node->child(0));
+    this->compile_varlist(node->child(0), attrib);
     this->compile_explist(node->child(1), vcount);
+
     if (vcount > 1)
     {
-        while (vcount--)
+        size_t v = vcount;
+        while (v)
         {
-            this->emit(Opcode(Instruction::IBLStore, vcount + this->vstack_nearest_nil()));
+            this->emit(Opcode(Instruction::IBLStore, v + this->vstack_nearest_nil() + 1));
+            v--;
         }
-        this->emit(Opcode(Instruction::IPop, vcount));
     }
     this->vstack.clear();
     this->ops_flush();
@@ -324,21 +376,19 @@ void Compiler::compile_block(Noderef node)
 
 void Compiler::compile_decl(Noderef node)
 {
-    this->compile_assignment(node);
+    this->compile_assignment(node, true);
 }
 
 void Compiler::compile_node(Noderef node)
 {
     if (node->get_kind() == NodeKind::AssignStmt)
-        this->compile_assignment(node);
+        this->compile_assignment(node, false);
     else if (node->get_kind() == NodeKind::Block)
         this->compile_block(node);
     else if (node->get_kind() == NodeKind::Declaration)
         this->compile_decl(node);
     else
-    {
         exit(4);
-    }
 }
 
 Lfunction &Compiler::cur()
@@ -407,4 +457,79 @@ Opcode::Opcode(lbyte op)
 {
     this->bytes[0] = op;
     this->count = 1;
+}
+
+string Lfunction::stringify()
+{
+    const char *opnames[256];
+    opnames[IAdd] = "add";
+    opnames[ISub] = "sub";
+    opnames[IMult] = "mult";
+    opnames[IFlrDiv] = "flrdiv";
+    opnames[IFltDiv] = "fltdiv";
+    opnames[IMod] = "mod";
+    opnames[IPow] = "pow";
+    opnames[IConcat] = "concat";
+    opnames[IBOr] = "or";
+    opnames[IBAnd] = "and";
+    opnames[IBXor] = "xor";
+    opnames[ISHR] = "shl";
+    opnames[ISHL] = "shr";
+    opnames[ILength] = "length";
+    opnames[INegate] = "negate";
+    opnames[INot] = "not";
+    opnames[IBNot] = "bnot";
+    opnames[IEq] = "eq";
+    opnames[INe] = "ne";
+    opnames[IGe] = "ge";
+    opnames[IGt] = "gt";
+    opnames[ILe] = "le";
+    opnames[ILt] = "lt";
+    opnames[ITGet] = "tget";
+    opnames[ITSet] = "tset";
+    opnames[ITNew] = "tnew";
+    opnames[IGGet] = "gget";
+    opnames[IGSet] = "gset";
+    opnames[INil] = "nil";
+    opnames[ITrue] = "true";
+    opnames[IFalse] = "false";
+    opnames[ICall] = "call";
+    opnames[IFCall] = "fcall";
+    opnames[IJmp] = "jmp";
+    opnames[ICjmp] = "cjmp";
+    opnames[Iret] = "ret";
+
+    opnames[INConst] = opnames[INConst + 1] = "NC";
+    opnames[ISConst] = opnames[ISConst + 1] = "SC";
+    opnames[IFConst] = opnames[IFConst + 1] = "FC";
+    opnames[ILocal] = opnames[ILocal + 1] = "local";
+    opnames[ILStore] = opnames[ILStore + 1] = "lstore";
+    opnames[IBLocal] = opnames[IBLocal + 1] = "blocal";
+    opnames[IBLStore] = opnames[IBLStore + 1] = "blstore";
+    opnames[IUpvalue] = opnames[IUpvalue + 1] = "upvalue";
+    opnames[IUStore] = opnames[IUStore + 1] = "ustore";
+    opnames[IPush] = opnames[IPush + 1] = "push";
+    opnames[IPop] = opnames[IPop + 1] = "pop";
+
+    string text;
+    for (size_t i = 0; i < this->clen(); i++)
+    {
+        lbyte op = this->opcode(i);
+        text.append(opnames[op]);
+        if (op >> 7)
+        {
+            int opr = 0;
+            int ocount = 1 + op & 0x01;
+            while (ocount--)
+            {
+                opr <<= 8;
+                opr += this->opcode(++i);
+            }
+            text.push_back(' ');
+            text += std::to_string(opr);
+        }
+        text.push_back('\n');
+    }
+
+    return text;
 }

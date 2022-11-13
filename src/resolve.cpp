@@ -14,7 +14,8 @@ Scope &SemanticAnalyzer::curscope()
 
 void SemanticAnalyzer::analyze_var_decl(Noderef node)
 {
-    Token tkn = node->child(0)->get_token();
+    node = node->child(0);
+    Token tkn = node->get_token();
     if (tkn.kind == TokenKind::Identifier)
     {
         string name = tkn.text();

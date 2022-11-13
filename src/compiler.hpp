@@ -45,24 +45,26 @@ enum Instruction
     ITrue = 0x46,
     IFalse = 0x47,
 
-    ICall = 0x50,
+    IFCall = 0x50,
     IJmp = 0x51,
     ICjmp = 0x52,
     Iret = 0x53,
 
-    INConst = 0x60,
-    ISConst = 0x62,
-    IFConst = 0x64,
+    ICall = 0xd0,
 
-    ILocal = 0x70,
-    ILStore = 0x72,
-    IBLocal = 0x74,
-    IBLStore = 0x76,
-    IUpvalue = 0x78,
-    IUStore = 0x7a,
+    INConst = 0xe0,
+    ISConst = 0xe2,
+    IFConst = 0xe4,
 
-    IPush = 0x7c,
-    IPop = 0x7e
+    ILocal = 0xf0,
+    ILStore = 0xf2,
+    IBLocal = 0xf4,
+    IBLStore = 0xf6,
+    IUpvalue = 0xf8,
+    IUStore = 0xfa,
+
+    IPush = 0xfc,
+    IPop = 0xfe
 };
 
 class Lfunction
@@ -78,6 +80,8 @@ public:
     size_t cstr(const char *s);
     size_t clen();
     lbyte opcode(size_t index);
+    string stringify();
+
     ~Lfunction();
     Lfunction &operator=(const Lfunction &other) = delete;
     Lfunction(const Lfunction &other) = delete;
@@ -119,9 +123,11 @@ private:
     void compile_block(Noderef node);
     void compile_primary(Noderef node);
     void compile_identifier(Noderef node);
-    void compile_assignment(Noderef node);
+    void compile_call(Noderef node, size_t expect);
+    void compile_methcall(Noderef node, size_t expect);
+    void compile_assignment(Noderef node, bool attrib);
     void compile_lvalue(Noderef node);
-    void compile_varlist(Noderef node);
+    void compile_varlist(Noderef node, bool attrib);
     void compile_explist(Noderef node, size_t vcount);
     void compile_lvalue_primary(Noderef node);
     void compile_exp(Noderef node);

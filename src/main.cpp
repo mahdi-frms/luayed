@@ -49,10 +49,10 @@ bool parse(const char *path)
                 vector<Lfunction> bin = compiler.compile(tree);
                 if (!silence)
                 {
-                    std::cout << "binary size : " << bin[0].clen() << "\n";
+                    std::cout << bin[0].stringify();
                 }
             }
-            if (!silence)
+            if (!silence && !compile)
             {
                 std::cout << root->to_string();
                 std::cout.flush();

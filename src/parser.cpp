@@ -617,9 +617,9 @@ Noderef Parser::vardecl()
 Noderef Parser::fncall(Token op)
 {
     if (op.kind == TokenKind::Literal)
-        return this->make(op, NodeKind::Primary);
+        return this->make(this->make(op, NodeKind::Primary), NodeKind::Explist);
     else if (op.kind == TokenKind::LeftBrace)
-        return this->table();
+        return this->make(this->table(), NodeKind::Explist);
     else // left parenthese
         return this->arglist();
 }
@@ -676,7 +676,7 @@ Noderef Parser::expr_p(uint8_t pwr)
             {
                 Token fname = this->consume(TokenKind::Identifier);
                 Noderef rhs = this->fncall(this->pop());
-                lhs = this->make(lhs, rhs, NodeKind::MethodCall);
+                lhs = this->make(lhs, this->make(fname, NodeKind::Name), rhs, NodeKind::MethodCall);
             }
             else if (op.kind == TokenKind::LeftBracket)
             {
