@@ -388,6 +388,15 @@ void Compiler::compile_decl(Noderef node)
     this->compile_assignment(node, true);
 }
 
+void Compiler::compile_ret(Noderef node)
+{
+    if (node->child_count())
+    {
+        this->compile_explist(node->child(0), EXPECT_FREE);
+    }
+    this->emit(Instruction::IRet);
+}
+
 void Compiler::compile_node(Noderef node)
 {
     if (node->get_kind() == NodeKind::AssignStmt)
@@ -396,6 +405,8 @@ void Compiler::compile_node(Noderef node)
         this->compile_block(node);
     else if (node->get_kind() == NodeKind::Declaration)
         this->compile_decl(node);
+    else if (node->get_kind() == NodeKind::ReturnStmt)
+        this->compile_ret(node);
     else
         exit(4);
 }
