@@ -45,6 +45,8 @@ enum Instruction
     ITrue = 0x46,
     IFalse = 0x47,
 
+    ITList = 0xc0,
+
     IFCall = 0x50,
     IRet = 0x53,
     IFVargs = 0x54,

@@ -188,7 +188,7 @@ void Compiler::compile_name(Noderef node)
 void Compiler::compile_table(Noderef node)
 {
     this->emit(Opcode(Instruction::ITNew));
-    size_t num_idx = 1;
+    size_t list_len = 0;
     for (size_t i = 0; i < node->child_count(); i++)
     {
         Noderef ch = node->child(i);
@@ -196,19 +196,23 @@ void Compiler::compile_table(Noderef node)
         {
             this->compile_name(ch->child(0));
             this->compile_exp(ch->child(1));
+            this->emit(Instruction::ITSet);
         }
         else if (ch->get_kind() == NodeKind::ExprField)
         {
             this->compile_exp(ch->child(0));
             this->compile_exp(ch->child(1));
+            this->emit(Instruction::ITSet);
         }
         else
         {
-            size_t nidx = this->const_number(num_idx++);
-            this->emit(Opcode(Instruction::INConst, nidx));
             this->compile_exp(ch);
+            list_len++;
         }
-        this->emit(Instruction::ITSet);
+    }
+    if (list_len)
+    {
+        this->emit(Opcode(Instruction::ITList, list_len));
     }
 }
 
@@ -550,6 +554,7 @@ string Lfunction::stringify()
     opnames[IRet] = "ret";
 
     opnames[IVargs] = opnames[IVargs + 1] = "vargs";
+    opnames[ITList] = opnames[ITList + 1] = "tlist";
     opnames[ICall] = opnames[ICall + 1] = "call";
     opnames[INConst] = opnames[INConst + 1] = "NC";
     opnames[ISConst] = opnames[ISConst + 1] = "SC";
