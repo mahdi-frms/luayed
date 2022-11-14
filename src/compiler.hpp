@@ -46,13 +46,13 @@ enum Instruction
     IFalse = 0x47,
 
     IFCall = 0x50,
-    IJmp = 0x51,
-    ICjmp = 0x52,
     IRet = 0x53,
     IFVargs = 0x54,
 
     ICall = 0xd0,
     IVargs = 0xd2,
+    IJmp = 0xd4,
+    ICjmp = 0xd6,
 
     INConst = 0xe0,
     ISConst = 0xe2,

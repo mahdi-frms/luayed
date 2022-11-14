@@ -104,13 +104,10 @@ lbyte Compiler::translate_token(TokenKind kind, bool bin)
 void Compiler::compile_methcall(Noderef node, size_t expect)
 {
     this->compile_exp(node->child(0));
-    Noderef arglist = node->child(2);
-    this->compile_explist(arglist, EXPECT_FREE);
-    this->emit(Opcode(Instruction::IBLocal, arglist->child_count() + 1));
-
     size_t idx = this->const_string(token_cstring(node->child(1)->get_token()));
     this->emit(Opcode(Instruction::ISConst, idx));
     this->emit(Opcode(Instruction::ITGet));
+    this->compile_explist(node->child(2), EXPECT_FREE);
     if (expect == EXPECT_FREE)
         this->emit(Opcode(Instruction::IFCall));
     else
@@ -118,9 +115,8 @@ void Compiler::compile_methcall(Noderef node, size_t expect)
 }
 void Compiler::compile_call(Noderef node, size_t expect)
 {
-    Noderef arglist = node->child(1);
-    this->compile_explist(arglist, EXPECT_FREE);
     this->compile_exp(node->child(0));
+    this->compile_explist(node->child(1), EXPECT_FREE);
     if (expect == EXPECT_FREE)
         this->emit(Opcode(Instruction::IFCall));
     else
@@ -218,7 +214,10 @@ void Compiler::compile_table(Noderef node)
 
 void Compiler::compile_exp_e(Noderef node, size_t expect)
 {
-    if (!expect)
+    bool is_vargs = node->get_kind() == NodeKind::Primary && node->get_token().kind == TokenKind::DotDotDot;
+    bool is_fncall = node->get_kind() == NodeKind::Call || node->get_kind() == NodeKind::MethodCall;
+
+    if (!expect && !is_fncall)
         return;
     if (node->get_kind() == NodeKind::Binary)
     {
@@ -245,23 +244,13 @@ void Compiler::compile_exp_e(Noderef node, size_t expect)
         this->emit(ITGet);
     }
     else if (node->get_kind() == NodeKind::Primary)
-    {
         this->compile_primary(node, expect);
-    }
     else if (node->get_kind() == NodeKind::Table)
-    {
         this->compile_table(node);
-    }
     else if (node->get_kind() == NodeKind::Call)
-    {
         this->compile_call(node, expect);
-    }
     else if (node->get_kind() == NodeKind::MethodCall)
-    {
         this->compile_methcall(node, expect);
-    }
-    bool is_vargs = node->get_kind() == NodeKind::Primary && node->get_token().kind == TokenKind::DotDotDot;
-    bool is_fncall = node->get_kind() == NodeKind::Call || node->get_kind() == NodeKind::MethodCall;
     if (!is_fncall && !is_vargs && expect != EXPECT_FREE)
         while (--expect)
             this->emit(Opcode(Instruction::INil));
@@ -446,6 +435,8 @@ void Compiler::compile_node(Noderef node)
         this->compile_decl(node);
     else if (node->get_kind() == NodeKind::ReturnStmt)
         this->compile_ret(node);
+    else if (node->get_kind() == NodeKind::CallStmt)
+        this->compile_exp_e(node->child(0), 0);
     else
         exit(4);
 }
