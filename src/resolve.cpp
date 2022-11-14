@@ -30,7 +30,6 @@ void SemanticAnalyzer::analyze_var_decl(Noderef node)
     else // DotDotDot
     {
         this->curscope().variadic = true;
-        this->curscope().stack_size = 256;
     }
 }
 
