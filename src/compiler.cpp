@@ -101,26 +101,42 @@ lbyte Compiler::translate_token(TokenKind kind, bool bin)
         return kind == TokenKind::Not ? Instruction::INot : Instruction::ILength;
     }
 }
+
+size_t Compiler::arglist_count(Noderef arglist)
+{
+    size_t chlen = arglist->child_count();
+    if (!chlen)
+        return 0;
+    Noderef last = arglist->child(chlen - 1);
+    if (last->get_kind() == NodeKind::MethodCall || last->get_kind() == NodeKind::Call)
+        chlen--;
+    return chlen;
+}
+
 void Compiler::compile_methcall(Noderef node, size_t expect)
 {
     this->compile_exp(node->child(0));
     size_t idx = this->const_string(token_cstring(node->child(1)->get_token()));
     this->emit(Opcode(Instruction::ISConst, idx));
     this->emit(Opcode(Instruction::ITGet));
-    this->compile_explist(node->child(2), EXPECT_FREE);
+    Noderef arglist = node->child(2);
+    this->compile_explist(arglist, EXPECT_FREE);
+    size_t argcount = this->arglist_count(arglist);
     if (expect == EXPECT_FREE)
-        this->emit(Opcode(Instruction::IFCall));
+        this->emit(Opcode(Instruction::ICall, argcount, 0));
     else
-        this->emit(Opcode(Instruction::ICall, expect));
+        this->emit(Opcode(Instruction::ICall, argcount, expect + 1));
 }
 void Compiler::compile_call(Noderef node, size_t expect)
 {
     this->compile_exp(node->child(0));
-    this->compile_explist(node->child(1), EXPECT_FREE);
+    Noderef arglist = node->child(1);
+    size_t argcount = this->arglist_count(arglist);
+    this->compile_explist(arglist, EXPECT_FREE);
     if (expect == EXPECT_FREE)
-        this->emit(Opcode(Instruction::IFCall));
+        this->emit(Opcode(Instruction::ICall, argcount, 0));
     else
-        this->emit(Opcode(Instruction::ICall, expect));
+        this->emit(Opcode(Instruction::ICall, argcount, expect + 1));
 }
 void Compiler::compile_identifier(Noderef node)
 {
@@ -491,6 +507,31 @@ void Compiler::ops_push(Opcode op)
     this->ops.push_back(op);
 }
 
+Opcode::Opcode(lbyte op, size_t idx1, size_t idx2)
+{
+    this->count = 1;
+    if (idx1 >= 256)
+    {
+        op = op | 0x2;
+        this->bytes[this->count++] = idx1 % 256;
+        this->bytes[this->count++] = idx1 >> 8;
+    }
+    else
+    {
+        this->bytes[this->count++] = idx1;
+    }
+    if (idx2 >= 256)
+    {
+        op = op | 0x1;
+        this->bytes[this->count++] = idx2 % 256;
+        this->bytes[this->count++] = idx2 >> 8;
+    }
+    else
+    {
+        this->bytes[this->count++] = idx2;
+    }
+    this->bytes[0] = op;
+}
 Opcode::Opcode(lbyte op, size_t idx)
 {
     if (idx >= 256)
@@ -548,11 +589,11 @@ string Lfunction::stringify()
     opnames[ITrue] = "true";
     opnames[IFalse] = "false";
     opnames[IFVargs] = "fvargs";
-    opnames[IFCall] = "fcall";
     opnames[IJmp] = "jmp";
     opnames[ICjmp] = "cjmp";
     opnames[IRet] = "ret";
 
+    opnames[ICall] = opnames[ICall + 1] = opnames[ICall + 2] = opnames[ICall + 3] = "call";
     opnames[IVargs] = opnames[IVargs + 1] = "vargs";
     opnames[ITList] = opnames[ITList + 1] = "tlist";
     opnames[ICall] = opnames[ICall + 1] = "call";
@@ -575,15 +616,38 @@ string Lfunction::stringify()
         text.append(opnames[op]);
         if (op >> 7)
         {
-            int opr = 0;
-            int ocount = 1 + op & 0x01;
-            while (ocount--)
+            if (op == ICall)
             {
-                opr <<= 8;
-                opr += this->opcode(++i);
+                int o1count = 1 + ((op & 0x2) >> 1);
+                int o2count = 1 + (op & 0x1);
+                int opr1 = 0, opr2 = 0;
+                while (o1count--)
+                {
+                    opr1 <<= 8;
+                    opr1 += this->opcode(++i);
+                }
+                while (o2count--)
+                {
+                    opr2 <<= 8;
+                    opr2 += this->opcode(++i);
+                }
+                text.push_back(' ');
+                text += std::to_string(opr1);
+                text.push_back(' ');
+                text += std::to_string(opr2);
             }
-            text.push_back(' ');
-            text += std::to_string(opr);
+            else
+            {
+                int opr = 0;
+                int ocount = 1 + op & 0x01;
+                while (ocount--)
+                {
+                    opr <<= 8;
+                    opr += this->opcode(++i);
+                }
+                text.push_back(' ');
+                text += std::to_string(opr);
+            }
         }
         text.push_back('\n');
     }

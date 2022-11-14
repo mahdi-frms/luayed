@@ -47,14 +47,13 @@ enum Instruction
 
     ITList = 0xc0,
 
-    IFCall = 0x50,
     IRet = 0x53,
     IFVargs = 0x54,
 
     ICall = 0xd0,
-    IVargs = 0xd2,
-    IJmp = 0xd4,
-    ICjmp = 0xd6,
+    IVargs = 0xd4,
+    IJmp = 0xd6,
+    ICjmp = 0xd8,
 
     INConst = 0xe0,
     ISConst = 0xe2,
@@ -98,9 +97,10 @@ public:
 struct Opcode
 {
     lbyte count;
-    lbyte bytes[3];
+    lbyte bytes[5];
 
     Opcode(lbyte op, size_t idx);
+    Opcode(lbyte op, size_t idx1, size_t idx2);
     Opcode(lbyte op);
 };
 
@@ -139,6 +139,7 @@ private:
     void compile_lvalue_primary(Noderef node);
     void compile_exp(Noderef node);
     void compile_exp_e(Noderef node, size_t expect);
+    size_t arglist_count(Noderef arglist);
     lbyte translate_token(TokenKind kind, bool bin);
 
 public:
