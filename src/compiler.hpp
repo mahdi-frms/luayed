@@ -125,6 +125,8 @@ private:
     void compile_ret(Noderef node);
     void compile_block(Noderef node);
     void compile_primary(Noderef node, size_t expect);
+    void compile_table(Noderef node);
+    void compile_name(Noderef node);
     void compile_identifier(Noderef node);
     void compile_call(Noderef node, size_t expect);
     void compile_methcall(Noderef node, size_t expect);

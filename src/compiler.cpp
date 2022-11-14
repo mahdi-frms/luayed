@@ -181,6 +181,41 @@ void Compiler::compile_primary(Noderef node, size_t expect)
         this->compile_identifier(node);
     }
 }
+void Compiler::compile_name(Noderef node)
+{
+    Token tkn = node->get_token();
+    const char *cstr = token_cstring(tkn);
+    size_t idx = this->const_string(cstr);
+    this->emit(Opcode(Instruction::ISConst, idx));
+}
+
+void Compiler::compile_table(Noderef node)
+{
+    this->emit(Opcode(Instruction::ITNew));
+    size_t num_idx = 1;
+    for (size_t i = 0; i < node->child_count(); i++)
+    {
+        Noderef ch = node->child(i);
+        if (ch->get_kind() == NodeKind::IdField)
+        {
+            this->compile_name(ch->child(0));
+            this->compile_exp(ch->child(1));
+        }
+        else if (ch->get_kind() == NodeKind::ExprField)
+        {
+            this->compile_exp(ch->child(0));
+            this->compile_exp(ch->child(1));
+        }
+        else
+        {
+            size_t nidx = this->const_number(num_idx++);
+            this->emit(Opcode(Instruction::INConst, nidx));
+            this->compile_exp(ch);
+        }
+        this->emit(Instruction::ITSet);
+    }
+}
+
 void Compiler::compile_exp_e(Noderef node, size_t expect)
 {
     if (!expect)
@@ -212,6 +247,10 @@ void Compiler::compile_exp_e(Noderef node, size_t expect)
     else if (node->get_kind() == NodeKind::Primary)
     {
         this->compile_primary(node, expect);
+    }
+    else if (node->get_kind() == NodeKind::Table)
+    {
+        this->compile_table(node);
     }
     else if (node->get_kind() == NodeKind::Call)
     {
@@ -248,7 +287,7 @@ void Compiler::compile_lvalue_primary(Noderef node)
         const char *str = token_cstring(node->get_token());
         size_t idx = this->const_string(str);
         this->emit(Opcode(Instruction::ISConst, idx));
-        this->ops_push(Instruction::IGGet);
+        this->ops_push(Instruction::IGSet);
         this->vstack.push_back(1);
     }
     else
