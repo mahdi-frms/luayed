@@ -59,6 +59,7 @@ vector<Lfunction> Compiler::compile(Ast ast)
 {
     this->newf();
     this->compile_node(ast.root());
+    this->emit(Opcode(Instruction::IRet, 0));
     this->endf();
     return std::move(this->funcs);
 }
@@ -478,9 +479,14 @@ void Compiler::compile_ret(Noderef node)
 {
     if (node->child_count())
     {
-        this->compile_explist(node->child(0), EXPECT_FREE);
+        Noderef vals = node->child(0);
+        this->compile_explist(vals, EXPECT_FREE);
+        this->emit(Opcode(Instruction::IRet, this->arglist_count(vals)));
     }
-    this->emit(Instruction::IRet);
+    else
+    {
+        this->emit(Opcode(Instruction::IRet, 0));
+    }
 }
 
 void Compiler::compile_while(Noderef node)
@@ -644,8 +650,8 @@ string Lfunction::stringify()
     opnames[ITrue] = "true";
     opnames[IFalse] = "false";
     opnames[IFVargs] = "fvargs";
-    opnames[IRet] = "ret";
 
+    opnames[IRet] = opnames[IRet + 1] = "ret";
     opnames[IJmp] = opnames[IJmp + 1] = "jmp";
     opnames[ICjmp] = opnames[ICjmp + 1] = "cjmp";
     opnames[ICall] = opnames[ICall + 1] = opnames[ICall + 2] = opnames[ICall + 3] = "call";
