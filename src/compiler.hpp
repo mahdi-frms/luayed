@@ -142,6 +142,7 @@ private:
     void compile_while(Noderef node);
     void compile_repeat(Noderef node);
     void compile_exp(Noderef node);
+    void compile_logic(Noderef node);
     void compile_exp_e(Noderef node, size_t expect);
     size_t arglist_count(Noderef arglist);
     lbyte translate_token(TokenKind kind, bool bin);

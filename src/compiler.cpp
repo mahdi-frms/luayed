@@ -280,9 +280,15 @@ void Compiler::compile_exp_e(Noderef node, size_t expect)
         return;
     if (node->get_kind() == NodeKind::Binary)
     {
-        this->compile_exp(node->child(0));
-        this->compile_exp(node->child(2));
-        this->emit(this->translate_token(node->child(1)->get_token().kind, true));
+        TokenKind tk = node->child(1)->get_token().kind;
+        if (tk == TokenKind::And || tk == TokenKind::Or)
+            this->compile_logic(node);
+        else
+        {
+            this->compile_exp(node->child(0));
+            this->compile_exp(node->child(2));
+            this->emit(this->translate_token(node->child(1)->get_token().kind, true));
+        }
     }
     else if (node->get_kind() == NodeKind::Unary)
     {
@@ -457,6 +463,20 @@ void Compiler::compile_assignment(Noderef node, bool attrib)
     }
     this->vstack.clear();
     this->ops_flush();
+}
+
+void Compiler::compile_logic(Noderef node)
+{
+    this->compile_exp(node->child(0));
+    this->emit(Opcode(Instruction::IBLocal, 1));
+    if (node->child(1)->get_token().kind == TokenKind::And)
+        this->emit(Instruction::INot);
+    size_t cjmp = this->len();
+    this->emit(Opcode(Instruction::ICjmp, 0));
+    this->emit(Opcode(Instruction::IPop, 1));
+    this->compile_exp(node->child(2));
+    this->cur()[cjmp + 1] = this->len() % 256;
+    this->cur()[cjmp + 2] = this->len() >> 8;
 }
 
 void Compiler::compile_block(Noderef node)
