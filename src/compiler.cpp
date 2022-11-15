@@ -478,9 +478,10 @@ void Compiler::compile_numeric_for(Noderef node)
     Noderef lvalue = node->child(0)->child(0);
     Noderef from = node->child(1);
     Noderef to = node->child(2);
+    this->emit(Opcode(Instruction::IPush, 1));
     this->compile_exp(from);
     this->emit(Opcode(Instruction::ILStore, this->varmem(lvalue)->offset));
-    compile_exp(to);
+    this->compile_exp(to);
     size_t blk_idx = 3;
     if (node->child_count() == 5)
     {
@@ -497,12 +498,13 @@ void Compiler::compile_numeric_for(Noderef node)
     this->emit(Opcode(Instruction::ICjmp, 0));
     this->compile_block(node->child(blk_idx));
     this->compile_identifier(lvalue);
-    this->emit(Opcode(Instruction::IBLocal, 1));
+    this->emit(Opcode(Instruction::IBLocal, 2));
     this->emit(Instruction::IAdd);
     this->emit(Opcode(Instruction::ILStore, this->varmem(lvalue)->offset));
     this->emit(Opcode(Instruction::IJmp, loop_start));
     this->cur()[cjmp + 1] = this->len() % 256;
     this->cur()[cjmp + 2] = this->len() >> 8;
+    this->emit(Opcode(Instruction::IPop, 3));
 }
 
 void Compiler::compile_assignment(Noderef node, bool attrib)
