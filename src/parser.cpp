@@ -343,7 +343,7 @@ Noderef Parser::repeat_stmt()
     Noderef blk = this->block(BlockEnd::Until);
     this->consume(TokenKind::Until);
     Noderef expr = this->expr();
-    return this->make(expr, blk, NodeKind::RepeatStmt);
+    return this->make(blk, expr, NodeKind::RepeatStmt);
 }
 Noderef Parser::if_stmt()
 {

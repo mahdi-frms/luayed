@@ -502,6 +502,15 @@ void Compiler::compile_while(Noderef node)
     this->cur()[cjmp + 2] = this->len() >> 8;
 }
 
+void Compiler::compile_repeat(Noderef node)
+{
+    size_t cjmp_idx = this->len();
+    this->compile_block(node->child(0));
+    this->compile_exp(node->child(1));
+    this->emit(Instruction::INot);
+    this->emit(Opcode(Instruction::ICjmp, cjmp_idx));
+}
+
 void Compiler::compile_node(Noderef node)
 {
     if (node->get_kind() == NodeKind::AssignStmt)
@@ -518,6 +527,8 @@ void Compiler::compile_node(Noderef node)
         this->compile_if(node);
     else if (node->get_kind() == NodeKind::WhileStmt)
         this->compile_while(node);
+    else if (node->get_kind() == NodeKind::RepeatStmt)
+        this->compile_repeat(node);
     else
         exit(4);
 }
