@@ -29,7 +29,7 @@ void Lfunction::push(lbyte b)
 {
     this->text.push_back(b);
 }
-lbyte Lfunction::opcode(size_t index)
+lbyte &Lfunction::operator[](size_t index)
 {
     return this->text[index];
 }
@@ -111,6 +111,44 @@ size_t Compiler::arglist_count(Noderef arglist)
     if (last->get_kind() == NodeKind::MethodCall || last->get_kind() == NodeKind::Call)
         chlen--;
     return chlen;
+}
+size_t Compiler::len()
+{
+    return this->cur().clen();
+}
+
+void Compiler::compile_if(Noderef node)
+{
+    vector<size_t> jmps;
+    size_t cjmp = 0;
+    for (size_t i = 0; i < node->child_count(); i++)
+    {
+        Noderef cls = node->child(i);
+        if (cls->get_kind() == NodeKind::ElseClause)
+        {
+            this->compile_block(cls->child(0));
+        }
+        else
+        {
+            this->compile_exp(cls->child(0));
+            this->emit(Instruction::INot);
+            cjmp = this->len();
+            this->emit(Opcode(Instruction::ICjmp, 0));
+            this->compile_block(cls->child(1));
+            jmps.push_back(this->len());
+            this->emit(Opcode(Instruction::IJmp, 0));
+            size_t cjmp_idx = this->len();
+            this->cur()[cjmp + 1] = cjmp_idx % 256;
+            this->cur()[cjmp + 2] = cjmp_idx >> 8;
+            printf("=> %d\n", this->cur()[cjmp + 2]);
+        }
+    }
+    size_t jmp_idx = this->len();
+    for (size_t i = 0; i < jmps.size(); i++)
+    {
+        this->cur()[jmps[i] + 1] = jmp_idx % 256;
+        this->cur()[jmps[i] + 2] = jmp_idx >> 8;
+    }
 }
 
 void Compiler::compile_methcall(Noderef node, size_t expect)
@@ -457,6 +495,8 @@ void Compiler::compile_node(Noderef node)
         this->compile_ret(node);
     else if (node->get_kind() == NodeKind::CallStmt)
         this->compile_exp_e(node->child(0), 0);
+    else if (node->get_kind() == NodeKind::IfStmt)
+        this->compile_if(node);
     else
         exit(4);
 }
@@ -534,7 +574,7 @@ Opcode::Opcode(lbyte op, size_t idx1, size_t idx2)
 }
 Opcode::Opcode(lbyte op, size_t idx)
 {
-    if (idx >= 256)
+    if (idx >= 256 || op == Instruction::IJmp || op == Instruction::ICjmp)
     {
         this->count = 3;
         this->bytes[0] = op | 0x1;
@@ -589,10 +629,10 @@ string Lfunction::stringify()
     opnames[ITrue] = "true";
     opnames[IFalse] = "false";
     opnames[IFVargs] = "fvargs";
-    opnames[IJmp] = "jmp";
-    opnames[ICjmp] = "cjmp";
     opnames[IRet] = "ret";
 
+    opnames[IJmp] = opnames[IJmp + 1] = "jmp";
+    opnames[ICjmp] = opnames[ICjmp + 1] = "cjmp";
     opnames[ICall] = opnames[ICall + 1] = opnames[ICall + 2] = opnames[ICall + 3] = "call";
     opnames[IVargs] = opnames[IVargs + 1] = "vargs";
     opnames[ITList] = opnames[ITList + 1] = "tlist";
@@ -612,25 +652,21 @@ string Lfunction::stringify()
     string text;
     for (size_t i = 0; i < this->clen(); i++)
     {
-        lbyte op = this->opcode(i);
+        lbyte op = this->text[i];
         text.append(opnames[op]);
         if (op >> 7)
         {
             if (op == ICall)
             {
-                int o1count = 1 + ((op & 0x2) >> 1);
-                int o2count = 1 + (op & 0x1);
-                int opr1 = 0, opr2 = 0;
-                while (o1count--)
-                {
-                    opr1 <<= 8;
-                    opr1 += this->opcode(++i);
-                }
-                while (o2count--)
-                {
-                    opr2 <<= 8;
-                    opr2 += this->opcode(++i);
-                }
+
+                int opr1 = this->text[++i];
+                if (op & 0x2)
+                    opr1 += this->text[++i] * 256;
+
+                int opr2 = this->text[++i];
+                if (op & 0x1)
+                    opr2 += this->text[++i] * 256;
+
                 text.push_back(' ');
                 text += std::to_string(opr1);
                 text.push_back(' ');
@@ -638,13 +674,10 @@ string Lfunction::stringify()
             }
             else
             {
-                int opr = 0;
-                int ocount = 1 + op & 0x01;
-                while (ocount--)
-                {
-                    opr <<= 8;
-                    opr += this->opcode(++i);
-                }
+                int opr = this->text[++i];
+                if (op & 0x01)
+                    opr += this->text[++i] * 256;
+
                 text.push_back(' ');
                 text += std::to_string(opr);
             }

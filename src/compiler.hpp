@@ -82,8 +82,8 @@ public:
     size_t number(lnumber n);
     size_t cstr(const char *s);
     size_t clen();
-    lbyte opcode(size_t index);
     string stringify();
+    lbyte &operator[](size_t index);
 
     ~Lfunction();
     Lfunction &operator=(const Lfunction &other) = delete;
@@ -113,6 +113,7 @@ private:
     vector<lbyte> vstack;
 
     Lfunction &cur();
+    size_t len();
     void emit(Opcode op);
     void ops_flush();
     void ops_push(Opcode op);
@@ -137,6 +138,7 @@ private:
     void compile_varlist(Noderef node, bool attrib);
     void compile_explist(Noderef node, size_t vcount);
     void compile_lvalue_primary(Noderef node);
+    void compile_if(Noderef node);
     void compile_exp(Noderef node);
     void compile_exp_e(Noderef node, size_t expect);
     size_t arglist_count(Noderef arglist);
