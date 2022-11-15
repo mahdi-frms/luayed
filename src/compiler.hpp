@@ -139,6 +139,7 @@ private:
     void compile_explist(Noderef node, size_t vcount);
     void compile_lvalue_primary(Noderef node);
     void compile_if(Noderef node);
+    void compile_while(Noderef node);
     void compile_exp(Noderef node);
     void compile_exp_e(Noderef node, size_t expect);
     size_t arglist_count(Noderef arglist);
