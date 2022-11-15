@@ -443,14 +443,43 @@ size_t Compiler::vstack_nearest_nil()
     return this->vstack.size() - 1 - i;
 }
 
+void Compiler::compile_generic_for(Noderef node)
+{
+    Noderef varlist = node->child(0);
+    Noderef arglist = node->child(1);
+    this->emit(Opcode(Instruction::IPush, varlist->child_count()));
+    this->compile_explist(arglist, 3);
+    size_t loop_start = this->len();
+    this->emit(Opcode(Instruction::IBLocal, 3));
+    this->emit(Opcode(Instruction::IBLocal, 3));
+    this->emit(Opcode(Instruction::IBLocal, 3));
+    this->emit(Opcode(Instruction::ICall, 2, varlist->child_count()));
+    for (size_t i = varlist->child_count(); i > 0; i--)
+    {
+        Noderef var = varlist->child(i - 1)->child(0);
+        this->emit(Opcode(Instruction::ILStore, this->varmem(var)->offset));
+    }
+    this->emit(Opcode(Instruction::ILocal, this->varmem(varlist->child(0)->child(0))->offset));
+    this->emit(Opcode(Instruction::IBLStore, 1));
+    this->emit(Opcode(Instruction::ILocal, this->varmem(varlist->child(0)->child(0))->offset));
+    this->emit(Instruction::INil);
+    this->emit(Instruction::IEq);
+    size_t cjmp = this->len();
+    this->emit(Opcode(Instruction::ICjmp, 0));
+    this->compile_block(node->child(2));
+    this->emit(Opcode(Instruction::IJmp, loop_start));
+    this->cur()[cjmp + 1] = this->len() % 256;
+    this->cur()[cjmp + 2] = this->len() >> 8;
+    this->emit(Opcode(Instruction::IPop, varlist->child_count() + 3));
+}
+
 void Compiler::compile_numeric_for(Noderef node)
 {
     Noderef lvalue = node->child(0)->child(0);
     Noderef from = node->child(1);
     Noderef to = node->child(2);
-    compile_exp(from);
-    compile_lvalue_primary(lvalue);
-    this->ops_flush();
+    this->compile_exp(from);
+    this->emit(Opcode(Instruction::ILStore, this->varmem(lvalue)->offset));
     compile_exp(to);
     size_t blk_idx = 3;
     if (node->child_count() == 5)
@@ -470,8 +499,7 @@ void Compiler::compile_numeric_for(Noderef node)
     this->compile_identifier(lvalue);
     this->emit(Opcode(Instruction::IBLocal, 1));
     this->emit(Instruction::IAdd);
-    compile_lvalue_primary(lvalue);
-    this->ops_flush();
+    this->emit(Opcode(Instruction::ILStore, this->varmem(lvalue)->offset));
     this->emit(Opcode(Instruction::IJmp, loop_start));
     this->cur()[cjmp + 1] = this->len() % 256;
     this->cur()[cjmp + 2] = this->len() >> 8;
@@ -582,6 +610,8 @@ void Compiler::compile_node(Noderef node)
         this->compile_repeat(node);
     else if (node->get_kind() == NodeKind::NumericFor)
         this->compile_numeric_for(node);
+    else if (node->get_kind() == NodeKind::GenericFor)
+        this->compile_generic_for(node);
     else
         exit(4);
 }
