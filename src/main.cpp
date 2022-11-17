@@ -26,6 +26,16 @@ char *readfile(const char *path)
     return text;
 }
 
+void print_fn(Lfunction *fn)
+{
+    std::cout << fn->stringify();
+    for (size_t i = 0; i < fn->fconst.size(); i++)
+    {
+        std::cout << "----------------------------\n";
+        print_fn(&fn->fconst[i]);
+    }
+}
+
 bool parse(const char *path)
 {
     bool silence = false;
@@ -46,10 +56,10 @@ bool parse(const char *path)
             if (compile)
             {
                 Compiler compiler;
-                vector<Lfunction> bin = compiler.compile(tree);
+                Lfunction bin = compiler.compile(tree);
                 if (!silence)
                 {
-                    std::cout << bin[0].stringify();
+                    print_fn(&bin);
                 }
             }
             if (!silence && !compile)

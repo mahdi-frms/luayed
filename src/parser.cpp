@@ -464,7 +464,7 @@ Noderef Parser::statement()
             var = this->make(var, this->make(token, NodeKind::Name), NodeKind::Property);
         }
         Noderef body = this->function_body(is_method);
-        return this->make(var, body, NodeKind::AssignStmt);
+        return this->make(this->make(var, NodeKind::VarList), this->make(body, NodeKind::Explist), NodeKind::AssignStmt);
     }
     if (this->peek().kind == TokenKind::For)
     {

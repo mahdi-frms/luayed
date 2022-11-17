@@ -72,14 +72,15 @@ enum Instruction
 
 class Lfunction
 {
-private:
+public:
     vector<lbyte> text;
     vector<lnumber> nconst;
     vector<const char *> sconst;
+    vector<Lfunction> fconst;
 
-public:
     void push(lbyte b);
     size_t number(lnumber n);
+    size_t func(Lfunction fn);
     size_t cstr(const char *s);
     size_t clen();
     string stringify();
@@ -107,12 +108,10 @@ struct Opcode
 class Compiler
 {
 private:
-    vector<Lfunction> funcs;
-    vector<Lfunction> current;
+    Lfunction func;
     vector<Opcode> ops;
     vector<lbyte> vstack;
 
-    Lfunction &cur();
     size_t len();
     void emit(Opcode op);
     void ops_flush();
@@ -121,8 +120,6 @@ private:
     size_t const_string(const char *s);
     size_t vstack_nearest_nil();
     MetaMemory *varmem(Noderef lvalue);
-    void newf();
-    void endf();
     void compile_node(Noderef node);
     void compile_decl(Noderef node);
     void compile_ret(Noderef node);
@@ -130,6 +127,7 @@ private:
     void compile_primary(Noderef node, size_t expect);
     void compile_table(Noderef node);
     void compile_name(Noderef node);
+    void compile_function(Noderef node);
     void compile_identifier(Noderef node);
     void compile_call(Noderef node, size_t expect);
     void compile_methcall(Noderef node, size_t expect);
@@ -150,7 +148,7 @@ private:
     lbyte translate_token(TokenKind kind, bool bin);
 
 public:
-    vector<Lfunction> compile(Ast ast);
+    Lfunction compile(Ast ast);
 };
 
 #endif

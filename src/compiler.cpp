@@ -43,6 +43,14 @@ size_t Lfunction::number(lnumber n)
     this->nconst.push_back(n);
     return i;
 }
+
+size_t Lfunction::func(Lfunction fn)
+{
+    size_t i = this->fconst.size();
+    this->fconst.push_back(std::move(fn));
+    return i;
+}
+
 size_t Lfunction::cstr(const char *s)
 {
     size_t i = this->sconst.size();
@@ -55,13 +63,11 @@ Lfunction::~Lfunction()
         free((void *)this->sconst[i]);
 }
 
-vector<Lfunction> Compiler::compile(Ast ast)
+Lfunction Compiler::compile(Ast ast)
 {
-    this->newf();
     this->compile_node(ast.root());
     this->emit(Opcode(Instruction::IRet, 0));
-    this->endf();
-    return std::move(this->funcs);
+    return std::move(this->func);
 }
 
 lbyte tkn_binops[] = {
@@ -115,7 +121,7 @@ size_t Compiler::arglist_count(Noderef arglist)
 }
 size_t Compiler::len()
 {
-    return this->cur().clen();
+    return this->func.clen();
 }
 
 void Compiler::compile_if(Noderef node)
@@ -139,15 +145,15 @@ void Compiler::compile_if(Noderef node)
             jmps.push_back(this->len());
             this->emit(Opcode(Instruction::IJmp, 0));
             size_t cjmp_idx = this->len();
-            this->cur()[cjmp + 1] = cjmp_idx % 256;
-            this->cur()[cjmp + 2] = cjmp_idx >> 8;
+            this->func[cjmp + 1] = cjmp_idx % 256;
+            this->func[cjmp + 2] = cjmp_idx >> 8;
         }
     }
     size_t jmp_idx = this->len();
     for (size_t i = 0; i < jmps.size(); i++)
     {
-        this->cur()[jmps[i] + 1] = jmp_idx % 256;
-        this->cur()[jmps[i] + 2] = jmp_idx >> 8;
+        this->func[jmps[i] + 1] = jmp_idx % 256;
+        this->func[jmps[i] + 2] = jmp_idx >> 8;
     }
 }
 
@@ -305,6 +311,10 @@ void Compiler::compile_exp_e(Noderef node, size_t expect)
         this->compile_exp(node->child(1));
         this->emit(ITGet);
     }
+    else if (node->get_kind() == NodeKind::FunctionBody)
+    {
+        this->compile_function(node);
+    }
     else if (node->get_kind() == NodeKind::Primary)
         this->compile_primary(node, expect);
     else if (node->get_kind() == NodeKind::Table)
@@ -316,6 +326,22 @@ void Compiler::compile_exp_e(Noderef node, size_t expect)
     if (!is_fncall && !is_vargs && expect != EXPECT_FREE)
         while (--expect)
             this->emit(Opcode(Instruction::INil));
+}
+
+void Compiler::compile_function(Noderef node)
+{
+    Compiler compiler;
+    MetaScope *md = (MetaScope *)node->getannot(MetaKind::MScope);
+    if (md->size)
+        compiler.emit(Opcode(Instruction::IPush, md->size));
+    compiler.compile_block(node->child(1));
+    if (md->size)
+        compiler.emit(Opcode(Instruction::IPop, md->size));
+    compiler.emit(Opcode(Instruction::IRet, 0));
+
+    Lfunction fn = std::move(compiler.func);
+    size_t fidx = this->func.func(std::move(fn));
+    this->emit(Opcode(Instruction::IFConst, fidx));
 }
 
 void Compiler::compile_exp(Noderef node)
@@ -468,8 +494,8 @@ void Compiler::compile_generic_for(Noderef node)
     this->emit(Opcode(Instruction::ICjmp, 0));
     this->compile_block(node->child(2));
     this->emit(Opcode(Instruction::IJmp, loop_start));
-    this->cur()[cjmp + 1] = this->len() % 256;
-    this->cur()[cjmp + 2] = this->len() >> 8;
+    this->func[cjmp + 1] = this->len() % 256;
+    this->func[cjmp + 2] = this->len() >> 8;
     this->emit(Opcode(Instruction::IPop, varlist->child_count() + 3));
 }
 
@@ -502,8 +528,8 @@ void Compiler::compile_numeric_for(Noderef node)
     this->emit(Instruction::IAdd);
     this->emit(Opcode(Instruction::ILStore, this->varmem(lvalue)->offset));
     this->emit(Opcode(Instruction::IJmp, loop_start));
-    this->cur()[cjmp + 1] = this->len() % 256;
-    this->cur()[cjmp + 2] = this->len() >> 8;
+    this->func[cjmp + 1] = this->len() % 256;
+    this->func[cjmp + 2] = this->len() >> 8;
     this->emit(Opcode(Instruction::IPop, 3));
 }
 
@@ -536,8 +562,8 @@ void Compiler::compile_logic(Noderef node)
     this->emit(Opcode(Instruction::ICjmp, 0));
     this->emit(Opcode(Instruction::IPop, 1));
     this->compile_exp(node->child(2));
-    this->cur()[cjmp + 1] = this->len() % 256;
-    this->cur()[cjmp + 2] = this->len() >> 8;
+    this->func[cjmp + 1] = this->len() % 256;
+    this->func[cjmp + 2] = this->len() >> 8;
 }
 
 void Compiler::compile_block(Noderef node)
@@ -579,8 +605,8 @@ void Compiler::compile_while(Noderef node)
     this->emit(Opcode(Instruction::ICjmp, 0));
     this->compile_block(node->child(1));
     this->emit(Opcode(Instruction::IJmp, jmp_idx));
-    this->cur()[cjmp + 1] = this->len() % 256;
-    this->cur()[cjmp + 2] = this->len() >> 8;
+    this->func[cjmp + 1] = this->len() % 256;
+    this->func[cjmp + 2] = this->len() >> 8;
 }
 
 void Compiler::compile_repeat(Noderef node)
@@ -618,36 +644,20 @@ void Compiler::compile_node(Noderef node)
         exit(4);
 }
 
-Lfunction &Compiler::cur()
-{
-    return this->current.back();
-}
-
-void Compiler::newf()
-{
-    this->current.push_back(std::move(Lfunction()));
-}
-
-void Compiler::endf()
-{
-    this->funcs.push_back(std::move(this->cur()));
-    this->current.pop_back();
-}
-
 size_t Compiler::const_number(lnumber n)
 {
-    return this->cur().number(n);
+    return this->func.number(n);
 }
 
 size_t Compiler::const_string(const char *s)
 {
-    return this->cur().cstr(s);
+    return this->func.cstr(s);
 }
 
 void Compiler::emit(Opcode op)
 {
     for (int i = 0; i < op.count; i++)
-        this->cur().push(op.bytes[i]);
+        this->func.push(op.bytes[i]);
 }
 
 void Compiler::ops_flush()
