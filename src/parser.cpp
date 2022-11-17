@@ -438,7 +438,7 @@ Noderef Parser::statement()
                     this->make(
                         this->make(t, NodeKind::Name), NodeKind::VarDecl),
                     NodeKind::VarList),
-                this->function_body(false), NodeKind::Declaration);
+                this->make(this->function_body(false), NodeKind::Explist), NodeKind::Declaration);
         }
         else
         {
