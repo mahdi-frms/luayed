@@ -492,10 +492,12 @@ void Compiler::compile_generic_for(Noderef node)
     this->emit(Instruction::IEq);
     size_t cjmp = this->len();
     this->emit(Opcode(Instruction::ICjmp, 0));
+    this->loop_start();
     this->compile_block(node->child(2));
     this->emit(Opcode(Instruction::IJmp, loop_start));
     this->func[cjmp + 1] = this->len() % 256;
     this->func[cjmp + 2] = this->len() >> 8;
+    this->loop_end();
     this->emit(Opcode(Instruction::IPop, varlist->child_count() + 3));
 }
 
@@ -522,6 +524,7 @@ void Compiler::compile_numeric_for(Noderef node)
     this->emit(Instruction::IGt);
     size_t cjmp = this->len();
     this->emit(Opcode(Instruction::ICjmp, 0));
+    this->loop_start();
     this->compile_block(node->child(blk_idx));
     this->compile_identifier(lvalue);
     this->emit(Opcode(Instruction::IBLocal, 2));
@@ -530,6 +533,7 @@ void Compiler::compile_numeric_for(Noderef node)
     this->emit(Opcode(Instruction::IJmp, loop_start));
     this->func[cjmp + 1] = this->len() % 256;
     this->func[cjmp + 2] = this->len() >> 8;
+    this->loop_end();
     this->emit(Opcode(Instruction::IPop, 3));
 }
 
@@ -603,8 +607,10 @@ void Compiler::compile_while(Noderef node)
     this->emit(Instruction::INot);
     size_t cjmp = this->len();
     this->emit(Opcode(Instruction::ICjmp, 0));
+    this->loop_start();
     this->compile_block(node->child(1));
     this->emit(Opcode(Instruction::IJmp, jmp_idx));
+    this->loop_end();
     this->func[cjmp + 1] = this->len() % 256;
     this->func[cjmp + 2] = this->len() >> 8;
 }
@@ -612,10 +618,18 @@ void Compiler::compile_while(Noderef node)
 void Compiler::compile_repeat(Noderef node)
 {
     size_t cjmp_idx = this->len();
+    this->loop_start();
     this->compile_block(node->child(0));
     this->compile_exp(node->child(1));
     this->emit(Instruction::INot);
     this->emit(Opcode(Instruction::ICjmp, cjmp_idx));
+    this->loop_end();
+}
+
+void Compiler::compile_break()
+{
+    this->breaks.push_back(this->len() + 1);
+    this->emit(Opcode(Instruction::IJmp, 0));
 }
 
 void Compiler::compile_node(Noderef node)
@@ -640,6 +654,8 @@ void Compiler::compile_node(Noderef node)
         this->compile_numeric_for(node);
     else if (node->get_kind() == NodeKind::GenericFor)
         this->compile_generic_for(node);
+    else if (node->get_kind() == NodeKind::BreakStmt)
+        this->compile_break();
     else
         exit(4);
 }
@@ -672,6 +688,23 @@ void Compiler::ops_flush()
 void Compiler::ops_push(Opcode op)
 {
     this->ops.push_back(op);
+}
+
+void Compiler::loop_start()
+{
+    this->breaks.push_back(0);
+}
+void Compiler::loop_end()
+{
+    size_t idx = this->len();
+    while (this->breaks.back())
+    {
+        size_t brk = this->breaks.back() - 1;
+        this->func.text[brk + 1] = idx % 256;
+        this->func.text[brk + 2] = idx >> 8;
+        this->breaks.pop_back();
+    }
+    this->breaks.pop_back();
 }
 
 Opcode::Opcode(lbyte op, size_t idx1, size_t idx2)

@@ -111,6 +111,7 @@ private:
     Lfunction func;
     vector<Opcode> ops;
     vector<lbyte> vstack;
+    vector<size_t> breaks;
 
     size_t len();
     void emit(Opcode op);
@@ -143,7 +144,10 @@ private:
     void compile_logic(Noderef node);
     void compile_numeric_for(Noderef node);
     void compile_generic_for(Noderef node);
+    void compile_break();
     void compile_exp_e(Noderef node, size_t expect);
+    void loop_start();
+    void loop_end();
     size_t arglist_count(Noderef arglist);
     lbyte translate_token(TokenKind kind, bool bin);
 
