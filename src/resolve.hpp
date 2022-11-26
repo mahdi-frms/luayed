@@ -23,6 +23,7 @@ private:
     vector<SemanticError> errors;
     Ast ast;
     Noderef current;
+    size_t fn_idx;
 
     void analyze_node(Noderef node);
     void analyze_var_decl(Noderef node);

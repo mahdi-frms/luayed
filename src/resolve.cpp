@@ -34,7 +34,7 @@ void SemanticAnalyzer::fix_offsets()
             mm->offset += msc->stack_size;
 
         } while (sc != fn);
-        mm->offset += msc->upvalue_size; // msc is function scope
+        mm->offset += msc->upvalue_size + is_meth(fn) ? 1 : 0; // msc is function scope
     }
 }
 
@@ -168,8 +168,9 @@ void SemanticAnalyzer::analyze_etc(Noderef node)
         sc->map = new Varmap();
         sc->variadic = false;
         sc->parent = this->current;
-        sc->stack_size = is_meth(node) ? 1 : 0;
-        sc->upvalue_size = 0;
+        sc->stack_size = 0;
+        sc->fn_idx = is_fn ? this->fn_idx++ : 0;
+        sc->upvalue_size = is_meth(node) ? 1 : 0;
 
         this->current = node;
     }
@@ -191,6 +192,8 @@ void SemanticAnalyzer::analyze_etc(Noderef node)
         MetaScope *sc = this->curscope();
         delete (Varmap *)sc->map;
         this->current = sc->parent;
+        if (is_meth(node))
+            sc->upvalue_size--;
     }
 }
 
@@ -276,6 +279,6 @@ void SemanticAnalyzer::finalize()
     this->labels.clear();
 }
 
-SemanticAnalyzer::SemanticAnalyzer(Ast ast) : ast(ast)
+SemanticAnalyzer::SemanticAnalyzer(Ast ast) : ast(ast), fn_idx(0)
 {
 }

@@ -103,6 +103,7 @@ namespace ast
         size_t upvalue_size;
         bool variadic;
         void *map;
+        size_t fn_idx;
     };
 
     class Node

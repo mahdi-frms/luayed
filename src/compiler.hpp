@@ -70,6 +70,12 @@ enum Instruction
     IPop = 0xfe
 };
 
+struct Upvalue
+{
+    size_t offset;
+    size_t fn_idx;
+};
+
 class Lfunction
 {
 public:
@@ -77,6 +83,7 @@ public:
     vector<lnumber> nconst;
     vector<const char *> sconst;
     vector<Lfunction> fconst;
+    vector<Upvalue> upvalues;
     size_t parlen = 0;
 
     void push(lbyte b);

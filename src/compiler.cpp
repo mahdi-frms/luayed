@@ -184,20 +184,33 @@ void Compiler::compile_call(Noderef node, size_t expect)
 }
 void Compiler::compile_identifier(Noderef node)
 {
-    MetaMemory *md = this->varmem(node);
-    if (!md)
+    MetaDeclaration *md = (MetaDeclaration *)node->getannot(MetaKind::MDecl);
+    Noderef dec = md ? md->decnode : node;
+    MetaMemory *mm = (MetaMemory *)dec->getannot(MetaKind::MMemory);
+    if (md)
+    {
+        if (md->is_upvalue)
+        {
+            MetaScope *fnsc = (MetaScope *)mm->scope->getannot(MetaKind::MScope);
+            size_t fn_idx = fnsc->fn_idx;
+            size_t upvalue_idx = this->func.upvalues.size();
+            this->func.upvalues.push_back(Upvalue{.offset = mm->offset, .fn_idx = fn_idx});
+            this->emit(Opcode(Instruction::IUpvalue, upvalue_idx));
+        }
+        else
+        {
+            this->emit(Opcode(Instruction::ILocal, mm->offset));
+        }
+    }
+    else if (node->getannot(MetaKind::MSelf))
+    {
+        this->emit(Opcode(Instruction::ILocal, 0));
+    }
+    else
     {
         size_t idx = this->const_string(token_cstring(node->get_token()));
         this->emit(Opcode(Instruction::ISConst, idx));
         this->emit(Instruction::IGGet);
-    }
-    else
-    {
-        this->emit(Opcode(Instruction::ILocal, md->offset));
-        if (md->is_upvalue)
-        {
-            // upval
-        }
     }
 }
 
@@ -349,22 +362,35 @@ MetaMemory *Compiler::varmem(Noderef lvalue)
 
 void Compiler::compile_lvalue_primary(Noderef node)
 {
-    MetaMemory *md = this->varmem(node);
-    if (!md)
+    MetaDeclaration *md = (MetaDeclaration *)node->getannot(MetaKind::MDecl);
+    Noderef dec = md ? md->decnode : node;
+    MetaMemory *mm = (MetaMemory *)dec->getannot(MetaKind::MMemory);
+    if (mm)
+    {
+        if (md && md->is_upvalue)
+        {
+            MetaScope *fnsc = (MetaScope *)mm->scope->getannot(MetaKind::MScope);
+            size_t fn_idx = fnsc->fn_idx;
+            size_t upvalue_idx = this->func.upvalues.size();
+            this->func.upvalues.push_back(Upvalue{.offset = mm->offset, .fn_idx = fn_idx});
+            this->ops_push(Opcode(Instruction::IUStore, upvalue_idx));
+        }
+        else
+        {
+            this->ops_push(Opcode(Instruction::ILStore, mm->offset));
+        }
+    }
+    else if (node->getannot(MetaKind::MSelf))
+    {
+        this->ops_push(Opcode(Instruction::ILStore, 0));
+    }
+    else
     {
         const char *str = token_cstring(node->get_token());
         size_t idx = this->const_string(str);
         this->emit(Opcode(Instruction::ISConst, idx));
         this->ops_push(Instruction::IGSet);
         this->vstack.push_back(1);
-    }
-    else
-    {
-        this->ops_push(Opcode(Instruction::ILStore, md->offset));
-        if (md->is_upvalue)
-        {
-            // upval
-        }
     }
 }
 
