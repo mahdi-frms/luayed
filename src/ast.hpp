@@ -58,13 +58,19 @@ namespace ast
         MDecl = 55,
         MMemory = 1,
         MLabel = 2,
-        MScope = 3
+        MScope = 3,
+        MSelf = 4,
     };
 
     struct MetaNode
     {
         MetaNode *next;
         MetaKind kind;
+    };
+
+    struct MetaSelf
+    {
+        MetaNode header;
     };
 
     struct MetaDeclaration

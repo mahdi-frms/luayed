@@ -4,6 +4,7 @@
 #define map(N) (*((Varmap *)(scope(N)->map)))
 #define mem(N) ((MetaMemory *)N->getannot(MetaKind::MMemory))
 #define halloc(T) ((T *)this->ast.get_heap().alloc(sizeof(T)))
+#define is_meth(N) (N->get_kind() == NodeKind::MethodBody)
 
 vector<SemanticError> SemanticAnalyzer::analyze()
 {
@@ -33,6 +34,7 @@ void SemanticAnalyzer::fix_offsets()
             mm->offset += msc->stack_size;
 
         } while (sc != fn);
+        mm->offset += msc->upvalue_size; // msc is function scope
     }
 }
 
@@ -91,6 +93,14 @@ void SemanticAnalyzer::reference(Noderef node, Noderef dec, bool func_past)
     }
 }
 
+void SemanticAnalyzer::self_ref(Noderef node)
+{
+    MetaSelf *meta = halloc(MetaSelf);
+    meta->header.kind = MetaKind::MSelf;
+    meta->header.next = nullptr;
+    node->annotate(&meta->header);
+}
+
 void SemanticAnalyzer::analyze_identifier(Noderef node)
 {
     Token t = node->get_token();
@@ -114,6 +124,8 @@ void SemanticAnalyzer::analyze_identifier(Noderef node)
         }
         if (dec)
             this->reference(node, dec, func_past);
+        else if (is_meth(this->curscope()->func) && t.text() == "self")
+            this->self_ref(node);
     }
     else if (t.kind == TokenKind::DotDotDot)
     {
@@ -129,8 +141,7 @@ void SemanticAnalyzer::analyze_identifier(Noderef node)
 
 void SemanticAnalyzer::analyze_etc(Noderef node)
 {
-    bool is_fn = node->get_kind() == NodeKind::FunctionBody ||
-                 node->get_kind() == NodeKind::MethodBody;
+    bool is_fn = node->get_kind() == NodeKind::FunctionBody || is_meth(node);
 
     bool new_scope =
         node->get_kind() == NodeKind::Block ||
@@ -157,7 +168,7 @@ void SemanticAnalyzer::analyze_etc(Noderef node)
         sc->map = new Varmap();
         sc->variadic = false;
         sc->parent = this->current;
-        sc->stack_size = 0;
+        sc->stack_size = is_meth(node) ? 1 : 0;
         sc->upvalue_size = 0;
 
         this->current = node;
@@ -169,7 +180,7 @@ void SemanticAnalyzer::analyze_etc(Noderef node)
     }
     if (new_scope)
     {
-        size_t offset = 0;
+        size_t offset = is_meth(node) ? 1 : 0;
         Varmap &vmap = this->curmap();
         for (auto it = vmap.cbegin(); it != vmap.cend(); it++)
         {
