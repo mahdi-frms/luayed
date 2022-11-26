@@ -193,11 +193,8 @@ void Compiler::compile_identifier(Noderef node)
     }
     else
     {
-        if (md->is_stack)
-        {
-            this->emit(Opcode(Instruction::ILocal, md->offset));
-        }
-        else
+        this->emit(Opcode(Instruction::ILocal, md->offset));
+        if (md->is_upvalue)
         {
             // upval
         }
@@ -311,10 +308,8 @@ void Compiler::compile_exp_e(Noderef node, size_t expect)
         this->compile_exp(node->child(1));
         this->emit(ITGet);
     }
-    else if (node->get_kind() == NodeKind::FunctionBody)
-    {
+    else if (node->get_kind() == NodeKind::FunctionBody || node->get_kind() == NodeKind::MethodBody)
         this->compile_function(node);
-    }
     else if (node->get_kind() == NodeKind::Primary)
         this->compile_primary(node, expect);
     else if (node->get_kind() == NodeKind::Table)
@@ -332,13 +327,9 @@ void Compiler::compile_function(Noderef node)
 {
     Compiler compiler;
     MetaScope *md = (MetaScope *)node->getannot(MetaKind::MScope);
-    if (md->size)
-        compiler.emit(Opcode(Instruction::IPush, md->size));
+    compiler.func.parlen = md->stack_size;
+    compiler.method = node->get_kind() == NodeKind::MethodBody;
     compiler.compile_block(node->child(1));
-    if (md->size)
-        compiler.emit(Opcode(Instruction::IPop, md->size));
-    compiler.emit(Opcode(Instruction::IRet, 0));
-
     Lfunction fn = std::move(compiler.func);
     size_t fidx = this->func.func(std::move(fn));
     this->emit(Opcode(Instruction::IFConst, fidx));
@@ -369,11 +360,8 @@ void Compiler::compile_lvalue_primary(Noderef node)
     }
     else
     {
-        if (md->is_stack)
-        {
-            this->ops_push(Opcode(Instruction::ILStore, md->offset));
-        }
-        else
+        this->ops_push(Opcode(Instruction::ILStore, md->offset));
+        if (md->is_upvalue)
         {
             // upval
         }
@@ -573,12 +561,12 @@ void Compiler::compile_logic(Noderef node)
 void Compiler::compile_block(Noderef node)
 {
     MetaScope *md = (MetaScope *)node->getannot(MetaKind::MScope);
-    if (md->size)
-        this->emit(Opcode(Instruction::IPush, md->size));
+    if (md->stack_size)
+        this->emit(Opcode(Instruction::IPush, md->stack_size));
     for (size_t i = 0; i < node->child_count(); i++)
         this->compile_node(node->child(i));
-    if (md->size)
-        this->emit(Opcode(Instruction::IPop, md->size));
+    if (md->stack_size)
+        this->emit(Opcode(Instruction::IPop, md->stack_size));
 }
 
 void Compiler::compile_decl(Noderef node)

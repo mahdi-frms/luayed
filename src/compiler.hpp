@@ -77,6 +77,7 @@ public:
     vector<lnumber> nconst;
     vector<const char *> sconst;
     vector<Lfunction> fconst;
+    size_t parlen = 0;
 
     void push(lbyte b);
     size_t number(lnumber n);
@@ -112,6 +113,7 @@ private:
     vector<Opcode> ops;
     vector<lbyte> vstack;
     vector<size_t> breaks;
+    bool method = false;
 
     size_t len();
     void emit(Opcode op);

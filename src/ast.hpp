@@ -71,6 +71,7 @@ namespace ast
     {
         MetaNode header;
         Noderef decnode;
+        bool is_upvalue;
     };
 
     struct MetaLabel
@@ -82,14 +83,20 @@ namespace ast
     struct MetaMemory
     {
         MetaNode header;
+        Noderef scope;
         size_t offset;
-        bool is_stack;
+        bool is_upvalue;
     };
 
     struct MetaScope
     {
         MetaNode header;
-        size_t size;
+        Noderef func;
+        Noderef parent;
+        size_t stack_size;
+        size_t upvalue_size;
+        bool variadic;
+        void *map;
     };
 
     class Node

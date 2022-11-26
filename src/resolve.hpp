@@ -2,11 +2,11 @@
 #define RESOLVE_HPP
 
 #include "ast.hpp"
-#include <unordered_map>
+#include <map>
 
 using namespace ast;
 
-typedef std::unordered_map<std::string, Noderef> Varmap;
+typedef std::map<std::string, Noderef> Varmap;
 
 struct SemanticError
 {
@@ -14,22 +14,15 @@ struct SemanticError
     string text;
 };
 
-struct Scope
-{
-    Noderef node;
-    Varmap map;
-    size_t stack_size;
-    bool variadic;
-};
-
 class SemanticAnalyzer
 {
 private:
-    vector<Scope> scopes;
     Varmap labels;
+    vector<Noderef> decls;
     vector<Noderef> gotolist;
     vector<SemanticError> errors;
     Ast ast;
+    Noderef current;
 
     void analyze_node(Noderef node);
     void analyze_var_decl(Noderef node);
@@ -38,8 +31,11 @@ private:
     void analyze_break(Noderef node);
     void analyze_label(Noderef node);
     void analyze_declaration(Noderef node);
-    Scope &curscope();
+    void reference(Noderef node, Noderef dec, bool func_past);
     void finalize();
+    void fix_offsets();
+    MetaScope *curscope();
+    Varmap &curmap();
 
 public:
     SemanticAnalyzer(Ast ast);
