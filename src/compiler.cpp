@@ -25,49 +25,24 @@ lnumber token_number(Token t)
     return 0;
 }
 
-void Lfunction::push(lbyte b)
+Lfunction *Compiler::compile(Noderef root)
 {
-    this->text.push_back(b);
-}
-lbyte &Lfunction::operator[](size_t index)
-{
-    return this->text[index];
-}
-size_t Lfunction::clen()
-{
-    return this->text.size();
-}
-size_t Lfunction::number(lnumber n)
-{
-    size_t i = this->nconst.size();
-    this->nconst.push_back(n);
-    return i;
-}
-
-size_t Lfunction::func(Lfunction fn)
-{
-    size_t i = this->fconst.size();
-    this->fconst.push_back(std::move(fn));
-    return i;
-}
-
-size_t Lfunction::cstr(const char *s)
-{
-    size_t i = this->sconst.size();
-    this->sconst.push_back(s);
-    return i;
-}
-Lfunction::~Lfunction()
-{
-    for (size_t i = 0; i < this->sconst.size(); i++)
-        free((void *)this->sconst[i]);
-}
-
-Lfunction Compiler::compile(Ast ast)
-{
-    this->compile_node(ast.root());
+    this->compile_node(root);
     this->emit(Opcode(Instruction::IRet, 0));
-    return std::move(this->func);
+    MetaScope *md = (MetaScope *)root->getannot(MetaKind::MScope);
+    MetaScope *fnmd = (MetaScope *)md->func->getannot(MetaKind::MScope);
+
+    Lfunction *fn = this->rt->create_luafn(this->text, this->rodata, this->upvalues, md->stack_size, fnmd->fn_idx);
+    this->text.clear();
+    this->rodata.clear();
+    this->upvalues.clear();
+    return fn;
+}
+
+void Compiler::compile(Ast ast)
+{
+    this->compile(ast.root());
+    return;
 }
 
 lbyte tkn_binops[] = {
@@ -121,7 +96,7 @@ size_t Compiler::arglist_count(Noderef arglist)
 }
 size_t Compiler::len()
 {
-    return this->func.clen();
+    return this->text.size();
 }
 
 void Compiler::compile_if(Noderef node)
@@ -145,15 +120,15 @@ void Compiler::compile_if(Noderef node)
             jmps.push_back(this->len());
             this->emit(Opcode(Instruction::IJmp, 0));
             size_t cjmp_idx = this->len();
-            this->func[cjmp + 1] = cjmp_idx % 256;
-            this->func[cjmp + 2] = cjmp_idx >> 8;
+            this->text[cjmp + 1] = cjmp_idx % 256;
+            this->text[cjmp + 2] = cjmp_idx >> 8;
         }
     }
     size_t jmp_idx = this->len();
     for (size_t i = 0; i < jmps.size(); i++)
     {
-        this->func[jmps[i] + 1] = jmp_idx % 256;
-        this->func[jmps[i] + 2] = jmp_idx >> 8;
+        this->text[jmps[i] + 1] = jmp_idx % 256;
+        this->text[jmps[i] + 2] = jmp_idx >> 8;
     }
 }
 
@@ -193,8 +168,8 @@ void Compiler::compile_identifier(Noderef node)
         {
             MetaScope *fnsc = (MetaScope *)mm->scope->getannot(MetaKind::MScope);
             size_t fn_idx = fnsc->fn_idx;
-            size_t upvalue_idx = this->func.upvalues.size();
-            this->func.upvalues.push_back(Upvalue{.offset = mm->offset, .fn_idx = fn_idx});
+            size_t upvalue_idx = this->upvalues.size();
+            this->upvalues.push_back(Upvalue{.offset = mm->offset, .fn_idx = fn_idx});
             this->emit(Opcode(Instruction::IUpvalue, upvalue_idx));
         }
         else
@@ -336,16 +311,16 @@ void Compiler::compile_exp_e(Noderef node, size_t expect)
             this->emit(Opcode(Instruction::INil));
 }
 
+Compiler::Compiler(Lua *rt) : rt(rt), method(false)
+{
+}
+
 void Compiler::compile_function(Noderef node)
 {
-    Compiler compiler;
-    MetaScope *md = (MetaScope *)node->getannot(MetaKind::MScope);
-    compiler.func.parlen = md->stack_size;
+    Compiler compiler(this->rt);
     compiler.method = node->get_kind() == NodeKind::MethodBody;
-    compiler.compile_block(node->child(1));
-    Lfunction fn = std::move(compiler.func);
-    size_t fidx = this->func.func(std::move(fn));
-    this->emit(Opcode(Instruction::IFConst, fidx));
+    Lfunction *fn = compiler.compile(node->child(1));
+    this->emit(Opcode(Instruction::IFConst, fn->fidx));
 }
 
 void Compiler::compile_exp(Noderef node)
@@ -371,8 +346,8 @@ void Compiler::compile_lvalue_primary(Noderef node)
         {
             MetaScope *fnsc = (MetaScope *)mm->scope->getannot(MetaKind::MScope);
             size_t fn_idx = fnsc->fn_idx;
-            size_t upvalue_idx = this->func.upvalues.size();
-            this->func.upvalues.push_back(Upvalue{.offset = mm->offset, .fn_idx = fn_idx});
+            size_t upvalue_idx = this->upvalues.size();
+            this->upvalues.push_back(Upvalue{.offset = mm->offset, .fn_idx = fn_idx});
             this->ops_push(Opcode(Instruction::IUStore, upvalue_idx));
         }
         else
@@ -509,8 +484,8 @@ void Compiler::compile_generic_for(Noderef node)
     this->loop_start();
     this->compile_block(node->child(2));
     this->emit(Opcode(Instruction::IJmp, loop_start));
-    this->func[cjmp + 1] = this->len() % 256;
-    this->func[cjmp + 2] = this->len() >> 8;
+    this->text[cjmp + 1] = this->len() % 256;
+    this->text[cjmp + 2] = this->len() >> 8;
     this->loop_end();
     this->emit(Opcode(Instruction::IPop, varlist->child_count() + 3));
 }
@@ -545,8 +520,8 @@ void Compiler::compile_numeric_for(Noderef node)
     this->emit(Instruction::IAdd);
     this->emit(Opcode(Instruction::ILStore, this->varmem(lvalue)->offset));
     this->emit(Opcode(Instruction::IJmp, loop_start));
-    this->func[cjmp + 1] = this->len() % 256;
-    this->func[cjmp + 2] = this->len() >> 8;
+    this->text[cjmp + 1] = this->len() % 256;
+    this->text[cjmp + 2] = this->len() >> 8;
     this->loop_end();
     this->emit(Opcode(Instruction::IPop, 3));
 }
@@ -580,8 +555,8 @@ void Compiler::compile_logic(Noderef node)
     this->emit(Opcode(Instruction::ICjmp, 0));
     this->emit(Opcode(Instruction::IPop, 1));
     this->compile_exp(node->child(2));
-    this->func[cjmp + 1] = this->len() % 256;
-    this->func[cjmp + 2] = this->len() >> 8;
+    this->text[cjmp + 1] = this->len() % 256;
+    this->text[cjmp + 2] = this->len() >> 8;
 }
 
 void Compiler::compile_block(Noderef node)
@@ -625,8 +600,8 @@ void Compiler::compile_while(Noderef node)
     this->compile_block(node->child(1));
     this->emit(Opcode(Instruction::IJmp, jmp_idx));
     this->loop_end();
-    this->func[cjmp + 1] = this->len() % 256;
-    this->func[cjmp + 2] = this->len() >> 8;
+    this->text[cjmp + 1] = this->len() % 256;
+    this->text[cjmp + 2] = this->len() >> 8;
 }
 
 void Compiler::compile_repeat(Noderef node)
@@ -674,20 +649,27 @@ void Compiler::compile_node(Noderef node)
         exit(4);
 }
 
+size_t Compiler::constant(LuaValue val)
+{
+    size_t idx = this->rodata.size();
+    this->rodata.push_back(std::move(val));
+    return idx;
+}
+
 size_t Compiler::const_number(lnumber n)
 {
-    return this->func.number(n);
+    return this->constant(this->rt->create_number(n));
 }
 
 size_t Compiler::const_string(const char *s)
 {
-    return this->func.cstr(s);
+    return this->constant(this->rt->create_string(s));
 }
 
 void Compiler::emit(Opcode op)
 {
     for (int i = 0; i < op.count; i++)
-        this->func.push(op.bytes[i]);
+        this->text.push_back(op.bytes[i]);
 }
 
 void Compiler::ops_flush()
@@ -714,8 +696,8 @@ void Compiler::loop_end()
     while (this->breaks.back())
     {
         size_t brk = this->breaks.back() - 1;
-        this->func.text[brk + 1] = idx % 256;
-        this->func.text[brk + 2] = idx >> 8;
+        this->text[brk + 1] = idx % 256;
+        this->text[brk + 2] = idx >> 8;
         this->breaks.pop_back();
     }
     this->breaks.pop_back();
@@ -766,98 +748,4 @@ Opcode::Opcode(lbyte op)
 {
     this->bytes[0] = op;
     this->count = 1;
-}
-
-string Lfunction::stringify()
-{
-    const char *opnames[256];
-    opnames[IAdd] = "add";
-    opnames[ISub] = "sub";
-    opnames[IMult] = "mult";
-    opnames[IFlrDiv] = "flrdiv";
-    opnames[IFltDiv] = "fltdiv";
-    opnames[IMod] = "mod";
-    opnames[IPow] = "pow";
-    opnames[IConcat] = "concat";
-    opnames[IBOr] = "or";
-    opnames[IBAnd] = "and";
-    opnames[IBXor] = "xor";
-    opnames[ISHR] = "shl";
-    opnames[ISHL] = "shr";
-    opnames[ILength] = "length";
-    opnames[INegate] = "negate";
-    opnames[INot] = "not";
-    opnames[IBNot] = "bnot";
-    opnames[IEq] = "eq";
-    opnames[INe] = "ne";
-    opnames[IGe] = "ge";
-    opnames[IGt] = "gt";
-    opnames[ILe] = "le";
-    opnames[ILt] = "lt";
-    opnames[ITGet] = "tget";
-    opnames[ITSet] = "tset";
-    opnames[ITNew] = "tnew";
-    opnames[IGGet] = "gget";
-    opnames[IGSet] = "gset";
-    opnames[INil] = "nil";
-    opnames[ITrue] = "true";
-    opnames[IFalse] = "false";
-    opnames[IFVargs] = "fvargs";
-
-    opnames[IRet] = opnames[IRet + 1] = "ret";
-    opnames[IJmp] = opnames[IJmp + 1] = "jmp";
-    opnames[ICjmp] = opnames[ICjmp + 1] = "cjmp";
-    opnames[ICall] = opnames[ICall + 1] = opnames[ICall + 2] = opnames[ICall + 3] = "call";
-    opnames[IVargs] = opnames[IVargs + 1] = "vargs";
-    opnames[ITList] = opnames[ITList + 1] = "tlist";
-    opnames[ICall] = opnames[ICall + 1] = "call";
-    opnames[INConst] = opnames[INConst + 1] = "NC";
-    opnames[ISConst] = opnames[ISConst + 1] = "SC";
-    opnames[IFConst] = opnames[IFConst + 1] = "FC";
-    opnames[ILocal] = opnames[ILocal + 1] = "local";
-    opnames[ILStore] = opnames[ILStore + 1] = "lstore";
-    opnames[IBLocal] = opnames[IBLocal + 1] = "blocal";
-    opnames[IBLStore] = opnames[IBLStore + 1] = "blstore";
-    opnames[IUpvalue] = opnames[IUpvalue + 1] = "upvalue";
-    opnames[IUStore] = opnames[IUStore + 1] = "ustore";
-    opnames[IPush] = opnames[IPush + 1] = "push";
-    opnames[IPop] = opnames[IPop + 1] = "pop";
-
-    string text;
-    for (size_t i = 0; i < this->clen(); i++)
-    {
-        lbyte op = this->text[i];
-        text.append(opnames[op]);
-        if (op >> 7)
-        {
-            if (op == ICall)
-            {
-
-                int opr1 = this->text[++i];
-                if (op & 0x2)
-                    opr1 += this->text[++i] * 256;
-
-                int opr2 = this->text[++i];
-                if (op & 0x1)
-                    opr2 += this->text[++i] * 256;
-
-                text.push_back(' ');
-                text += std::to_string(opr1);
-                text.push_back(' ');
-                text += std::to_string(opr2);
-            }
-            else
-            {
-                int opr = this->text[++i];
-                if (op & 0x01)
-                    opr += this->text[++i] * 256;
-
-                text.push_back(' ');
-                text += std::to_string(opr);
-            }
-        }
-        text.push_back('\n');
-    }
-
-    return text;
 }

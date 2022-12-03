@@ -10,6 +10,7 @@ add_executable(luayed
     src/ast.cpp
     src/monoheap.cpp
     src/resolve.cpp
+    src/runtime.cpp
 )
 
 add_executable(luaytest

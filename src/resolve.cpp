@@ -169,7 +169,7 @@ void SemanticAnalyzer::analyze_etc(Noderef node)
         sc->variadic = false;
         sc->parent = this->current;
         sc->stack_size = 0;
-        sc->fn_idx = is_fn ? this->fn_idx++ : 0;
+        sc->fn_idx = (is_fn || (!this->current)) ? this->fn_idx++ : 0;
         sc->upvalue_size = is_meth(node) ? 1 : 0;
 
         this->current = node;
@@ -279,6 +279,6 @@ void SemanticAnalyzer::finalize()
     this->labels.clear();
 }
 
-SemanticAnalyzer::SemanticAnalyzer(Ast ast) : ast(ast), fn_idx(0)
+SemanticAnalyzer::SemanticAnalyzer(Ast ast) : ast(ast), fn_idx(1)
 {
 }

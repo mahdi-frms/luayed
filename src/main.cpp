@@ -26,13 +26,13 @@ char *readfile(const char *path)
     return text;
 }
 
-void print_fn(Lfunction *fn)
+void print_fns(Lua *rt)
 {
-    std::cout << fn->stringify();
-    for (size_t i = 0; i < fn->fconst.size(); i++)
+    printf("SZ=%lu\n", rt->functable.size());
+    for (size_t i = 1; i < rt->functable.size(); i++)
     {
+        std::cout << rt->functable[i]->stringify();
         std::cout << "----------------------------\n";
-        print_fn(&fn->fconst[i]);
     }
 }
 
@@ -55,11 +55,12 @@ bool parse(const char *path)
             sem.analyze();
             if (compile)
             {
-                Compiler compiler;
-                Lfunction bin = compiler.compile(tree);
+                Lua lua;
+                Compiler compiler(&lua);
+                compiler.compile(tree);
                 if (!silence)
                 {
-                    print_fn(&bin);
+                    print_fns(&lua);
                 }
             }
             if (!silence && !compile)
