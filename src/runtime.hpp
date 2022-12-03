@@ -164,7 +164,12 @@ public:
     LuaValue create_number(lnumber n);
     LuaValue create_string(const char *s);
     LuaValue create_table();
-    Lfunction *create_luafn(vector<lbyte> &text, vector<LuaValue> &rodata, vector<Upvalue> &ups, size_t parlen, size_t fidx);
+    Lfunction *create_binary(
+        vector<lbyte> &text,
+        vector<LuaValue> &rodata,
+        vector<Upvalue> &ups,
+        size_t parlen,
+        size_t fidx);
     LuaValue create_cppfn(LuaCppFunction fn);
 
     LuaValue clone_value(LuaValue &value);
@@ -177,15 +182,6 @@ struct LuaFunction
 {
     void *fn;
     bool is_lua;
-};
-
-union LuaData
-{
-    bool b;
-    lnumber n;
-    char *s;
-    LuaFunction *f;
-    LuaTable *t;
 };
 
 class LuaValue

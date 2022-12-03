@@ -174,7 +174,7 @@ LuaValue Lua::create_number(lnumber n)
     return val;
 }
 
-Lfunction *Lua::create_luafn(vector<lbyte> &text, vector<LuaValue> &rodata, vector<Upvalue> &ups, size_t parlen, size_t fidx)
+Lfunction *Lua::create_binary(vector<lbyte> &text, vector<LuaValue> &rodata, vector<Upvalue> &ups, size_t parlen, size_t fidx)
 {
     Lfunction *fn = (Lfunction *)this->allocate(
         sizeof(Lfunction) +

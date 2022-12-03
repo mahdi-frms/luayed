@@ -32,7 +32,7 @@ Lfunction *Compiler::compile(Noderef root)
     MetaScope *md = (MetaScope *)root->getannot(MetaKind::MScope);
     MetaScope *fnmd = (MetaScope *)md->func->getannot(MetaKind::MScope);
 
-    Lfunction *fn = this->rt->create_luafn(this->text, this->rodata, this->upvalues, md->stack_size, fnmd->fn_idx);
+    Lfunction *fn = this->rt->create_binary(this->text, this->rodata, this->upvalues, md->stack_size, fnmd->fn_idx);
     this->text.clear();
     this->rodata.clear();
     this->upvalues.clear();
