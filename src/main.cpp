@@ -28,7 +28,6 @@ char *readfile(const char *path)
 
 void print_fns(Lua *rt)
 {
-    printf("SZ=%lu\n", rt->functable.size());
     for (size_t i = 1; i < rt->functable.size(); i++)
     {
         std::cout << rt->functable[i]->stringify();

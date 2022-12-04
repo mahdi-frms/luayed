@@ -174,7 +174,13 @@ LuaValue Lua::create_number(lnumber n)
     return val;
 }
 
-Lfunction *Lua::create_binary(vector<lbyte> &text, vector<LuaValue> &rodata, vector<Upvalue> &ups, size_t parlen, size_t fidx)
+Lfunction *Lua::create_binary(vector<lbyte> &text,
+                              vector<LuaValue> &rodata,
+                              vector<Upvalue> &ups,
+                              size_t parlen,
+                              size_t fidx,
+                              size_t stack_size,
+                              size_t upvalue_size)
 {
     Lfunction *fn = (Lfunction *)this->allocate(
         sizeof(Lfunction) +
@@ -184,6 +190,8 @@ Lfunction *Lua::create_binary(vector<lbyte> &text, vector<LuaValue> &rodata, vec
 
     fn->fidx = fidx;
     fn->parlen = parlen;
+    fn->stack_size = stack_size;
+    fn->upvalue_size = upvalue_size;
     fn->codelen = text.size();
     fn->rolen = rodata.size();
     fn->uplen = ups.size();
@@ -208,4 +216,117 @@ void *Lua::allocate(size_t size)
 void Lua::deallocate(void *ptr)
 {
     free(ptr);
+}
+LuaValue Frame::pop()
+{
+    this->sp--;
+    return this->stack()[this->sp];
+}
+void Frame::push(LuaValue value)
+{
+    this->stack()[this->sp] = value;
+    this->sp++;
+}
+void Lua::new_frame(size_t stack_size)
+{
+    Frame *frame = (Frame *)this->allocate(sizeof(Frame) + stack_size);
+    frame->fn = this->create_nil();
+    frame->stack_size = stack_size;
+    frame->prev = this->frame;
+    frame->sp = 0;
+    frame->retc = 0;
+    this->frame = frame;
+}
+void Lua::destroy_frame()
+{
+    Frame *frame = this->frame;
+    this->frame = frame->prev;
+    this->deallocate(frame);
+}
+
+void Lua::fncall(size_t argc, size_t retc)
+{
+    this->frame->retc = retc;
+    if (argc > this->frame->sp)
+    {
+        // FIXME: throw error
+        return;
+    }
+    size_t fn_idx = this->frame->sp - argc;
+    LuaValue *fn = this->frame->stack() + fn_idx;
+    if (fn->data.f->is_lua)
+    {
+        // FIXME: call intrprt
+    }
+    else
+    {
+        this->new_frame(1024 + argc);
+        Frame *prev = this->frame->prev;
+        for (size_t i = 0; i < argc; i++)
+        {
+            this->frame->push(prev->stack()[fn_idx + i + 1]);
+        }
+        for (size_t i = 0; i < prev->vargsc; i++)
+        {
+            this->frame->push(prev->stack()[prev->sp + i]);
+        }
+        prev->vargsc = 0;
+        prev->sp -= (1 + argc);
+
+        LuaCppFunction cppfn = (LuaCppFunction)fn->data.f->fn;
+        size_t retc = cppfn(this);
+        this->fnret(retc);
+    }
+}
+void Lua::fnret(size_t count)
+{
+    if (!this->frame->prev)
+    {
+        // FIXME: error
+    }
+    Frame *prev = this->frame->prev;
+    if (this->frame->sp < count)
+    {
+        // FIXME: error
+    }
+    size_t sidx = this->frame->sp - count;
+    if (prev->retc)
+    {
+        size_t i = 0;
+        size_t c = count + prev->vargsc;
+        while (--prev->retc)
+        {
+            if (i < c)
+            {
+                i++;
+                prev->push(this->frame->stack()[sidx + i]);
+            }
+            else
+                prev->push(this->create_nil());
+        }
+    }
+    else
+    {
+        for (size_t i = 0; i < count + prev->vargsc; i++)
+        {
+            prev->push(this->frame->stack()[sidx + i]);
+        }
+    }
+    this->destroy_frame();
+}
+Lfunction *Frame::bin()
+{
+    return (Lfunction *)this->fn.data.f->fn;
+}
+LuaValue *Frame::stack()
+{
+    return (LuaValue *)(this->hooktable() + 32333);
+}
+Hook *Frame::uptable()
+{
+    return (Hook *)(this + 1);
+}
+Hook *Frame::hooktable()
+{
+    return (Hook *)(this->uptable() + this->bin()->uplen);
 }

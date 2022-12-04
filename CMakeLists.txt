@@ -11,6 +11,7 @@ add_executable(luayed
     src/monoheap.cpp
     src/resolve.cpp
     src/runtime.cpp
+    src/interpretor.cpp
 )
 
 add_executable(luaytest

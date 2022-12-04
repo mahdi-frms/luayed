@@ -1,5 +1,5 @@
-#ifndef INTERPRETOR_HPP
-#define INTERPRETOR_HPP
+#ifndef RUNTIME_HPP
+#define RUNTIME_HPP
 
 #include <set>
 #include <map>
@@ -9,7 +9,8 @@
 
 class LuaValue;
 class Lua;
-typedef void (*LuaCppFunction)(Lua *);
+typedef size_t (*LuaCppFunction)(Lua *);
+struct LuaFunction;
 
 template <typename T>
 using vector = std::vector<T>;
@@ -95,6 +96,8 @@ public:
     size_t rolen = 0;
     size_t parlen = 0;
     size_t fidx = 0;
+    size_t stack_size = 0;
+    size_t upvalue_size = 0;
 
     lbyte *text();
     Upvalue *ups();
@@ -153,36 +156,7 @@ public:
     void remove(char *lstr);
 };
 
-class Lua
-{
-public:
-    StringInterner interner;
-    vector<Lfunction *> functable;
-
-    LuaValue create_nil();
-    LuaValue create_boolean(bool b);
-    LuaValue create_number(lnumber n);
-    LuaValue create_string(const char *s);
-    LuaValue create_table();
-    Lfunction *create_binary(
-        vector<lbyte> &text,
-        vector<LuaValue> &rodata,
-        vector<Upvalue> &ups,
-        size_t parlen,
-        size_t fidx);
-    LuaValue create_cppfn(LuaCppFunction fn);
-
-    LuaValue clone_value(LuaValue &value);
-    void destroy_value(LuaValue &value);
-    void *allocate(size_t size);
-    void deallocate(void *ptr);
-};
-
-struct LuaFunction
-{
-    void *fn;
-    bool is_lua;
-};
+class Frame;
 
 class LuaValue
 {
@@ -196,6 +170,70 @@ public:
         LuaFunction *f;
         LuaTable *t;
     } data;
+};
+
+struct Hook
+{
+    LuaValue val;
+    Frame *frame;
+};
+
+struct Frame
+{
+    size_t stack_size;
+    size_t sp;
+    LuaValue fn;
+    Frame *prev;
+    size_t retc;
+    size_t vargsc;
+
+    Lfunction *bin();
+    LuaValue *stack();
+    LuaValue *args();
+    Hook *uptable();
+    Hook *hooktable();
+
+    LuaValue pop();
+    void push(LuaValue value);
+};
+
+class Lua
+{
+public:
+    StringInterner interner;
+    vector<Lfunction *> functable;
+    Frame *frame;
+
+    LuaValue create_nil();
+    LuaValue create_boolean(bool b);
+    LuaValue create_number(lnumber n);
+    LuaValue create_string(const char *s);
+    LuaValue create_table();
+    Lfunction *create_binary(
+        vector<lbyte> &text,
+        vector<LuaValue> &rodata,
+        vector<Upvalue> &ups,
+        size_t parlen,
+        size_t fidx,
+        size_t stack_size,
+        size_t upvalue_size);
+    LuaValue create_cppfn(LuaCppFunction fn);
+
+    LuaValue clone_value(LuaValue &value);
+    void destroy_value(LuaValue &value);
+    void *allocate(size_t size);
+    void deallocate(void *ptr);
+
+    void fncall(size_t argc, size_t retc);
+    void fnret(size_t count);
+    void new_frame(size_t stack_size);
+    void destroy_frame();
+};
+
+struct LuaFunction
+{
+    void *fn;
+    bool is_lua;
 };
 
 #endif
