@@ -54,7 +54,11 @@ Upvalue *Lfunction::ups()
 }
 LuaValue *Lfunction::rodata()
 {
-    return (LuaValue *)(this->text() + this->codelen);
+    return (LuaValue *)(this->parmap() + this->parlen);
+}
+size_t *Lfunction::parmap()
+{
+    return (size_t *)(this->text() + this->codelen);
 }
 
 string Lfunction::stringify()
@@ -177,7 +181,9 @@ LuaValue Lua::create_number(lnumber n)
 Lfunction *Lua::create_binary(vector<lbyte> &text,
                               vector<LuaValue> &rodata,
                               vector<Upvalue> &ups,
+                              vector<size_t> &parmap,
                               size_t parlen,
+                              size_t parlistsize,
                               size_t fidx,
                               size_t stack_size,
                               size_t upvalue_size)
@@ -186,6 +192,7 @@ Lfunction *Lua::create_binary(vector<lbyte> &text,
         sizeof(Lfunction) +
         text.size() * sizeof(lbyte) +
         rodata.size() * sizeof(LuaValue) +
+        parmap.size() * sizeof(size_t) +
         ups.size() * sizeof(Upvalue));
 
     fn->fidx = fidx;
@@ -202,11 +209,17 @@ Lfunction *Lua::create_binary(vector<lbyte> &text,
         fn->rodata()[i] = rodata[i];
     for (size_t i = 0; i < ups.size(); i++)
         fn->ups()[i] = ups[i];
+    for (size_t i = 0; i < parmap.size(); i++)
+        fn->parmap()[i] = parmap[i];
 
     while (this->functable.size() <= fidx)
         this->functable.push_back(NULL);
     this->functable[fidx] = fn;
     return fn;
+}
+
+void Lua::destroy_value(LuaValue &value)
+{
 }
 
 void *Lua::allocate(size_t size)
@@ -230,7 +243,6 @@ void Frame::push(LuaValue value)
 void Lua::new_frame(size_t stack_size)
 {
     Frame *frame = (Frame *)this->allocate(sizeof(Frame) + stack_size);
-    frame->fn = this->create_nil();
     frame->stack_size = stack_size;
     frame->prev = this->frame;
     frame->sp = 0;
@@ -246,29 +258,31 @@ void Lua::destroy_frame()
 
 void Lua::fncall(size_t argc, size_t retc)
 {
-    this->frame->retc = retc;
-    if (argc > this->frame->sp)
+    Frame *prev = this->frame;
+    if (argc + 1 > prev->sp - prev->retc)
     {
         // FIXME: throw error
         return;
     }
-    size_t fn_idx = this->frame->sp - argc;
-    LuaValue *fn = this->frame->stack() + fn_idx;
+    size_t pidx = prev->sp - prev->retc - argc - 1;
+    LuaValue *fn = prev->stack() + pidx;
     if (fn->data.f->is_lua)
     {
-        // FIXME: call intrprt
+        this->interpretor->call(this, argc, retc);
     }
     else
     {
+        prev->retc = retc;
         this->new_frame(1024 + argc);
-        Frame *prev = this->frame->prev;
+        Frame *frame = this->frame;
+        frame->fn = *fn;
         for (size_t i = 0; i < argc; i++)
         {
-            this->frame->push(prev->stack()[fn_idx + i + 1]);
+            frame->push(prev->stack()[pidx + i + 1]);
         }
         for (size_t i = 0; i < prev->vargsc; i++)
         {
-            this->frame->push(prev->stack()[prev->sp + i]);
+            frame->push(prev->stack()[prev->sp + i]);
         }
         prev->vargsc = 0;
         prev->sp -= (1 + argc);
@@ -280,37 +294,43 @@ void Lua::fncall(size_t argc, size_t retc)
 }
 void Lua::fnret(size_t count)
 {
-    if (!this->frame->prev)
+    Frame *frame = this->frame;
+    if (!frame->prev)
     {
         // FIXME: error
     }
     Frame *prev = this->frame->prev;
-    if (this->frame->sp < count)
+    if (frame->sp < count)
     {
         // FIXME: error
     }
-    size_t sidx = this->frame->sp - count;
+    size_t sidx = frame->sp - frame->retc - count;
     if (prev->retc)
     {
         size_t i = 0;
-        size_t c = count + prev->vargsc;
+        size_t c = count + frame->retc;
         while (--prev->retc)
         {
             if (i < c)
             {
                 i++;
-                prev->push(this->frame->stack()[sidx + i]);
+                prev->push(frame->stack()[sidx + i]);
             }
             else
                 prev->push(this->create_nil());
         }
+        while (i != c)
+        {
+            this->destroy_value(frame->stack()[sidx + i++]);
+        }
     }
     else
     {
-        for (size_t i = 0; i < count + prev->vargsc; i++)
+        for (size_t i = 0; i < count + frame->retc; i++)
         {
-            prev->push(this->frame->stack()[sidx + i]);
+            prev->push(frame->stack()[sidx + i]);
         }
+        prev->retc = count + frame->retc;
     }
     this->destroy_frame();
 }

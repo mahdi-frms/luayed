@@ -9,6 +9,7 @@
 
 class LuaValue;
 class Lua;
+class Frame;
 typedef size_t (*LuaCppFunction)(Lua *);
 struct LuaFunction;
 
@@ -97,11 +98,13 @@ public:
     size_t parlen = 0;
     size_t fidx = 0;
     size_t stack_size = 0;
+    size_t parlistsize = 0;
     size_t upvalue_size = 0;
 
     lbyte *text();
     Upvalue *ups();
     LuaValue *rodata();
+    size_t *parmap();
 
     string stringify();
 
@@ -146,6 +149,12 @@ struct InternString
     friend bool operator<(const InternString &l, const InternString &r);
 };
 
+class IInterpretor
+{
+public:
+    virtual void call(Lua *rt, size_t argc, size_t retc) = 0;
+};
+
 class StringInterner
 {
 private:
@@ -155,8 +164,6 @@ public:
     char *insert(char *lstr);
     void remove(char *lstr);
 };
-
-class Frame;
 
 class LuaValue
 {
@@ -203,6 +210,7 @@ public:
     StringInterner interner;
     vector<Lfunction *> functable;
     Frame *frame;
+    IInterpretor *interpretor;
 
     LuaValue create_nil();
     LuaValue create_boolean(bool b);
@@ -213,9 +221,11 @@ public:
         vector<lbyte> &text,
         vector<LuaValue> &rodata,
         vector<Upvalue> &ups,
+        vector<size_t> &parmap,
         size_t parlen,
         size_t fidx,
         size_t stack_size,
+        size_t parlistsize,
         size_t upvalue_size);
     LuaValue create_cppfn(LuaCppFunction fn);
 

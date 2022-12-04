@@ -27,6 +27,11 @@ lnumber token_number(Token t)
 
 Lfunction *Compiler::compile(Noderef root)
 {
+    return this->compile(root, {});
+}
+
+Lfunction *Compiler::compile(Noderef root, vector<size_t> parmap)
+{
     this->compile_node(root);
     this->emit(Opcode(Instruction::IRet, 0));
     MetaScope *md = (MetaScope *)root->getannot(MetaKind::MScope);
@@ -36,6 +41,8 @@ Lfunction *Compiler::compile(Noderef root)
         this->text,
         this->rodata,
         this->upvalues,
+        parmap,
+        parmap.size(),
         md->stack_size,
         fnmd->fn_idx,
         1024,
@@ -327,7 +334,19 @@ void Compiler::compile_function(Noderef node)
 {
     Compiler compiler(this->rt);
     compiler.method = node->get_kind() == NodeKind::MethodBody;
-    Lfunction *fn = compiler.compile(node->child(1));
+    Noderef parlist = node->child(0);
+    vector<size_t> parmap;
+    for (size_t i = 0; i < parlist->child_count(); i++)
+    {
+        Noderef ch = parlist->child(i)->child(0);
+        Token tkn = ch->get_token();
+        if (tkn.kind == TokenKind::Identifier)
+        {
+            MetaMemory *mm = (MetaMemory *)ch->getannot(MetaKind::MMemory);
+            parmap.push_back(mm->offset);
+        }
+    }
+    Lfunction *fn = compiler.compile(node->child(1), std::move(parmap));
     this->emit(Opcode(Instruction::IFConst, fn->fidx));
 }
 

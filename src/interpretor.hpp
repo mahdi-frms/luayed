@@ -9,25 +9,25 @@ typedef void (Interpretor::*opimpl)();
 
 class Interpretor
 {
+public:
+    void call(Lua *rt, size_t argc, size_t retc);
+
 private:
     static opimpl optable[256];
+    static void optable_init();
 
     size_t ip = 0;
     lbyte op;
     size_t arg1;
     size_t arg2;
+    size_t retc = 0;
     bool end = false;
-
     Lua *rt = NULL;
 
-public:
-    static void optable_init();
-
-    void run(Lua *rt);
+    void load(size_t argc, size_t retc);
     lbyte iread();
     void fetch();
     void exec();
-
     Frame *frame();
     Lfunction *bin();
     size_t sp();
