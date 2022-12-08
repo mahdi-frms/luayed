@@ -34,11 +34,7 @@ void Compiler::compile(Noderef root, vector<size_t> parmap)
 {
     this->compile_node(root);
     this->emit(Opcode(Instruction::IRet, 0));
-    MetaScope *md = (MetaScope *)root->getannot(MetaKind::MScope);
-    MetaScope *fnmd = (MetaScope *)md->func->getannot(MetaKind::MScope);
-
     this->gen->popf();
-
     this->text.clear();
     this->rodata.clear();
     this->upvalues.clear();

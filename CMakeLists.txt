@@ -26,6 +26,8 @@ add_executable(luaytest
     lib/tap/tap.c
 )
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall")
+
 enable_testing()
 add_test(NAME "luayedtests" COMMAND luaytest)
 

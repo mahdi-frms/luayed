@@ -68,7 +68,7 @@ void Node::stringify(int depth, string &buffer)
 }
 
 Node::Node(Noderef *children, size_t count, NodeKind kind)
-    : children(children), count(count), kind(kind), token(token_none())
+    : token(token_none()), children(children), count(count), kind(kind)
 {
 }
 

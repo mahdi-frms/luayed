@@ -32,8 +32,8 @@ public:
 class LuaGenerator : IGenerator
 {
 private:
-    GenFunction *gfn;
     Lua *rt;
+    GenFunction *gfn;
     size_t add_const(LuaValue value);
 
 public:

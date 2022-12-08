@@ -6,16 +6,14 @@
         auto tmp = T;                    \
         if (tmp.kind != TokenKind::None) \
             return tmp;                  \
-    }                                    \
-    0
+    }
 
 #define RETK(T)                     \
     {                               \
         auto tmp = T;               \
         if (tmp != TokenKind::None) \
             return tmp;             \
-    }                               \
-    0
+    }
 
 string token_kind_stringify(TokenKind kind)
 {
