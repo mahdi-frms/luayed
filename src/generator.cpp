@@ -61,8 +61,9 @@ void LuaGenerator::pushf(fidx_t fidx)
 void LuaGenerator::popf()
 {
     rt->create_binary(this->gfn);
+    GenFunction *prev = this->gfn->prev;
     delete this->gfn;
-    this->gfn = this->gfn->prev;
+    this->gfn = prev;
 }
 
 void LuaGenerator::emit(Opcode opcode)
@@ -93,4 +94,14 @@ size_t LuaGenerator::add_const(LuaValue value)
     size_t idx = this->gfn->rodata.size();
     this->gfn->rodata.push_back(value);
     return idx;
+}
+size_t LuaGenerator::upval(fidx_t fidx, size_t offset)
+{
+    size_t idx = this->gfn->upvalues.size();
+    this->gfn->upvalues.push_back(Upvalue{.fidx = fidx, .offset = offset});
+    return idx;
+}
+void LuaGenerator::meta_parcount(size_t parcount)
+{
+    this->gfn->parcount = parcount;
 }

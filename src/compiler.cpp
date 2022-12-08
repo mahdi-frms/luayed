@@ -27,17 +27,11 @@ lnumber token_number(Token t)
 
 void Compiler::compile(Noderef root)
 {
-    this->compile(root, {});
-}
-
-void Compiler::compile(Noderef root, vector<size_t> parmap)
-{
-    this->compile_node(root);
+    MetaScope *fnscp = (MetaScope *)root->getannot(MetaKind::MScope);
+    this->gen->pushf(fnscp->fn_idx);
+    this->compile_node(root->get_kind() == NodeKind::Block ? root : root->child(1));
     this->emit(Opcode(Instruction::IRet, 0));
     this->gen->popf();
-    this->text.clear();
-    this->rodata.clear();
-    this->upvalues.clear();
 }
 
 void Compiler::compile(Ast ast)
@@ -96,7 +90,7 @@ size_t Compiler::arglist_count(Noderef arglist)
 }
 size_t Compiler::len()
 {
-    return this->text.size();
+    return this->gen->len();
 }
 
 void Compiler::compile_if(Noderef node)
@@ -120,16 +114,20 @@ void Compiler::compile_if(Noderef node)
             jmps.push_back(this->len());
             this->emit(Opcode(Instruction::IJmp, 0));
             size_t cjmp_idx = this->len();
-            this->text[cjmp + 1] = cjmp_idx % 256;
-            this->text[cjmp + 2] = cjmp_idx >> 8;
+            this->edit_jmp(cjmp, cjmp_idx);
         }
     }
     size_t jmp_idx = this->len();
     for (size_t i = 0; i < jmps.size(); i++)
     {
-        this->text[jmps[i] + 1] = jmp_idx % 256;
-        this->text[jmps[i] + 2] = jmp_idx >> 8;
+        this->edit_jmp(jmps[i], jmp_idx);
     }
+}
+
+void Compiler::edit_jmp(size_t opidx, size_t jmp_idx)
+{
+    this->seti(opidx + 1, jmp_idx % 256);
+    this->seti(opidx + 2, jmp_idx >> 8);
 }
 
 void Compiler::compile_methcall(Noderef node, size_t expect)
@@ -167,10 +165,7 @@ void Compiler::compile_identifier(Noderef node)
         if (md->is_upvalue)
         {
             MetaScope *fnsc = (MetaScope *)mm->scope->getannot(MetaKind::MScope);
-            size_t fn_idx = fnsc->fn_idx;
-            size_t upvalue_idx = this->upvalues.size();
-            this->upvalues.push_back(Upvalue{.offset = mm->offset, .fn_idx = fn_idx});
-            this->emit(Opcode(Instruction::IUpvalue, upvalue_idx));
+            this->emit(Opcode(Instruction::IUpvalue, this->upval(fnsc->fn_idx, mm->offset)));
         }
         else
         {
@@ -311,28 +306,14 @@ void Compiler::compile_exp_e(Noderef node, size_t expect)
             this->emit(Opcode(Instruction::INil));
 }
 
-Compiler::Compiler(Lua *rt) : rt(rt), method(false)
+Compiler::Compiler(IGenerator *gen) : gen(gen)
 {
 }
 
 void Compiler::compile_function(Noderef node)
 {
     MetaScope *fnscp = (MetaScope *)node->getannot(MetaKind::MScope);
-    Compiler compiler(this->rt);
-    compiler.method = node->get_kind() == NodeKind::MethodBody;
-    Noderef parlist = node->child(0);
-    vector<size_t> parmap;
-    for (size_t i = 0; i < parlist->child_count(); i++)
-    {
-        Noderef ch = parlist->child(i)->child(0);
-        Token tkn = ch->get_token();
-        if (tkn.kind == TokenKind::Identifier)
-        {
-            MetaMemory *mm = (MetaMemory *)ch->getannot(MetaKind::MMemory);
-            parmap.push_back(mm->offset);
-        }
-    }
-    compiler.compile(node->child(1), std::move(parmap));
+    this->compile(node);
     this->emit(Opcode(Instruction::IFConst, fnscp->fn_idx));
 }
 
@@ -358,10 +339,7 @@ void Compiler::compile_lvalue_primary(Noderef node)
         if (md && md->is_upvalue)
         {
             MetaScope *fnsc = (MetaScope *)mm->scope->getannot(MetaKind::MScope);
-            size_t fn_idx = fnsc->fn_idx;
-            size_t upvalue_idx = this->upvalues.size();
-            this->upvalues.push_back(Upvalue{.offset = mm->offset, .fn_idx = fn_idx});
-            this->ops_push(Opcode(Instruction::IUStore, upvalue_idx));
+            this->ops_push(Opcode(Instruction::IUStore, this->upval(fnsc->fn_idx, mm->offset)));
         }
         else
         {
@@ -497,10 +475,17 @@ void Compiler::compile_generic_for(Noderef node)
     this->loop_start();
     this->compile_block(node->child(2));
     this->emit(Opcode(Instruction::IJmp, loop_start));
-    this->text[cjmp + 1] = this->len() % 256;
-    this->text[cjmp + 2] = this->len() >> 8;
+    this->edit_jmp(cjmp, this->len());
     this->loop_end();
     this->emit(Opcode(Instruction::IPop, varlist->child_count() + 3));
+}
+void Compiler::seti(size_t idx, lbyte b)
+{
+    this->gen->seti(idx, b);
+}
+size_t Compiler::upval(fidx_t fidx, size_t offset)
+{
+    return this->gen->upval(fidx, offset);
 }
 
 void Compiler::compile_numeric_for(Noderef node)
@@ -533,8 +518,7 @@ void Compiler::compile_numeric_for(Noderef node)
     this->emit(Instruction::IAdd);
     this->emit(Opcode(Instruction::ILStore, this->varmem(lvalue)->offset));
     this->emit(Opcode(Instruction::IJmp, loop_start));
-    this->text[cjmp + 1] = this->len() % 256;
-    this->text[cjmp + 2] = this->len() >> 8;
+    this->seti(cjmp, this->len());
     this->loop_end();
     this->emit(Opcode(Instruction::IPop, 3));
 }
@@ -568,8 +552,7 @@ void Compiler::compile_logic(Noderef node)
     this->emit(Opcode(Instruction::ICjmp, 0));
     this->emit(Opcode(Instruction::IPop, 1));
     this->compile_exp(node->child(2));
-    this->text[cjmp + 1] = this->len() % 256;
-    this->text[cjmp + 2] = this->len() >> 8;
+    this->seti(cjmp, this->len());
 }
 
 void Compiler::compile_block(Noderef node)
@@ -613,8 +596,7 @@ void Compiler::compile_while(Noderef node)
     this->compile_block(node->child(1));
     this->emit(Opcode(Instruction::IJmp, jmp_idx));
     this->loop_end();
-    this->text[cjmp + 1] = this->len() % 256;
-    this->text[cjmp + 2] = this->len() >> 8;
+    this->seti(cjmp, this->len());
 }
 
 void Compiler::compile_repeat(Noderef node)
@@ -662,27 +644,19 @@ void Compiler::compile_node(Noderef node)
         exit(4);
 }
 
-size_t Compiler::constant(LuaValue val)
-{
-    size_t idx = this->rodata.size();
-    this->rodata.push_back(std::move(val));
-    return idx;
-}
-
 size_t Compiler::const_number(lnumber n)
 {
-    return this->constant(this->rt->create_number(n));
+    return this->gen->const_number(n);
 }
 
 size_t Compiler::const_string(const char *s)
 {
-    return this->constant(this->rt->create_string(s));
+    return this->gen->const_string(s);
 }
 
 void Compiler::emit(Opcode op)
 {
-    for (int i = 0; i < op.count; i++)
-        this->text.push_back(op.bytes[i]);
+    this->gen->emit(op);
 }
 
 void Compiler::ops_flush()
@@ -709,8 +683,7 @@ void Compiler::loop_end()
     while (this->breaks.back())
     {
         size_t brk = this->breaks.back() - 1;
-        this->text[brk + 1] = idx % 256;
-        this->text[brk + 2] = idx >> 8;
+        this->seti(brk, idx);
         this->breaks.pop_back();
     }
     this->breaks.pop_back();

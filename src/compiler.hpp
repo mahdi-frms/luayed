@@ -2,7 +2,6 @@
 #define COMPILER_HPP
 
 #include "ast.hpp"
-#include "runtime.hpp"
 #include "generator.hpp"
 
 using namespace ast;
@@ -11,21 +10,17 @@ class Compiler
 {
 private:
     IGenerator *gen;
-    Lua *rt;
     vector<Opcode> ops;
     vector<lbyte> vstack;
     vector<size_t> breaks;
-    vector<Upvalue> upvalues;
-    vector<lbyte> text;
-    vector<LuaValue> rodata;
-
-    bool method = false;
 
     size_t len();
     void emit(Opcode op);
     void ops_flush();
+    void edit_jmp(size_t opidx, size_t jmp_idx);
+    void seti(size_t idx, lbyte b);
+    size_t upval(fidx_t fidx, size_t offset);
     void ops_push(Opcode op);
-    size_t constant(LuaValue val);
     size_t const_number(lnumber n);
     size_t const_string(const char *s);
     size_t vstack_nearest_nil();
@@ -60,10 +55,9 @@ private:
     size_t arglist_count(Noderef arglist);
     lbyte translate_token(TokenKind kind, bool bin);
     void compile(Noderef root);
-    void compile(Noderef root, vector<size_t> parmap);
 
 public:
-    Compiler(Lua *rt);
+    Compiler(IGenerator *gen);
     void compile(Ast ast);
 };
 

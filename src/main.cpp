@@ -54,7 +54,8 @@ bool parse(const char *path)
             if (compile)
             {
                 Lua lua;
-                Compiler compiler(&lua);
+                LuaGenerator gen(&lua);
+                Compiler compiler((IGenerator *)&gen);
                 compiler.compile(tree);
                 if (!silence)
                 {

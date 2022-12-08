@@ -79,8 +79,8 @@ enum Instruction
 
 struct Upvalue
 {
+    fidx_t fidx;
     size_t offset;
-    size_t fn_idx;
 };
 
 class Lfunction

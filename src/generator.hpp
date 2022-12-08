@@ -26,10 +26,12 @@ public:
     virtual void pushf(fidx_t fidx) = 0;
     virtual void popf() = 0;
 
-    virtual size_t upval(size_t idx, size_t offset) = 0;
+    virtual size_t upval(fidx_t idx, size_t offset) = 0;
+
+    virtual void meta_parcount(size_t parcount) = 0;
 };
 
-class LuaGenerator : IGenerator
+class LuaGenerator final : IGenerator
 {
 private:
     Lua *rt;
@@ -48,6 +50,10 @@ public:
 
     void pushf(fidx_t fidx);
     void popf();
+
+    size_t upval(fidx_t idx, size_t offset);
+
+    void meta_parcount(size_t parcount);
 };
 
 #endif
