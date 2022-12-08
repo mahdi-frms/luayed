@@ -1,5 +1,4 @@
 #include <iostream>
-#include <cstdlib>
 #include <cstring>
 #include "compiler.hpp"
 #include "parser.hpp"
