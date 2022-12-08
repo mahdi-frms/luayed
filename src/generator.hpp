@@ -29,17 +29,6 @@ public:
     virtual size_t upval(size_t idx, size_t offset) = 0;
 };
 
-struct GenFunction;
-
-struct GenFunction
-{
-    GenFunction *prev;
-    vector<lbyte> text;
-    vector<LuaValue> rodata;
-    vector<Upvalue> upvalues;
-    fidx_t fidx;
-};
-
 class LuaGenerator : IGenerator
 {
 private:

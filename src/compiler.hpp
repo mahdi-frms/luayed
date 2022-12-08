@@ -59,8 +59,8 @@ private:
     void loop_end();
     size_t arglist_count(Noderef arglist);
     lbyte translate_token(TokenKind kind, bool bin);
-    Lfunction *compile(Noderef root);
-    Lfunction *compile(Noderef root, vector<size_t> parmap);
+    void compile(Noderef root);
+    void compile(Noderef root, vector<size_t> parmap);
 
 public:
     Compiler(Lua *rt);

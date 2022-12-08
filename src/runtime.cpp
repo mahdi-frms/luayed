@@ -54,11 +54,7 @@ Upvalue *Lfunction::ups()
 }
 LuaValue *Lfunction::rodata()
 {
-    return (LuaValue *)(this->parmap() + this->parlen);
-}
-size_t *Lfunction::parmap()
-{
-    return (size_t *)(this->text() + this->codelen);
+    return (LuaValue *)(this->text() + this->codelen);
 }
 
 string Lfunction::stringify()
@@ -178,43 +174,30 @@ LuaValue Lua::create_number(lnumber n)
     return val;
 }
 
-Lfunction *Lua::create_binary(vector<lbyte> &text,
-                              vector<LuaValue> &rodata,
-                              vector<Upvalue> &ups,
-                              vector<size_t> &parmap,
-                              size_t parlen,
-                              size_t parlistsize,
-                              size_t fidx,
-                              size_t stack_size,
-                              size_t upvalue_size)
+Lfunction *Lua::create_binary(GenFunction *gfn)
 {
     Lfunction *fn = (Lfunction *)this->allocate(
         sizeof(Lfunction) +
-        text.size() * sizeof(lbyte) +
-        rodata.size() * sizeof(LuaValue) +
-        parmap.size() * sizeof(size_t) +
-        ups.size() * sizeof(Upvalue));
+        gfn->text.size() * sizeof(lbyte) +
+        gfn->rodata.size() * sizeof(LuaValue) +
+        gfn->upvalues.size() * sizeof(Upvalue));
 
-    fn->fidx = fidx;
-    fn->parlen = parlen;
-    fn->stack_size = stack_size;
-    fn->upvalue_size = upvalue_size;
-    fn->codelen = text.size();
-    fn->rolen = rodata.size();
-    fn->uplen = ups.size();
+    fn->fidx = gfn->fidx;
+    fn->parcount = gfn->parcount;
+    fn->codelen = gfn->text.size();
+    fn->rolen = gfn->rodata.size();
+    fn->uplen = gfn->upvalues.size();
 
-    for (size_t i = 0; i < text.size(); i++)
-        fn->text()[i] = text[i];
-    for (size_t i = 0; i < rodata.size(); i++)
-        fn->rodata()[i] = rodata[i];
-    for (size_t i = 0; i < ups.size(); i++)
-        fn->ups()[i] = ups[i];
-    for (size_t i = 0; i < parmap.size(); i++)
-        fn->parmap()[i] = parmap[i];
+    for (size_t i = 0; i < gfn->text.size(); i++)
+        fn->text()[i] = gfn->text[i];
+    for (size_t i = 0; i < gfn->rodata.size(); i++)
+        fn->rodata()[i] = gfn->rodata[i];
+    for (size_t i = 0; i < gfn->upvalues.size(); i++)
+        fn->ups()[i] = gfn->upvalues[i];
 
-    while (this->functable.size() <= fidx)
+    while (this->functable.size() <= gfn->fidx)
         this->functable.push_back(NULL);
-    this->functable[fidx] = fn;
+    this->functable[gfn->fidx] = fn;
     return fn;
 }
 

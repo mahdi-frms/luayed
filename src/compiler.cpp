@@ -25,39 +25,28 @@ lnumber token_number(Token t)
     return 0;
 }
 
-Lfunction *Compiler::compile(Noderef root)
+void Compiler::compile(Noderef root)
 {
-    return this->compile(root, {});
+    this->compile(root, {});
 }
 
-Lfunction *Compiler::compile(Noderef root, vector<size_t> parmap)
+void Compiler::compile(Noderef root, vector<size_t> parmap)
 {
     this->compile_node(root);
     this->emit(Opcode(Instruction::IRet, 0));
     MetaScope *md = (MetaScope *)root->getannot(MetaKind::MScope);
     MetaScope *fnmd = (MetaScope *)md->func->getannot(MetaKind::MScope);
 
-    Lfunction *fn = this->rt->create_binary(
-        this->text,
-        this->rodata,
-        this->upvalues,
-        parmap,
-        parmap.size(),
-        md->stack_size,
-        fnmd->fn_idx,
-        1024,
-        fnmd->upvalue_size);
+    this->gen->popf();
 
     this->text.clear();
     this->rodata.clear();
     this->upvalues.clear();
-    return fn;
 }
 
 void Compiler::compile(Ast ast)
 {
     this->compile(ast.root());
-    return;
 }
 
 lbyte tkn_binops[] = {
@@ -332,6 +321,7 @@ Compiler::Compiler(Lua *rt) : rt(rt), method(false)
 
 void Compiler::compile_function(Noderef node)
 {
+    MetaScope *fnscp = (MetaScope *)node->getannot(MetaKind::MScope);
     Compiler compiler(this->rt);
     compiler.method = node->get_kind() == NodeKind::MethodBody;
     Noderef parlist = node->child(0);
@@ -346,8 +336,8 @@ void Compiler::compile_function(Noderef node)
             parmap.push_back(mm->offset);
         }
     }
-    Lfunction *fn = compiler.compile(node->child(1), std::move(parmap));
-    this->emit(Opcode(Instruction::IFConst, fn->fidx));
+    compiler.compile(node->child(1), std::move(parmap));
+    this->emit(Opcode(Instruction::IFConst, fnscp->fn_idx));
 }
 
 void Compiler::compile_exp(Noderef node)

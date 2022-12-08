@@ -57,32 +57,34 @@ void Interpretor::optable_init()
 
 void Interpretor::load(size_t argc, size_t retc)
 {
-    Frame *prev = this->rt->frame;
-    size_t targcount = prev->retc + argc;
-    size_t pidx = prev->sp - targcount - 1;
-    Lfunction *fn = (Lfunction *)((prev->stack() + pidx)->data.f->fn);
-    this->rt->new_frame(fn->stack_size);
-    Frame *frame = this->rt->frame;
-    if (targcount > fn->parlen)
-    {
-        frame->vargsc = targcount - fn->parlen;
-        size_t vidx = pidx + 1 + argc;
-        for (size_t i = 0; i < frame->vargsc; i++)
-            frame->push(prev->stack()[pidx + i]);
-    }
-    for (size_t i = 0; i < fn->uplen; i++)
-    {
-        frame->push(this->rt->create_nil());
-    }
-    frame->sp += fn->parlistsize;
-    size_t aidx = pidx + 1;
-    for (size_t i = 0; i < fn->parlen; i++)
-    {
-        if (aidx == pidx + 1 + argc)
-            frame->stack()[fn->parmap()[i]] = this->rt->create_nil();
-        else
-            frame->stack()[fn->parmap()[i]] = prev->stack()[aidx++];
-    }
+    // FIXME : must be reimplemented according to VM stack structure
+
+    // Frame *prev = this->rt->frame;
+    // size_t targcount = prev->retc + argc;
+    // size_t pidx = prev->sp - targcount - 1;
+    // Lfunction *fn = (Lfunction *)((prev->stack() + pidx)->data.f->fn);
+    // this->rt->new_frame(0);
+    // Frame *frame = this->rt->frame;
+    // if (targcount > fn->parcount)
+    // {
+    //     frame->vargsc = targcount - fn->parcount;
+    //     size_t vidx = pidx + 1 + argc;
+    //     for (size_t i = 0; i < frame->vargsc; i++)
+    //         frame->push(prev->stack()[pidx + i]);
+    // }
+    // for (size_t i = 0; i < fn->uplen; i++)
+    // {
+    //     frame->push(this->rt->create_nil());
+    // }
+    // frame->sp += fn->parcount;
+    // size_t aidx = pidx + 1;
+    // for (size_t i = 0; i < fn->parcount; i++)
+    // {
+    //     if (aidx == pidx + 1 + argc)
+    //         frame->stack()[fn->parmap()[i]] = this->rt->create_nil();
+    //     else
+    //         frame->stack()[fn->parmap()[i]] = prev->stack()[aidx++];
+    // }
 }
 
 void Interpretor::call(Lua *rt, size_t argc, size_t retc)

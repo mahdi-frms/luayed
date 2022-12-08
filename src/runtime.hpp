@@ -11,6 +11,7 @@
 class LuaValue;
 class Lua;
 class Frame;
+class GenFunction;
 typedef size_t (*LuaCppFunction)(Lua *);
 struct LuaFunction;
 
@@ -88,11 +89,9 @@ public:
     size_t codelen = 0;
     size_t uplen = 0;
     size_t rolen = 0;
-    size_t parlen = 0;
-    size_t fidx = 0;
-    size_t stack_size = 0;
-    size_t parlistsize = 0;
-    size_t upvalue_size = 0;
+    size_t hookmax = 0;
+    size_t parcount = 0;
+    fidx_t fidx = 0;
 
     lbyte *text();
     Upvalue *ups();
@@ -196,7 +195,15 @@ struct Frame
     LuaValue pop();
     void push(LuaValue value);
 };
-
+struct GenFunction
+{
+    GenFunction *prev;
+    vector<lbyte> text;
+    vector<LuaValue> rodata;
+    vector<Upvalue> upvalues;
+    fidx_t fidx;
+    size_t parcount;
+};
 class Lua
 {
 public:
@@ -210,16 +217,7 @@ public:
     LuaValue create_number(lnumber n);
     LuaValue create_string(const char *s);
     LuaValue create_table();
-    Lfunction *create_binary(
-        vector<lbyte> &text,
-        vector<LuaValue> &rodata,
-        vector<Upvalue> &ups,
-        vector<size_t> &parmap,
-        size_t parlen,
-        size_t fidx,
-        size_t stack_size,
-        size_t parlistsize,
-        size_t upvalue_size);
+    Lfunction *create_binary(GenFunction *gfn);
     LuaValue create_cppfn(LuaCppFunction fn);
 
     LuaValue clone_value(LuaValue &value);

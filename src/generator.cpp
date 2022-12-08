@@ -60,7 +60,7 @@ void LuaGenerator::pushf(fidx_t fidx)
 }
 void LuaGenerator::popf()
 {
-    // rt->create_binary(this->gfn);
+    rt->create_binary(this->gfn);
     delete this->gfn;
     this->gfn = this->gfn->prev;
 }
