@@ -47,7 +47,7 @@ Opcode::Opcode(lbyte op)
     this->count = 1;
 }
 
-LuaGenerator::LuaGenerator(Lua *rt) : rt(rt)
+LuaGenerator::LuaGenerator(Lua *rt) : rt(rt), gfn(nullptr)
 {
 }
 
