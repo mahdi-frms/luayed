@@ -11,6 +11,7 @@ add_executable(luayed
     src/monoheap.cpp
     src/resolve.cpp
     src/runtime.cpp
+    src/generator.cpp
     src/interpretor.cpp
 )
 

@@ -3,22 +3,14 @@
 
 #include "ast.hpp"
 #include "runtime.hpp"
+#include "generator.hpp"
 
 using namespace ast;
-
-struct Opcode
-{
-    lbyte count;
-    lbyte bytes[5];
-
-    Opcode(lbyte op, size_t idx);
-    Opcode(lbyte op, size_t idx1, size_t idx2);
-    Opcode(lbyte op);
-};
 
 class Compiler
 {
 private:
+    IGenerator *gen;
     Lua *rt;
     vector<Opcode> ops;
     vector<lbyte> vstack;

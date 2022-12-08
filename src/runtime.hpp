@@ -4,6 +4,7 @@
 #include <set>
 #include <map>
 #include <vector>
+#include "luadef.hpp"
 
 #define lstrnull NULL
 
@@ -12,14 +13,6 @@ class Lua;
 class Frame;
 typedef size_t (*LuaCppFunction)(Lua *);
 struct LuaFunction;
-
-template <typename T>
-using vector = std::vector<T>;
-
-typedef std::string string;
-
-typedef unsigned char lbyte;
-typedef double lnumber;
 
 enum Instruction
 {
