@@ -410,7 +410,6 @@ Lexer::Lexer(const char *text) : text(text)
     this->prev_pos = 0;
     this->prev_line = 0;
     this->prev_offset = 0;
-    this->tokens = vector<Token>();
 }
 
 Token::Token(const char *str, size_t len, size_t line, size_t offset, TokenKind kind)
@@ -737,14 +736,15 @@ Token Lexer::keyword_identifier(char c)
 
 vector<Token> Lexer::drain()
 {
+    vector<Token> tokens;
     while (true)
     {
         Token t = this->next();
-        this->tokens.push_back(t);
+        tokens.push_back(t);
         if (t.kind == TokenKind::Eof)
             break;
     }
-    return std::move(this->tokens);
+    return tokens;
 }
 
 Token Lexer::token(TokenKind kind)

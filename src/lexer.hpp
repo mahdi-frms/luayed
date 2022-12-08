@@ -3,11 +3,7 @@
 
 #include <string>
 #include <vector>
-
-typedef std::string string;
-
-template <typename T>
-using vector = std::vector<T>;
+#include "luadef.hpp"
 
 #define TOKEN_IS_PRIMARY(K) (K & 0x0100)
 #define TOKEN_IS_POSTFIX(K) (K & 0x0200)
@@ -119,7 +115,6 @@ class Lexer : ILexer
 {
 private:
     const char *text;
-    vector<Token> tokens;
     size_t pos;
     size_t offset;
     size_t line;

@@ -18,7 +18,7 @@ enum class BlockEnd
 class Parser
 {
 private:
-    ILexer &lexer;
+    ILexer *lexer;
     Token current;
     Token ahead;
     Monoheap heap;
@@ -58,7 +58,7 @@ private:
     Noderef make(Noderef c1, Noderef c2, Noderef c3, Noderef c4, Noderef c5, NodeKind kind);
 
 public:
-    Parser(ILexer &lexer);
+    Parser(ILexer *lexer);
     Ast parse();
     Ast parse_exp();
 };

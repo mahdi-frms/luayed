@@ -143,7 +143,7 @@ void partest(bool exp, const char *message, ...)
     tkns.push_back(tokenk(TokenKind::Eof));
 
     MockLexer mlx = MockLexer(tkns);
-    Parser parser = Parser((ILexer &)mlx);
+    Parser parser = Parser((ILexer *)&mlx);
     Ast parser_ast = exp ? parser.parse_exp() : parser.parse();
     Ast maker_ast = am.get_tree();
     char *mes = concat("parser : ", message);

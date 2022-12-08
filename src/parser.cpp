@@ -72,12 +72,12 @@ uint8_t check_postfix(TokenKind kind)
     return 255;
 }
 
-Parser::Parser(ILexer &lexer) : lexer(lexer), current(token_none()), ahead(token_none())
+Parser::Parser(ILexer *lexer) : lexer(lexer), current(token_none()), ahead(token_none())
 {
-    this->current = this->lexer.next();
+    this->current = this->lexer->next();
     if (this->current.kind != TokenKind::Eof)
     {
-        this->ahead = this->lexer.next();
+        this->ahead = this->lexer->next();
     }
 }
 
@@ -717,7 +717,7 @@ Token Parser::pop()
     }
     this->current = ahead;
     if (current.kind != TokenKind::Eof)
-        this->ahead = this->lexer.next();
+        this->ahead = this->lexer->next();
     return t;
 }
 
