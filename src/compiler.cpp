@@ -28,7 +28,7 @@ lnumber token_number(Token t)
 void Compiler::compile(Noderef root)
 {
     MetaScope *fnscp = (MetaScope *)root->getannot(MetaKind::MScope);
-    this->gen->pushf(fnscp->fn_idx);
+    this->gen->pushf(fnscp->fidx);
     this->compile_node(root->get_kind() == NodeKind::Block ? root : root->child(1));
     this->emit(Opcode(Instruction::IRet, 0));
     this->gen->popf();
@@ -165,7 +165,7 @@ void Compiler::compile_identifier(Noderef node)
         if (md->is_upvalue)
         {
             MetaScope *fnsc = (MetaScope *)mm->scope->getannot(MetaKind::MScope);
-            this->emit(Opcode(Instruction::IUpvalue, this->upval(fnsc->fn_idx, mm->offset)));
+            this->emit(Opcode(Instruction::IUpvalue, this->upval(fnsc->fidx, mm->offset)));
         }
         else
         {
@@ -314,7 +314,7 @@ void Compiler::compile_function(Noderef node)
 {
     MetaScope *fnscp = (MetaScope *)node->getannot(MetaKind::MScope);
     this->compile(node);
-    this->emit(Opcode(Instruction::IFConst, fnscp->fn_idx));
+    this->emit(Opcode(Instruction::IFConst, fnscp->fidx));
 }
 
 void Compiler::compile_exp(Noderef node)
@@ -339,7 +339,7 @@ void Compiler::compile_lvalue_primary(Noderef node)
         if (md && md->is_upvalue)
         {
             MetaScope *fnsc = (MetaScope *)mm->scope->getannot(MetaKind::MScope);
-            this->ops_push(Opcode(Instruction::IUStore, this->upval(fnsc->fn_idx, mm->offset)));
+            this->ops_push(Opcode(Instruction::IUStore, this->upval(fnsc->fidx, mm->offset)));
         }
         else
         {

@@ -18,7 +18,6 @@ class SemanticAnalyzer
 {
 private:
     Varmap labels;
-    vector<Noderef> decls;
     vector<Noderef> gotolist;
     vector<SemanticError> errors;
     Ast ast;
@@ -35,7 +34,7 @@ private:
     void reference(Noderef node, Noderef dec, bool func_past);
     void self_ref(Noderef node);
     void finalize();
-    void fix_offsets();
+    // void fix_offsets();
     MetaScope *curscope();
     Varmap &curmap();
 

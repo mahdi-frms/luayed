@@ -11,46 +11,21 @@ vector<SemanticError> SemanticAnalyzer::analyze()
     this->current = nullptr;
     this->analyze_node(ast.root());
     this->finalize();
-    this->fix_offsets();
     return std::move(this->errors);
 }
-
-void SemanticAnalyzer::fix_offsets()
-{
-    for (size_t i = 0; i < this->decls.size(); i++)
-    {
-        Noderef dec = this->decls[i];
-        MetaMemory *mm = mem(dec);
-
-        Noderef sc = mm->scope;
-        MetaScope *msc = scope(sc);
-        Noderef fn = msc->func;
-        do
-        {
-            sc = msc->parent;
-            if (!sc)
-                break;
-            msc = scope(sc);
-            mm->offset += msc->stack_size;
-
-        } while (sc != fn);
-        mm->offset += msc->upvalue_size + is_meth(fn) ? 1 : 0; // msc is function scope
-    }
-}
-
 void SemanticAnalyzer::analyze_var_decl(Noderef node)
 {
     node = node->child(0);
     Token tkn = node->get_token();
     if (tkn.kind == TokenKind::Identifier)
     {
-        this->decls.push_back(node);
         string name = tkn.text();
         this->curmap()[name] = node;
         MetaMemory *meta = halloc(MetaMemory);
         meta->header.next = nullptr;
         meta->header.kind = MetaKind::MMemory;
         meta->offset = 0;
+        meta->is_upvalue = 0;
         meta->scope = this->current;
         this->curscope()->stack_size++;
         node->annotate(&meta->header);
@@ -80,16 +55,10 @@ void SemanticAnalyzer::reference(Noderef node, Noderef dec, bool func_past)
     node->annotate(&meta->header);
     if (func_past)
     {
-        // set memory as upvalue
         MetaMemory *mm = mem(dec);
         mm->is_upvalue = true;
-        // remove from stack
         MetaScope *sc = scope(mm->scope);
-        sc->stack_size--;
-        // add to upvalue
-        mm->scope = sc->func;
-        sc = scope(sc->func);
-        mm->offset = sc->upvalue_size++;
+        sc->upvalue_size++;
     }
 }
 
@@ -168,9 +137,9 @@ void SemanticAnalyzer::analyze_etc(Noderef node)
         sc->map = new Varmap();
         sc->variadic = false;
         sc->parent = this->current;
-        sc->stack_size = 0;
-        sc->fn_idx = (is_fn || (!this->current)) ? this->fn_idx++ : 0;
-        sc->upvalue_size = is_meth(node) ? 1 : 0;
+        sc->stack_size = is_meth(node) ? 1 : 0;
+        sc->fidx = (is_fn || (!this->current)) ? this->fn_idx++ : 0;
+        sc->upvalue_size = 0;
 
         this->current = node;
     }
@@ -181,19 +150,9 @@ void SemanticAnalyzer::analyze_etc(Noderef node)
     }
     if (new_scope)
     {
-        size_t offset = is_meth(node) ? 1 : 0;
-        Varmap &vmap = this->curmap();
-        for (auto it = vmap.cbegin(); it != vmap.cend(); it++)
-        {
-            MetaMemory *mm = mem(it->second);
-            if (!mm->is_upvalue)
-                mm->offset = offset++;
-        }
         MetaScope *sc = this->curscope();
         delete (Varmap *)sc->map;
         this->current = sc->parent;
-        if (is_meth(node))
-            sc->upvalue_size--;
     }
 }
 
