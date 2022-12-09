@@ -37,9 +37,9 @@ private:
     void compile_identifier(Noderef node);
     void compile_call(Noderef node, size_t expect);
     void compile_methcall(Noderef node, size_t expect);
-    void compile_assignment(Noderef node, bool attrib);
+    void compile_assignment(Noderef node);
     void compile_lvalue(Noderef node);
-    void compile_varlist(Noderef node, bool attrib);
+    void compile_varlist(Noderef node);
     void compile_explist(Noderef node, size_t vcount);
     void compile_lvalue_primary(Noderef node);
     void compile_if(Noderef node);

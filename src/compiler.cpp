@@ -425,17 +425,17 @@ void Compiler::compile_explist(Noderef node, size_t vcount)
     }
 }
 
-void Compiler::compile_varlist(Noderef node, bool attrib)
+void Compiler::compile_varlist(Noderef node)
 {
     if (node->child_count() == 1)
     {
-        this->compile_lvalue(attrib ? node->child(0)->child(0) : node->child(0));
+        this->compile_lvalue(node->child(0));
     }
     else
     {
         for (size_t i = 0; i < node->child_count(); i++)
         {
-            this->compile_lvalue(attrib ? node->child(i)->child(0) : node->child(i));
+            this->compile_lvalue(node->child(i));
             this->emit(Opcode(Instruction::INil));
             this->vstack.push_back(0);
         }
@@ -525,10 +525,10 @@ void Compiler::compile_numeric_for(Noderef node)
     this->emit(Opcode(Instruction::IPop, 3));
 }
 
-void Compiler::compile_assignment(Noderef node, bool attrib)
+void Compiler::compile_assignment(Noderef node)
 {
     size_t vcount = node->child(0)->child_count();
-    this->compile_varlist(node->child(0), attrib);
+    this->compile_varlist(node->child(0));
     this->compile_explist(node->child(1), vcount);
 
     if (vcount > 1)
@@ -626,7 +626,7 @@ void Compiler::compile_break()
 void Compiler::compile_node(Noderef node)
 {
     if (node->get_kind() == NodeKind::AssignStmt)
-        this->compile_assignment(node, false);
+        this->compile_assignment(node);
     else if (node->get_kind() == NodeKind::Block)
         this->compile_block(node);
     else if (node->get_kind() == NodeKind::Declaration)
