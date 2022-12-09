@@ -42,9 +42,9 @@ void Interpretor::optable_init()
     Interpretor::optable[IVargs] = &Interpretor::i_vargs;
     Interpretor::optable[IJmp] = &Interpretor::i_jmp;
     Interpretor::optable[ICjmp] = &Interpretor::i_cjmp;
-    Interpretor::optable[INConst] = &Interpretor::i_const;
-    Interpretor::optable[ISConst] = &Interpretor::i_const;
-    Interpretor::optable[IFConst] = &Interpretor::i_const;
+    Interpretor::optable[IConst] = &Interpretor::i_const;
+    Interpretor::optable[IConst] = &Interpretor::i_const;
+    Interpretor::optable[IFConst] = &Interpretor::i_fconst;
     Interpretor::optable[ILocal] = &Interpretor::i_local;
     Interpretor::optable[ILStore] = &Interpretor::i_lstore;
     Interpretor::optable[IBLocal] = &Interpretor::i_blocal;
@@ -276,6 +276,9 @@ void Interpretor::i_cjmp()
 {
 }
 void Interpretor::i_const()
+{
+}
+void Interpretor::i_fconst()
 {
 }
 void Interpretor::i_local()

@@ -100,8 +100,7 @@ string Lfunction::stringify()
     opnames[IVargs] = opnames[IVargs + 1] = "vargs";
     opnames[ITList] = opnames[ITList + 1] = "tlist";
     opnames[ICall] = opnames[ICall + 1] = "call";
-    opnames[INConst] = opnames[INConst + 1] = "NC";
-    opnames[ISConst] = opnames[ISConst + 1] = "SC";
+    opnames[IConst] = opnames[IConst + 1] = "C";
     opnames[IFConst] = opnames[IFConst + 1] = "FC";
     opnames[ILocal] = opnames[ILocal + 1] = "local";
     opnames[ILStore] = opnames[ILStore + 1] = "lstore";

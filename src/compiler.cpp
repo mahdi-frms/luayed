@@ -134,7 +134,7 @@ void Compiler::compile_methcall(Noderef node, size_t expect)
 {
     this->compile_exp(node->child(0));
     size_t idx = this->const_string(token_cstring(node->child(1)->get_token()));
-    this->emit(Opcode(Instruction::ISConst, idx));
+    this->emit(Opcode(Instruction::IConst, idx));
     this->emit(Opcode(Instruction::ITGet));
     Noderef arglist = node->child(2);
     this->compile_explist(arglist, EXPECT_FREE);
@@ -179,7 +179,7 @@ void Compiler::compile_identifier(Noderef node)
     else
     {
         size_t idx = this->const_string(token_cstring(node->get_token()));
-        this->emit(Opcode(Instruction::ISConst, idx));
+        this->emit(Opcode(Instruction::IConst, idx));
         this->emit(Instruction::IGGet);
     }
 }
@@ -203,12 +203,12 @@ void Compiler::compile_primary(Noderef node, size_t expect)
     else if (tkn.kind == TokenKind::Number)
     {
         size_t idx = this->const_number(token_number(tkn));
-        this->emit(Opcode(Instruction::INConst, idx));
+        this->emit(Opcode(Instruction::IConst, idx));
     }
     else if (tkn.kind == TokenKind::Literal)
     {
         size_t idx = this->const_string(token_lstring(tkn));
-        this->emit(Opcode(Instruction::ISConst, idx));
+        this->emit(Opcode(Instruction::IConst, idx));
     }
     else if (tkn.kind == TokenKind::Identifier)
     {
@@ -220,7 +220,7 @@ void Compiler::compile_name(Noderef node)
     Token tkn = node->get_token();
     const char *cstr = token_cstring(tkn);
     size_t idx = this->const_string(cstr);
-    this->emit(Opcode(Instruction::ISConst, idx));
+    this->emit(Opcode(Instruction::IConst, idx));
 }
 
 void Compiler::compile_table(Noderef node)
@@ -282,7 +282,7 @@ void Compiler::compile_exp_e(Noderef node, size_t expect)
     {
         this->compile_exp(node->child(0));
         size_t idx = this->const_string(token_cstring(node->child(1)->get_token()));
-        this->emit(Opcode(ISConst, idx));
+        this->emit(Opcode(IConst, idx));
         this->emit(ITGet);
     }
     else if (node->get_kind() == NodeKind::Index)
@@ -356,7 +356,7 @@ void Compiler::compile_lvalue_primary(Noderef node)
     {
         const char *str = token_cstring(node->get_token());
         size_t idx = this->const_string(str);
-        this->emit(Opcode(Instruction::ISConst, idx));
+        this->emit(Opcode(Instruction::IConst, idx));
         this->ops_push(Instruction::IGSet);
         this->vstack.push_back(1);
     }
@@ -376,7 +376,7 @@ void Compiler::compile_lvalue(Noderef node)
         this->compile_exp(lexp);
         const char *prop_str = token_cstring(prop->get_token());
         size_t idx = this->const_string(prop_str);
-        this->emit(Opcode(Instruction::ISConst, idx));
+        this->emit(Opcode(Instruction::IConst, idx));
         this->ops_push(Opcode(Instruction::ITSet));
         this->vstack.push_back(1);
         this->vstack.push_back(1);
@@ -506,7 +506,7 @@ void Compiler::compile_numeric_for(Noderef node)
         this->compile_exp(node->child(3));
     }
     else
-        this->emit(Opcode(Instruction::INConst, this->const_number(1)));
+        this->emit(Opcode(Instruction::IConst, this->const_number(1)));
     size_t loop_start = this->len();
     this->emit(Opcode(Instruction::IBLocal, 2));
     this->compile_identifier(lvalue);

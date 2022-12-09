@@ -82,6 +82,7 @@ private:
     void i_cjmp();
 
     void i_const();
+    void i_fconst();
 
     void i_local();
     void i_lstore();

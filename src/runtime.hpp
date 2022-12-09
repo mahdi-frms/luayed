@@ -62,9 +62,8 @@ enum Instruction
     IJmp = 0xd6,
     ICjmp = 0xd8,
 
-    INConst = 0xe0,
-    ISConst = 0xe2,
-    IFConst = 0xe4,
+    IConst = 0xe0,
+    IFConst = 0xe2,
 
     ILocal = 0xf0,
     ILStore = 0xf2,
