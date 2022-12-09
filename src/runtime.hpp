@@ -95,7 +95,6 @@ public:
     lbyte *text();
     Upvalue *ups();
     LuaValue *rodata();
-    size_t *parmap();
 
     string stringify();
 
