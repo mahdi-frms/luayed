@@ -313,8 +313,10 @@ Compiler::Compiler(IGenerator *gen) : gen(gen)
 void Compiler::compile_function(Noderef node)
 {
     MetaScope *fnscp = (MetaScope *)node->getannot(MetaKind::MScope);
-    this->compile(node);
-    this->emit(Opcode(Instruction::IFConst, fnscp->fidx));
+    Compiler compiler(this->gen);
+    compiler.stack_offset = node->get_kind() == NodeKind::MethodBody ? 1 : 0;
+    compiler.compile(node);
+    compiler.emit(Opcode(Instruction::IFConst, fnscp->fidx));
 }
 
 void Compiler::compile_exp(Noderef node)
@@ -558,8 +560,6 @@ void Compiler::compile_logic(Noderef node)
 void Compiler::compile_block(Noderef node)
 {
     MetaScope *md = (MetaScope *)node->getannot(MetaKind::MScope);
-    if (md->stack_size)
-        this->emit(Opcode(Instruction::IPush, md->stack_size));
     for (size_t i = 0; i < node->child_count(); i++)
         this->compile_node(node->child(i));
     if (md->stack_size)
@@ -568,7 +568,14 @@ void Compiler::compile_block(Noderef node)
 
 void Compiler::compile_decl(Noderef node)
 {
-    this->compile_assignment(node, true);
+    Noderef varlist = node->child(0);
+    for (size_t i = 0; i < varlist->child_count(); i++)
+    {
+        Noderef var = varlist->child(i)->child(0);
+        MetaMemory *mm = (MetaMemory *)var->getannot(MetaKind::MMemory);
+        mm->offset = this->stack_offset++;
+    }
+    this->compile_explist(node->child(1), varlist->child_count());
 }
 
 void Compiler::compile_ret(Noderef node)

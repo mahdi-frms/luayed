@@ -13,6 +13,7 @@ private:
     vector<Opcode> ops;
     vector<lbyte> vstack;
     vector<size_t> breaks;
+    size_t stack_offset = 0;
 
     size_t len();
     void emit(Opcode op);
