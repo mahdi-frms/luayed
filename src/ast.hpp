@@ -92,6 +92,7 @@ namespace ast
         Noderef scope;
         size_t offset;
         bool is_upvalue;
+        size_t upoffset;
     };
 
     struct MetaScope

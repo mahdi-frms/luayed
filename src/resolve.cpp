@@ -26,6 +26,7 @@ void SemanticAnalyzer::analyze_var_decl(Noderef node)
         meta->header.kind = MetaKind::MMemory;
         meta->offset = 0;
         meta->is_upvalue = 0;
+        meta->upoffset = 0;
         meta->scope = this->current;
         this->curscope()->stack_size++;
         node->annotate(&meta->header);
