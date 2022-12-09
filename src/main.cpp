@@ -29,8 +29,8 @@ void print_fns(Lua *rt)
 {
     for (size_t i = 1; i < rt->functable.size(); i++)
     {
+        std::cout << "--------------- " << rt->functable[i]->fidx << " ---------------\n";
         std::cout << rt->functable[i]->stringify();
-        std::cout << "----------------------------\n";
     }
 }
 
