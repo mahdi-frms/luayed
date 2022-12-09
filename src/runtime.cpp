@@ -26,6 +26,11 @@ bool operator<=(const InternString &l, const InternString &r)
     return strcmp(l.lstr, r.lstr) != 1;
 }
 
+bool operator==(const Upvalue &l, const Upvalue &r)
+{
+    return l.fidx == r.fidx && l.offset == r.offset;
+}
+
 char *StringInterner::insert(char *lstr)
 {
     InternString istr = InternString{.lstr = lstr};
@@ -182,6 +187,7 @@ Lfunction *Lua::create_binary(GenFunction *gfn)
         gfn->upvalues.size() * sizeof(Upvalue));
 
     fn->fidx = gfn->fidx;
+    fn->hookmax = gfn->hookmax;
     fn->parcount = gfn->parcount;
     fn->codelen = gfn->text.size();
     fn->rolen = gfn->rodata.size();

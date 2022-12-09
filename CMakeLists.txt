@@ -20,7 +20,12 @@ add_executable(luaytest
     src/parser.cpp
     src/ast.cpp
     src/monoheap.cpp
+    src/compiler.cpp
+    src/generator.cpp
+    src/runtime.cpp
+    src/resolve.cpp
     test/lexer.cpp
+    test/compiler.cpp
     test/test.cpp
     test/parser.cpp
     lib/tap/tap.c

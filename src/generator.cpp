@@ -105,3 +105,7 @@ void LuaGenerator::meta_parcount(size_t parcount)
 {
     this->gfn->parcount = parcount;
 }
+void LuaGenerator::meta_hookmax(size_t hookmax)
+{
+    this->gfn->hookmax = hookmax;
+}

@@ -80,6 +80,8 @@ struct Upvalue
 {
     fidx_t fidx;
     size_t offset;
+
+    friend bool operator==(const Upvalue &l, const Upvalue &r);
 };
 
 class Lfunction
@@ -201,6 +203,7 @@ struct GenFunction
     vector<Upvalue> upvalues;
     fidx_t fidx;
     size_t parcount;
+    size_t hookmax;
 };
 class Lua
 {

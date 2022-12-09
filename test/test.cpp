@@ -2,6 +2,7 @@
 
 void lexer_tests();
 void parser_tests();
+void compiler_tests();
 
 int main()
 {
@@ -9,6 +10,7 @@ int main()
 
     lexer_tests();
     parser_tests();
+    compiler_tests();
 
     done_testing();
     return 0;
