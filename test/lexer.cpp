@@ -103,7 +103,7 @@ bool lexer_test(const char *text, vector<TokenKind> kinds)
             break;
         }
     }
-    free(orig);
+    delete[] orig;
     return rsl && tkns.size() == tidx;
 }
 

@@ -154,6 +154,11 @@ public:
         free(mes);
         return *this;
     }
+    ~GenTest()
+    {
+        for (auto it = this->funcs.begin(); it != this->funcs.end(); it++)
+            delete it->second;
+    }
 };
 
 GenTest compiler_test_case(const char *message, const char *text)
@@ -166,6 +171,7 @@ GenTest compiler_test_case(const char *message, const char *text)
     analyzer.analyze();
     Compiler compiler((IGenerator *)&gentest);
     compiler.compile(ast);
+    ast.destroy();
     return gentest;
 }
 

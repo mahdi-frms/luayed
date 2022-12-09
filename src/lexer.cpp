@@ -170,11 +170,12 @@ char *error_missing_ls(size_t level)
     const char *p1 = "missing symbol '[";
     size_t l1 = strlen(p1);
 
-    char *buf = (char *)malloc(l1 + level + 2);
+    char *buf = (char *)malloc(l1 + level + 3);
     strcpy(buf, p1);
-    memset(buf + l1, level, '=');
+    memset(buf + l1, '=', level);
     buf[l1 + level] = ']';
     buf[l1 + level + 1] = '\'';
+    buf[l1 + level + 2] = '\0';
     return buf;
 }
 
