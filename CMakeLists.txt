@@ -2,36 +2,33 @@ cmake_minimum_required(VERSION 3.16)
 
 project(luayed VERSION 0.1.0)
 
+add_library(luacomp
+    src/lexer.cpp
+    src/monoheap.cpp
+    src/ast.cpp
+    src/parser.cpp
+    src/resolve.cpp
+    src/compiler.cpp
+    src/luabin.cpp
+)
+
 add_executable(luayed
     src/main.cpp
-    src/lexer.cpp
-    src/parser.cpp
-    src/compiler.cpp
-    src/ast.cpp
-    src/monoheap.cpp
-    src/resolve.cpp
     src/runtime.cpp
     src/generator.cpp
     src/interpretor.cpp
-    src/luabin.cpp
-    )
+)
     
-    add_executable(luaytest
-    src/lexer.cpp
-    src/parser.cpp
-    src/ast.cpp
-    src/monoheap.cpp
-    src/compiler.cpp
-    src/generator.cpp
-    src/runtime.cpp
-    src/resolve.cpp
-    src/luabin.cpp
+add_executable(luaytest
     test/lexer.cpp
     test/compiler.cpp
     test/test.cpp
     test/parser.cpp
     lib/tap/tap.c
 )
+
+target_link_libraries(luayed luacomp)
+target_link_libraries(luaytest luacomp)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall")
 
