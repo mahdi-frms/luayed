@@ -1,5 +1,7 @@
 #include <iostream>
 #include <cstring>
+#include "runtime.hpp"
+#include "generator.hpp"
 #include "compiler.hpp"
 #include "parser.hpp"
 #include "resolve.hpp"

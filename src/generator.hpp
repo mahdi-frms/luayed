@@ -2,35 +2,7 @@
 #define GENERATOR_HPP
 
 #include "runtime.hpp"
-
-struct Opcode
-{
-    lbyte count;
-    lbyte bytes[5];
-
-    Opcode(lbyte op, size_t idx);
-    Opcode(lbyte op, size_t idx1, size_t idx2);
-    Opcode(lbyte op);
-};
-
-class IGenerator
-{
-public:
-    virtual void emit(Opcode opcode) = 0;
-    virtual size_t len() = 0;
-    virtual void seti(size_t idx, lbyte b) = 0;
-
-    virtual size_t const_number(lnumber num) = 0;
-    virtual size_t const_string(const char *str) = 0;
-
-    virtual void pushf(fidx_t fidx) = 0;
-    virtual void popf() = 0;
-
-    virtual size_t upval(fidx_t fidx, size_t offset) = 0;
-
-    virtual void meta_parcount(size_t parcount) = 0;
-    virtual void meta_hookmax(size_t hookmax) = 0;
-};
+#include "luabin.hpp"
 
 class LuaGenerator final : IGenerator
 {

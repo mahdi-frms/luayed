@@ -2,7 +2,7 @@
 #define COMPILER_HPP
 
 #include "ast.hpp"
-#include "generator.hpp"
+#include "luabin.hpp"
 
 using namespace ast;
 

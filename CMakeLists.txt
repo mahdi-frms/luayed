@@ -13,9 +13,10 @@ add_executable(luayed
     src/runtime.cpp
     src/generator.cpp
     src/interpretor.cpp
-)
-
-add_executable(luaytest
+    src/luabin.cpp
+    )
+    
+    add_executable(luaytest
     src/lexer.cpp
     src/parser.cpp
     src/ast.cpp
@@ -24,6 +25,7 @@ add_executable(luaytest
     src/generator.cpp
     src/runtime.cpp
     src/resolve.cpp
+    src/luabin.cpp
     test/lexer.cpp
     test/compiler.cpp
     test/test.cpp
