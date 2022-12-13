@@ -146,3 +146,59 @@ MetaNode *Node::getannot(MetaKind kind)
         tmp = tmp->next;
     return tmp;
 }
+
+Noderef Ast::make(NodeKind kind)
+{
+    return new Node(token_none(), kind);
+}
+Noderef Ast::make(vector<Noderef> &nodes, NodeKind kind)
+{
+    Noderef *children = new Noderef[nodes.size()];
+    for (size_t i = 0; i < nodes.size(); i++)
+        children[i] = nodes[i];
+    return new Node(children, nodes.size(), kind);
+}
+Noderef Ast::make(Token token, NodeKind kind)
+{
+    return new Node(token, kind);
+}
+Noderef Ast::make(Noderef c1, NodeKind kind)
+{
+    Noderef *nodes = new Noderef[1];
+    nodes[0] = c1;
+    return new Node(nodes, 1, kind);
+}
+Noderef Ast::make(Noderef c1, Noderef c2, NodeKind kind)
+{
+    Noderef *nodes = new Noderef[2];
+    nodes[0] = c1;
+    nodes[1] = c2;
+    return new Node(nodes, 2, kind);
+}
+Noderef Ast::make(Noderef c1, Noderef c2, Noderef c3, NodeKind kind)
+{
+    Noderef *nodes = new Noderef[3];
+    nodes[0] = c1;
+    nodes[1] = c2;
+    nodes[2] = c3;
+    return new Node(nodes, 3, kind);
+}
+Noderef Ast::make(Noderef c1, Noderef c2, Noderef c3, Noderef c4, NodeKind kind)
+{
+    Noderef *nodes = new Noderef[4];
+    nodes[0] = c1;
+    nodes[1] = c2;
+    nodes[2] = c3;
+    nodes[3] = c4;
+    return new Node(nodes, 4, kind);
+}
+Noderef Ast::make(Noderef c1, Noderef c2, Noderef c3, Noderef c4, Noderef c5, NodeKind kind)
+{
+    Noderef *nodes = new Noderef[5];
+    nodes[0] = c1;
+    nodes[1] = c2;
+    nodes[2] = c3;
+    nodes[3] = c4;
+    nodes[4] = c5;
+    return new Node(nodes, 5, kind);
+}

@@ -47,14 +47,6 @@ private:
     Noderef explist();
     Noderef function_body(bool is_method);
     Token consume(TokenKind kind);
-    Noderef make(NodeKind kind);
-    Noderef make(vector<Noderef> &nodes, NodeKind kind);
-    Noderef make(Token token, NodeKind kind);
-    Noderef make(Noderef c1, NodeKind kind);
-    Noderef make(Noderef c1, Noderef c2, NodeKind kind);
-    Noderef make(Noderef c1, Noderef c2, Noderef c3, NodeKind kind);
-    Noderef make(Noderef c1, Noderef c2, Noderef c3, Noderef c4, NodeKind kind);
-    Noderef make(Noderef c1, Noderef c2, Noderef c3, Noderef c4, Noderef c5, NodeKind kind);
 
 public:
     Parser(ILexer *lexer);
