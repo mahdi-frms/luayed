@@ -95,7 +95,7 @@ bool cmp_node(Noderef n1, Noderef n2)
 
 Token tokenk(TokenKind k)
 {
-    return Token(NULL, 0, 0, 0, k);
+    return Token(nullptr, 0, 0, 0, k);
 }
 
 char *concat(const char *s1, const char *s2);

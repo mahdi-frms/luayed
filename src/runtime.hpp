@@ -6,7 +6,7 @@
 #include <vector>
 #include "luabin.hpp"
 
-#define lstrnull NULL
+#define lstrnull nullptr
 
 class LuaValue;
 class Lua;

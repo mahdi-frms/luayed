@@ -27,9 +27,9 @@ char *tokenize_test(const char *text, vector<TokenKind> &kinds, vector<Token> &t
             if (c == marker)
             {
                 if (ptr == cur_ptr)
-                    return NULL;
+                    return nullptr;
                 if (kidx == kinds.size())
-                    return NULL;
+                    return nullptr;
                 else
                 {
                     is_token = 0;
@@ -57,9 +57,9 @@ char *tokenize_test(const char *text, vector<TokenKind> &kinds, vector<Token> &t
         }
     }
     if (is_token)
-        return NULL;
+        return nullptr;
     if (kidx < kinds.size())
-        return NULL;
+        return nullptr;
     orig[ptr] = '\0';
     return orig;
 }
@@ -77,7 +77,7 @@ bool lexer_test(const char *text, vector<TokenKind> kinds)
 {
     vector<Token> tkns;
     char *orig = tokenize_test(text, kinds, tkns);
-    if (orig == NULL)
+    if (orig == nullptr)
     {
         fprintf(stderr, "LEXER TEST CRASH!\n");
         exit(1);

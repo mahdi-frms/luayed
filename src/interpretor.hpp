@@ -22,7 +22,7 @@ private:
     size_t arg2;
     size_t retc = 0;
     bool end = false;
-    Lua *rt = NULL;
+    Lua *rt = nullptr;
 
     void load(size_t argc, size_t retc);
     lbyte iread();

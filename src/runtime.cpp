@@ -161,7 +161,7 @@ LuaValue Lua::create_string(const char *s)
 {
     LuaValue val;
     val.kind = LuaType::LVString;
-    val.data.s = NULL;
+    val.data.s = nullptr;
     return val;
 }
 
@@ -196,7 +196,7 @@ Lfunction *Lua::create_binary(GenFunction *gfn)
         fn->ups()[i] = gfn->upvalues[i];
 
     while (this->functable.size() <= gfn->fidx)
-        this->functable.push_back(NULL);
+        this->functable.push_back(nullptr);
     this->functable[gfn->fidx] = fn;
     return fn;
 }
