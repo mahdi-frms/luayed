@@ -39,8 +39,9 @@ void print_fns(Lua *rt)
 bool parse(const char *path)
 {
     bool silence = false;
-    bool parse = true;
-    bool compile = true;
+    bool parse = false;
+    bool compile = false;
+
     char *text = readfile(path);
     printf("===== %s =====\n", path);
     Lexer lxr = Lexer(text);
@@ -84,7 +85,16 @@ bool parse(const char *path)
                 break;
             }
             if (!silence)
-                printf("--> %s (%s) [%lu,%lu]\n", tkn.text().c_str(), token_kind_stringify(tkn.kind).c_str(), tkn.line + 1, tkn.offset + 1);
+            {
+                if (tkn.kind == TokenKind::Error)
+                {
+                    std::cout << lxr.get_error();
+                }
+                else
+                {
+                    printf("--> %s (%s) [%lu,%lu]\n", tkn.text().c_str(), token_kind_stringify(tkn.kind).c_str(), tkn.line + 1, tkn.offset + 1);
+                }
+            }
         }
         free(text);
         return true;

@@ -142,58 +142,6 @@ string token_kind_stringify(TokenKind kind)
     return "while";
 }
 
-char *error_missing(const char *symbols)
-{
-    const char *p1 = "missing symbol '";
-    size_t l1 = strlen(p1);
-    size_t ls = strlen(symbols);
-
-    char *buf = (char *)malloc(l1 + ls + 1);
-    strcpy(buf, p1);
-    strcpy(buf + l1, symbols);
-    buf[l1 + ls] = '\'';
-    return buf;
-}
-
-char *error_missing_ch(char ch)
-{
-    const char *p1 = "missing symbol 'X'";
-    size_t l1 = strlen(p1);
-
-    char *buf = strdup(p1);
-    buf[l1 - 2] = ch;
-    return buf;
-}
-
-char *error_missing_ls(size_t level)
-{
-    const char *p1 = "missing symbol '[";
-    size_t l1 = strlen(p1);
-
-    char *buf = (char *)malloc(l1 + level + 3);
-    strcpy(buf, p1);
-    memset(buf + l1, '=', level);
-    buf[l1 + level] = ']';
-    buf[l1 + level + 1] = '\'';
-    buf[l1 + level + 2] = '\0';
-    return buf;
-}
-
-char Lexer::ch(size_t offset)
-{
-    return this->text[this->prev_pos + offset];
-}
-
-char *error_invalid(char c)
-{
-    const char *p1 = "invalid character 'X'";
-    size_t l1 = strlen(p1);
-
-    char *buf = strdup(p1);
-    buf[l1 - 2] = c;
-    return buf;
-}
-
 TokenKind single_op(char c)
 {
     if (c == '+')
@@ -309,45 +257,6 @@ string Token::text()
     return str;
 }
 
-Token::~Token()
-{
-    if (this->kind == TokenKind::Error)
-    {
-        free((void *)this->str);
-    }
-}
-Token &Token::operator=(const Token &other)
-{
-    if (other.kind == TokenKind::Error)
-    {
-        this->str = strdup(other.str);
-    }
-    else
-    {
-        this->str = other.str;
-    }
-    this->kind = other.kind;
-    this->len = other.len;
-    this->line = other.line;
-    this->offset = other.offset;
-    return *this;
-}
-Token::Token(const Token &other)
-{
-    if (other.kind == TokenKind::Error)
-    {
-        this->str = strdup(other.str);
-    }
-    else
-    {
-        this->str = other.str;
-    }
-    this->kind = other.kind;
-    this->len = other.len;
-    this->line = other.line;
-    this->offset = other.offset;
-}
-
 bool is_letter(char c)
 {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
@@ -411,6 +320,7 @@ Lexer::Lexer(const char *text) : text(text)
     this->prev_pos = 0;
     this->prev_line = 0;
     this->prev_offset = 0;
+    this->err = error_ok();
 }
 
 Token::Token(const char *str, size_t len, size_t line, size_t offset, TokenKind kind)
@@ -448,6 +358,7 @@ bool is_space(char c)
 
 Token Lexer::read()
 {
+    this->err = error_ok();
     char c = this->pop();
     if (c == '\0')
     {
@@ -496,7 +407,7 @@ Token Lexer::read()
             return this->token(TokenKind::LeftBracket);
         }
     }
-    return this->error(error_invalid(c));
+    return this->error(error_invalid_char(c));
 }
 
 Token Lexer::long_string()
@@ -512,7 +423,7 @@ Token Lexer::long_string()
         char c = this->peek();
         if (c == '\0')
         {
-            return this->error(error_missing_ls(level));
+            return this->error(error_missing_end_of_string(level));
         }
         this->pop();
         if (c == ']')
@@ -522,7 +433,7 @@ Token Lexer::long_string()
             {
                 c = this->peek();
                 if (c == '\0')
-                    return this->error(error_missing_ls(level));
+                    return this->error(error_missing_end_of_string(level));
                 if (c == '=')
                 {
                     this->pop();
@@ -562,14 +473,13 @@ bool Lexer::look_ahead()
 Token Lexer::short_string(char c)
 {
     const char *escape_list = "abfnrtv\\\"\n'[]";
-    const char *error_invescape = "invalid escape sequence";
     bool escape = false;
     while (true)
     {
         char ch = this->pop();
         if ((ch == '\n' && !escape) || ch == '\0')
         {
-            return this->error(error_missing_ch(ch));
+            return this->error(error_missing_char(c));
         }
         if (escape)
         {
@@ -585,7 +495,7 @@ Token Lexer::short_string(char c)
                 for (int i = 0; i < 2; i++)
                 {
                     if (!is_hex(this->peek()))
-                        this->error(strdup(error_invescape));
+                        return this->error(error_invalid_escape());
                     this->pop();
                 }
             }
@@ -603,7 +513,7 @@ Token Lexer::short_string(char c)
                         int n = ch * 100 + ch2 * 10 + ch3;
                         if (n > 255)
                         {
-                            return this->error(strdup(error_invescape));
+                            return this->error(error_invalid_escape());
                         }
                     }
                 }
@@ -621,7 +531,7 @@ Token Lexer::short_string(char c)
                 }
                 if (!exists)
                 {
-                    return this->error(strdup(error_invescape));
+                    return this->error(error_invalid_escape());
                 }
             }
             escape = false;
@@ -647,12 +557,12 @@ Token Lexer::hex()
 {
     this->pop();
     if (!is_hex(this->peek()))
-        return this->error(strdup(number_error));
+        return this->error(error_malformed_number());
     while (is_hex(this->peek()))
         this->pop();
     char c = this->peek();
     if (is_alphabetic(c) || c == '.')
-        return this->error(strdup(number_error));
+        return this->error(error_malformed_number());
     return this->none();
 }
 
@@ -662,7 +572,7 @@ Token Lexer::integer()
         this->pop();
     char c = this->peek();
     if (is_alphabetic(c) && c != 'e')
-        return this->error(strdup(number_error));
+        return this->error(error_malformed_number());
     return this->none();
 }
 Token Lexer::decimal()
@@ -674,7 +584,7 @@ Token Lexer::decimal()
             this->pop();
         char c = this->peek();
         if ((is_alphabetic(c) && c != 'e') || c == '.')
-            return this->error(strdup(number_error));
+            return this->error(error_malformed_number());
     }
     return this->none();
 }
@@ -686,12 +596,12 @@ Token Lexer::power()
         if (this->peek() == '-')
             this->pop();
         if (!is_digit(this->peek()))
-            return this->error(strdup(number_error));
+            return this->error(error_malformed_number());
         while (is_digit(this->peek()))
             this->pop();
         char c = this->peek();
         if (is_alphabetic(c) || c == '.')
-            return this->error(strdup(number_error));
+            return this->error(error_malformed_number());
     }
     return this->none();
 }
@@ -711,11 +621,13 @@ Token Lexer::number(char c)
     return this->token(TokenKind::Number);
 }
 
-Token Lexer::error(const char *message)
+Token Lexer::error(LError err)
 {
-    Token err = Token(message, 0, this->prev_line, this->prev_offset, TokenKind::Error);
-    this->skip_line();
-    return err;
+    Token errtok = Token(nullptr, 0, this->prev_line, this->prev_offset, TokenKind::Error);
+    this->err = err;
+    this->err.line = errtok.line;
+    this->err.offset = errtok.offset;
+    return errtok;
 }
 
 Token Lexer::keyword_identifier(char c)
@@ -753,6 +665,11 @@ Token Lexer::token(TokenKind kind)
     return Token((char *)this->text + this->prev_pos, this->pos - this->prev_pos, this->prev_line, this->prev_offset, kind);
 }
 
+char Lexer::ch(size_t offset)
+{
+    return this->text[this->prev_pos + offset];
+}
+
 void Lexer::skip_line()
 {
     char c = this->peek();
@@ -760,9 +677,13 @@ void Lexer::skip_line()
         c = this->pop();
 }
 
+LError Lexer::get_error()
+{
+    return this->err;
+}
+
 Token Lexer::skip_comment_block()
 {
-    const char *error_miscom = "missing end of comment";
     size_t level = 0;
     while (this->peek() == '=')
     {
@@ -783,7 +704,7 @@ Token Lexer::skip_comment_block()
             char l = this->peek();
             if (l == '\0')
             {
-                return this->error(strdup(error_miscom));
+                return this->error(error_missing_end_of_comment(level));
             }
             if (l == ']' && lvl == 0)
             {
@@ -792,7 +713,7 @@ Token Lexer::skip_comment_block()
         }
         else if (c == '\0')
         {
-            return this->error(strdup(error_miscom));
+            return this->error(error_missing_end_of_comment(level));
         }
     }
     this->pop();

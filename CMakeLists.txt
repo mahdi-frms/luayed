@@ -10,6 +10,7 @@ add_library(luacomp
     src/resolve.cpp
     src/compiler.cpp
     src/luabin.cpp
+    src/lerror.cpp
 )
 
 add_executable(luayed
@@ -17,6 +18,7 @@ add_executable(luayed
     src/runtime.cpp
     src/generator.cpp
     src/interpretor.cpp
+    src/lerror.cpp
 )
     
 add_executable(luaytest

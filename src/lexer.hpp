@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "luadef.hpp"
+#include "lerror.hpp"
 
 #define TOKEN_IS_PRIMARY(K) (K & 0x0100)
 #define TOKEN_IS_POSTFIX(K) (K & 0x0200)
@@ -83,9 +84,9 @@ enum TokenKind
 
     Eof = 0x1000,
 
-    None = 0x1001,  // returned as error
+    None = 0x1001,  // control purpose (token not matched)
     Error = 0x1002, // returned as lexical error
-    Empty = 0x1003, // control purpose
+    Empty = 0x1003, // control purpose (blank token)
 };
 
 string token_kind_stringify(TokenKind kind);
@@ -99,9 +100,6 @@ struct Token
     TokenKind kind;
 
     Token(const char *str, size_t len, size_t line, size_t offset, TokenKind kind);
-    ~Token();
-    Token &operator=(const Token &other);
-    Token(const Token &other);
     string text();
 };
 
@@ -122,6 +120,8 @@ private:
     size_t prev_offset;
     size_t prev_line;
     size_t prev_pos;
+
+    LError err;
 
     char peek();
     char pop();
@@ -152,7 +152,7 @@ private:
     Token op_length(char c);
     Token token(TokenKind kind);
     Token token_eof();
-    Token error(const char *message);
+    Token error(LError err);
     Token none();
     Token empty();
     bool look_ahead();
@@ -160,6 +160,7 @@ private:
 public:
     Lexer(const char *text);
     Token next();
+    LError get_error();
     vector<Token> drain();
 };
 
