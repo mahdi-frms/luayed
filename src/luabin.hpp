@@ -101,4 +101,53 @@ public:
     virtual void meta_hookmax(size_t hookmax) = 0;
 };
 
+#define iadd IAdd
+#define isub ISub
+#define imult IMult
+#define iflrdiv IFlrDiv
+#define ifltdiv IFltDiv
+#define imod IMod
+#define ipow IPow
+#define iconcat IConcat
+#define ibor IBOr
+#define iband IBAnd
+#define ibxor IBXor
+#define ishr ISHR
+#define ishl ISHL
+#define ilength ILength
+#define inegate INegate
+#define inot INot
+#define ibnot IBNot
+#define ieq IEq
+#define ine INe
+#define ige IGe
+#define igt IGt
+#define ile ILe
+#define ilt ILt
+#define itget ITGet
+#define itset ITSet
+#define itnew ITNew
+#define igget IGGet
+#define igset IGSet
+#define inil INil
+#define itrue ITrue
+#define ifalse IFalse
+#define itlist(A) Opcode(ITList, A)
+#define iret(A) Opcode(IRet, A)
+#define ifvargs(A) Opcode(IFVargs, A)
+#define icall(A, B) Opcode(ICall, A, B)
+#define ivargs(A) Opcode(IVargs, A)
+#define ijmp(A) Opcode(IJmp, A)
+#define icjmp(A) Opcode(ICjmp, A)
+#define iconst(A) Opcode(IConst, A)
+#define ifconst(A) Opcode(IFConst, A)
+#define ilocal(A) Opcode(ILocal, A)
+#define ilstore(A) Opcode(ILStore, A)
+#define iblocal(A) Opcode(IBLocal, A)
+#define iblStore(A) Opcode(IBLStore, A)
+#define iupvalue(A) Opcode(IUpvalue, A)
+#define iustore(A) Opcode(IUStore, A)
+#define ipush(A) Opcode(IPush, A)
+#define ipop(A) Opcode(IPop, A)
+
 #endif

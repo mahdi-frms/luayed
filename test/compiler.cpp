@@ -131,11 +131,16 @@ public:
         delete[] mes;
         return *this;
     }
+    bool compare_text(vector<lbyte> t1, vector<lbyte> t2)
+    {
+        return t1 == t2;
+    }
     GenTest &test_opcodes(vector<Opcode> opcodes)
     {
         vector<lbyte> text;
         for (size_t i = 0; i < opcodes.size(); i++)
         {
+
             Opcode op = opcodes[i];
             for (size_t j = 0; j < op.count; j++)
             {
@@ -143,7 +148,7 @@ public:
             }
         }
         char *mes = compiler_test_message(this->message, "text");
-        test_case(mes, this->test->text == text);
+        test_case(mes, this->compare_text(this->test->text, text));
         delete[] mes;
         return *this;
     }
@@ -188,8 +193,8 @@ void compiler_tests()
         .test_ccount(1)
         .test_upvalues({})
         .test_opcodes({
-            Opcode(IConst, 0),
-            Opcode(IPop, 1),
-            Opcode(IRet, 0),
+            iconst(0),
+            ipop(1),
+            iret(0),
         });
 }
