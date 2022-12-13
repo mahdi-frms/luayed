@@ -100,7 +100,23 @@ size_t Node::child_count()
 
 void Ast::destroy()
 {
-    // FIXME : delete all nodes and metadata
+    this->destroy_node(this->tree);
+}
+void Ast::destroy_node(Noderef node)
+{
+    while (node->meta)
+    {
+        MetaNode *md = node->meta;
+        node->meta = md->next;
+        delete md;
+    }
+    for (size_t i = 0; i < node->child_count(); i++)
+    {
+        Noderef ch = node->child(i);
+        this->destroy_node(ch);
+    }
+    delete[] node->children;
+    delete node;
 }
 
 Ast::Ast(Noderef tree) : tree(tree)

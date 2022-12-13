@@ -108,6 +108,9 @@ namespace ast
 
     class Node
     {
+
+        friend class Ast;
+
     private:
         Token token;
         Noderef *children;
@@ -134,6 +137,7 @@ namespace ast
     {
     private:
         Noderef tree;
+        void destroy_node(Noderef node);
 
     public:
         void destroy();
