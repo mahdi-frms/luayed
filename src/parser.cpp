@@ -115,74 +115,58 @@ Token Parser::consume(TokenKind kind)
 
 Noderef Parser::make(NodeKind kind)
 {
-    Noderef node = (Noderef)this->heap.alloc(sizeof(Node));
-    *node = Node(token_none(), kind);
-    return node;
+    return new Node(token_none(), kind);
 }
 Noderef Parser::make(vector<Noderef> &nodes, NodeKind kind)
 {
-    Noderef *children = (Noderef *)this->heap.alloc(sizeof(Noderef) * nodes.size());
+    Noderef *children = new Noderef[nodes.size()];
     for (size_t i = 0; i < nodes.size(); i++)
         children[i] = nodes[i];
-    Noderef node = (Noderef)this->heap.alloc(sizeof(Node));
-    *node = Node(children, nodes.size(), kind);
-    return node;
+    return new Node(children, nodes.size(), kind);
 }
 Noderef Parser::make(Token token, NodeKind kind)
 {
-    Noderef node = (Noderef)this->heap.alloc(sizeof(Node));
-    *node = Node(token, kind);
-    return node;
+    return new Node(token, kind);
 }
 Noderef Parser::make(Noderef c1, NodeKind kind)
 {
-    Noderef *nodes = (Noderef *)this->heap.alloc(sizeof(Noderef));
+    Noderef *nodes = new Noderef[1];
     nodes[0] = c1;
-    Noderef node = (Noderef)this->heap.alloc(sizeof(Node));
-    *node = Node(nodes, 1, kind);
-    return node;
+    return new Node(nodes, 1, kind);
 }
 Noderef Parser::make(Noderef c1, Noderef c2, NodeKind kind)
 {
-    Noderef *nodes = (Noderef *)this->heap.alloc(sizeof(Noderef) * 2);
+    Noderef *nodes = new Noderef[2];
     nodes[0] = c1;
     nodes[1] = c2;
-    Noderef node = (Noderef)this->heap.alloc(sizeof(Node));
-    *node = Node(nodes, 2, kind);
-    return node;
+    return new Node(nodes, 2, kind);
 }
 Noderef Parser::make(Noderef c1, Noderef c2, Noderef c3, NodeKind kind)
 {
-    Noderef *nodes = (Noderef *)this->heap.alloc(sizeof(Noderef) * 3);
+    Noderef *nodes = new Noderef[3];
     nodes[0] = c1;
     nodes[1] = c2;
     nodes[2] = c3;
-    Noderef node = (Noderef)this->heap.alloc(sizeof(Node));
-    *node = Node(nodes, 3, kind);
-    return node;
+    return new Node(nodes, 3, kind);
 }
 Noderef Parser::make(Noderef c1, Noderef c2, Noderef c3, Noderef c4, NodeKind kind)
 {
-    Noderef *nodes = (Noderef *)this->heap.alloc(sizeof(Noderef) * 4);
+    Noderef *nodes = new Noderef[4];
     nodes[0] = c1;
     nodes[1] = c2;
     nodes[2] = c3;
     nodes[3] = c4;
-    Noderef node = (Noderef)this->heap.alloc(sizeof(Node));
-    *node = Node(nodes, 4, kind);
-    return node;
+    return new Node(nodes, 4, kind);
 }
 Noderef Parser::make(Noderef c1, Noderef c2, Noderef c3, Noderef c4, Noderef c5, NodeKind kind)
 {
-    Noderef *nodes = (Noderef *)this->heap.alloc(sizeof(Noderef) * 5);
+    Noderef *nodes = new Noderef[5];
     nodes[0] = c1;
     nodes[1] = c2;
     nodes[2] = c3;
     nodes[3] = c4;
     nodes[4] = c5;
-    Noderef node = (Noderef)this->heap.alloc(sizeof(Node));
-    *node = Node(nodes, 5, kind);
-    return node;
+    return new Node(nodes, 5, kind);
 }
 
 Noderef Parser::id_field()
@@ -745,7 +729,7 @@ Ast Parser::parse()
 {
     try
     {
-        Ast tree = Ast(this->block(BlockEnd::Eof), this->heap);
+        Ast tree = Ast(this->block(BlockEnd::Eof));
         if (this->peek().kind != TokenKind::Eof)
         {
             this->error("EOF expected", this->pop());
@@ -755,7 +739,7 @@ Ast Parser::parse()
     catch (string message)
     {
         printf("lua: %s\n", message.c_str());
-        return Ast(nullptr, this->heap);
+        return Ast(nullptr);
     }
 }
 
@@ -763,7 +747,7 @@ Ast Parser::parse_exp()
 {
     try
     {
-        Ast tree = Ast(this->expr(), this->heap);
+        Ast tree = Ast(this->expr());
         if (this->peek().kind != TokenKind::Eof)
         {
             this->error("EOF expected", this->pop());
@@ -773,6 +757,6 @@ Ast Parser::parse_exp()
     catch (string message)
     {
         printf("lua: %s\n", message.c_str());
-        return Ast(nullptr, this->heap);
+        return Ast(nullptr);
     }
 }

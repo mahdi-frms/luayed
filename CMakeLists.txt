@@ -4,7 +4,6 @@ project(luayed VERSION 0.1.0)
 
 add_library(luacomp
     src/lexer.cpp
-    src/monoheap.cpp
     src/ast.cpp
     src/parser.cpp
     src/resolve.cpp

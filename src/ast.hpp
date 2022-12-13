@@ -4,7 +4,6 @@
 #include <stddef.h>
 #include <vector>
 #include "lexer.hpp"
-#include "monoheap.hpp"
 
 extern const char *node_names[34];
 
@@ -135,13 +134,11 @@ namespace ast
     {
     private:
         Noderef tree;
-        Monoheap heap;
 
     public:
-        Monoheap &get_heap();
         void destroy();
         Noderef root();
-        Ast(Noderef tree, Monoheap heap);
+        Ast(Noderef tree);
     };
 }
 

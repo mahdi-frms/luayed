@@ -100,10 +100,10 @@ size_t Node::child_count()
 
 void Ast::destroy()
 {
-    this->heap.destroy();
+    // FIXME : delete all nodes and metadata
 }
 
-Ast::Ast(Noderef tree, Monoheap heap) : tree(tree), heap(heap)
+Ast::Ast(Noderef tree) : tree(tree)
 {
 }
 
@@ -121,11 +121,6 @@ void Node::annotate(MetaNode *md)
 Noderef Node::child(size_t index)
 {
     return this->children[index];
-}
-
-Monoheap &Ast::get_heap()
-{
-    return this->heap;
 }
 
 MetaNode *Node::getannot(MetaKind kind)

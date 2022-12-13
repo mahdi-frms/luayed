@@ -4,7 +4,7 @@
 
 char *token_cstring(Token t)
 {
-    char *str = (char *)malloc(t.len + 1);
+    char *str = new char[t.len + 1];
     for (size_t i = 0; i < t.len; i++)
         str[i] = t.str[i];
     str[t.len] = '\0';
@@ -13,7 +13,7 @@ char *token_cstring(Token t)
 
 char *token_lstring(Token t)
 {
-    char *str = (char *)malloc(t.len + 1);
+    char *str = new char[t.len + 1];
     for (size_t i = 0; i < t.len; i++)
         str[i] = t.str[i];
     str[t.len] = '\0';

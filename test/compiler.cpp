@@ -30,7 +30,7 @@ char *compiler_test_message(const char *item, const char *property)
     size_t plen = strlen(property);
     size_t tlen = strlen(title);
     size_t mlen = ilen + plen + tlen + 4 /* ()\0*/;
-    char *message = (char *)malloc(mlen);
+    char *message = new char[mlen];
     strcpy(message, title);
     strcpy(message + tlen, item);
     message[tlen + ilen] = ' ';
@@ -114,21 +114,21 @@ public:
     {
         char *mes = compiler_test_message(this->message, "parameter count");
         test_case(mes, this->test->parcount == parcount);
-        free(mes);
+        delete[] mes;
         return *this;
     }
     GenTest &test_hookmax(size_t hookmax)
     {
         char *mes = compiler_test_message(this->message, "hook LIFO max size");
         test_case(mes, this->test->hookmax == hookmax);
-        free(mes);
+        delete[] mes;
         return *this;
     }
     GenTest &test_ccount(size_t ccount)
     {
         char *mes = compiler_test_message(this->message, "constant count");
         test_case(mes, this->test->ccount == ccount);
-        free(mes);
+        delete[] mes;
         return *this;
     }
     GenTest &test_opcodes(vector<Opcode> opcodes)
@@ -144,14 +144,14 @@ public:
         }
         char *mes = compiler_test_message(this->message, "text");
         test_case(mes, this->test->text == text);
-        free(mes);
+        delete[] mes;
         return *this;
     }
     GenTest &test_upvalues(vector<Upvalue> upvalues)
     {
         char *mes = compiler_test_message(this->message, "upvalue table");
         test_case(mes, this->test->upvalues == upvalues);
-        free(mes);
+        delete[] mes;
         return *this;
     }
     ~GenTest()

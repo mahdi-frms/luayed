@@ -111,7 +111,7 @@ char *concat(const char *s1, const char *s2)
 {
     size_t plen = strlen(s1);
     size_t mlen = strlen(s2);
-    char *mes = (char *)malloc(mlen + plen + 1);
+    char *mes = new char[mlen + plen + 1];
     strcpy(mes, s1);
     strcpy(mes + plen, s2);
     mes[mlen + plen] = '\0';
@@ -133,7 +133,7 @@ void lxerrr(const char *message, const char *text)
     }
     char *mes = concat("lexer : ", message);
     ok(rsl, mes);
-    free(mes);
+    delete[] mes;
 }
 
 void lxtest(const char *message, const char *text, ...)
@@ -156,7 +156,7 @@ void lxtest(const char *message, const char *text, ...)
 
     char *mes = concat("lexer : ", message);
     ok(lexer_test(text, kinds), mes);
-    free(mes);
+    delete[] mes;
 }
 
 void lexer_tests()

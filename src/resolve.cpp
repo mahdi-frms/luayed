@@ -3,7 +3,6 @@
 #define scope(N) ((MetaScope *)N->getannot(MetaKind::MScope))
 #define map(N) (*((Varmap *)(scope(N)->map)))
 #define mem(N) ((MetaMemory *)N->getannot(MetaKind::MMemory))
-#define halloc(T) ((T *)this->ast.get_heap().alloc(sizeof(T)))
 #define is_meth(N) (N->get_kind() == NodeKind::MethodBody)
 
 vector<SemanticError> SemanticAnalyzer::analyze()
@@ -21,7 +20,7 @@ void SemanticAnalyzer::analyze_var_decl(Noderef node)
     {
         string name = tkn.text();
         this->curmap()[name] = node;
-        MetaMemory *meta = halloc(MetaMemory);
+        MetaMemory *meta = new MetaMemory;
         meta->header.next = nullptr;
         meta->header.kind = MetaKind::MMemory;
         meta->offset = 0;
@@ -48,7 +47,7 @@ Varmap &SemanticAnalyzer::curmap()
 
 void SemanticAnalyzer::reference(Noderef node, Noderef dec, bool func_past)
 {
-    MetaDeclaration *meta = halloc(MetaDeclaration);
+    MetaDeclaration *meta = new MetaDeclaration;
     meta->decnode = dec;
     meta->header.kind = MetaKind::MDecl;
     meta->header.next = nullptr;
@@ -65,7 +64,7 @@ void SemanticAnalyzer::reference(Noderef node, Noderef dec, bool func_past)
 
 void SemanticAnalyzer::self_ref(Noderef node)
 {
-    MetaSelf *meta = halloc(MetaSelf);
+    MetaSelf *meta = new MetaSelf;
     meta->header.kind = MetaKind::MSelf;
     meta->header.next = nullptr;
     node->annotate(&meta->header);
@@ -125,7 +124,7 @@ void SemanticAnalyzer::analyze_etc(Noderef node)
 
     if (new_scope)
     {
-        MetaScope *sc = halloc(MetaScope);
+        MetaScope *sc = new MetaScope;
         sc->header.next = nullptr;
         sc->header.kind = MetaKind::MScope;
         node->annotate(&sc->header);
@@ -224,7 +223,7 @@ void SemanticAnalyzer::finalize()
         string name = node->child(0)->get_token().text();
         if (this->labels.find(name) != this->labels.cend())
         {
-            MetaLabel *label = (MetaLabel *)this->ast.get_heap().alloc(sizeof(MetaLabel));
+            MetaLabel *label = new MetaLabel;
             label->header.next = nullptr;
             label->header.kind = MetaKind::MLabel;
             label->label_node = node;

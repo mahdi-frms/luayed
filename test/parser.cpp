@@ -26,7 +26,6 @@ class AstMaker
 private:
     vector<vector<Noderef>> nodes;
     vector<NodeKind> kinds;
-    Monoheap heap;
     Noderef root;
 
 public:
@@ -37,8 +36,7 @@ public:
     }
     void add(Token t, NodeKind kind)
     {
-        Noderef node = (Noderef)this->heap.alloc(sizeof(Node));
-        *node = Node(t, kind);
+        Noderef node = new Node(t, kind);
 
         if (nodes.size() == 0)
         {
@@ -51,14 +49,13 @@ public:
     }
     void close()
     {
-        Noderef node = (Noderef)this->heap.alloc(sizeof(Node));
         size_t chlen = nodes.back().size();
-        Noderef *ch = (Noderef *)this->heap.alloc(sizeof(Noderef) * chlen);
+        Noderef *ch = new Noderef[chlen];
         for (size_t i = 0; i < chlen; i++)
         {
             ch[i] = nodes.back()[i];
         }
-        *node = Node(ch, chlen, this->kinds.back());
+        Noderef node = new Node(ch, chlen, this->kinds.back());
         nodes.pop_back();
         kinds.pop_back();
 
@@ -73,7 +70,7 @@ public:
     }
     Ast get_tree()
     {
-        return Ast(root, heap);
+        return Ast(root);
     }
 };
 
@@ -150,7 +147,7 @@ void partest(bool exp, const char *message, ...)
     ok(cmp_node(parser_ast.root(), maker_ast.root()), mes);
     parser_ast.destroy();
     maker_ast.destroy();
-    free(mes);
+    delete[] mes;
 }
 
 #define exptest(MES, ...) partest(true, MES, __VA_ARGS__)

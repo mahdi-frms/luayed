@@ -21,7 +21,6 @@ private:
     ILexer *lexer;
     Token current;
     Token ahead;
-    Monoheap heap;
 
     Noderef expr();
     Noderef fncall(Token op);

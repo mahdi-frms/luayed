@@ -21,7 +21,7 @@ char *readfile(const char *path)
             break;
     }
     fclose(file);
-    char *text = (char *)malloc(str.size() + 1);
+    char *text = new char[str.size() + 1];
     text[str.size()] = '\0';
     strcpy(text, str.c_str());
     return text;
@@ -72,7 +72,7 @@ bool parse(const char *path)
             }
         }
         tree.destroy();
-        free(text);
+        delete[] text;
         return root != nullptr;
     }
     else
@@ -96,7 +96,7 @@ bool parse(const char *path)
                 }
             }
         }
-        free(text);
+        delete[] text;
         return true;
     }
 }
