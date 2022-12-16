@@ -39,8 +39,8 @@ void print_fns(Lua *rt)
 bool parse(const char *path)
 {
     bool silence = false;
-    bool parse = false;
-    bool compile = false;
+    bool parse = true;
+    bool compile = true;
 
     char *text = readfile(path);
     printf("===== %s =====\n", path);

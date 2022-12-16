@@ -3,6 +3,7 @@
 #include <resolve.hpp>
 #include <map>
 #include <cstring>
+#include <iostream>
 #include <tap/tap.h>
 
 struct FuncTest
@@ -131,24 +132,31 @@ public:
         delete[] mes;
         return *this;
     }
-    bool compare_text(vector<lbyte> t1, vector<lbyte> t2)
+    vector<lbyte> assemble(vector<Opcode> &opcodes)
     {
-        return t1 == t2;
+        vector<lbyte> bin;
+        for (size_t i = 0; i < opcodes.size(); i++)
+        {
+            for (lbyte j = 0; j < opcodes[i].count; j++)
+                bin.push_back(opcodes[i].bytes[j]);
+        }
+        return bin;
     }
     GenTest &test_opcodes(vector<Opcode> opcodes)
     {
-        vector<lbyte> text;
-        for (size_t i = 0; i < opcodes.size(); i++)
-        {
-
-            Opcode op = opcodes[i];
-            for (size_t j = 0; j < op.count; j++)
-            {
-                text.push_back(op.bytes[j]);
-            }
-        }
+        vector<lbyte> bin = this->assemble(opcodes);
         char *mes = compiler_test_message(this->message, "text");
-        test_case(mes, this->compare_text(this->test->text, text));
+        vector<lbyte> &gen = this->test->text;
+        bool rsl = bin == this->test->text;
+        test_case(mes, rsl);
+        if (!rsl)
+        {
+            std::cerr << "generated and expected binaries do not match!\n"
+                      << "expected binary:\n"
+                      << binary_stringify(&bin[0], bin.size())
+                      << "generated binary:\n"
+                      << binary_stringify(&gen[0], gen.size());
+        }
         delete[] mes;
         return *this;
     }
@@ -195,6 +203,46 @@ void compiler_tests()
         .test_opcodes({
             iconst(0),
             ipop(1),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "two local assignments",
+
+        "local a,b = 3")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(1)
+        .test_upvalues({})
+        .test_opcodes({
+            iconst(0),
+            inil,
+            ipop(2),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "nested block",
+
+        "local a, b\n"
+        "do\n"
+        "    local c, d = 3, true\n"
+        "end\n")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(1)
+        .test_upvalues({})
+        .test_opcodes({
+            inil,
+            inil,
+            iconst(0),
+            itrue,
+            ipop(2),
+            ipop(2),
             iret(0),
         });
 }

@@ -575,7 +575,11 @@ void Compiler::compile_decl(Noderef node)
         MetaMemory *mm = (MetaMemory *)var->getannot(MetaKind::MMemory);
         mm->offset = this->stack_offset++;
     }
-    this->compile_explist(node->child(1), varlist->child_count());
+    if (node->child_count() == 2)
+        this->compile_explist(node->child(1), varlist->child_count());
+    else
+        for (size_t i = 0; i < varlist->child_count(); i++)
+            this->emit(Opcode(Instruction::INil));
 }
 
 void Compiler::compile_ret(Noderef node)

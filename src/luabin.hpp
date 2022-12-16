@@ -101,6 +101,8 @@ public:
     virtual void meta_hookmax(size_t hookmax) = 0;
 };
 
+string binary_stringify(lbyte *text, size_t codelen);
+
 #define iadd IAdd
 #define isub ISub
 #define imult IMult
