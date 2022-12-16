@@ -207,9 +207,43 @@ void compiler_tests()
         });
 
     compiler_test_case(
-        "two local assignments",
+        "two declaration",
 
-        "local a,b = 3")
+        "local a,b = 3,4")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(2)
+        .test_upvalues({})
+        .test_opcodes({
+            iconst(0),
+            iconst(1),
+            ipop(2),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "declaration without expression list",
+
+        "local a,b")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            inil,
+            inil,
+            ipop(2),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "declaration with less expressions",
+
+        "local a,b = 6")
 
         .test_fn(1)
         .test_parcount(0)
@@ -219,6 +253,23 @@ void compiler_tests()
         .test_opcodes({
             iconst(0),
             inil,
+            ipop(2),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "declaration with more expressions",
+
+        "local a,b = 6,'', true ")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(2)
+        .test_upvalues({})
+        .test_opcodes({
+            iconst(0),
+            iconst(1),
             ipop(2),
             iret(0),
         });
@@ -242,6 +293,35 @@ void compiler_tests()
             iconst(0),
             itrue,
             ipop(2),
+            ipop(2),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "double nested block",
+
+        "local a, b\n"
+        "do\n"
+        "    local c = \"hello world!\"\n"
+        "    do\n"
+        "       local d, e, f = 3, true\n"
+        "    end\n"
+        "end\n")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(2)
+        .test_upvalues({})
+        .test_opcodes({
+            inil,
+            inil,
+            iconst(0),
+            iconst(1),
+            itrue,
+            inil,
+            ipop(3),
+            ipop(1),
             ipop(2),
             iret(0),
         });
