@@ -951,6 +951,7 @@ void compiler_tests()
             ipop(1),
             iret(0),
         });
+
     compiler_test_case(
         "logical and",
 
@@ -969,6 +970,55 @@ void compiler_tests()
             ipop(1),
             iconst(0),
             // cjmp 11
+            ipop(1),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "while loop",
+
+        "local a while (true) do a() end")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            inil,
+            // while 1
+            itrue,
+            inot,
+            icjmp(14),
+            // do
+            ilocal(0),
+            icall(0, 1),
+            ijmp(1),
+            // end 14
+            ipop(1),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "repeat loop",
+
+        "local a repeat a() until( false )")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            inil,
+            // repeat 1
+            ilocal(0),
+            icall(0, 1),
+            // until
+            ifalse,
+            inot,
+            icjmp(1),
+            // end
             ipop(1),
             iret(0),
         });

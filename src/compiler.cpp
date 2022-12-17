@@ -520,7 +520,7 @@ void Compiler::compile_numeric_for(Noderef node)
     this->emit(Instruction::IAdd);
     this->emit(Opcode(Instruction::ILStore, this->varmem(lvalue)->offset));
     this->emit(Opcode(Instruction::IJmp, loop_start));
-    this->seti(cjmp, this->len());
+    this->edit_jmp(cjmp, this->len());
     this->loop_end();
     this->emit(Opcode(Instruction::IPop, 3));
 }
@@ -607,7 +607,7 @@ void Compiler::compile_while(Noderef node)
     this->compile_block(node->child(1));
     this->emit(Opcode(Instruction::IJmp, jmp_idx));
     this->loop_end();
-    this->seti(cjmp, this->len());
+    this->edit_jmp(cjmp, this->len());
 }
 
 void Compiler::compile_repeat(Noderef node)
@@ -694,7 +694,7 @@ void Compiler::loop_end()
     while (this->breaks.back())
     {
         size_t brk = this->breaks.back() - 1;
-        this->seti(brk, idx);
+        this->edit_jmp(brk, idx);
         this->breaks.pop_back();
     }
     this->breaks.pop_back();
