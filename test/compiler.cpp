@@ -180,6 +180,12 @@ GenTest compiler_test_case(const char *message, const char *text)
     Lexer lexer(text);
     Parser parser((ILexer *)&lexer);
     Ast ast = parser.parse();
+    if (ast.root() == nullptr)
+    {
+        std::cerr << "parsing code failed [ " << message << "]\n"
+                  << parser.get_error() << "\n";
+        exit(1);
+    }
     SemanticAnalyzer analyzer(ast);
     analyzer.analyze();
     Compiler compiler((IGenerator *)&gentest);
@@ -567,25 +573,142 @@ void compiler_tests()
         });
 
     compiler_test_case(
-        "function call returning infinite values",
+        "binary operators",
 
-        "local a,b\n"
-        "a(3,b())")
+        "local a,b,c\n"
+
+        "a=b+c\n"
+        "a=b-c\n"
+        "a=b*c\n"
+        "a=b/c\n"
+        "a=b//c\n"
+        "a=b%c\n"
+        "a=b^c\n"
+
+        "a=b&c\n"
+        "a=b|c\n"
+        "a=b~c\n"
+        "a=b>>c\n"
+        "a=b<<c\n"
+
+        "a=b..c\n"
+
+        "a=b>c\n"
+        "a=b<c\n"
+        "a=b>=c\n"
+        "a=b<=c\n"
+        "a=b==c\n"
+        "a=b~=c\n"
+
+        "")
 
         .test_fn(1)
         .test_parcount(0)
         .test_hookmax(0)
-        .test_ccount(1)
+        .test_ccount(0)
         .test_upvalues({})
         .test_opcodes({
+            // decl
             inil,
             inil,
-            ilocal(0),
-            iconst(0),
+            inil,
+            // add
             ilocal(1),
-            icall(0, 0),
-            icall(1, 1),
-            ipop(2),
+            ilocal(2),
+            iadd,
+            ilstore(0),
+            // sub
+            ilocal(1),
+            ilocal(2),
+            isub,
+            ilstore(0),
+            // mult
+            ilocal(1),
+            ilocal(2),
+            imult,
+            ilstore(0),
+            // float div
+            ilocal(1),
+            ilocal(2),
+            ifltdiv,
+            ilstore(0),
+            // floor div
+            ilocal(1),
+            ilocal(2),
+            iflrdiv,
+            ilstore(0),
+            // mod
+            ilocal(1),
+            ilocal(2),
+            imod,
+            ilstore(0),
+            // pow
+            ilocal(1),
+            ilocal(2),
+            ipow,
+            ilstore(0),
+            // binary and
+            ilocal(1),
+            ilocal(2),
+            iband,
+            ilstore(0),
+            // binary or
+            ilocal(1),
+            ilocal(2),
+            ibor,
+            ilstore(0),
+            // binary xor
+            ilocal(1),
+            ilocal(2),
+            ibxor,
+            ilstore(0),
+            // binary right shift
+            ilocal(1),
+            ilocal(2),
+            ishr,
+            ilstore(0),
+            // binary left shift
+            ilocal(1),
+            ilocal(2),
+            ishl,
+            ilstore(0),
+            // concat
+            ilocal(1),
+            ilocal(2),
+            iconcat,
+            ilstore(0),
+            // greater
+            ilocal(1),
+            ilocal(2),
+            igt,
+            ilstore(0),
+            // less
+            ilocal(1),
+            ilocal(2),
+            ilt,
+            ilstore(0),
+            // greater equal
+            ilocal(1),
+            ilocal(2),
+            ige,
+            ilstore(0),
+            // less equal
+            ilocal(1),
+            ilocal(2),
+            ile,
+            ilstore(0),
+            // equal
+            ilocal(1),
+            ilocal(2),
+            ieq,
+            ilstore(0),
+            // not equal
+            ilocal(1),
+            ilocal(2),
+            ine,
+            ilstore(0),
+            // end
+            ipop(3),
             iret(0),
         });
 
