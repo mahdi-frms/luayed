@@ -554,7 +554,7 @@ void Compiler::compile_logic(Noderef node)
     this->emit(Opcode(Instruction::ICjmp, 0));
     this->emit(Opcode(Instruction::IPop, 1));
     this->compile_exp(node->child(2));
-    this->seti(cjmp, this->len());
+    this->edit_jmp(cjmp, this->len());
 }
 
 void Compiler::compile_block(Noderef node)

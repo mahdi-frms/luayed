@@ -197,7 +197,7 @@ GenTest compiler_test_case(const char *message, const char *text)
 void compiler_tests()
 {
     compiler_test_case(
-        "simple local assignment",
+        "simple declaration",
 
         "local a = 3")
 
@@ -758,18 +758,27 @@ void compiler_tests()
         "local a, b\n"
         "do\n"
         "    local c, d = 3, true\n"
+        "    a = 'text'\n"
+        "    d = false\n"
         "end\n")
 
         .test_fn(1)
         .test_parcount(0)
         .test_hookmax(0)
-        .test_ccount(1)
+        .test_ccount(2)
         .test_upvalues({})
         .test_opcodes({
+            // decls
             inil,
             inil,
             iconst(0),
             itrue,
+            // assignments
+            iconst(1),
+            ilstore(0),
+            ifalse,
+            ilstore(3),
+            // end
             ipop(2),
             ipop(2),
             iret(0),
@@ -783,6 +792,7 @@ void compiler_tests()
         "    local c = \"hello world!\"\n"
         "    do\n"
         "       local d, e, f = 3, true\n"
+        "       a = c + d\n"
         "    end\n"
         "end\n")
 
@@ -792,15 +802,174 @@ void compiler_tests()
         .test_ccount(2)
         .test_upvalues({})
         .test_opcodes({
+            // decl
             inil,
             inil,
             iconst(0),
             iconst(1),
             itrue,
             inil,
+            // assignments
+            ilocal(2),
+            ilocal(3),
+            iadd,
+            ilstore(0),
+            // end
             ipop(3),
             ipop(1),
             ipop(2),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "if block",
+
+        "local a ,b\n"
+        "if a then\n"
+        "    b()\n"
+        "end\n")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            // decl
+            inil,
+            inil,
+            ilocal(0),
+            inot,
+            icjmp(16),
+            ilocal(1),
+            icall(0, 1),
+            ijmp(16),
+            // end
+            ipop(2),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "if-else block",
+
+        "local a, b, c\n"
+        "if a then\n"
+        "    b()\n"
+        "else\n"
+        "    c()\n"
+        "end\n")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            // decl
+            inil,
+            inil,
+            inil,
+            // if
+            ilocal(0),
+            inot,
+            icjmp(17),
+            // then
+            ilocal(1),
+            icall(0, 1),
+            ijmp(22),
+            // else
+            ilocal(2),
+            icall(0, 1),
+            // end
+            ipop(3),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "if-elseif-else block",
+
+        "local a, b, c\n"
+        "if true then\n"
+        "    a()\n"
+        "elseif false then\n"
+        "    b()\n"
+        "else\n"
+        "    c()\n"
+        "end\n")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            // decl
+            inil,
+            inil,
+            inil,
+            // if 3
+            itrue,
+            inot,
+            icjmp(16),
+            // then 8
+            ilocal(0),
+            icall(0, 1),
+            ijmp(34),
+            // elseif 16
+            ifalse,
+            inot,
+            icjmp(29),
+            // then 21
+            ilocal(1),
+            icall(0, 1),
+            ijmp(34),
+            // else 29
+            ilocal(2),
+            icall(0, 1),
+            // end 34
+            ipop(3),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "logical or",
+
+        "local a = false or 3")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(1)
+        .test_upvalues({})
+        .test_opcodes({
+            ifalse,
+            iblocal(1),
+            icjmp(10),
+            ipop(1),
+            iconst(0),
+            // cjmp 10
+            ipop(1),
+            iret(0),
+        });
+    compiler_test_case(
+        "logical and",
+
+        "local a = true and 4")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(1)
+        .test_upvalues({})
+        .test_opcodes({
+            itrue,
+            iblocal(1),
+            inot,
+            icjmp(11),
+            ipop(1),
+            iconst(0),
+            // cjmp 11
+            ipop(1),
             iret(0),
         });
 }
