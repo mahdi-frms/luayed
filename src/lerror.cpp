@@ -24,7 +24,7 @@ LError error_missing_char(char c)
 LError error_invalid_char(char c)
 {
     LError err;
-    err.kind = LError::LE_MissingChar;
+    err.kind = LError::LE_InvalidChar;
     err.as.invalid_char.c = c;
     return err;
 }
