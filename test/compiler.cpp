@@ -713,6 +713,46 @@ void compiler_tests()
         });
 
     compiler_test_case(
+        "expression with multiple binary operators",
+
+        "local a = 1 + 2 + 3")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(3)
+        .test_upvalues({})
+        .test_opcodes({
+            iconst(0),
+            iconst(1),
+            iadd,
+            iconst(2),
+            iadd,
+            ipop(1),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "unary operators",
+
+        "local a = not ~#-(4)")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(1)
+        .test_upvalues({})
+        .test_opcodes({
+            iconst(0),
+            inegate,
+            ilength,
+            ibnot,
+            inot,
+            ipop(1),
+            iret(0),
+        });
+
+    compiler_test_case(
         "nested block",
 
         "local a, b\n"
