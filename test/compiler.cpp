@@ -511,10 +511,9 @@ void compiler_tests()
         });
 
     compiler_test_case(
-        "function call with args",
+        "function call with return value",
 
-        "local a,b\n"
-        "a(b,3)\n")
+        "local a = b()\n")
 
         .test_fn(1)
         .test_parcount(0)
@@ -522,17 +521,70 @@ void compiler_tests()
         .test_ccount(1)
         .test_upvalues({})
         .test_opcodes({
-            // decl
-            inil,
-            inil,
-            // func
-            ilocal(0),
-            // args
-            ilocal(1),
             iconst(0),
-            // call
-            icall(2, 1),
-            // end
+            igget,
+            icall(0, 2),
+            ipop(1),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "function call with multiple return values",
+
+        "local a,b,c = d()\n")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(1)
+        .test_upvalues({})
+        .test_opcodes({
+            iconst(0),
+            igget,
+            icall(0, 4),
+            ipop(3),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "function call returning one value for varlist",
+
+        "local a,b,c = d() , 3\n")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(2)
+        .test_upvalues({})
+        .test_opcodes({
+            iconst(0),
+            igget,
+            icall(0, 2),
+            iconst(1),
+            inil,
+            ipop(3),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "function call returning infinite values",
+
+        "local a,b\n"
+        "a(3,b())")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(1)
+        .test_upvalues({})
+        .test_opcodes({
+            inil,
+            inil,
+            ilocal(0),
+            iconst(0),
+            ilocal(1),
+            icall(0, 0),
+            icall(1, 1),
             ipop(2),
             iret(0),
         });
