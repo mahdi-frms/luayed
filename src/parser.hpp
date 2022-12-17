@@ -20,24 +20,24 @@ class Parser
 private:
     ILexer *lexer;
     Token current;
-    Token ahead;
+    LError err;
 
     Noderef expr();
+    Noderef expr(Token t);
     Noderef fncall(Token op);
-    Noderef expr_p(uint8_t);
+    Noderef expr_p(uint8_t pwr, Token tt);
     Noderef primary();
     Token pop();
     Token peek();
-    Token look_ahead();
     Noderef table();
-    Noderef id_field();
+    Noderef id_field(Token t);
     Noderef expr_field();
     Noderef block(BlockEnd end);
     Noderef statement();
     Noderef while_stmt();
     Noderef repeat_stmt();
     Noderef vardecl();
-    void error(string message, Token token);
+    void error(LError err, Token token);
     Noderef name_attrib();
     Noderef if_stmt();
     Noderef generic_for_stmt(Token identifier);
@@ -51,6 +51,7 @@ private:
 public:
     Parser(ILexer *lexer);
     Ast parse();
+    LError get_error();
     Ast parse_exp();
 };
 

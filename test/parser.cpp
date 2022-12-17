@@ -19,6 +19,10 @@ public:
         this->tkns.erase(this->tkns.begin());
         return last;
     }
+    LError get_error()
+    {
+        return error_ok();
+    }
 };
 
 class AstMaker

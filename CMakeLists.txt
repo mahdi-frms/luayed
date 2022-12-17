@@ -10,6 +10,7 @@ add_library(luacomp
     src/compiler.cpp
     src/luabin.cpp
     src/lerror.cpp
+    src/token.cpp
 )
 
 add_executable(luayed

@@ -72,13 +72,9 @@ uint8_t check_postfix(TokenKind kind)
     return 255;
 }
 
-Parser::Parser(ILexer *lexer) : lexer(lexer), current(token_none()), ahead(token_none())
+Parser::Parser(ILexer *lexer) : lexer(lexer), current(token_none())
 {
     this->current = this->lexer->next();
-    if (this->current.kind != TokenKind::Eof)
-    {
-        this->ahead = this->lexer->next();
-    }
 }
 
 /*
@@ -97,7 +93,12 @@ Parser::Parser(ILexer *lexer) : lexer(lexer), current(token_none()), ahead(token
 */
 Noderef Parser::expr()
 {
-    return this->expr_p(0);
+    return this->expr(token_none());
+}
+
+Noderef Parser::expr(Token t)
+{
+    return this->expr_p(0, t);
 }
 
 Token Parser::consume(TokenKind kind)
@@ -105,17 +106,14 @@ Token Parser::consume(TokenKind kind)
     Token t = this->pop();
     if (t.kind != kind)
     {
-        this->error(string("expected '") +
-                        token_kind_stringify(kind) +
-                        "'",
-                    t);
+        this->error(error_expected_token(kind), t);
     }
     return t;
 }
 
-Noderef Parser::id_field()
+Noderef Parser::id_field(Token t)
 {
-    Noderef id = Ast::make(this->pop(), NodeKind::Name);
+    Noderef id = Ast::make(t, NodeKind::Name);
     this->consume(TokenKind::Equal);
     return Ast::make(id, this->expr(), NodeKind::IdField);
 }
@@ -142,13 +140,14 @@ Noderef Parser::table()
         }
         else if (t.kind == TokenKind::Identifier)
         {
-            if (this->look_ahead().kind == TokenKind::Equal)
+            Token n = this->pop();
+            if (this->peek().kind == TokenKind::Equal)
             {
-                items.push_back(this->id_field());
+                items.push_back(this->id_field(n));
             }
             else
             {
-                items.push_back(this->expr());
+                items.push_back(this->expr(n));
             }
         }
         else if (t.kind == TokenKind::LeftBracket)
@@ -162,10 +161,9 @@ Noderef Parser::table()
 
         t = this->peek();
         if (t.kind != TokenKind::Comma &&
-            t.kind != TokenKind::Semicolon &&
             t.kind != TokenKind::RightBrace)
         {
-            this->error(string("expected ',' or ';'"), t);
+            this->error(error_expected_token(TokenKind::RightBrace), t);
         }
         else if (t.kind != TokenKind::RightBrace)
         {
@@ -200,7 +198,7 @@ Noderef Parser::varlist(Noderef var)
         this->pop();
         Noderef var = this->expr();
         if (!is_var(var))
-            this->error("expected variable", this->peek());
+            this->error(error_expected_variable(), this->peek());
         items.push_back(var);
     }
     return Ast::make(items, NodeKind::Explist);
@@ -315,7 +313,7 @@ Noderef Parser::statement()
         }
         else
         {
-            this->error(string("unexpected expression before"), this->peek());
+            this->error(error_expected_variable(), this->peek());
         }
     }
     if (this->peek().kind == TokenKind::Semicolon)
@@ -410,13 +408,12 @@ Noderef Parser::statement()
     return nullptr; // never reaches here
 }
 
-void Parser::error(string message, Token token)
+void Parser::error(LError err, Token token)
 {
-    throw message + " (line " +
-        std::to_string(token.line + 1) +
-        ", at " +
-        std::to_string(token.offset + 1) +
-        ")";
+    this->err = err;
+    err.line = token.line;
+    err.offset = token.offset;
+    throw 1;
 }
 
 bool is_end(BlockEnd end, Token token)
@@ -552,14 +549,14 @@ Noderef Parser::fncall(Token op)
         return this->arglist();
 }
 
-Noderef Parser::expr_p(uint8_t pwr)
+Noderef Parser::expr_p(uint8_t pwr, Token tt)
 {
-    Token t = this->pop();
+    Token t = tt.kind == TokenKind::None ? this->pop() : tt;
     uint8_t prefix = check_prefix(t.kind);
     Noderef lhs = nullptr;
     if (prefix != 255)
     {
-        Noderef rhs = this->expr_p(prefix);
+        Noderef rhs = this->expr_p(prefix, token_none());
         lhs = Ast::make(Ast::make(t, NodeKind::Operator), rhs, NodeKind::Unary);
     }
     else if (TOKEN_IS_PRIMARY(t.kind))
@@ -581,7 +578,7 @@ Noderef Parser::expr_p(uint8_t pwr)
     }
     else
     {
-        this->error("expression expected", t);
+        this->error(error_expected_expression(), t);
     }
 
     while (true)
@@ -628,7 +625,7 @@ Noderef Parser::expr_p(uint8_t pwr)
                 break;
             }
             this->pop();
-            Noderef rhs = expr_p(rp);
+            Noderef rhs = expr_p(rp, token_none());
             lhs = Ast::make(lhs, Ast::make(op, NodeKind::Operator), rhs, NodeKind::Binary);
         }
     }
@@ -641,11 +638,9 @@ Token Parser::pop()
     Token t = this->current;
     if (t.kind == TokenKind::Error)
     {
-        this->error(t.text(), t);
+        this->error(this->lexer->get_error(), t);
     }
-    this->current = ahead;
-    if (current.kind != TokenKind::Eof)
-        this->ahead = this->lexer->next();
+    this->current = this->lexer->next();
     return t;
 }
 
@@ -654,17 +649,7 @@ Token Parser::peek()
     Token t = this->current;
     if (t.kind == TokenKind::Error)
     {
-        this->error(t.text(), t);
-    }
-    return t;
-}
-
-Token Parser::look_ahead()
-{
-    Token t = this->ahead;
-    if (t.kind == TokenKind::Error)
-    {
-        this->error(t.text(), t);
+        this->error(this->lexer->get_error(), t);
     }
     return t;
 }
@@ -676,13 +661,12 @@ Ast Parser::parse()
         Ast tree = Ast(this->block(BlockEnd::Eof));
         if (this->peek().kind != TokenKind::Eof)
         {
-            this->error("EOF expected", this->pop());
+            this->error(error_expected_token(TokenKind::Eof), this->pop());
         }
         return tree;
     }
-    catch (string message)
+    catch (int _)
     {
-        printf("lua: %s\n", message.c_str());
         return Ast(nullptr);
     }
 }
@@ -694,13 +678,17 @@ Ast Parser::parse_exp()
         Ast tree = Ast(this->expr());
         if (this->peek().kind != TokenKind::Eof)
         {
-            this->error("EOF expected", this->pop());
+            this->error(error_expected_token(TokenKind::Eof), this->pop());
         }
         return tree;
     }
-    catch (string message)
+    catch (int _)
     {
-        printf("lua: %s\n", message.c_str());
         return Ast(nullptr);
     }
+}
+
+LError Parser::get_error()
+{
+    return this->err;
 }

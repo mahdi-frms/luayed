@@ -47,15 +47,33 @@ LError error_missing_end_of_comment(size_t level)
     err.as.missing_end_of_comment.level = level;
     return err;
 }
-
+LError error_expected_token(TokenKind kind)
+{
+    LError err;
+    err.kind = LError::LE_ExpectedToken;
+    err.as.expected_token.token_kind = kind;
+    return err;
+}
+LError error_expected_expression()
+{
+    LError err;
+    err.kind = LError::LE_ExpectedExpression;
+    return err;
+}
+LError error_expected_variable()
+{
+    LError err;
+    err.kind = LError::LE_ExpectedVariable;
+    return err;
+}
 std::ostream &operator<<(std::ostream &os, const LError &err)
 {
     if (err.kind == LError::LE_OK)
         return os;
     os << "lua: error(line: "
-       << err.line
+       << err.line + 1
        << ", offset: "
-       << err.offset
+       << err.offset + 1
        << "): ";
     if (err.kind == LError::LE_MissingEndOfComment)
     {
@@ -86,6 +104,18 @@ std::ostream &operator<<(std::ostream &os, const LError &err)
     else if (err.kind == LError::LE_MalformedNumber)
     {
         os << "malformed number";
+    }
+    else if (err.kind == LError::LE_ExpectedToken)
+    {
+        os << "expected token '" << token_kind_stringify(err.as.expected_token.token_kind) << "'";
+    }
+    else if (err.kind == LError::LE_ExpectedVariable)
+    {
+        os << "expected variable";
+    }
+    else if (err.kind == LError::LE_ExpectedExpression)
+    {
+        os << "expected expression";
     }
     else
     {
