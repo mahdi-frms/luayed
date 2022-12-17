@@ -146,7 +146,7 @@ string binary_stringify(lbyte *text, size_t codelen);
 #define ilocal(A) Opcode(ILocal, A)
 #define ilstore(A) Opcode(ILStore, A)
 #define iblocal(A) Opcode(IBLocal, A)
-#define iblStore(A) Opcode(IBLStore, A)
+#define iblstore(A) Opcode(IBLStore, A)
 #define iupvalue(A) Opcode(IUpvalue, A)
 #define iustore(A) Opcode(IUStore, A)
 #define ipush(A) Opcode(IPush, A)

@@ -275,6 +275,269 @@ void compiler_tests()
         });
 
     compiler_test_case(
+        "global assignment",
+
+        "a = 3")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(2)
+        .test_upvalues({})
+        .test_opcodes({
+            iconst(0),
+            iconst(1),
+            igset,
+            iret(0),
+        });
+
+    compiler_test_case(
+        "double assignment",
+
+        "a,b = 3,true")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(3)
+        .test_upvalues({})
+        .test_opcodes({
+            // lvalues
+            iconst(0),
+            inil,
+            iconst(1),
+            inil,
+            // rvalues
+            iconst(2),
+            itrue,
+            // write to buffers
+            iblstore(3),
+            iblstore(4),
+            // global set
+            igset,
+            igset,
+            // end
+            iret(0),
+        });
+
+    compiler_test_case(
+        "double assignment with less expressions",
+
+        "a,b = 3")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(3)
+        .test_upvalues({})
+        .test_opcodes({
+            // lvalues
+            iconst(0),
+            inil,
+            iconst(1),
+            inil,
+            // rvalues
+            iconst(2),
+            inil,
+            // write to buffers
+            iblstore(3),
+            iblstore(4),
+            // global set
+            igset,
+            igset,
+            // end
+            iret(0),
+        });
+
+    compiler_test_case(
+        "double assignment with more expressions",
+
+        "a,b = 3, 'str' , false")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(4)
+        .test_upvalues({})
+        .test_opcodes({
+            // lvalues
+            iconst(0),
+            inil,
+            iconst(1),
+            inil,
+            // rvalues
+            iconst(2),
+            iconst(3),
+            // write to buffers
+            iblstore(3),
+            iblstore(4),
+            // global set
+            igset,
+            igset,
+            // end
+            iret(0),
+        });
+
+    compiler_test_case(
+        "local assignment",
+
+        "local a\n"
+        "a = 4\n")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(1)
+        .test_upvalues({})
+        .test_opcodes({
+            inil,
+            iconst(0),
+            ilstore(0),
+            ipop(1),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "multiple local assignments",
+
+        "local a\n"
+        "local b\n"
+        "a = 4\n"
+        "b = true\n")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(1)
+        .test_upvalues({})
+        .test_opcodes({
+            inil,
+            inil,
+            iconst(0),
+            ilstore(0),
+            itrue,
+            ilstore(1),
+            ipop(2),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "varlist local assignment",
+
+        "local a,b,c\n"
+        "a,b,c = 1,3,8\n")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(3)
+        .test_upvalues({})
+        .test_opcodes({
+            inil,
+            inil,
+            inil,
+            // lvalues
+            inil,
+            inil,
+            inil,
+            // rvalues
+            iconst(0),
+            iconst(1),
+            iconst(2),
+            // write to buffers
+            iblstore(4),
+            iblstore(4),
+            iblstore(4),
+            // local set
+            ilstore(2),
+            ilstore(1),
+            ilstore(0),
+            // end
+            ipop(3),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "get globals",
+
+        "local v = a")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(1)
+        .test_upvalues({})
+        .test_opcodes({
+            iconst(0),
+            igget,
+            ipop(1),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "get local",
+
+        "local foo\n"
+        "local bar = foo\n")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            inil,
+            ilocal(0),
+            ipop(2),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "function call",
+
+        "a()\n")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(1)
+        .test_upvalues({})
+        .test_opcodes({
+            iconst(0),
+            igget,
+            icall(0, 1),
+            // end
+            iret(0),
+        });
+
+    compiler_test_case(
+        "function call with args",
+
+        "local a,b\n"
+        "a(b,3)\n")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(1)
+        .test_upvalues({})
+        .test_opcodes({
+            // decl
+            inil,
+            inil,
+            // func
+            ilocal(0),
+            // args
+            ilocal(1),
+            iconst(0),
+            // call
+            icall(2, 1),
+            // end
+            ipop(2),
+            iret(0),
+        });
+
+    compiler_test_case(
         "nested block",
 
         "local a, b\n"
