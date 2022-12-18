@@ -1267,4 +1267,52 @@ void compiler_tests()
             ipop(1),
             iret(0),
         });
+
+    compiler_test_case(
+        "upvalue in numeric for",
+
+        "for i = 1,5,1 do local v = function() local w = i end end")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(3)
+        .test_upvalues({})
+        .test_opcodes({
+            // params
+            iupush,
+            iconst(0),
+            iconst(1),
+            iconst(2),
+            // block
+            ifconst(2),
+            ipop(1),
+            // next
+            iblocal(3), // counter
+            iblocal(2), // step
+            iadd,
+            iblocal(1),  // copy new counter
+            iblstore(5), // store new counter
+            iblocal(3),  // limit
+            ile,
+            icjmp(7),
+            // loop end 37
+            ipop(3),
+            iupop,
+            // end
+            iret(0),
+        })
+
+        .test_fn(2)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({
+            Upvalue(1, 0),
+        })
+        .test_opcodes({
+            iupvalue(0),
+            ipop(1),
+            iret(0),
+        });
 }

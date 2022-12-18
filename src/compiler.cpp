@@ -176,7 +176,8 @@ void Compiler::compile_identifier(Noderef node)
     {
         if (md->is_upvalue)
         {
-            MetaScope *fnsc = (MetaScope *)mm->scope->getannot(MetaKind::MScope);
+            MetaScope *sc = (MetaScope *)mm->scope->getannot(MetaKind::MScope);
+            MetaScope *fnsc = (MetaScope *)sc->func->getannot(MetaKind::MScope);
             this->emit(Opcode(Instruction::IUpvalue, this->upval(fnsc->fidx, mm->offset)));
         }
         else
@@ -349,7 +350,8 @@ void Compiler::compile_lvalue_primary(Noderef node)
     {
         if (md && md->is_upvalue)
         {
-            MetaScope *fnsc = (MetaScope *)mm->scope->getannot(MetaKind::MScope);
+            MetaScope *sc = (MetaScope *)mm->scope->getannot(MetaKind::MScope);
+            MetaScope *fnsc = (MetaScope *)sc->func->getannot(MetaKind::MScope);
             this->ops_push(Opcode(Instruction::IUStore, this->upval(fnsc->fidx, mm->offset)));
         }
         else
@@ -577,6 +579,8 @@ void Compiler::compile_numeric_for(Noderef node)
     this->stack_offset += 2;
     Noderef from = node->child(1);
     Noderef to = node->child(2);
+    if (md->is_upvalue)
+        this->emit(Instruction::IUPush);
     this->compile_exp(from);
     this->compile_exp(to);
     size_t blk_idx = 3;
@@ -601,6 +605,8 @@ void Compiler::compile_numeric_for(Noderef node)
     this->loop_end();
     this->emit(Opcode(Instruction::IPop, 3));
     this->stack_offset -= 3;
+    if (md->is_upvalue)
+        this->emit(Instruction::IUPop);
 }
 
 void Compiler::compile_assignment(Noderef node)
