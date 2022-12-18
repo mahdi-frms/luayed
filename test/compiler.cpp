@@ -94,7 +94,7 @@ public:
     size_t upval(fidx_t fidx, size_t offset)
     {
         size_t idx = this->current->upvalues.size();
-        this->current->upvalues.push_back(Upvalue{.fidx = fidx, .offset = offset});
+        this->current->upvalues.push_back(Upvalue(fidx, offset));
         return idx;
     }
     void meta_parcount(size_t parcount)
@@ -1232,6 +1232,38 @@ void compiler_tests()
             inil,
             ilocal(2),
             ilstore(0),
+            ipop(1),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "upvalue",
+
+        "local u local a = function() local z = u end")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            iupush,
+            inil,
+            ifconst(2),
+            ipop(2),
+            iupop,
+            iret(0),
+        })
+
+        .test_fn(2)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({
+            Upvalue(1, 0),
+        })
+        .test_opcodes({
+            iupvalue(0),
             ipop(1),
             iret(0),
         });

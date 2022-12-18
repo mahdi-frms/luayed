@@ -645,6 +645,10 @@ void Compiler::compile_block(Noderef node)
         this->emit(Opcode(Instruction::IPop, md->stack_size));
         this->stack_offset -= md->stack_size;
     }
+    for (size_t i = 0; i < md->upvalue_size; i++)
+    {
+        this->emit(Instruction::IUPop);
+    }
 }
 
 void Compiler::compile_decl(Noderef node)
@@ -655,6 +659,10 @@ void Compiler::compile_decl(Noderef node)
         Noderef var = varlist->child(i)->child(0);
         MetaMemory *mm = (MetaMemory *)var->getannot(MetaKind::MMemory);
         mm->offset = this->stack_offset++;
+        if (mm->is_upvalue)
+        {
+            this->emit(Instruction::IUPush);
+        }
     }
     if (node->child_count() == 2)
         this->compile_explist(node->child(1), varlist->child_count());

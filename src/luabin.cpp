@@ -141,3 +141,5 @@ string binary_stringify(lbyte *text, size_t codelen)
     }
     return str;
 }
+
+Upvalue::Upvalue(fidx_t fidx, size_t offset) : fidx(fidx), offset(offset) {}

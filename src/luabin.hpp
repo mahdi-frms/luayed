@@ -69,6 +69,7 @@ struct Upvalue
     fidx_t fidx;
     size_t offset;
 
+    Upvalue(fidx_t fidx, size_t offset);
     friend bool operator==(const Upvalue &l, const Upvalue &r);
 };
 
