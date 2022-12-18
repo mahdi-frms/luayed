@@ -525,10 +525,17 @@ void Compiler::compile_generic_for(Noderef node)
     Noderef lvalue = varlist->child(0)->child(0);
     Noderef arglist = node->child(1);
     size_t varcount = varlist->child_count();
+    size_t upcount = 0;
     for (size_t i = 0; i < varcount; i++)
     {
         Noderef var = varlist->child(i)->child(0);
         this->varmem(var)->offset = this->stack_offset++;
+        MetaMemory *mm = this->varmem(var);
+        if (mm->is_upvalue)
+        {
+            upcount++;
+            this->emit(Instruction::IUPush);
+        }
     }
     this->stack_offset += 2;
     //-- push args
@@ -561,6 +568,8 @@ void Compiler::compile_generic_for(Noderef node)
     this->emit(Opcode(Instruction::IPop, varcount + 2));
     this->stack_offset -= (varcount + 2);
     this->edit_jmp(cjmp, loop_end);
+    for (size_t i = 0; i < upcount; i++)
+        this->emit(Instruction::IUPop);
 }
 void Compiler::seti(size_t idx, lbyte b)
 {
