@@ -40,10 +40,11 @@ enum Instruction
     ITrue = 0x46,
     IFalse = 0x47,
 
+    IUPush = 0x50,
+    IUPop = 0x51,
+
     ITList = 0xc0,
     IRet = 0xc2,
-
-    IFVargs = 0x54,
 
     ICall = 0xd0,
     IVargs = 0xd4,
@@ -60,7 +61,6 @@ enum Instruction
     IUpvalue = 0xf8,
     IUStore = 0xfa,
 
-    IPush = 0xfc,
     IPop = 0xfe
 };
 
@@ -134,9 +134,10 @@ string binary_stringify(lbyte *text, size_t codelen);
 #define inil INil
 #define itrue ITrue
 #define ifalse IFalse
+#define iupush IUPush
+#define iupop IUPop
 #define itlist(A) Opcode(ITList, A)
 #define iret(A) Opcode(IRet, A)
-#define ifvargs(A) Opcode(IFVargs, A)
 #define icall(A, B) Opcode(ICall, A, B)
 #define ivargs(A) Opcode(IVargs, A)
 #define ijmp(A) Opcode(IJmp, A)
@@ -149,7 +150,6 @@ string binary_stringify(lbyte *text, size_t codelen);
 #define iblstore(A) Opcode(IBLStore, A)
 #define iupvalue(A) Opcode(IUpvalue, A)
 #define iustore(A) Opcode(IUStore, A)
-#define ipush(A) Opcode(IPush, A)
 #define ipop(A) Opcode(IPop, A)
 
 #endif

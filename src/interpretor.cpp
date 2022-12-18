@@ -37,7 +37,6 @@ void Interpretor::optable_init()
     Interpretor::optable[IFalse] = &Interpretor::i_false;
     Interpretor::optable[ITList] = &Interpretor::i_tlist;
     Interpretor::optable[IRet] = &Interpretor::i_ret;
-    Interpretor::optable[IFVargs] = &Interpretor::i_fvargs;
     Interpretor::optable[ICall] = &Interpretor::i_call;
     Interpretor::optable[IVargs] = &Interpretor::i_vargs;
     Interpretor::optable[IJmp] = &Interpretor::i_jmp;
@@ -51,7 +50,7 @@ void Interpretor::optable_init()
     Interpretor::optable[IBLStore] = &Interpretor::i_blstore;
     Interpretor::optable[IUpvalue] = &Interpretor::i_upvalue;
     Interpretor::optable[IUStore] = &Interpretor::i_ustore;
-    Interpretor::optable[IPush] = &Interpretor::i_push;
+    Interpretor::optable[IUPush] = &Interpretor::i_push;
     Interpretor::optable[IPop] = &Interpretor::i_pop;
 }
 

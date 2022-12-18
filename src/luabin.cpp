@@ -84,7 +84,8 @@ string binary_stringify(lbyte *text, size_t codelen)
     opnames[INil] = "nil";
     opnames[ITrue] = "true";
     opnames[IFalse] = "false";
-    opnames[IFVargs] = "fvargs";
+    opnames[IUPush] = "upush";
+    opnames[IUPop] = "upop";
 
     opnames[IRet] = opnames[IRet + 1] = "ret";
     opnames[IJmp] = opnames[IJmp + 1] = "jmp";
@@ -101,7 +102,6 @@ string binary_stringify(lbyte *text, size_t codelen)
     opnames[IBLStore] = opnames[IBLStore + 1] = "blstore";
     opnames[IUpvalue] = opnames[IUpvalue + 1] = "upvalue";
     opnames[IUStore] = opnames[IUStore + 1] = "ustore";
-    opnames[IPush] = opnames[IPush + 1] = "push";
     opnames[IPop] = opnames[IPop + 1] = "pop";
 
     string str;

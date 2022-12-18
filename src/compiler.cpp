@@ -203,10 +203,7 @@ void Compiler::compile_primary(Noderef node, size_t expect)
         this->emit(Instruction::ITrue);
     else if (tkn.kind == TokenKind::DotDotDot)
     {
-        if (expect == EXPECT_FREE)
-            this->emit(Instruction::IFVargs);
-        else
-            this->emit(Opcode(Instruction::IVargs, expect));
+        this->emit(Opcode(Instruction::IVargs, expect == EXPECT_FREE ? 0 : expect + 1));
     }
     else if (tkn.kind == TokenKind::False)
         this->emit(Instruction::IFalse);
