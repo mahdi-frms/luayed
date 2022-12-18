@@ -1206,4 +1206,33 @@ void compiler_tests()
         .test_opcodes({
             iret(0),
         });
+
+    compiler_test_case(
+        "function declaration with locals",
+
+        "local a = function(v,w) local z v = z end")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            ifconst(2),
+            ipop(1),
+            iret(0),
+        })
+
+        .test_fn(2)
+        .test_parcount(2)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            inil,
+            ilocal(2),
+            ilstore(0),
+            ipop(1),
+            iret(0),
+        });
 }

@@ -33,11 +33,14 @@ void Compiler::compile(Noderef root)
     {
         this->compile_node(root);
         this->gen->meta_parcount(0);
+        this->stack_offset = 0;
     }
     else
     {
+        size_t parcount = root->child(0)->child_count();
+        this->stack_offset += parcount;
         this->compile_node(root->child(1));
-        this->gen->meta_parcount(root->child(0)->child_count());
+        this->gen->meta_parcount(parcount);
     }
     this->emit(Opcode(Instruction::IRet, 0));
     this->gen->popf();

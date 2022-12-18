@@ -100,7 +100,8 @@ size_t Node::child_count()
 
 void Ast::destroy()
 {
-    this->destroy_node(this->tree);
+    if (this->tree)
+        this->destroy_node(this->tree);
 }
 void Ast::destroy_node(Noderef node)
 {

@@ -410,9 +410,9 @@ Noderef Parser::statement()
 
 void Parser::error(LError err, Token token)
 {
-    this->err = err;
     err.line = token.line;
     err.offset = token.offset;
+    this->err = err;
     throw 1;
 }
 

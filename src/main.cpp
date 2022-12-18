@@ -71,6 +71,10 @@ bool parse(const char *path)
                 std::cout.flush();
             }
         }
+        else
+        {
+            std::cerr << parser.get_error();
+        }
         tree.destroy();
         delete[] text;
         return root != nullptr;
