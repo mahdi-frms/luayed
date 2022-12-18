@@ -29,7 +29,16 @@ void Compiler::compile(Noderef root)
 {
     MetaScope *fnscp = (MetaScope *)root->getannot(MetaKind::MScope);
     this->gen->pushf(fnscp->fidx);
-    this->compile_node(root->get_kind() == NodeKind::Block ? root : root->child(1));
+    if (root->get_kind() == NodeKind::Block)
+    {
+        this->compile_node(root);
+        this->gen->meta_parcount(0);
+    }
+    else
+    {
+        this->compile_node(root->child(1));
+        this->gen->meta_parcount(root->child(0)->child_count());
+    }
     this->emit(Opcode(Instruction::IRet, 0));
     this->gen->popf();
 }
