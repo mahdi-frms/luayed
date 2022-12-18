@@ -495,6 +495,7 @@ void Compiler::compile_numeric_for(Noderef node)
     Noderef lvalue = node->child(0)->child(0);
     MetaMemory *md = (MetaMemory *)lvalue->getannot(MetaKind::MMemory);
     md->offset = this->stack_offset++;
+    this->stack_offset += 2;
     Noderef from = node->child(1);
     Noderef to = node->child(2);
     this->compile_exp(from);
@@ -520,7 +521,7 @@ void Compiler::compile_numeric_for(Noderef node)
     this->emit(Opcode(Instruction::ICjmp, loop_start));
     this->loop_end();
     this->emit(Opcode(Instruction::IPop, 3));
-    this->stack_offset--;
+    this->stack_offset -= 3;
 }
 
 void Compiler::compile_assignment(Noderef node)

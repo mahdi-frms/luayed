@@ -788,7 +788,7 @@ void compiler_tests()
             ilocal(2),
             ilstore(0),
             // chunk end
-            ipop(2),
+            ipop(3),
             iret(0),
         });
 
@@ -1057,7 +1057,7 @@ void compiler_tests()
             inil,
             ijmp(37),
             ilocal(0),
-            ilocal(2),
+            ilocal(4),
             ilocal(1),
             icall(2, 1),
             ipop(1),
