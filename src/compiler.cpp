@@ -451,35 +451,105 @@ size_t Compiler::vstack_nearest_nil()
     return this->vstack.size() - 1 - i;
 }
 
+void Compiler::compile_generic_for_swap_pair(size_t back_offset1, size_t back_offset2)
+{
+    this->emit(Opcode(Instruction::IBLocal, back_offset1));
+    this->emit(Opcode(Instruction::IBLocal, back_offset2 + 1));
+    this->emit(Opcode(Instruction::IBLStore, back_offset1 + 2));
+    this->emit(Opcode(Instruction::IBLStore, back_offset2 + 1));
+}
+
+void Compiler::compile_generic_for_swap(size_t varcount)
+{
+    // I
+    // S
+    // P
+    //-----
+    // P
+    // S
+    // I
+    if (varcount == 1)
+    {
+        this->compile_generic_for_swap_pair(1, 3); // I <-> P
+    }
+    // I
+    // S
+    // P
+    // nil
+    //-----
+    // P
+    // nil
+    // S
+    // I
+    else if (varcount == 2)
+    {
+        this->compile_generic_for_swap_pair(2, 4);
+        this->compile_generic_for_swap_pair(2, 1);
+        this->compile_generic_for_swap_pair(2, 3);
+    }
+    // I
+    // S
+    // P
+    // nil
+    // ...
+    // nil
+    //-----
+    // P
+    // nil
+    // ...
+    // nil
+    // S
+    // I
+    else
+    {
+        this->compile_generic_for_swap_pair(1, varcount);
+        this->compile_generic_for_swap_pair(2, varcount - 1);
+        this->compile_generic_for_swap_pair(varcount, varcount - 2);
+    }
+}
+
 void Compiler::compile_generic_for(Noderef node)
 {
     Noderef varlist = node->child(0);
+    Noderef lvalue = varlist->child(0)->child(0);
     Noderef arglist = node->child(1);
-    this->emit(Opcode(Instruction::IPush, varlist->child_count()));
-    this->compile_explist(arglist, 3);
-    size_t loop_start = this->len();
-    this->emit(Opcode(Instruction::IBLocal, 3));
-    this->emit(Opcode(Instruction::IBLocal, 3));
-    this->emit(Opcode(Instruction::IBLocal, 3));
-    this->emit(Opcode(Instruction::ICall, 2, varlist->child_count()));
-    for (size_t i = varlist->child_count(); i > 0; i--)
+    size_t varcount = varlist->child_count();
+    for (size_t i = 0; i < varcount; i++)
     {
-        Noderef var = varlist->child(i - 1)->child(0);
-        this->emit(Opcode(Instruction::ILStore, this->varmem(var)->offset));
+        Noderef var = varlist->child(i)->child(0);
+        this->varmem(var)->offset = this->stack_offset++;
     }
-    this->emit(Opcode(Instruction::ILocal, this->varmem(varlist->child(0)->child(0))->offset));
-    this->emit(Opcode(Instruction::IBLStore, 1));
-    this->emit(Opcode(Instruction::ILocal, this->varmem(varlist->child(0)->child(0))->offset));
+    this->stack_offset += 2;
+    //-- push args
+    this->compile_explist(arglist, 3);
+    for (size_t i = 0; i < varcount - 1; i++)
+        this->emit(Instruction::INil);
+    //-- swap args
+    this->compile_generic_for_swap(varcount);
+    //-- loop start
+    size_t loop_beg = this->len();
+    this->emit(Opcode(Instruction::IBLocal, 1));                           // iterator
+    this->emit(Opcode(Instruction::IBLocal, 3));                           // state
+    this->emit(Opcode(Instruction::ILocal, this->varmem(lvalue)->offset)); // prev
+    this->emit(Opcode(Instruction::ICall, 2, varcount + 1));
+    for (size_t i = 0; i < varcount; i++)
+        this->emit(Opcode(Instruction::IBLStore, varcount + 3));
+    //-- loop check
+    this->emit(Opcode(Instruction::ILocal, this->varmem(lvalue)->offset));
     this->emit(Instruction::INil);
     this->emit(Instruction::IEq);
     size_t cjmp = this->len();
-    this->emit(Opcode(Instruction::ICjmp, 0));
+    this->emit(Opcode(Instruction::ICjmp, 0x00)); // cjmp to loop end
+    //-- block
     this->loop_start();
-    this->compile_block(node->child(2));
-    this->emit(Opcode(Instruction::IJmp, loop_start));
-    this->edit_jmp(cjmp, this->len());
+    this->compile_node(node->child(2));
+    this->emit(Opcode(Instruction::IJmp, loop_beg));
     this->loop_end();
-    this->emit(Opcode(Instruction::IPop, varlist->child_count() + 3));
+    size_t loop_end = this->len();
+    //-- loop end
+    this->emit(Opcode(Instruction::IPop, varcount + 2));
+    this->stack_offset -= (varcount + 2);
+    this->edit_jmp(cjmp, loop_end);
 }
 void Compiler::seti(size_t idx, lbyte b)
 {
@@ -625,7 +695,7 @@ void Compiler::compile_repeat(Noderef node)
 
 void Compiler::compile_break()
 {
-    this->breaks.push_back(this->len() + 1);
+    this->breaks.push_back(this->len());
     this->emit(Opcode(Instruction::IJmp, 0));
 }
 
@@ -695,7 +765,7 @@ void Compiler::loop_end()
     size_t idx = this->len();
     while (this->breaks.back())
     {
-        size_t brk = this->breaks.back() - 1;
+        size_t brk = this->breaks.back();
         this->edit_jmp(brk, idx);
         this->breaks.pop_back();
     }

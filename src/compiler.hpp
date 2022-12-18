@@ -49,6 +49,8 @@ private:
     void compile_logic(Noderef node);
     void compile_numeric_for(Noderef node);
     void compile_generic_for(Noderef node);
+    void compile_generic_for_swap(size_t varcount);
+    void compile_generic_for_swap_pair(size_t back_offset1, size_t back_offset2);
     void compile_break();
     void compile_exp_e(Noderef node, size_t expect);
     void loop_start();

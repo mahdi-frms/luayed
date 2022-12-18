@@ -32,7 +32,7 @@ add_executable(luaytest
 target_link_libraries(luayed luacomp)
 target_link_libraries(luaytest luacomp)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall")
 
 enable_testing()
 add_test(NAME "luayedtests" COMMAND luaytest)

@@ -1079,4 +1079,81 @@ void compiler_tests()
             ipop(2),
             iret(0),
         });
+
+    compiler_test_case(
+        "generic for",
+
+        "local iter, state, prev, func\n"
+        "for i,j,k in iter, state, prev do \n"
+        "   local v\n"
+        "   break\n"
+        "   func(v,i,j)\n"
+        "end\n"
+        "local e\n"
+        "state = e")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            // decls
+            inil,
+            inil,
+            inil,
+            inil,
+            // explist
+            ilocal(0),
+            ilocal(1),
+            ilocal(2),
+            // varlist
+            inil,
+            inil,
+            // swap
+            iblocal(1),
+            iblocal(4),
+            iblstore(3),
+            iblstore(4),
+            iblocal(2),
+            iblocal(3),
+            iblstore(4),
+            iblstore(3),
+            iblocal(3),
+            iblocal(2),
+            iblstore(5),
+            iblstore(2),
+            // loop start 36
+            iblocal(1),
+            iblocal(3),
+            ilocal(4),
+            icall(2, 4),
+            iblstore(6),
+            iblstore(6),
+            iblstore(6),
+            // loop check
+            ilocal(4),
+            inil,
+            ieq,
+            icjmp(78),
+            // block
+            inil,
+            ijmp(78),
+            ilocal(3),
+            ilocal(9),
+            ilocal(4),
+            ilocal(5),
+            icall(3, 1),
+            ipop(1),
+            // end of block
+            ijmp(36),
+            // loop end 78
+            ipop(5),
+            // end of for
+            inil,
+            ilocal(4),
+            ilstore(1),
+            ipop(5),
+            iret(0),
+        });
 }
