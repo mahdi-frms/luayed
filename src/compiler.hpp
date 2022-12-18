@@ -15,6 +15,11 @@ private:
     vector<size_t> breaks;
     size_t stack_offset = 0;
 
+    size_t hooksize = 0;
+    size_t hookmax = 0;
+
+    void hookpush();
+    void hookpop();
     size_t len();
     void emit(Opcode op);
     void ops_flush();

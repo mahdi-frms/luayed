@@ -42,6 +42,7 @@ void Compiler::compile(Noderef root)
         this->compile_node(root->child(1));
         this->gen->meta_parcount(parcount);
     }
+    this->gen->meta_hookmax(this->hookmax);
     this->emit(Opcode(Instruction::IRet, 0));
     this->gen->popf();
 }
@@ -535,6 +536,7 @@ void Compiler::compile_generic_for(Noderef node)
         {
             upcount++;
             this->emit(Instruction::IUPush);
+            this->hookpush();
         }
     }
     this->stack_offset += 2;
@@ -569,7 +571,10 @@ void Compiler::compile_generic_for(Noderef node)
     this->stack_offset -= (varcount + 2);
     this->edit_jmp(cjmp, loop_end);
     for (size_t i = 0; i < upcount; i++)
+    {
+        this->hookpop();
         this->emit(Instruction::IUPop);
+    }
 }
 void Compiler::seti(size_t idx, lbyte b)
 {
@@ -589,7 +594,10 @@ void Compiler::compile_numeric_for(Noderef node)
     Noderef from = node->child(1);
     Noderef to = node->child(2);
     if (md->is_upvalue)
+    {
+        this->hookpush();
         this->emit(Instruction::IUPush);
+    }
     this->compile_exp(from);
     this->compile_exp(to);
     size_t blk_idx = 3;
@@ -615,7 +623,10 @@ void Compiler::compile_numeric_for(Noderef node)
     this->emit(Opcode(Instruction::IPop, 3));
     this->stack_offset -= 3;
     if (md->is_upvalue)
+    {
+        this->hookpop();
         this->emit(Instruction::IUPop);
+    }
 }
 
 void Compiler::compile_assignment(Noderef node)
@@ -662,6 +673,7 @@ void Compiler::compile_block(Noderef node)
     }
     for (size_t i = 0; i < md->upvalue_size; i++)
     {
+        this->hookpop();
         this->emit(Instruction::IUPop);
     }
 }
@@ -677,6 +689,7 @@ void Compiler::compile_decl(Noderef node)
         if (mm->is_upvalue)
         {
             this->emit(Instruction::IUPush);
+            this->hookpush();
         }
     }
     if (node->child_count() == 2)
@@ -802,4 +815,15 @@ void Compiler::loop_end()
         this->breaks.pop_back();
     }
     this->breaks.pop_back();
+}
+
+void Compiler::hookpush()
+{
+    this->hooksize++;
+    if (this->hookmax < this->hooksize)
+        this->hookmax = this->hooksize;
+}
+void Compiler::hookpop()
+{
+    this->hooksize--;
 }

@@ -1243,7 +1243,7 @@ void compiler_tests()
 
         .test_fn(1)
         .test_parcount(0)
-        .test_hookmax(0)
+        .test_hookmax(1)
         .test_ccount(0)
         .test_upvalues({})
         .test_opcodes({
@@ -1275,7 +1275,7 @@ void compiler_tests()
 
         .test_fn(1)
         .test_parcount(0)
-        .test_hookmax(0)
+        .test_hookmax(1)
         .test_ccount(3)
         .test_upvalues({})
         .test_opcodes({
