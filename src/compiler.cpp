@@ -493,11 +493,11 @@ size_t Compiler::upval(fidx_t fidx, size_t offset)
 void Compiler::compile_numeric_for(Noderef node)
 {
     Noderef lvalue = node->child(0)->child(0);
+    MetaMemory *md = (MetaMemory *)lvalue->getannot(MetaKind::MMemory);
+    md->offset = this->stack_offset++;
     Noderef from = node->child(1);
     Noderef to = node->child(2);
-    this->emit(Opcode(Instruction::IPush, 1));
     this->compile_exp(from);
-    this->emit(Opcode(Instruction::ILStore, this->varmem(lvalue)->offset));
     this->compile_exp(to);
     size_t blk_idx = 3;
     if (node->child_count() == 5)
@@ -508,21 +508,19 @@ void Compiler::compile_numeric_for(Noderef node)
     else
         this->emit(Opcode(Instruction::IConst, this->const_number(1)));
     size_t loop_start = this->len();
-    this->emit(Opcode(Instruction::IBLocal, 2));
-    this->compile_identifier(lvalue);
-    this->emit(Instruction::IGt);
-    size_t cjmp = this->len();
-    this->emit(Opcode(Instruction::ICjmp, 0));
     this->loop_start();
     this->compile_block(node->child(blk_idx));
-    this->compile_identifier(lvalue);
+    this->emit(Opcode(Instruction::IBLocal, 3));
     this->emit(Opcode(Instruction::IBLocal, 2));
     this->emit(Instruction::IAdd);
-    this->emit(Opcode(Instruction::ILStore, this->varmem(lvalue)->offset));
-    this->emit(Opcode(Instruction::IJmp, loop_start));
-    this->edit_jmp(cjmp, this->len());
+    this->emit(Opcode(Instruction::IBLocal, 1));
+    this->emit(Opcode(Instruction::IBLStore, 5));
+    this->emit(Opcode(Instruction::IBLocal, 3));
+    this->emit(Instruction::ILe);
+    this->emit(Opcode(Instruction::ICjmp, loop_start));
     this->loop_end();
     this->emit(Opcode(Instruction::IPop, 3));
+    this->stack_offset--;
 }
 
 void Compiler::compile_assignment(Noderef node)
@@ -563,7 +561,10 @@ void Compiler::compile_block(Noderef node)
     for (size_t i = 0; i < node->child_count(); i++)
         this->compile_node(node->child(i));
     if (md->stack_size)
+    {
         this->emit(Opcode(Instruction::IPop, md->stack_size));
+        this->stack_offset -= md->stack_size;
+    }
 }
 
 void Compiler::compile_decl(Noderef node)

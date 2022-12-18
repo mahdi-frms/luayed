@@ -1022,4 +1022,48 @@ void compiler_tests()
             ipop(1),
             iret(0),
         });
+    compiler_test_case(
+        "numeric for",
+
+        "local a\n"
+        "for i = 0,10,2 do \n"
+        "   local b\n"
+        "   break\n"
+        "   a(b,i)\n"
+        "end")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(3)
+        .test_upvalues({})
+        .test_opcodes({
+            inil,
+            // params
+            iconst(0),
+            iconst(1),
+            iconst(2),
+            // block 7
+            inil,
+            ijmp(37),
+            ilocal(0),
+            ilocal(2),
+            ilocal(1),
+            icall(2, 1),
+            ipop(1),
+            // next
+            iblocal(3), // counter
+            iblocal(2), // step
+            iadd,
+            iblocal(1),  // copy new counter
+            iblstore(5), // store new counter
+            iblocal(3),  // limit
+            ile,
+            icjmp(7),
+            // loop end 37
+            ipop(3),
+            // end
+            ipop(1),
+            iret(0),
+        });
 }
