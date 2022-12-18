@@ -760,7 +760,9 @@ void compiler_tests()
         "    local c, d = 3, true\n"
         "    a = 'text'\n"
         "    d = false\n"
-        "end\n")
+        "end\n"
+        "local e\n"
+        "a = e\n")
 
         .test_fn(1)
         .test_parcount(0)
@@ -780,6 +782,12 @@ void compiler_tests()
             ilstore(3),
             // end
             ipop(2),
+            // decl
+            inil,
+            // assignment
+            ilocal(2),
+            ilstore(0),
+            // chunk end
             ipop(2),
             iret(0),
         });
@@ -1030,7 +1038,9 @@ void compiler_tests()
         "   local b\n"
         "   break\n"
         "   a(b,i)\n"
-        "end")
+        "end\n"
+        "local e\n"
+        "a = e")
 
         .test_fn(1)
         .test_parcount(0)
@@ -1063,7 +1073,10 @@ void compiler_tests()
             // loop end 37
             ipop(3),
             // end
-            ipop(1),
+            inil,
+            ilocal(1),
+            ilstore(0),
+            ipop(2),
             iret(0),
         });
 }
