@@ -156,7 +156,7 @@ void Lua::fncall(size_t argc, size_t retc)
     Frame *prev = this->frame;
     if (argc + 1 > prev->sp - prev->retc)
     {
-        // FIXME: throw error
+        // todo: throw error
         return;
     }
     size_t pidx = prev->sp - prev->retc - argc - 1;
@@ -192,12 +192,12 @@ void Lua::fnret(size_t count)
     Frame *frame = this->frame;
     if (!frame->prev)
     {
-        // FIXME: error
+        // todo: error
     }
     Frame *prev = this->frame->prev;
     if (frame->sp < count)
     {
-        // FIXME: error
+        // todo: error
     }
     size_t sidx = frame->sp - frame->retc - count;
     if (prev->retc)

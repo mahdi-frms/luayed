@@ -56,7 +56,7 @@ void Interpretor::optable_init()
 
 void Interpretor::load(size_t argc, size_t retc)
 {
-    // FIXME : must be reimplemented according to VM stack structure
+    // todo : must be reimplemented according to VM stack structure
 
     // Frame *prev = this->rt->frame;
     // size_t targcount = prev->retc + argc;
