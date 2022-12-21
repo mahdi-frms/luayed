@@ -1247,11 +1247,11 @@ void compiler_tests()
         .test_ccount(0)
         .test_upvalues({})
         .test_opcodes({
-            iupush,
             inil,
+            iupush,
             ifconst(2),
-            ipop(2),
             iupop,
+            ipop(2),
             iret(0),
         })
 
@@ -1280,8 +1280,8 @@ void compiler_tests()
         .test_upvalues({})
         .test_opcodes({
             // params
-            iupush,
             iconst(0),
+            iupush,
             iconst(1),
             iconst(2),
             // block
@@ -1297,8 +1297,8 @@ void compiler_tests()
             ile,
             icjmp(7),
             // loop end 37
-            ipop(3),
             iupop,
+            ipop(3),
             // end
             iret(0),
         })

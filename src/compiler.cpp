@@ -535,8 +535,6 @@ void Compiler::compile_generic_for(Noderef node)
         if (mm->is_upvalue)
         {
             upcount++;
-            this->emit(Instruction::IUPush);
-            this->hookpush();
         }
     }
     this->stack_offset += 2;
@@ -544,6 +542,12 @@ void Compiler::compile_generic_for(Noderef node)
     this->compile_explist(arglist, 3);
     for (size_t i = 0; i < varcount - 1; i++)
         this->emit(Instruction::INil);
+    //-- push hooks
+    for (size_t i = 0; i < upcount; i++)
+    {
+        this->hookpush();
+        this->emit(Instruction::IUPush);
+    }
     //-- swap args
     this->compile_generic_for_swap(varcount);
     //-- loop start
@@ -593,12 +597,12 @@ void Compiler::compile_numeric_for(Noderef node)
     this->stack_offset += 2;
     Noderef from = node->child(1);
     Noderef to = node->child(2);
+    this->compile_exp(from);
     if (md->is_upvalue)
     {
         this->hookpush();
         this->emit(Instruction::IUPush);
     }
-    this->compile_exp(from);
     this->compile_exp(to);
     size_t blk_idx = 3;
     if (node->child_count() == 5)
@@ -620,13 +624,13 @@ void Compiler::compile_numeric_for(Noderef node)
     this->emit(Instruction::ILe);
     this->emit(Opcode(Instruction::ICjmp, loop_start));
     this->loop_end();
-    this->emit(Opcode(Instruction::IPop, 3));
-    this->stack_offset -= 3;
     if (md->is_upvalue)
     {
         this->hookpop();
         this->emit(Instruction::IUPop);
     }
+    this->emit(Opcode(Instruction::IPop, 3));
+    this->stack_offset -= 3;
 }
 
 void Compiler::compile_assignment(Noderef node)
@@ -666,21 +670,22 @@ void Compiler::compile_block(Noderef node)
     MetaScope *md = (MetaScope *)node->getannot(MetaKind::MScope);
     for (size_t i = 0; i < node->child_count(); i++)
         this->compile_node(node->child(i));
-    if (md->stack_size)
-    {
-        this->emit(Opcode(Instruction::IPop, md->stack_size));
-        this->stack_offset -= md->stack_size;
-    }
     for (size_t i = 0; i < md->upvalue_size; i++)
     {
         this->hookpop();
         this->emit(Instruction::IUPop);
+    }
+    if (md->stack_size)
+    {
+        this->emit(Opcode(Instruction::IPop, md->stack_size));
+        this->stack_offset -= md->stack_size;
     }
 }
 
 void Compiler::compile_decl(Noderef node)
 {
     Noderef varlist = node->child(0);
+    size_t upcount = 0;
     for (size_t i = 0; i < varlist->child_count(); i++)
     {
         Noderef var = varlist->child(i)->child(0);
@@ -688,8 +693,7 @@ void Compiler::compile_decl(Noderef node)
         mm->offset = this->stack_offset++;
         if (mm->is_upvalue)
         {
-            this->emit(Instruction::IUPush);
-            this->hookpush();
+            upcount++;
         }
     }
     if (node->child_count() == 2)
@@ -697,6 +701,11 @@ void Compiler::compile_decl(Noderef node)
     else
         for (size_t i = 0; i < varlist->child_count(); i++)
             this->emit(Opcode(Instruction::INil));
+    while (upcount--)
+    {
+        this->emit(Instruction::IUPush);
+        this->hookpush();
+    }
 }
 
 void Compiler::compile_ret(Noderef node)
