@@ -1315,4 +1315,51 @@ void compiler_tests()
             ipop(1),
             iret(0),
         });
+
+    compiler_test_case(
+        "upvalue function params",
+
+        "local function a(v1, vm, v2)\n"
+        "    local function b()\n"
+        "        v1 = v2\n"
+        "    end\n"
+        "end")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            ifconst(2),
+            ipop(1),
+            iret(0),
+        })
+
+        .test_fn(2)
+        .test_parcount(3)
+        .test_hookmax(2)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            ifconst(3),
+            ipop(1),
+            iupop,
+            iupop,
+            iret(0),
+        })
+
+        .test_fn(3)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({
+            Upvalue(2, 0),
+            Upvalue(2, 2),
+        })
+        .test_opcodes({
+            iupvalue(1),
+            iustore(0),
+            iret(0),
+        });
 }

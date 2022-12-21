@@ -29,17 +29,32 @@ void Compiler::compile(Noderef root)
 {
     MetaScope *fnscp = (MetaScope *)root->getannot(MetaKind::MScope);
     this->gen->pushf(fnscp->fidx);
+    this->stack_offset = 0;
     if (root->get_kind() == NodeKind::Block)
     {
         this->compile_node(root);
         this->gen->meta_parcount(0);
-        this->stack_offset = 0;
     }
     else
     {
-        size_t parcount = root->child(0)->child_count();
-        this->stack_offset += parcount;
+        Noderef params = root->child(0);
+        size_t parcount = params->child_count();
+        size_t upcount = 0;
+        for (size_t i = 0; i < parcount; i++)
+        {
+            Noderef par = params->child(i)->child(0);
+            MetaMemory *md = (MetaMemory *)par->getannot(MetaKind::MMemory);
+            md->offset = this->stack_offset++;
+            if (md->is_upvalue)
+            {
+                this->hookpush();
+                upcount++;
+            }
+        }
         this->compile_node(root->child(1));
+        while (upcount--)
+            this->emit(Instruction::IUPop);
+
         this->gen->meta_parcount(parcount);
     }
     this->gen->meta_hookmax(this->hookmax);
