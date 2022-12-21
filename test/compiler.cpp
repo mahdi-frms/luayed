@@ -1210,7 +1210,7 @@ void compiler_tests()
     compiler_test_case(
         "function declaration with locals",
 
-        "local a = function(v,w) local z v = z end")
+        "local a = function(v,w) local z v = z + w end")
 
         .test_fn(1)
         .test_parcount(0)
@@ -1231,6 +1231,8 @@ void compiler_tests()
         .test_opcodes({
             inil,
             ilocal(2),
+            ilocal(1),
+            iadd,
             ilstore(0),
             ipop(1),
             iret(0),
