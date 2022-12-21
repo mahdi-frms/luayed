@@ -1317,6 +1317,38 @@ void compiler_tests()
         });
 
     compiler_test_case(
+        "upvalue store",
+
+        "local u local a = function() u = 0 end")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(1)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            inil,
+            iupush,
+            ifconst(2),
+            iupop,
+            ipop(2),
+            iret(0),
+        })
+
+        .test_fn(2)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(1)
+        .test_upvalues({
+            Upvalue(1, 0),
+        })
+        .test_opcodes({
+            iconst(0),
+            iustore(0),
+            iret(0),
+        });
+
+    compiler_test_case(
         "upvalue function params",
 
         "local function a(v1, vm, v2)\n"
