@@ -1667,7 +1667,7 @@ void compiler_tests()
         });
 
     compiler_test_case(
-        "function with vaiable params",
+        "function with variable params",
 
         "local function a(e,...) end")
 
@@ -1688,6 +1688,91 @@ void compiler_tests()
         .test_ccount(0)
         .test_upvalues({})
         .test_opcodes({
+            iret(0),
+        });
+
+    compiler_test_case(
+        "method declaration",
+
+        "local i = {} "
+        "function i:f(a,b) "
+        "   local c,d "
+        "   d(a,b,c,self) "
+        "end")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(1)
+        .test_upvalues({})
+        .test_opcodes({
+            itnew,
+            ilocal(0),
+            iconst(0),
+            ifconst(2),
+            itset,
+            ipop(1),
+            ipop(1),
+            iret(0),
+        })
+
+        .test_fn(2)
+        .test_parcount(2)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            inil,
+            inil,
+            ilocal(4),
+            ilocal(1),
+            ilocal(2),
+            ilocal(3),
+            ilocal(0),
+            icall(4, 1),
+            ipop(2),
+            iret(0),
+        });
+    compiler_test_case(
+        "method declaration with 'self' as param",
+
+        "local i = {} "
+        "function i:f(self,a,b) "
+        "   local c,d "
+        "   d(a,b,c,self) "
+        "end")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(1)
+        .test_upvalues({})
+        .test_opcodes({
+            itnew,
+            ilocal(0),
+            iconst(0),
+            ifconst(2),
+            itset,
+            ipop(1),
+            ipop(1),
+            iret(0),
+        })
+
+        .test_fn(2)
+        .test_parcount(3)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            inil,
+            inil,
+            ilocal(5),
+            ilocal(2),
+            ilocal(3),
+            ilocal(4),
+            ilocal(1),
+            icall(4, 1),
+            ipop(2),
             iret(0),
         });
 }

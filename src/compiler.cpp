@@ -29,7 +29,6 @@ void Compiler::compile(Noderef root)
 {
     MetaScope *fnscp = (MetaScope *)root->getannot(MetaKind::MScope);
     this->gen->pushf(fnscp->fidx);
-    this->stack_offset = 0;
     if (root->get_kind() == NodeKind::Block)
     {
         this->compile_node(root);
