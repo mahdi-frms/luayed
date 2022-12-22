@@ -1775,4 +1775,32 @@ void compiler_tests()
             ipop(2),
             iret(0),
         });
+
+    compiler_test_case(
+        "method call",
+
+        "local i,j "
+        "i:a(j)")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(1)
+        .test_upvalues({})
+        .test_opcodes({
+            inil,
+            inil,
+            // call
+            inil,
+            ilocal(0),
+            iblocal(1),
+            iconst(0),
+            itget,
+            iblstore(3),
+            ilocal(1),
+            icall(2, 1),
+            // end
+            ipop(2),
+            iret(0),
+        });
 }
