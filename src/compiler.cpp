@@ -268,7 +268,7 @@ void Compiler::compile_table(Noderef node)
         }
         else
         {
-            this->emit(Opcode(Instruction::IConst, this->const_number(1)));
+            this->emit(Opcode(Instruction::IConst, this->const_number(list_len++)));
             this->compile_exp(ch);
         }
         this->emit(Instruction::ITSet);
@@ -384,12 +384,12 @@ void Compiler::compile_lvalue_primary(Noderef node)
     }
 }
 
-void Compiler::compile_lvalue(Noderef node)
+bool Compiler::compile_lvalue(Noderef node)
 {
     if (node->get_kind() == NodeKind::Primary || node->get_kind() == NodeKind::Name)
     {
         this->compile_lvalue_primary(node);
-        return;
+        return false;
     }
     if (node->get_kind() == NodeKind::Property)
     {
@@ -402,6 +402,7 @@ void Compiler::compile_lvalue(Noderef node)
         this->ops_push(Opcode(Instruction::ITSet));
         this->vstack.push_back(1);
         this->vstack.push_back(1);
+        return true;
     }
     if (node->get_kind() == NodeKind::Index)
     {
@@ -412,7 +413,9 @@ void Compiler::compile_lvalue(Noderef node)
         this->ops_push(Opcode(Instruction::ITSet));
         this->vstack.push_back(1);
         this->vstack.push_back(1);
+        return true;
     }
+    return false; // never reaches
 }
 
 void Compiler::compile_explist(Noderef node, size_t vcount)
@@ -447,20 +450,22 @@ void Compiler::compile_explist(Noderef node, size_t vcount)
     }
 }
 
-void Compiler::compile_varlist(Noderef node)
+size_t Compiler::compile_varlist(Noderef node)
 {
     if (node->child_count() == 1)
     {
-        this->compile_lvalue(node->child(0));
+        return this->compile_lvalue(node->child(0)) ? 1 : 0;
     }
     else
     {
+        size_t varlc = 0;
         for (size_t i = 0; i < node->child_count(); i++)
         {
-            this->compile_lvalue(node->child(i));
+            varlc += this->compile_lvalue(node->child(i)) ? 1 : 0;
             this->emit(Opcode(Instruction::INil));
             this->vstack.push_back(0);
         }
+        return varlc;
     }
 }
 
@@ -646,7 +651,7 @@ void Compiler::compile_numeric_for(Noderef node)
 void Compiler::compile_assignment(Noderef node)
 {
     size_t vcount = node->child(0)->child_count();
-    this->compile_varlist(node->child(0));
+    size_t varlc = this->compile_varlist(node->child(0));
     this->compile_explist(node->child(1), vcount);
 
     if (vcount > 1)
@@ -660,6 +665,8 @@ void Compiler::compile_assignment(Noderef node)
     }
     this->vstack.clear();
     this->ops_flush();
+    if (varlc)
+        this->emit(Opcode(Instruction::IPop, varlc));
 }
 
 void Compiler::compile_logic(Noderef node)

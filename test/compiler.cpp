@@ -1532,4 +1532,102 @@ void compiler_tests()
             ipop(2),
             iret(0),
         });
+
+    compiler_test_case(
+        "table get",
+
+        "local i local j = i.a + i[4]")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(2)
+        .test_upvalues({})
+        .test_opcodes({
+            inil,
+            // 1st
+            ilocal(0),
+            iconst(0),
+            itget,
+            // 2st
+            ilocal(0),
+            iconst(1),
+            itget,
+            // operator
+            iadd,
+            // end
+            ipop(2),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "table set",
+
+        "local i\n"
+        "i[3] = true\n"
+        "i()[7] = false")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(2)
+        .test_upvalues({})
+        .test_opcodes({
+            inil,
+            // 1st
+            ilocal(0),
+            iconst(0),
+            itrue,
+            itset,
+            ipop(1),
+            // 2st
+            ilocal(0),
+            icall(0, 2),
+            iconst(1),
+            ifalse,
+            itset,
+            ipop(1),
+            // end
+            ipop(1),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "varlist table set",
+
+        "local i\n"
+        "i[3] , i()[7] = true , false")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(2)
+        .test_upvalues({})
+        .test_opcodes({
+            inil,
+            // varlist
+            // 1st
+            ilocal(0),
+            iconst(0),
+            inil, // buffer
+            // 2st
+            ilocal(0),
+            icall(0, 2),
+            iconst(1),
+            inil, // buffer
+            // exprlist
+            itrue,
+            ifalse,
+            // fill buffers
+            iblstore(3),
+            iblstore(5),
+            // operators
+            itset,
+            itset,
+            // pop
+            ipop(2),
+            // end
+            ipop(1),
+            iret(0),
+        });
 }
