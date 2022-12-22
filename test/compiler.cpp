@@ -1396,4 +1396,65 @@ void compiler_tests()
             iustore(0),
             iret(0),
         });
+
+    compiler_test_case(
+        "return statement",
+
+        "return")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            iret(0),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "return statement with args",
+
+        "return 1 , 3")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(2)
+        .test_upvalues({})
+        .test_opcodes({
+            iconst(0),
+            iconst(1),
+            iret(2),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "return statement with function call",
+
+        "local f,g return 1 , f(), g()")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(1)
+        .test_upvalues({})
+        .test_opcodes({
+            // locals
+            inil,
+            inil,
+            // 1st arg
+            iconst(0),
+            // 2nd args
+            ilocal(0),
+            icall(0, 2),
+            // 3rd arg
+            ilocal(1),
+            icall(0, 0),
+            // ret
+            iret(2),
+            // end
+            ipop(2),
+            iret(0),
+        });
 }
