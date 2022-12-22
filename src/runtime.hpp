@@ -75,7 +75,7 @@ struct InternString
 class IInterpretor
 {
 public:
-    virtual void call(Lua *rt, size_t argc, size_t retc) = 0;
+    virtual size_t call(Lua *rt) = 0;
 };
 
 class StringInterner
@@ -110,21 +110,24 @@ struct Hook
 
 struct Frame
 {
-    size_t stack_size;
+    size_t ss;
     size_t sp;
     LuaValue fn;
     Frame *prev;
-    size_t retc;
-    size_t vargsc;
+    size_t hookptr;
+
+    // number of args this frame is supposed to return
+    size_t exp_count;
+    // number of extra args supplied to this function
+    size_t vargs_count;
+    // number of values returned to this function after an expect-free call
+    size_t ret_count;
 
     Lfunction *bin();
     LuaValue *stack();
     LuaValue *args();
     Hook *uptable();
     Hook *hooktable();
-
-    LuaValue pop();
-    void push(LuaValue value);
 };
 struct GenFunction
 {
@@ -161,6 +164,24 @@ public:
     void fnret(size_t count);
     void new_frame(size_t stack_size);
     void destroy_frame();
+
+    Lfunction *bin();
+    LuaValue *stack();
+    LuaValue *args();
+    Hook *uptable();
+    Hook *hooktable();
+
+    void copy_values(Frame *fsrc, Frame *fdest, size_t count);
+    void push_nils(Frame *fsrc, size_t count);
+
+    LuaValue stack_pop();
+    void stack_push(LuaValue value);
+    LuaValue stack_read(size_t idx);
+    void stack_write(size_t idx, LuaValue value);
+    size_t stack_ptr();
+    void set_stack_ptr(size_t sp);
+
+    size_t stack_address(size_t idx);
 };
 
 struct LuaFunction

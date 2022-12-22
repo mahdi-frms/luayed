@@ -86,16 +86,16 @@ void Interpretor::load(size_t argc, size_t retc)
     // }
 }
 
-void Interpretor::call(Lua *rt, size_t argc, size_t retc)
+size_t Interpretor::call(Lua *rt)
 {
     this->rt = rt;
-    this->load(argc, retc);
     while (!this->retc)
     {
         this->fetch();
         this->exec();
     }
     rt->fnret(this->retc);
+    return 0;
 }
 
 lbyte Interpretor::iread()
@@ -141,11 +141,11 @@ Lfunction *Interpretor::bin()
 }
 size_t Interpretor::sp()
 {
-    return this->frame()->sp;
+    return this->rt->stack_ptr();
 }
 void Interpretor::setsp(size_t sp)
 {
-    this->frame()->sp = sp;
+    this->rt->set_stack_ptr(sp);
 }
 LuaValue *Interpretor::stack(size_t idx)
 {

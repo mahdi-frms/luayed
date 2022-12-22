@@ -10,7 +10,7 @@ typedef void (Interpretor::*opimpl)();
 class Interpretor
 {
 public:
-    void call(Lua *rt, size_t argc, size_t retc);
+    size_t call(Lua *rt);
 
 private:
     static opimpl optable[256];

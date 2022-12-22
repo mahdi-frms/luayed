@@ -125,23 +125,13 @@ void Lua::deallocate(void *ptr)
 {
     free(ptr);
 }
-LuaValue Frame::pop()
-{
-    this->sp--;
-    return this->stack()[this->sp];
-}
-void Frame::push(LuaValue value)
-{
-    this->stack()[this->sp] = value;
-    this->sp++;
-}
 void Lua::new_frame(size_t stack_size)
 {
     Frame *frame = (Frame *)this->allocate(sizeof(Frame) + stack_size);
-    frame->stack_size = stack_size;
+    frame->ss = stack_size;
     frame->prev = this->frame;
     frame->sp = 0;
-    frame->retc = 0;
+    frame->ret_count = 0;
     this->frame = frame;
 }
 void Lua::destroy_frame()
@@ -150,42 +140,68 @@ void Lua::destroy_frame()
     this->frame = frame->prev;
     this->deallocate(frame);
 }
+void Lua::copy_values(
+    Frame *fsrc,
+    Frame *fdest,
+    size_t count)
+{
+    size_t src_idx = fsrc->sp - count;
+    for (size_t idx = 0; idx < count; idx++)
+    {
+        fdest->stack()[src_idx + idx] = fdest->stack()[fdest->sp + idx];
+    }
+    fdest->sp += count;
+    fsrc->sp -= count;
+}
+
+void Lua::push_nils(
+    Frame *frame,
+    size_t count)
+{
+    size_t idx = 0;
+    while (count--)
+        frame->stack()[frame->sp + idx++] = this->create_nil();
+    frame->sp += count;
+}
 
 void Lua::fncall(size_t argc, size_t retc)
 {
     Frame *prev = this->frame;
-    if (argc + 1 > prev->sp - prev->retc)
+    size_t total_argc = argc + prev->ret_count;
+    // check if there are enough values on the stack
+    if (total_argc + 1 > prev->sp)
     {
         // todo: throw error
         return;
     }
-    size_t pidx = prev->sp - prev->retc - argc - 1;
-    LuaValue *fn = prev->stack() + pidx;
-    if (fn->data.f->is_lua)
+    LuaValue *fn = prev->stack() - total_argc - 1;
+    bool is_lua = fn->data.f->is_lua;
+    Lfunction *bin = is_lua ? (Lfunction *)fn->data.f->fn : nullptr;
+    this->new_frame(argc + 1024 /* THIS NUMBER MUST BE PROVIDED BY THE COMPILER */);
+    Frame *frame = this->frame;
+    // move values bwtween frames
+    frame->fn = *fn;
+    frame->exp_count = retc;
+    frame->vargs_count = 0;
+    this->copy_values(prev, frame, total_argc);
+    if (is_lua && bin->parcount > total_argc)
+        this->push_nils(frame, bin->parcount - total_argc);
+    else
+        frame->vargs_count += total_argc - bin->parcount;
+    prev->sp--;
+    prev->ret_count = 0;
+    // execute function
+    size_t return_count = 0;
+    if (is_lua)
     {
-        this->interpretor->call(this, argc, retc);
+        return_count = this->interpretor->call(this);
     }
     else
     {
-        prev->retc = retc;
-        this->new_frame(1024 + argc);
-        Frame *frame = this->frame;
-        frame->fn = *fn;
-        for (size_t i = 0; i < argc; i++)
-        {
-            frame->push(prev->stack()[pidx + i + 1]);
-        }
-        for (size_t i = 0; i < prev->vargsc; i++)
-        {
-            frame->push(prev->stack()[prev->sp + i]);
-        }
-        prev->vargsc = 0;
-        prev->sp -= (1 + argc);
-
         LuaCppFunction cppfn = (LuaCppFunction)fn->data.f->fn;
-        size_t retc = cppfn(this);
-        this->fnret(retc);
+        return_count = cppfn(this);
     }
+    this->fnret(return_count);
 }
 void Lua::fnret(size_t count)
 {
@@ -194,48 +210,39 @@ void Lua::fnret(size_t count)
     {
         // todo: error
     }
+    size_t total_count = frame->ret_count + count;
     Frame *prev = this->frame->prev;
-    if (frame->sp < count)
+    if (frame->sp < total_count)
     {
         // todo: error
     }
-    size_t sidx = frame->sp - frame->retc - count;
-    if (prev->retc)
+    size_t exp = frame->exp_count;
+    if (exp--)
+        this->copy_values(frame, prev, total_count);
+    else if (total_count < exp)
     {
-        size_t i = 0;
-        size_t c = count + frame->retc;
-        while (--prev->retc)
-        {
-            if (i < c)
-            {
-                i++;
-                prev->push(frame->stack()[sidx + i]);
-            }
-            else
-                prev->push(this->create_nil());
-        }
-        while (i != c)
-        {
-            this->destroy_value(frame->stack()[sidx + i++]);
-        }
+        this->copy_values(frame, prev, total_count);
+        this->push_nils(frame, exp - total_count);
     }
     else
+        this->copy_values(frame, prev, exp);
+    if (frame->exp_count)
+        prev->ret_count = total_count;
+    while (this->stack_ptr())
     {
-        for (size_t i = 0; i < count + frame->retc; i++)
-        {
-            prev->push(frame->stack()[sidx + i]);
-        }
-        prev->retc = count + frame->retc;
+        LuaValue v = this->stack_pop();
+        this->destroy_value(v);
     }
     this->destroy_frame();
 }
+
 Lfunction *Frame::bin()
 {
     return (Lfunction *)this->fn.data.f->fn;
 }
 LuaValue *Frame::stack()
 {
-    return (LuaValue *)(this->hooktable() + 32333);
+    return (LuaValue *)(this->hooktable() + this->bin()->hookmax);
 }
 Hook *Frame::uptable()
 {
@@ -244,4 +251,41 @@ Hook *Frame::uptable()
 Hook *Frame::hooktable()
 {
     return (Hook *)(this->uptable() + this->bin()->uplen);
+}
+LuaValue Lua::clone_value(LuaValue &value)
+{
+    return create_nil(); // todo : cloning must be implemented
+}
+LuaValue Lua::stack_read(size_t idx)
+{
+    size_t real_idx = this->stack_address(idx);
+    return this->clone_value(this->frame->stack()[real_idx]);
+}
+size_t Lua::stack_address(size_t idx)
+{
+    return idx < this->frame->bin()->parcount ? idx : idx + this->frame->vargs_count;
+}
+void Lua::stack_write(size_t idx, LuaValue value)
+{
+    size_t real_idx = this->stack_address(idx);
+    this->destroy_value(this->frame->stack()[real_idx]);
+    this->frame->stack()[idx] = value;
+}
+size_t Lua::stack_ptr()
+{
+    return this->frame->sp;
+}
+void Lua::set_stack_ptr(size_t sp)
+{
+    this->frame->sp = sp;
+}
+LuaValue Lua::stack_pop()
+{
+    this->frame->sp--;
+    return this->frame->stack()[this->frame->sp];
+}
+void Lua::stack_push(LuaValue value)
+{
+    this->frame->stack()[this->frame->sp] = value;
+    this->frame->sp++;
 }
