@@ -40,7 +40,7 @@ bool parse(const char *path)
 {
     bool silence = false;
     bool parse = true;
-    bool compile = true;
+    bool compile = false;
 
     char *text = readfile(path);
     printf("===== %s =====\n", path);

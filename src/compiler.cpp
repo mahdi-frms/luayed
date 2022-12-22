@@ -38,11 +38,14 @@ void Compiler::compile(Noderef root)
     else
     {
         Noderef params = root->child(0);
-        size_t parcount = params->child_count();
+        size_t parcount = 0;
         size_t upcount = 0;
-        for (size_t i = 0; i < parcount; i++)
+        for (size_t i = 0; i < params->child_count(); i++)
         {
             Noderef par = params->child(i)->child(0);
+            if (par->get_token().kind == TokenKind::DotDotDot)
+                continue;
+            parcount++;
             MetaMemory *md = (MetaMemory *)par->getannot(MetaKind::MMemory);
             md->offset = this->stack_offset++;
             if (md->is_upvalue)

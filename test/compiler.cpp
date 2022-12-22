@@ -1665,4 +1665,29 @@ void compiler_tests()
             ipop(1),
             iret(0),
         });
+
+    compiler_test_case(
+        "function with vaiable params",
+
+        "local function a(e,...) end")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            ifconst(2),
+            ipop(1),
+            iret(0),
+        })
+
+        .test_fn(2)
+        .test_parcount(1)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            iret(0),
+        });
 }

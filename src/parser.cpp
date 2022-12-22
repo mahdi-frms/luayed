@@ -491,7 +491,7 @@ Noderef Parser::function_body(bool is_method)
             this->pop();
             if (this->peek().kind == TokenKind::DotDotDot)
             {
-                parlist.push_back(Ast::make(this->pop(), NodeKind::Name));
+                parlist.push_back(Ast::make(Ast::make(this->pop(), NodeKind::Name), NodeKind::VarDecl));
                 break;
             }
             parlist.push_back(Ast::make(Ast::make(this->consume(TokenKind::Identifier), NodeKind::Name), NodeKind::VarDecl));
