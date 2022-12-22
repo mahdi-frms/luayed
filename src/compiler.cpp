@@ -260,23 +260,18 @@ void Compiler::compile_table(Noderef node)
         {
             this->compile_name(ch->child(0));
             this->compile_exp(ch->child(1));
-            this->emit(Instruction::ITSet);
         }
         else if (ch->get_kind() == NodeKind::ExprField)
         {
             this->compile_exp(ch->child(0));
             this->compile_exp(ch->child(1));
-            this->emit(Instruction::ITSet);
         }
         else
         {
+            this->emit(Opcode(Instruction::IConst, this->const_number(1)));
             this->compile_exp(ch);
-            list_len++;
         }
-    }
-    if (list_len)
-    {
-        this->emit(Opcode(Instruction::ITList, list_len));
+        this->emit(Instruction::ITSet);
     }
 }
 

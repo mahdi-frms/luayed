@@ -1457,4 +1457,79 @@ void compiler_tests()
             ipop(2),
             iret(0),
         });
+
+    compiler_test_case(
+        "empty table constructor",
+
+        "local a = {}")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            itnew,
+            ipop(1),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "empty table constructor",
+
+        "local a = { foo = 1 , bar = true }")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(3)
+        .test_upvalues({})
+        .test_opcodes({
+            itnew,
+            // foo
+            iconst(0),
+            iconst(1),
+            itset,
+            // bar
+            iconst(2),
+            itrue,
+            itset,
+            // end
+            ipop(1),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "empty table constructor",
+
+        "local i local a = { '' , foo = 1 , [i] = true , false}")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(5)
+        .test_upvalues({})
+        .test_opcodes({
+            inil,
+            itnew,
+            // [1]
+            iconst(0),
+            iconst(1),
+            itset,
+            // foo
+            iconst(2),
+            iconst(3),
+            itset,
+            // bar
+            ilocal(0),
+            itrue,
+            itset,
+            // [2]
+            iconst(4),
+            ifalse,
+            itset,
+            // end
+            ipop(2),
+            iret(0),
+        });
 }
