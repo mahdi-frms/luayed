@@ -1630,4 +1630,39 @@ void compiler_tests()
             ipop(1),
             iret(0),
         });
+
+    compiler_test_case(
+        "variable args",
+
+        "local i,j,k = ...")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            ivargs(4),
+            ipop(3),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "variable args with unexpected count",
+
+        "local i  i(...)")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            inil,
+            ilocal(0),
+            ivargs(0),
+            icall(0, 1),
+            ipop(1),
+            iret(0),
+        });
 }

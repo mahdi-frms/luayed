@@ -112,7 +112,9 @@ size_t Compiler::arglist_count(Noderef arglist)
     if (!chlen)
         return 0;
     Noderef last = arglist->child(chlen - 1);
-    if (last->get_kind() == NodeKind::MethodCall || last->get_kind() == NodeKind::Call)
+    if (last->get_kind() == NodeKind::MethodCall ||
+        last->get_kind() == NodeKind::Call ||
+        (last->get_kind() == NodeKind::Primary && last->get_token().kind == TokenKind::DotDotDot))
         chlen--;
     return chlen;
 }
