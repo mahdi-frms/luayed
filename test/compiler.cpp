@@ -1475,7 +1475,7 @@ void compiler_tests()
         });
 
     compiler_test_case(
-        "empty table constructor",
+        "table constructor with properties",
 
         "local a = { foo = 1 , bar = true }")
 
@@ -1500,34 +1500,68 @@ void compiler_tests()
         });
 
     compiler_test_case(
-        "empty table constructor",
+        "table constructor props & indexes & expressions",
 
         "local i local a = { '' , foo = 1 , [i] = true , false}")
 
         .test_fn(1)
         .test_parcount(0)
         .test_hookmax(0)
-        .test_ccount(5)
+        .test_ccount(3)
         .test_upvalues({})
         .test_opcodes({
             inil,
             itnew,
             // [1]
             iconst(0),
-            iconst(1),
             itset,
             // foo
+            iconst(1),
             iconst(2),
-            iconst(3),
             itset,
             // bar
             ilocal(0),
             itrue,
             itset,
             // [2]
-            iconst(4),
             ifalse,
             itset,
+            // expressions
+            itlist(2),
+            // end
+            ipop(2),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "table constructor with extras",
+
+        "local i local a = { 'str' , foo = 1 , true, i()}")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(3)
+        .test_upvalues({})
+        .test_opcodes({
+            inil,
+            itnew,
+            // [1]
+            iconst(0),
+            itset,
+            // foo
+            iconst(1),
+            iconst(2),
+            itset,
+            // [2]
+            itrue,
+            itset,
+            // extra
+            ilocal(0),
+            icall(0, 0),
+            itset,
+            // expressions and extra
+            itlist(2),
             // end
             ipop(2),
             iret(0),
