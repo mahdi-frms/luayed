@@ -147,6 +147,12 @@ private:
     Frame *frame;
     IInterpretor *interpretor;
 
+    void new_frame(size_t stack_size);
+    void destroy_frame();
+    void copy_values(Frame *fsrc, Frame *fdest, size_t count);
+    void push_nils(Frame *fsrc, size_t count);
+    size_t stack_address(size_t idx);
+
 public:
     vector<Lfunction *> functable; // todo: this must be private
     LuaValue create_nil();
@@ -165,8 +171,6 @@ public:
 
     void fncall(size_t argc, size_t retc);
     void fnret(size_t count);
-    void new_frame(size_t stack_size);
-    void destroy_frame();
 
     Lfunction *bin();
     LuaValue *stack();
@@ -174,17 +178,12 @@ public:
     Hook *hooktable();
     Hook *uptable();
 
-    void copy_values(Frame *fsrc, Frame *fdest, size_t count);
-    void push_nils(Frame *fsrc, size_t count);
-
     LuaValue stack_pop();
     void stack_push(LuaValue value);
     LuaValue stack_read(size_t idx);
     void stack_write(size_t idx, LuaValue value);
     size_t stack_ptr();
     void set_stack_ptr(size_t sp);
-
-    size_t stack_address(size_t idx);
 };
 
 struct LuaFunction

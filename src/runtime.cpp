@@ -73,18 +73,26 @@ LuaValue Lua::create_nil()
     return val;
 }
 
+LuaValue Lua::create_boolean(bool b)
+{
+    LuaValue val;
+    val.kind = LuaType::LVBool;
+    val.data.b = b;
+    return val;
+}
+
 LuaValue Lua::create_string(const char *s)
 {
     LuaValue val;
     val.kind = LuaType::LVString;
-    val.data.s = nullptr;
+    val.data.s = nullptr; // todo
     return val;
 }
 
 LuaValue Lua::create_number(lnumber n)
 {
     LuaValue val;
-    val.kind = LuaType::LVString;
+    val.kind = LuaType::LVNumber;
     val.data.n = n;
     return val;
 }

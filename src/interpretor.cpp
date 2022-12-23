@@ -209,12 +209,15 @@ void Interpretor::i_gset()
 }
 void Interpretor::i_nil()
 {
+    this->rt->stack_push(this->rt->create_nil());
 }
 void Interpretor::i_true()
 {
+    this->rt->stack_push(this->rt->create_boolean(true));
 }
 void Interpretor::i_false()
 {
+    this->rt->stack_push(this->rt->create_boolean(false));
 }
 void Interpretor::i_tlist()
 {
@@ -266,4 +269,9 @@ void Interpretor::i_upop()
 }
 void Interpretor::i_pop()
 {
+    for (size_t i = 0; i < this->arg1; i++)
+    {
+        LuaValue v = this->rt->stack_pop();
+        this->rt->destroy_value(v);
+    }
 }
