@@ -123,6 +123,7 @@ struct Frame
     // number of values returned to this function after an expect-free call
     size_t ret_count;
 
+    bool is_Lua();
     Lfunction *bin();
     LuaValue *stack();
     LuaValue *args();
@@ -141,12 +142,13 @@ struct GenFunction
 };
 class Lua
 {
-public:
+private:
     StringInterner interner;
-    vector<Lfunction *> functable;
     Frame *frame;
     IInterpretor *interpretor;
 
+public:
+    vector<Lfunction *> functable; // todo: this must be private
     LuaValue create_nil();
     LuaValue create_boolean(bool b);
     LuaValue create_number(lnumber n);
@@ -154,6 +156,7 @@ public:
     LuaValue create_table();
     Lfunction *create_binary(GenFunction *gfn);
     LuaValue create_cppfn(LuaCppFunction fn);
+    LuaValue create_luafn(Lfunction *bin);
 
     LuaValue clone_value(LuaValue &value);
     void destroy_value(LuaValue &value);
@@ -168,8 +171,8 @@ public:
     Lfunction *bin();
     LuaValue *stack();
     LuaValue *args();
-    Hook *uptable();
     Hook *hooktable();
+    Hook *uptable();
 
     void copy_values(Frame *fsrc, Frame *fdest, size_t count);
     void push_nils(Frame *fsrc, size_t count);

@@ -50,52 +50,23 @@ void Interpretor::optable_init()
     Interpretor::optable[IBLStore] = &Interpretor::i_blstore;
     Interpretor::optable[IUpvalue] = &Interpretor::i_upvalue;
     Interpretor::optable[IUStore] = &Interpretor::i_ustore;
-    Interpretor::optable[IUPush] = &Interpretor::i_push;
+    Interpretor::optable[IUPush] = &Interpretor::i_upush;
+    Interpretor::optable[IUPop] = &Interpretor::i_upop;
     Interpretor::optable[IPop] = &Interpretor::i_pop;
-}
-
-void Interpretor::load(size_t argc, size_t retc)
-{
-    // todo : must be reimplemented according to VM stack structure
-
-    // Frame *prev = this->rt->frame;
-    // size_t targcount = prev->retc + argc;
-    // size_t pidx = prev->sp - targcount - 1;
-    // Lfunction *fn = (Lfunction *)((prev->stack() + pidx)->data.f->fn);
-    // this->rt->new_frame(0);
-    // Frame *frame = this->rt->frame;
-    // if (targcount > fn->parcount)
-    // {
-    //     frame->vargsc = targcount - fn->parcount;
-    //     size_t vidx = pidx + 1 + argc;
-    //     for (size_t i = 0; i < frame->vargsc; i++)
-    //         frame->push(prev->stack()[pidx + i]);
-    // }
-    // for (size_t i = 0; i < fn->uplen; i++)
-    // {
-    //     frame->push(this->rt->create_nil());
-    // }
-    // frame->sp += fn->parcount;
-    // size_t aidx = pidx + 1;
-    // for (size_t i = 0; i < fn->parcount; i++)
-    // {
-    //     if (aidx == pidx + 1 + argc)
-    //         frame->stack()[fn->parmap()[i]] = this->rt->create_nil();
-    //     else
-    //         frame->stack()[fn->parmap()[i]] = prev->stack()[aidx++];
-    // }
 }
 
 size_t Interpretor::call(Lua *rt)
 {
     this->rt = rt;
-    while (!this->retc)
+    while (!this->end)
     {
         this->fetch();
         this->exec();
     }
-    rt->fnret(this->retc);
-    return 0;
+    this->end = false;
+    size_t retc = this->retc;
+    this->retc = 0;
+    return retc;
 }
 
 lbyte Interpretor::iread()
@@ -131,13 +102,9 @@ void Interpretor::exec()
     (this->*optable[this->op])();
 }
 
-Frame *Interpretor::frame()
-{
-    return this->rt->frame;
-}
 Lfunction *Interpretor::bin()
 {
-    return (Lfunction *)this->frame()->bin();
+    return (Lfunction *)this->rt->bin();
 }
 size_t Interpretor::sp()
 {
@@ -147,17 +114,13 @@ void Interpretor::setsp(size_t sp)
 {
     this->rt->set_stack_ptr(sp);
 }
-LuaValue *Interpretor::stack(size_t idx)
-{
-    return this->frame()->stack() + idx;
-}
 Hook *Interpretor::uptable(size_t idx)
 {
-    return this->frame()->uptable() + idx;
+    return this->rt->uptable() + idx;
 }
 Hook *Interpretor::hooktable(size_t idx)
 {
-    return this->frame()->hooktable() + idx;
+    return this->rt->hooktable() + idx;
 }
 
 void Interpretor::i_add()
@@ -259,9 +222,6 @@ void Interpretor::i_tlist()
 void Interpretor::i_ret()
 {
 }
-void Interpretor::i_fvargs()
-{
-}
 void Interpretor::i_call()
 {
 }
@@ -298,7 +258,10 @@ void Interpretor::i_upvalue()
 void Interpretor::i_ustore()
 {
 }
-void Interpretor::i_push()
+void Interpretor::i_upush()
+{
+}
+void Interpretor::i_upop()
 {
 }
 void Interpretor::i_pop()

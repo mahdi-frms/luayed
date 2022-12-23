@@ -24,15 +24,12 @@ private:
     bool end = false;
     Lua *rt = nullptr;
 
-    void load(size_t argc, size_t retc);
     lbyte iread();
     void fetch();
     void exec();
-    Frame *frame();
     Lfunction *bin();
     size_t sp();
     void setsp(size_t sp);
-    LuaValue *stack(size_t idx);
     Hook *uptable(size_t idx);
     Hook *hooktable(size_t idx);
 
@@ -74,8 +71,6 @@ private:
     void i_tlist();
     void i_ret();
 
-    void i_fvargs();
-
     void i_call();
     void i_vargs();
     void i_jmp();
@@ -91,7 +86,8 @@ private:
     void i_upvalue();
     void i_ustore();
 
-    void i_push();
+    void i_upush();
+    void i_upop();
     void i_pop();
 };
 

@@ -25,6 +25,10 @@ bool operator<=(const InternString &l, const InternString &r)
 {
     return strcmp(l.lstr, r.lstr) != 1;
 }
+bool Frame::is_Lua()
+{
+    return this->fn.data.f->is_lua;
+}
 
 char *StringInterner::insert(char *lstr)
 {
@@ -84,6 +88,10 @@ LuaValue Lua::create_number(lnumber n)
     val.data.n = n;
     return val;
 }
+LuaValue Lua::create_luafn(Lfunction *bin)
+{
+    return this->create_nil(); // todo
+}
 
 Lfunction *Lua::create_binary(GenFunction *gfn)
 {
@@ -136,6 +144,7 @@ void Lua::new_frame(size_t stack_size)
 }
 void Lua::destroy_frame()
 {
+    this->destroy_value(this->frame->fn);
     Frame *frame = this->frame;
     this->frame = frame->prev;
     this->deallocate(frame);
@@ -244,13 +253,25 @@ LuaValue *Frame::stack()
 {
     return (LuaValue *)(this->hooktable() + this->bin()->hookmax);
 }
+Lfunction *Lua::bin()
+{
+    return this->frame->bin();
+}
+Hook *Lua::uptable()
+{
+    return this->frame->uptable();
+}
+Hook *Lua::hooktable()
+{
+    return this->frame->hooktable();
+}
 Hook *Frame::uptable()
 {
-    return (Hook *)(this + 1);
+    return (Hook *)(this->fn.data.f + 1);
 }
 Hook *Frame::hooktable()
 {
-    return (Hook *)(this->uptable() + this->bin()->uplen);
+    return (Hook *)(this + 1);
 }
 LuaValue Lua::clone_value(LuaValue &value)
 {
