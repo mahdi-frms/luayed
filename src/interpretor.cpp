@@ -229,9 +229,14 @@ void Interpretor::i_vargs()
 }
 void Interpretor::i_jmp()
 {
+    this->ip = this->arg1;
 }
 void Interpretor::i_cjmp()
 {
+    LuaValue value = this->rt->stack_pop();
+    if (value.truth())
+        this->ip = this->arg1;
+    this->rt->destroy_value(value);
 }
 void Interpretor::i_const()
 {

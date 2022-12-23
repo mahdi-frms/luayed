@@ -100,6 +100,8 @@ public:
         LuaFunction *f;
         LuaTable *t;
     } data;
+
+    bool truth();
 };
 
 struct Hook

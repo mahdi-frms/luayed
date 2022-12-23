@@ -331,3 +331,7 @@ void Lua::hookpop()
     hook.val = hook.frame->stack()[stack_idx];
     *ptr = nullptr;
 }
+bool LuaValue::truth()
+{
+    return this->kind != LuaType::LVNil && (this->kind != LuaType::LVBool || this->data.b);
+}
