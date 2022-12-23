@@ -1475,7 +1475,7 @@ void compiler_tests()
         });
 
     compiler_test_case(
-        "empty table constructor",
+        "table constructor with properties",
 
         "local a = { foo = 1 , bar = true }")
 
@@ -1500,7 +1500,7 @@ void compiler_tests()
         });
 
     compiler_test_case(
-        "empty table constructor",
+        "table constructor props & indexes & expressions",
 
         "local i local a = { '' , foo = 1 , [i] = true , false}")
 
