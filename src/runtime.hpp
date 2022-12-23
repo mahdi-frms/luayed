@@ -75,7 +75,7 @@ struct InternString
 class IInterpretor
 {
 public:
-    virtual size_t call(Lua *rt) = 0;
+    virtual size_t run(Lua *rt) = 0;
 };
 
 class StringInterner
@@ -116,6 +116,7 @@ struct Frame
 {
     size_t ss;
     size_t sp;
+    size_t ip;
     LuaValue fn;
     Frame *prev;
     size_t hookptr;
@@ -190,6 +191,8 @@ public:
     void set_stack_ptr(size_t sp);
     void hookpush();
     void hookpop();
+    size_t load_ip();
+    void save_ip(size_t sp);
 };
 
 struct LuaFunction

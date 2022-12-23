@@ -211,7 +211,7 @@ void Lua::fncall(size_t argc, size_t retc)
     size_t return_count = 0;
     if (is_lua)
     {
-        return_count = this->interpretor->call(this);
+        return_count = this->interpretor->run(this);
     }
     else
     {
@@ -307,6 +307,14 @@ size_t Lua::stack_ptr()
 void Lua::set_stack_ptr(size_t sp)
 {
     this->frame->sp = sp;
+}
+size_t Lua::load_ip()
+{
+    return this->frame->ip;
+}
+void Lua::save_ip(size_t ip)
+{
+    this->frame->ip = ip;
 }
 LuaValue Lua::stack_pop()
 {

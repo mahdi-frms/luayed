@@ -54,7 +54,7 @@ void Interpretor::optable_init()
     Interpretor::optable[IPop] = &Interpretor::i_pop;
 }
 
-size_t Interpretor::call(Lua *rt)
+size_t Interpretor::run(Lua *rt)
 {
     this->rt = rt;
     while (!this->end)
@@ -104,14 +104,6 @@ void Interpretor::exec()
 Lfunction *Interpretor::bin()
 {
     return (Lfunction *)this->rt->bin();
-}
-size_t Interpretor::sp()
-{
-    return this->rt->stack_ptr();
-}
-void Interpretor::setsp(size_t sp)
-{
-    this->rt->set_stack_ptr(sp);
 }
 Hook *Interpretor::upvalue(size_t idx)
 {
@@ -220,9 +212,14 @@ void Interpretor::i_false()
 }
 void Interpretor::i_ret()
 {
+    this->retc = this->arg1;
+    this->end = true;
 }
 void Interpretor::i_call()
 {
+    this->rt->save_ip(this->ip);
+    this->rt->fncall(this->arg1, this->arg2);
+    this->ip = this->rt->load_ip();
 }
 void Interpretor::i_vargs()
 {

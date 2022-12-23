@@ -10,7 +10,7 @@ typedef void (Interpretor::*opimpl)();
 class Interpretor
 {
 public:
-    size_t call(Lua *rt);
+    size_t run(Lua *rt);
 
 private:
     static opimpl optable[256];
@@ -28,8 +28,6 @@ private:
     void fetch();
     void exec();
     Lfunction *bin();
-    size_t sp();
-    void setsp(size_t sp);
     Hook *upvalue(size_t idx);
     Hook *hook(size_t idx);
 
