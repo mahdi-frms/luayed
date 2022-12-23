@@ -35,7 +35,6 @@ void Interpretor::optable_init()
     Interpretor::optable[INil] = &Interpretor::i_nil;
     Interpretor::optable[ITrue] = &Interpretor::i_true;
     Interpretor::optable[IFalse] = &Interpretor::i_false;
-    Interpretor::optable[ITList] = &Interpretor::i_tlist;
     Interpretor::optable[IRet] = &Interpretor::i_ret;
     Interpretor::optable[ICall] = &Interpretor::i_call;
     Interpretor::optable[IVargs] = &Interpretor::i_vargs;
@@ -218,9 +217,6 @@ void Interpretor::i_true()
 void Interpretor::i_false()
 {
     this->rt->stack_push(this->rt->create_boolean(false));
-}
-void Interpretor::i_tlist()
-{
 }
 void Interpretor::i_ret()
 {

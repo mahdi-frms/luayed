@@ -68,7 +68,6 @@ private:
     void i_true();
     void i_false();
 
-    void i_tlist();
     void i_ret();
 
     void i_call();
