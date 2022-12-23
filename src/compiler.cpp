@@ -261,6 +261,9 @@ void Compiler::compile_table(Noderef node)
 {
     this->emit(Opcode(Instruction::ITNew));
     size_t list_len = 0;
+    bool extra = false;
+    if (!node->child_count())
+        return;
     for (size_t i = 0; i < node->child_count(); i++)
     {
         Noderef ch = node->child(i);
@@ -274,13 +277,20 @@ void Compiler::compile_table(Noderef node)
             this->compile_exp(ch->child(0));
             this->compile_exp(ch->child(1));
         }
+        else if (ch->get_kind() == NodeKind::Call || ch->get_kind() == NodeKind::MethodCall)
+        {
+            extra = true;
+            this->compile_exp_e(ch, EXPECT_FREE);
+        }
         else
         {
-            this->emit(Opcode(Instruction::IConst, this->const_number(list_len++)));
+            list_len++;
             this->compile_exp(ch);
         }
         this->emit(Instruction::ITSet);
     }
+    if (list_len || extra)
+        this->emit(Opcode(Instruction::ITList, list_len));
 }
 
 void Compiler::compile_exp_e(Noderef node, size_t expect)
