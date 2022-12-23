@@ -114,13 +114,13 @@ void Interpretor::setsp(size_t sp)
 {
     this->rt->set_stack_ptr(sp);
 }
-Hook *Interpretor::uptable(size_t idx)
+Hook *Interpretor::upvalue(size_t idx)
 {
-    return this->rt->uptable() + idx;
+    return this->rt->uptable()[idx];
 }
-Hook *Interpretor::hooktable(size_t idx)
+Hook *Interpretor::hook(size_t idx)
 {
-    return this->rt->hooktable() + idx;
+    return this->rt->hooktable()[idx];
 }
 
 void Interpretor::i_add()
@@ -263,9 +263,11 @@ void Interpretor::i_ustore()
 }
 void Interpretor::i_upush()
 {
+    this->rt->hookpush();
 }
 void Interpretor::i_upop()
 {
+    this->rt->hookpop();
 }
 void Interpretor::i_pop()
 {

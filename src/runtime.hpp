@@ -104,8 +104,10 @@ public:
 
 struct Hook
 {
+    bool is_detached;
     LuaValue val;
     Frame *frame;
+    size_t stack_idx;
 };
 
 struct Frame
@@ -127,8 +129,9 @@ struct Frame
     Lfunction *bin();
     LuaValue *stack();
     LuaValue *args();
-    Hook *uptable();
-    Hook *hooktable();
+    Hook **uptable();
+    Hook **hooktable();
+    size_t stack_address(size_t idx);
 };
 struct GenFunction
 {
@@ -151,7 +154,6 @@ private:
     void destroy_frame();
     void copy_values(Frame *fsrc, Frame *fdest, size_t count);
     void push_nils(Frame *fsrc, size_t count);
-    size_t stack_address(size_t idx);
 
 public:
     vector<Lfunction *> functable; // todo: this must be private
@@ -175,8 +177,8 @@ public:
     Lfunction *bin();
     LuaValue *stack();
     LuaValue *args();
-    Hook *hooktable();
-    Hook *uptable();
+    Hook **hooktable();
+    Hook **uptable();
 
     LuaValue stack_pop();
     void stack_push(LuaValue value);
@@ -184,6 +186,8 @@ public:
     void stack_write(size_t idx, LuaValue value);
     size_t stack_ptr();
     void set_stack_ptr(size_t sp);
+    void hookpush();
+    void hookpop();
 };
 
 struct LuaFunction

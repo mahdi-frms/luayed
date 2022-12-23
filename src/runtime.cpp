@@ -265,21 +265,21 @@ Lfunction *Lua::bin()
 {
     return this->frame->bin();
 }
-Hook *Lua::uptable()
+Hook **Lua::uptable()
 {
     return this->frame->uptable();
 }
-Hook *Lua::hooktable()
+Hook **Lua::hooktable()
 {
     return this->frame->hooktable();
 }
-Hook *Frame::uptable()
+Hook **Frame::uptable()
 {
-    return (Hook *)(this->fn.data.f + 1);
+    return (Hook **)(this->fn.data.f + 1);
 }
-Hook *Frame::hooktable()
+Hook **Frame::hooktable()
 {
-    return (Hook *)(this + 1);
+    return (Hook **)(this + 1);
 }
 LuaValue Lua::clone_value(LuaValue &value)
 {
@@ -287,16 +287,16 @@ LuaValue Lua::clone_value(LuaValue &value)
 }
 LuaValue Lua::stack_read(size_t idx)
 {
-    size_t real_idx = this->stack_address(idx);
+    size_t real_idx = this->frame->stack_address(idx);
     return this->clone_value(this->frame->stack()[real_idx]);
 }
-size_t Lua::stack_address(size_t idx)
+size_t Frame::stack_address(size_t idx)
 {
-    return idx < this->frame->bin()->parcount ? idx : idx + this->frame->vargs_count;
+    return idx < this->bin()->parcount ? idx : idx + this->vargs_count;
 }
 void Lua::stack_write(size_t idx, LuaValue value)
 {
-    size_t real_idx = this->stack_address(idx);
+    size_t real_idx = this->frame->stack_address(idx);
     this->destroy_value(this->frame->stack()[real_idx]);
     this->frame->stack()[idx] = value;
 }
@@ -317,4 +317,17 @@ void Lua::stack_push(LuaValue value)
 {
     this->frame->stack()[this->frame->sp] = value;
     this->frame->sp++;
+}
+void Lua::hookpush()
+{
+    this->hooktable()[this->frame->hookptr++] = nullptr;
+}
+void Lua::hookpop()
+{
+    Hook **ptr = this->hooktable() + --this->frame->hookptr;
+    Hook hook = **ptr;
+    hook.is_detached = true;
+    size_t stack_idx = hook.frame->stack_address(hook.stack_idx);
+    hook.val = hook.frame->stack()[stack_idx];
+    *ptr = nullptr;
 }

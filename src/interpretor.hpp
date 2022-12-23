@@ -30,8 +30,8 @@ private:
     Lfunction *bin();
     size_t sp();
     void setsp(size_t sp);
-    Hook *uptable(size_t idx);
-    Hook *hooktable(size_t idx);
+    Hook *upvalue(size_t idx);
+    Hook *hook(size_t idx);
 
     void i_add();
     void i_sub();
