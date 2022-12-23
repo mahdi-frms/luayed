@@ -48,10 +48,10 @@ size_t LuaGenerator::add_const(LuaValue value)
     this->gfn->rodata.push_back(value);
     return idx;
 }
-size_t LuaGenerator::upval(fidx_t fidx, size_t offset)
+size_t LuaGenerator::upval(fidx_t fidx, size_t offset, size_t hidx)
 {
     size_t idx = this->gfn->upvalues.size();
-    this->gfn->upvalues.push_back(Upvalue{.fidx = fidx, .offset = offset});
+    this->gfn->upvalues.push_back(Upvalue(fidx, offset, hidx));
     return idx;
 }
 void LuaGenerator::meta_parcount(size_t parcount)

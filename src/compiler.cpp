@@ -49,6 +49,7 @@ void Compiler::compile(Noderef root)
             md->offset = this->stack_offset++;
             if (md->is_upvalue)
             {
+                md->upoffset = this->hooksize;
                 this->hookpush();
                 upcount++;
             }
@@ -201,7 +202,7 @@ void Compiler::compile_identifier(Noderef node)
         {
             MetaScope *sc = (MetaScope *)mm->scope->getannot(MetaKind::MScope);
             MetaScope *fnsc = (MetaScope *)sc->func->getannot(MetaKind::MScope);
-            this->emit(Opcode(Instruction::IUpvalue, this->upval(fnsc->fidx, mm->offset)));
+            this->emit(Opcode(Instruction::IUpvalue, this->upval(fnsc->fidx, mm->offset, mm->upoffset)));
         }
         else
         {
@@ -370,7 +371,7 @@ void Compiler::compile_lvalue_primary(Noderef node)
         {
             MetaScope *sc = (MetaScope *)mm->scope->getannot(MetaKind::MScope);
             MetaScope *fnsc = (MetaScope *)sc->func->getannot(MetaKind::MScope);
-            this->ops_push(Opcode(Instruction::IUStore, this->upval(fnsc->fidx, mm->offset)));
+            this->ops_push(Opcode(Instruction::IUStore, this->upval(fnsc->fidx, mm->offset, mm->upoffset)));
         }
         else
         {
@@ -606,9 +607,9 @@ void Compiler::seti(size_t idx, lbyte b)
 {
     this->gen->seti(idx, b);
 }
-size_t Compiler::upval(fidx_t fidx, size_t offset)
+size_t Compiler::upval(fidx_t fidx, size_t offset, size_t hidx)
 {
-    return this->gen->upval(fidx, offset);
+    return this->gen->upval(fidx, offset, hidx);
 }
 
 void Compiler::compile_numeric_for(Noderef node)
@@ -717,6 +718,8 @@ void Compiler::compile_decl(Noderef node)
         mm->offset = this->stack_offset++;
         if (mm->is_upvalue)
         {
+            mm->upoffset = this->hooksize;
+            this->hookpush();
             upcount++;
         }
     }
@@ -728,7 +731,6 @@ void Compiler::compile_decl(Noderef node)
     while (upcount--)
     {
         this->emit(Instruction::IUPush);
-        this->hookpush();
     }
 }
 

@@ -91,10 +91,10 @@ public:
         this->funcs[this->current->fidx] = this->current;
         this->current = this->current->prev;
     }
-    size_t upval(fidx_t fidx, size_t offset)
+    size_t upval(fidx_t fidx, size_t offset, size_t hidx)
     {
         size_t idx = this->current->upvalues.size();
-        this->current->upvalues.push_back(Upvalue(fidx, offset));
+        this->current->upvalues.push_back(Upvalue(fidx, offset, hidx));
         return idx;
     }
     void meta_parcount(size_t parcount)
@@ -1262,7 +1262,7 @@ void compiler_tests()
         .test_hookmax(0)
         .test_ccount(0)
         .test_upvalues({
-            Upvalue(1, 0),
+            Upvalue(1, 0, 0),
         })
         .test_opcodes({
             iupvalue(0),
@@ -1310,7 +1310,7 @@ void compiler_tests()
         .test_hookmax(0)
         .test_ccount(0)
         .test_upvalues({
-            Upvalue(1, 0),
+            Upvalue(1, 0, 0),
         })
         .test_opcodes({
             iupvalue(0),
@@ -1342,7 +1342,7 @@ void compiler_tests()
         .test_hookmax(0)
         .test_ccount(1)
         .test_upvalues({
-            Upvalue(1, 0),
+            Upvalue(1, 0, 0),
         })
         .test_opcodes({
             iconst(0),
@@ -1388,8 +1388,8 @@ void compiler_tests()
         .test_hookmax(0)
         .test_ccount(0)
         .test_upvalues({
-            Upvalue(2, 0),
-            Upvalue(2, 2),
+            Upvalue(2, 0, 0),
+            Upvalue(2, 2, 1),
         })
         .test_opcodes({
             iupvalue(1),

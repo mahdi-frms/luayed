@@ -68,8 +68,9 @@ struct Upvalue
 {
     fidx_t fidx;
     size_t offset;
+    size_t hidx;
 
-    Upvalue(fidx_t fidx, size_t offset);
+    Upvalue(fidx_t fidx, size_t offset, size_t hidx);
     friend bool operator==(const Upvalue &l, const Upvalue &r);
 };
 
@@ -96,7 +97,7 @@ public:
     virtual void pushf(fidx_t fidx) = 0;
     virtual void popf() = 0;
 
-    virtual size_t upval(fidx_t fidx, size_t offset) = 0;
+    virtual size_t upval(fidx_t fidx, size_t offset, size_t hidx) = 0;
 
     virtual void meta_parcount(size_t parcount) = 0;
     virtual void meta_hookmax(size_t hookmax) = 0;

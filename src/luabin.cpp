@@ -48,7 +48,7 @@ Opcode::Opcode(lbyte op)
 }
 bool operator==(const Upvalue &l, const Upvalue &r)
 {
-    return l.fidx == r.fidx && l.offset == r.offset;
+    return l.fidx == r.fidx && l.offset == r.offset && l.hidx == r.hidx;
 }
 string binary_stringify(lbyte *text, size_t codelen)
 {
@@ -142,4 +142,4 @@ string binary_stringify(lbyte *text, size_t codelen)
     return str;
 }
 
-Upvalue::Upvalue(fidx_t fidx, size_t offset) : fidx(fidx), offset(offset) {}
+Upvalue::Upvalue(fidx_t fidx, size_t offset, size_t hidx) : fidx(fidx), offset(offset), hidx(hidx) {}

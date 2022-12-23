@@ -24,7 +24,7 @@ public:
     void pushf(fidx_t fidx);
     void popf();
 
-    size_t upval(fidx_t fidx, size_t offset);
+    size_t upval(fidx_t fidx, size_t offset, size_t hidx);
 
     void meta_parcount(size_t parcount);
     void meta_hookmax(size_t hookmax);

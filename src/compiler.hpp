@@ -25,7 +25,7 @@ private:
     void ops_flush();
     void edit_jmp(size_t opidx, size_t jmp_idx);
     void seti(size_t idx, lbyte b);
-    size_t upval(fidx_t fidx, size_t offset);
+    size_t upval(fidx_t fidx, size_t offset, size_t hidx);
     void ops_push(Opcode op);
     size_t const_number(lnumber n);
     size_t const_string(const char *s);
