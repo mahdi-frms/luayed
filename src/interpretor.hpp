@@ -60,6 +60,7 @@ private:
     void i_tget();
     void i_tset();
     void i_tnew();
+    void i_tlist();
     void i_gget();
     void i_gset();
     void i_nil();

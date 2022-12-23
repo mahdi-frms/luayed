@@ -30,6 +30,7 @@ void Interpretor::optable_init()
     Interpretor::optable[ITGet] = &Interpretor::i_tget;
     Interpretor::optable[ITSet] = &Interpretor::i_tset;
     Interpretor::optable[ITNew] = &Interpretor::i_tnew;
+    Interpretor::optable[ITList] = &Interpretor::i_tlist;
     Interpretor::optable[IGGet] = &Interpretor::i_gget;
     Interpretor::optable[IGSet] = &Interpretor::i_gset;
     Interpretor::optable[INil] = &Interpretor::i_nil;
@@ -274,4 +275,7 @@ void Interpretor::i_pop()
         LuaValue v = this->rt->stack_pop();
         this->rt->destroy_value(v);
     }
+}
+void Interpretor::i_tlist()
+{
 }
