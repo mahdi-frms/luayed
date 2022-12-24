@@ -126,6 +126,10 @@ Hook *Interpretor::hook(size_t idx)
 {
     return this->rt->hooktable()[idx];
 }
+void Interpretor::push_bool(bool b)
+{
+    this->rt->stack_push(this->rt->create_boolean(b));
+}
 
 void Interpretor::i_add()
 {
@@ -192,9 +196,40 @@ void Interpretor::i_le()
 }
 void Interpretor::i_eq()
 {
+    this->push_bool(this->compare());
 }
 void Interpretor::i_ne()
 {
+    this->push_bool(!this->compare());
+}
+bool Interpretor::compare()
+{
+    LuaValue a = this->rt->stack_pop();
+    LuaValue b = this->rt->stack_pop();
+    bool rsl;
+    if (a.kind != b.kind)
+    {
+        rsl = false;
+    }
+    else if (a.kind == LuaType::LVNumber)
+    {
+        rsl = a.data.n == b.data.n;
+    }
+    else if (a.kind == LuaType::LVBool)
+    {
+        rsl = a.data.b == b.data.b;
+    }
+    else if (a.kind == LuaType::LVNil)
+    {
+        rsl = true;
+    }
+    else
+    {
+        rsl = a.data.ptr == b.data.ptr;
+    }
+    this->rt->destroy_value(a);
+    this->rt->destroy_value(b);
+    return rsl;
 }
 void Interpretor::i_tget()
 {
@@ -220,11 +255,11 @@ void Interpretor::i_nil()
 }
 void Interpretor::i_true()
 {
-    this->rt->stack_push(this->rt->create_boolean(true));
+    this->push_bool(true);
 }
 void Interpretor::i_false()
 {
-    this->rt->stack_push(this->rt->create_boolean(false));
+    this->push_bool(false);
 }
 void Interpretor::i_ret()
 {

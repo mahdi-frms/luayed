@@ -96,9 +96,7 @@ public:
     {
         bool b;
         lnumber n;
-        char *s;
-        LuaFunction *f;
-        LuaTable *t;
+        void *ptr;
     } data;
 
     bool truth();

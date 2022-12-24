@@ -27,7 +27,7 @@ bool operator<=(const InternString &l, const InternString &r)
 }
 bool Frame::is_Lua()
 {
-    return this->fn.data.f->is_lua;
+    return ((LuaFunction *)this->fn.data.ptr)->is_lua;
 }
 
 char *StringInterner::insert(char *lstr)
@@ -85,7 +85,7 @@ LuaValue Lua::create_string(const char *s)
 {
     LuaValue val;
     val.kind = LuaType::LVString;
-    val.data.s = nullptr; // todo
+    val.data.ptr = nullptr; // todo
     return val;
 }
 
@@ -192,8 +192,8 @@ void Lua::fncall(size_t argc, size_t retc)
         return;
     }
     LuaValue *fn = prev->stack() - total_argc - 1;
-    bool is_lua = fn->data.f->is_lua;
-    Lfunction *bin = is_lua ? (Lfunction *)fn->data.f->fn : nullptr;
+    bool is_lua = ((LuaFunction *)fn->data.ptr)->is_lua;
+    Lfunction *bin = is_lua ? (Lfunction *)((LuaFunction *)fn->data.ptr)->fn : nullptr;
     this->new_frame(argc + 1024 /* THIS NUMBER MUST BE PROVIDED BY THE COMPILER */);
     Frame *frame = this->frame;
     // move values bwtween frames
@@ -215,7 +215,7 @@ void Lua::fncall(size_t argc, size_t retc)
     }
     else
     {
-        LuaCppFunction cppfn = (LuaCppFunction)fn->data.f->fn;
+        LuaCppFunction cppfn = (LuaCppFunction)((LuaFunction *)fn->data.ptr)->fn;
         return_count = cppfn(this);
     }
     this->fnret(return_count);
@@ -255,7 +255,7 @@ void Lua::fnret(size_t count)
 
 Lfunction *Frame::bin()
 {
-    return (Lfunction *)this->fn.data.f->fn;
+    return (Lfunction *)((LuaFunction *)this->fn.data.ptr)->fn;
 }
 LuaValue *Frame::stack()
 {
@@ -283,7 +283,7 @@ Hook **Lua::hooktable()
 }
 Hook **Frame::uptable()
 {
-    return (Hook **)(this->fn.data.f + 1);
+    return (Hook **)(((LuaFunction *)this->fn.data.ptr) + 1);
 }
 Hook **Frame::hooktable()
 {
