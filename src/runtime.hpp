@@ -131,7 +131,8 @@ struct Frame
     bool is_Lua();
     Lfunction *bin();
     LuaValue *stack();
-    LuaValue *args();
+    LuaValue *vargs();
+    size_t vargcount();
     Hook **uptable();
     Hook **hooktable();
     size_t stack_address(size_t idx);
@@ -178,6 +179,7 @@ public:
     void fnret(size_t count);
 
     Lfunction *bin();
+    Lfunction *bin(size_t fidx);
     LuaValue *stack();
     LuaValue *args();
     Hook **hooktable();
@@ -194,6 +196,7 @@ public:
     void hookpush();
     void hookpop();
     LuaValue hookread(Hook *hook);
+    LuaValue arg(size_t idx);
     void hookwrite(Hook *hook, LuaValue value);
     size_t load_ip();
     void save_ip(size_t sp);

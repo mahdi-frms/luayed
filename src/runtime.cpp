@@ -261,6 +261,14 @@ LuaValue *Frame::stack()
 {
     return (LuaValue *)(this->hooktable() + this->bin()->hookmax);
 }
+LuaValue *Frame::vargs()
+{
+    return (LuaValue *)(this->stack() + this->bin()->parcount);
+}
+size_t Frame::vargcount()
+{
+    return this->vargs_count;
+}
 Lfunction *Lua::bin()
 {
     return this->frame->bin();
@@ -381,4 +389,13 @@ void Lua::hookwrite(Hook *hook, LuaValue value)
         this->destroy_value(*vptr);
         *vptr = value;
     }
+}
+LuaValue Lua::arg(size_t idx)
+{
+    LuaValue value = this->clone_value(this->frame->vargs()[idx]);
+    return value;
+}
+Lfunction *Lua::bin(size_t fidx)
+{
+    return this->functable[fidx];
 }

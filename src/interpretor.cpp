@@ -227,6 +227,8 @@ void Interpretor::i_call()
 }
 void Interpretor::i_vargs()
 {
+    for (size_t i = 0; i < this->arg1; i++)
+        this->rt->stack_push(this->rt->arg(i));
 }
 void Interpretor::i_jmp()
 {
@@ -241,9 +243,13 @@ void Interpretor::i_cjmp()
 }
 void Interpretor::i_const()
 {
+    LuaValue val = this->bin()->rodata()[this->arg1];
+    this->rt->stack_push(this->rt->clone_value(val));
 }
 void Interpretor::i_fconst()
 {
+    LuaValue fn = this->rt->create_luafn(this->rt->bin(this->arg1));
+    this->rt->stack_push(fn);
 }
 void Interpretor::i_local()
 {
