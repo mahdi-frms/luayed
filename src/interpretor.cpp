@@ -134,9 +134,35 @@ void Interpretor::push_bool(bool b)
 
 void Interpretor::i_add()
 {
+    // todo: string conversion
+    LuaValue a = this->rt->stack_pop();
+    LuaValue b = this->rt->stack_pop();
+    if (a.kind != LuaType::LVNumber || b.kind != LuaType::LVNumber)
+    {
+        this->error = error_invalid_operands(a.kind, b.kind);
+        this->state = InterpretorState::Error;
+        return;
+    }
+    LuaValue sum = this->rt->create_number(a.data.n + b.data.n);
+    this->rt->destroy_value(a);
+    this->rt->destroy_value(b);
+    this->rt->stack_push(sum);
 }
 void Interpretor::i_sub()
 {
+    // todo: string conversion
+    LuaValue a = this->rt->stack_pop();
+    LuaValue b = this->rt->stack_pop();
+    if (a.kind != LuaType::LVNumber || b.kind != LuaType::LVNumber)
+    {
+        this->error = error_invalid_operands(a.kind, b.kind);
+        this->state = InterpretorState::Error;
+        return;
+    }
+    LuaValue sum = this->rt->create_number(a.data.n - b.data.n);
+    this->rt->destroy_value(a);
+    this->rt->destroy_value(b);
+    this->rt->stack_push(sum);
 }
 void Interpretor::i_mult()
 {
@@ -155,6 +181,17 @@ void Interpretor::i_pow()
 }
 void Interpretor::i_neg()
 {
+    // todo: string conversion
+    LuaValue a = this->rt->stack_pop();
+    if (a.kind != LuaType::LVNumber)
+    {
+        this->error = error_invalid_operands(a.kind, a.kind);
+        this->state = InterpretorState::Error;
+        return;
+    }
+    LuaValue num = this->rt->create_number(-a.data.n);
+    this->rt->destroy_value(a);
+    this->rt->stack_push(num);
 }
 
 void Interpretor::i_bor()
