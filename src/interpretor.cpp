@@ -153,9 +153,10 @@ void Interpretor::i_mod()
 void Interpretor::i_pow()
 {
 }
-void Interpretor::i_concat()
+void Interpretor::i_neg()
 {
 }
+
 void Interpretor::i_bor()
 {
 }
@@ -165,22 +166,27 @@ void Interpretor::i_band()
 void Interpretor::i_bxor()
 {
 }
+void Interpretor::i_bnot()
+{
+}
 void Interpretor::i_shr()
 {
 }
 void Interpretor::i_shl()
 {
 }
-void Interpretor::i_len()
-{
-}
-void Interpretor::i_neg()
-{
-}
+
 void Interpretor::i_not()
 {
+    LuaValue val = this->rt->stack_pop();
+    bool rsl = !val.truth();
+    this->rt->destroy_value(val);
+    this->push_bool(rsl);
 }
-void Interpretor::i_bnot()
+void Interpretor::i_concat()
+{
+}
+void Interpretor::i_len()
 {
 }
 
