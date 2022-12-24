@@ -1,4 +1,5 @@
 #include "interpretor.hpp"
+#include <cstring>
 
 opimpl Interpretor::optable[256];
 
@@ -187,6 +188,44 @@ void Interpretor::i_lt()
 }
 void Interpretor::i_gt()
 {
+}
+
+bool Interpretor::compare(Comparison cmp)
+{
+    LuaValue a = this->rt->stack_pop();
+    LuaValue b = this->rt->stack_pop();
+    bool rsl;
+    if (a.kind != b.kind || (a.kind != LuaType::LVNumber && a.kind != LuaType::LVString))
+    {
+        this->error = error_invalid_operands(a.kind, b.kind);
+        this->state = InterpretorState::Error;
+        return false;
+    }
+    else if (a.kind == LuaType::LVNumber)
+    {
+        if (cmp == Comparison::GE)
+            rsl = a.data.n >= b.data.n;
+        else if (cmp == Comparison::GT)
+            rsl = a.data.n > b.data.n;
+        else if (cmp == Comparison::LE)
+            rsl = a.data.n <= b.data.n;
+        else
+            rsl = a.data.n < b.data.n;
+    }
+    else
+    {
+        if (cmp == Comparison::GE)
+            rsl = strcmp((char *)a.data.ptr, (char *)b.data.ptr) != -1;
+        else if (cmp == Comparison::GT)
+            rsl = strcmp((char *)a.data.ptr, (char *)b.data.ptr) == 1;
+        else if (cmp == Comparison::LE)
+            rsl = strcmp((char *)a.data.ptr, (char *)b.data.ptr) != 1;
+        else
+            rsl = strcmp((char *)a.data.ptr, (char *)b.data.ptr) == -1;
+    }
+    this->rt->destroy_value(a);
+    this->rt->destroy_value(b);
+    return rsl;
 }
 void Interpretor::i_ge()
 {

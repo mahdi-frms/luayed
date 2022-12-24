@@ -15,6 +15,14 @@ enum class InterpretorState
     Error,
 };
 
+enum class Comparison
+{
+    GT,
+    GE,
+    LT,
+    LE
+};
+
 class Interpretor
 {
 public:
@@ -45,6 +53,7 @@ private:
 
     void push_bool(bool b);
     bool compare();
+    bool compare(Comparison cmp);
 
     void i_add();
     void i_sub();

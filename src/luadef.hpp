@@ -14,4 +14,14 @@ typedef double lnumber;
 
 typedef size_t fidx_t;
 
+enum LuaType
+{
+    LVNil = 0,
+    LVBool = 1,
+    LVNumber = 2,
+    LVString = 3,
+    LVTable = 4,
+    LVFunction = 5,
+};
+
 #endif

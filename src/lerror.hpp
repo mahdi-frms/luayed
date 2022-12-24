@@ -20,6 +20,7 @@ struct LError
         LE_ExpectedToken,
         LE_ExpectedExpression,
         LE_ExpectedVariable,
+        LE_InvalidOperands,
     } kind;
     union
     {
@@ -67,6 +68,12 @@ struct LError
         struct
         {
         } expected_variable;
+
+        struct
+        {
+            LuaType t1;
+            LuaType t2;
+        } invalid_operands;
     } as;
 
     string to_string();
@@ -84,6 +91,7 @@ LError error_missing_end_of_comment(size_t level);
 LError error_expected_token(TokenKind kind);
 LError error_expected_expression();
 LError error_expected_variable();
+LError error_invalid_operands(LuaType t1, LuaType t2);
 
 std::ostream &operator<<(std::ostream &os, const LError &err);
 

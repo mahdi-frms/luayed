@@ -66,6 +66,14 @@ LError error_expected_variable()
     err.kind = LError::LE_ExpectedVariable;
     return err;
 }
+LError error_invalid_operands(LuaType t1, LuaType t2)
+{
+    LError err;
+    err.kind = LError::LE_InvalidOperands;
+    err.as.invalid_operands.t1 = t1;
+    err.as.invalid_operands.t2 = t2;
+    return err;
+}
 std::ostream &operator<<(std::ostream &os, const LError &err)
 {
     if (err.kind == LError::LE_OK)
