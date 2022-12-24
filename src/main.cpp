@@ -1,10 +1,6 @@
 #include <iostream>
 #include <cstring>
-#include "runtime.hpp"
-#include "generator.hpp"
-#include "compiler.hpp"
-#include "parser.hpp"
-#include "resolve.hpp"
+#include "lua.hpp"
 
 char *readfile(const char *path)
 {
@@ -27,7 +23,7 @@ char *readfile(const char *path)
     return text;
 }
 
-void print_fns(Lua *rt)
+void print_fns(LuaRuntime *rt)
 {
     for (size_t i = 1; i < rt->functable.size(); i++)
     {
@@ -36,73 +32,76 @@ void print_fns(Lua *rt)
     }
 }
 
-bool parse(const char *path)
-{
-    bool silence = false;
-    bool parse = true;
-    bool compile = false;
+// void previous_main()
+// {
+//     Lexer lxr = Lexer(text);
+//     if (parse)
+//     {
+//         Parser parser = Parser((ILexer *)&lxr);
+//         ast::Ast tree = parser.parse();
+//         ast::Noderef root = tree.root();
+//         if (root != nullptr)
+//         {
+//             SemanticAnalyzer sem = SemanticAnalyzer(tree);
+//             sem.analyze();
+//             if (compile)
+//             {
+//                 LuaRuntime lua;
+//                 LuaGenerator gen(&lua);
+//                 Compiler compiler((IGenerator *)&gen);
+//                 compiler.compile(tree);
+//                 if (!silence)
+//                 {
+//                     print_fns(&lua);
+//                 }
+//             }
+//             if (!silence && !compile)
+//             {
+//                 std::cout << root->to_string();
+//                 std::cout.flush();
+//             }
+//         }
+//         else
+//         {
+//             std::cerr << parser.get_error();
+//         }
+//         tree.destroy();
+//         delete[] text;
+//         return root != nullptr;
+//     }
+//     else
+//     {
+//         for (;;)
+//         {
+//             Token tkn = lxr.next();
+//             if (tkn.kind == TokenKind::Eof)
+//             {
+//                 break;
+//             }
+//             if (!silence)
+//             {
+//                 if (tkn.kind == TokenKind::Error)
+//                 {
+//                     std::cout << lxr.get_error();
+//                 }
+//                 else
+//                 {
+//                     printf("--> %s (%s) [%lu,%lu]\n", tkn.text().c_str(), token_kind_stringify(tkn.kind).c_str(), tkn.line + 1, tkn.offset + 1);
+//                 }
+//             }
+//         }
+//         delete[] text;
+//         return true;
+//     }
+// }
 
-    char *text = readfile(path);
-    printf("===== %s =====\n", path);
-    Lexer lxr = Lexer(text);
-    if (parse)
-    {
-        Parser parser = Parser((ILexer *)&lxr);
-        ast::Ast tree = parser.parse();
-        ast::Noderef root = tree.root();
-        if (root != nullptr)
-        {
-            SemanticAnalyzer sem = SemanticAnalyzer(tree);
-            sem.analyze();
-            if (compile)
-            {
-                Lua lua;
-                LuaGenerator gen(&lua);
-                Compiler compiler((IGenerator *)&gen);
-                compiler.compile(tree);
-                if (!silence)
-                {
-                    print_fns(&lua);
-                }
-            }
-            if (!silence && !compile)
-            {
-                std::cout << root->to_string();
-                std::cout.flush();
-            }
-        }
-        else
-        {
-            std::cerr << parser.get_error();
-        }
-        tree.destroy();
-        delete[] text;
-        return root != nullptr;
-    }
-    else
-    {
-        for (;;)
-        {
-            Token tkn = lxr.next();
-            if (tkn.kind == TokenKind::Eof)
-            {
-                break;
-            }
-            if (!silence)
-            {
-                if (tkn.kind == TokenKind::Error)
-                {
-                    std::cout << lxr.get_error();
-                }
-                else
-                {
-                    printf("--> %s (%s) [%lu,%lu]\n", tkn.text().c_str(), token_kind_stringify(tkn.kind).c_str(), tkn.line + 1, tkn.offset + 1);
-                }
-            }
-        }
-        delete[] text;
-        return true;
-    }
+bool runfile(const char *path)
+{
+    Lua lua;
+    const char *text = readfile(path);
+    lua.compile(text);
+    lua.call(1, 0);
+    return true; // todo: must check for errors
 }
 
 int main(int argc, char **argv)
@@ -111,7 +110,7 @@ int main(int argc, char **argv)
         return 1;
     for (int i = 1; i < argc; i++)
     {
-        if (!parse(argv[i]))
+        if (!runfile(argv[i]))
         {
             // return 1;
         }

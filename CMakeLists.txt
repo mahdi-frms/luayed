@@ -19,6 +19,7 @@ add_executable(luayed
     src/generator.cpp
     src/interpretor.cpp
     src/lerror.cpp
+    src/lua.cpp
 )
     
 add_executable(luaytest

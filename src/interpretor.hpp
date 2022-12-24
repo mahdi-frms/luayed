@@ -26,7 +26,7 @@ enum class Comparison
 class Interpretor
 {
 public:
-    size_t run(Lua *rt);
+    size_t run(LuaRuntime *rt);
     LError get_error();
 
 private:
@@ -42,7 +42,7 @@ private:
     LError error = error_ok();
     InterpretorState state = InterpretorState::Run;
 
-    Lua *rt = nullptr;
+    LuaRuntime *rt = nullptr;
 
     lbyte iread();
     void fetch();

@@ -9,10 +9,10 @@
 #define lstrnull nullptr
 
 class LuaValue;
-class Lua;
+class LuaRuntime;
 class Frame;
 class GenFunction;
-typedef size_t (*LuaCppFunction)(Lua *);
+typedef size_t (*LuaCppFunction)(LuaRuntime *);
 struct LuaFunction;
 
 class Lfunction
@@ -65,7 +65,7 @@ struct InternString
 class IInterpretor
 {
 public:
-    virtual size_t run(Lua *rt) = 0;
+    virtual size_t run(LuaRuntime *rt) = 0;
 };
 
 class StringInterner
@@ -90,6 +90,8 @@ public:
     } data;
 
     bool truth();
+    LuaFunction *as_function();
+    const char *as_string();
 };
 
 struct Hook
@@ -118,6 +120,8 @@ struct Frame
 
     bool is_Lua();
     Lfunction *bin();
+    size_t parcount();
+    size_t hookmax();
     LuaValue *stack();
     LuaValue *vargs();
     size_t vargcount();
@@ -135,7 +139,7 @@ struct GenFunction
     size_t parcount;
     size_t hookmax;
 };
-class Lua
+class LuaRuntime
 {
 private:
     StringInterner interner;
@@ -148,6 +152,8 @@ private:
     void push_nils(Frame *fsrc, size_t count);
 
 public:
+    LuaRuntime();
+
     vector<Lfunction *> functable; // todo: this must be private
     LuaValue create_nil();
     LuaValue create_boolean(bool b);
@@ -194,6 +200,9 @@ struct LuaFunction
 {
     void *fn;
     bool is_lua;
+
+    Lfunction *binary();
+    LuaCppFunction native();
 };
 
 #endif

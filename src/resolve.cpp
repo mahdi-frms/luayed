@@ -238,6 +238,6 @@ void SemanticAnalyzer::finalize()
     this->labels.clear();
 }
 
-SemanticAnalyzer::SemanticAnalyzer(Ast ast) : ast(ast), fn_idx(1)
+SemanticAnalyzer::SemanticAnalyzer(Ast ast, size_t first_fidx) : ast(ast), fn_idx(first_fidx)
 {
 }

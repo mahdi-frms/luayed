@@ -1,6 +1,8 @@
 #include "runtime.hpp"
 #include <cstring>
 
+#define INITIAL_FRAME_SIZE 1024 // must be expandable
+
 bool operator>(const InternString &l, const InternString &r)
 {
     return strcmp(l.lstr, r.lstr) == 1;
@@ -66,14 +68,14 @@ string Lfunction::stringify()
     return binary_stringify(this->text(), this->codelen);
 }
 
-LuaValue Lua::create_nil()
+LuaValue LuaRuntime::create_nil()
 {
     LuaValue val;
     val.kind = LuaType::LVNil;
     return val;
 }
 
-LuaValue Lua::create_boolean(bool b)
+LuaValue LuaRuntime::create_boolean(bool b)
 {
     LuaValue val;
     val.kind = LuaType::LVBool;
@@ -81,7 +83,7 @@ LuaValue Lua::create_boolean(bool b)
     return val;
 }
 
-LuaValue Lua::create_string(const char *s)
+LuaValue LuaRuntime::create_string(const char *s)
 {
     LuaValue val;
     val.kind = LuaType::LVString;
@@ -89,19 +91,29 @@ LuaValue Lua::create_string(const char *s)
     return val;
 }
 
-LuaValue Lua::create_number(lnumber n)
+LuaValue LuaRuntime::create_number(lnumber n)
 {
     LuaValue val;
     val.kind = LuaType::LVNumber;
     val.data.n = n;
     return val;
 }
-LuaValue Lua::create_luafn(Lfunction *bin)
+LuaValue LuaRuntime::create_luafn(Lfunction *bin)
 {
     return this->create_nil(); // todo
 }
+LuaValue LuaRuntime::create_cppfn(LuaCppFunction fn)
+{
+    LuaValue val;
+    val.kind = LuaType::LVFunction;
+    LuaFunction *fobj = (LuaFunction *)this->allocate(sizeof(LuaFunction));
+    fobj->is_lua = false;
+    fobj->fn = (void *)fn;
+    val.data.ptr = (void *)fobj;
+    return val;
+}
 
-Lfunction *Lua::create_binary(GenFunction *gfn)
+Lfunction *LuaRuntime::create_binary(GenFunction *gfn)
 {
     Lfunction *fn = (Lfunction *)this->allocate(
         sizeof(Lfunction) +
@@ -129,35 +141,40 @@ Lfunction *Lua::create_binary(GenFunction *gfn)
     return fn;
 }
 
-void Lua::destroy_value(LuaValue &value)
+void LuaRuntime::destroy_value(LuaValue &value)
 {
 }
 
-void *Lua::allocate(size_t size)
+void *LuaRuntime::allocate(size_t size)
 {
     return malloc(size);
 }
-void Lua::deallocate(void *ptr)
+void LuaRuntime::deallocate(void *ptr)
 {
     free(ptr);
 }
-void Lua::new_frame(size_t stack_size)
+void LuaRuntime::new_frame(size_t stack_size)
 {
     Frame *frame = (Frame *)this->allocate(sizeof(Frame) + stack_size);
     frame->ss = stack_size;
     frame->prev = this->frame;
+    frame->hookptr = 0;
     frame->sp = 0;
     frame->ret_count = 0;
     this->frame = frame;
 }
-void Lua::destroy_frame()
+LuaRuntime::LuaRuntime()
+{
+    this->new_frame(INITIAL_FRAME_SIZE);
+}
+void LuaRuntime::destroy_frame()
 {
     this->destroy_value(this->frame->fn);
     Frame *frame = this->frame;
     this->frame = frame->prev;
     this->deallocate(frame);
 }
-void Lua::copy_values(
+void LuaRuntime::copy_values(
     Frame *fsrc,
     Frame *fdest,
     size_t count)
@@ -171,7 +188,7 @@ void Lua::copy_values(
     fsrc->sp -= count;
 }
 
-void Lua::push_nils(
+void LuaRuntime::push_nils(
     Frame *frame,
     size_t count)
 {
@@ -181,7 +198,7 @@ void Lua::push_nils(
     frame->sp += count;
 }
 
-void Lua::fncall(size_t argc, size_t retc)
+void LuaRuntime::fncall(size_t argc, size_t retc)
 {
     Frame *prev = this->frame;
     size_t total_argc = argc + prev->ret_count;
@@ -204,7 +221,7 @@ void Lua::fncall(size_t argc, size_t retc)
     if (is_lua && bin->parcount > total_argc)
         this->push_nils(frame, bin->parcount - total_argc);
     else
-        frame->vargs_count += total_argc - bin->parcount;
+        frame->vargs_count += total_argc - is_lua ? bin->parcount : 0;
     prev->sp--;
     prev->ret_count = 0;
     // execute function
@@ -220,7 +237,7 @@ void Lua::fncall(size_t argc, size_t retc)
     }
     this->fnret(return_count);
 }
-void Lua::fnret(size_t count)
+void LuaRuntime::fnret(size_t count)
 {
     Frame *frame = this->frame;
     if (!frame->prev)
@@ -253,31 +270,64 @@ void Lua::fnret(size_t count)
     this->destroy_frame();
 }
 
+LuaFunction *LuaValue::as_function()
+{
+    return (LuaFunction *)this->data.ptr;
+}
+const char *LuaValue::as_string()
+{
+    return (const char *)this->data.ptr;
+}
+
+Lfunction *LuaFunction::binary()
+{
+    return (Lfunction *)this->fn;
+}
+
+LuaCppFunction LuaFunction::native()
+{
+    return (LuaCppFunction)this->fn;
+}
+
+size_t Frame::parcount()
+{
+    LuaFunction *fn = this->fn.as_function();
+    if (!fn)
+        return 0;
+    return fn->is_lua ? fn->binary()->parcount : 0;
+}
+size_t Frame::hookmax()
+{
+    LuaFunction *fn = this->fn.as_function();
+    if (!fn)
+        return 0;
+    return fn->is_lua ? fn->binary()->hookmax : 0;
+}
 Lfunction *Frame::bin()
 {
-    return (Lfunction *)((LuaFunction *)this->fn.data.ptr)->fn;
+    return (Lfunction *)this->fn.as_function()->binary();
 }
 LuaValue *Frame::stack()
 {
-    return (LuaValue *)(this->hooktable() + this->bin()->hookmax);
+    return (LuaValue *)(this->hooktable() + this->hookmax());
 }
 LuaValue *Frame::vargs()
 {
-    return (LuaValue *)(this->stack() + this->bin()->parcount);
+    return (LuaValue *)(this->stack() + this->parcount());
 }
 size_t Frame::vargcount()
 {
     return this->vargs_count;
 }
-Lfunction *Lua::bin()
+Lfunction *LuaRuntime::bin()
 {
     return this->frame->bin();
 }
-Hook **Lua::uptable()
+Hook **LuaRuntime::uptable()
 {
     return this->frame->uptable();
 }
-Hook **Lua::hooktable()
+Hook **LuaRuntime::hooktable()
 {
     return this->frame->hooktable();
 }
@@ -289,11 +339,11 @@ Hook **Frame::hooktable()
 {
     return (Hook **)(this + 1);
 }
-LuaValue Lua::clone_value(LuaValue &value)
+LuaValue LuaRuntime::clone_value(LuaValue &value)
 {
     return create_nil(); // todo : cloning must be implemented
 }
-LuaValue Lua::stack_read(size_t idx)
+LuaValue LuaRuntime::stack_read(size_t idx)
 {
     size_t real_idx = this->frame->stack_address(idx);
     return this->clone_value(this->frame->stack()[real_idx]);
@@ -302,43 +352,43 @@ size_t Frame::stack_address(size_t idx)
 {
     return idx < this->bin()->parcount ? idx : idx + this->vargs_count;
 }
-void Lua::stack_write(size_t idx, LuaValue value)
+void LuaRuntime::stack_write(size_t idx, LuaValue value)
 {
     size_t real_idx = this->frame->stack_address(idx);
     this->destroy_value(this->frame->stack()[real_idx]);
     this->frame->stack()[idx] = value;
 }
-size_t Lua::stack_ptr()
+size_t LuaRuntime::stack_ptr()
 {
     return this->frame->sp;
 }
-void Lua::set_stack_ptr(size_t sp)
+void LuaRuntime::set_stack_ptr(size_t sp)
 {
     this->frame->sp = sp;
 }
-size_t Lua::load_ip()
+size_t LuaRuntime::load_ip()
 {
     return this->frame->ip;
 }
-void Lua::save_ip(size_t ip)
+void LuaRuntime::save_ip(size_t ip)
 {
     this->frame->ip = ip;
 }
-LuaValue Lua::stack_pop()
+LuaValue LuaRuntime::stack_pop()
 {
     this->frame->sp--;
     return this->frame->stack()[this->frame->sp];
 }
-void Lua::stack_push(LuaValue value)
+void LuaRuntime::stack_push(LuaValue value)
 {
     this->frame->stack()[this->frame->sp] = value;
     this->frame->sp++;
 }
-void Lua::hookpush()
+void LuaRuntime::hookpush()
 {
     this->hooktable()[this->frame->hookptr++] = nullptr;
 }
-void Lua::hookpop()
+void LuaRuntime::hookpop()
 {
     Hook **ptr = this->hooktable() + --this->frame->hookptr;
     Hook hook = **ptr;
@@ -351,17 +401,17 @@ bool LuaValue::truth()
 {
     return this->kind != LuaType::LVNil && (this->kind != LuaType::LVBool || this->data.b);
 }
-LuaValue Lua::stack_back_read(size_t idx)
+LuaValue LuaRuntime::stack_back_read(size_t idx)
 {
     idx = this->frame->sp - idx + 1;
     return this->stack_read(idx);
 }
-void Lua::stack_back_write(size_t idx, LuaValue value)
+void LuaRuntime::stack_back_write(size_t idx, LuaValue value)
 {
     idx = this->frame->sp - idx + 1;
     this->stack_back_write(idx, value);
 }
-LuaValue Lua::hookread(Hook *hook)
+LuaValue LuaRuntime::hookread(Hook *hook)
 {
     if (hook->is_detached)
     {
@@ -374,7 +424,7 @@ LuaValue Lua::hookread(Hook *hook)
         return this->clone_value(frame->stack()[idx]);
     }
 }
-void Lua::hookwrite(Hook *hook, LuaValue value)
+void LuaRuntime::hookwrite(Hook *hook, LuaValue value)
 {
     if (hook->is_detached)
     {
@@ -390,12 +440,12 @@ void Lua::hookwrite(Hook *hook, LuaValue value)
         *vptr = value;
     }
 }
-LuaValue Lua::arg(size_t idx)
+LuaValue LuaRuntime::arg(size_t idx)
 {
     LuaValue value = this->clone_value(this->frame->vargs()[idx]);
     return value;
 }
-Lfunction *Lua::bin(size_t fidx)
+Lfunction *LuaRuntime::bin(size_t fidx)
 {
     return this->functable[fidx];
 }

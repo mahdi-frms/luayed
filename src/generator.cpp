@@ -1,6 +1,6 @@
 #include "generator.hpp"
 
-LuaGenerator::LuaGenerator(Lua *rt) : rt(rt), gfn(nullptr)
+LuaGenerator::LuaGenerator(LuaRuntime *rt) : rt(rt), gfn(nullptr)
 {
 }
 

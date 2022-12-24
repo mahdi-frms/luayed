@@ -56,7 +56,7 @@ void Interpretor::optable_init()
     Interpretor::optable[IPop] = &Interpretor::i_pop;
 }
 
-size_t Interpretor::run(Lua *rt)
+size_t Interpretor::run(LuaRuntime *rt)
 {
     this->rt = rt;
     while (this->state == InterpretorState::Run)

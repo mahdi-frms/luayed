@@ -38,7 +38,7 @@ private:
     Varmap &curmap();
 
 public:
-    SemanticAnalyzer(Ast ast);
+    SemanticAnalyzer(Ast ast, size_t first_fidx);
     vector<SemanticError> analyze();
 };
 

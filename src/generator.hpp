@@ -7,12 +7,12 @@
 class LuaGenerator final : IGenerator
 {
 private:
-    Lua *rt;
+    LuaRuntime *rt;
     GenFunction *gfn;
     size_t add_const(LuaValue value);
 
 public:
-    LuaGenerator(Lua *rt);
+    LuaGenerator(LuaRuntime *rt);
 
     void emit(Opcode opcode);
     size_t len();
