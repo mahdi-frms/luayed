@@ -42,3 +42,10 @@ void Lua::call(size_t arg_count, size_t return_count)
 {
     this->runtime.fncall(arg_count, return_count + 1);
 }
+lnumber Lua::pop_number()
+{
+    LuaValue value = this->runtime.stack_pop();
+    lnumber num = value.data.n;
+    runtime.destroy_value(value);
+    return num;
+}

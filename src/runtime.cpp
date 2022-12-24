@@ -189,7 +189,7 @@ void LuaRuntime::copy_values(
     size_t src_idx = fsrc->sp - count;
     for (size_t idx = 0; idx < count; idx++)
     {
-        fdest->stack()[src_idx + idx] = fdest->stack()[fdest->sp + idx];
+        fdest->stack()[fdest->sp + idx] = fsrc->stack()[src_idx + idx];
     }
     fdest->sp += count;
     fsrc->sp -= count;
@@ -230,6 +230,7 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
     frame->fn = *fn;
     frame->exp_count = retc;
     frame->vargs_count = 0;
+    // todo: extra args most not be copied in case of fix return-count
     this->copy_values(prev, frame, total_argc);
     if (is_lua && bin->parcount > total_argc)
     {
@@ -359,7 +360,11 @@ Hook **Frame::hooktable()
 }
 LuaValue LuaRuntime::clone_value(LuaValue &value)
 {
-    return create_nil(); // todo : cloning must be implemented
+    // todo : must increase reference counters
+    LuaValue v;
+    v.kind = value.kind;
+    v.data = value.data;
+    return v;
 }
 LuaValue LuaRuntime::stack_read(size_t idx)
 {

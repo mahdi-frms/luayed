@@ -14,6 +14,7 @@ public:
     Lua();
     void compile(const char *lua_code);
     void push_cppfn(LuaCppFunction cppfn);
+    lnumber pop_number();
     void call(size_t arg_count, size_t return_count);
 };
 

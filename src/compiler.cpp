@@ -22,7 +22,13 @@ char *token_lstring(Token t)
 
 lnumber token_number(Token t)
 {
-    return 0;
+    char *str = new char[t.len + 1];
+    for (size_t i = 0; i < t.len; i++)
+        str[i] = t.str[i];
+    str[t.len] = '\0';
+    lnumber num = atof(str);
+    delete str;
+    return num;
 }
 
 void Compiler::compile(Noderef root)
