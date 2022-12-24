@@ -100,7 +100,14 @@ LuaValue LuaRuntime::create_number(lnumber n)
 }
 LuaValue LuaRuntime::create_luafn(Lfunction *bin)
 {
-    return this->create_nil(); // todo
+    // todo : uptable must be created
+    LuaValue val;
+    val.kind = LuaType::LVFunction;
+    LuaFunction *fobj = (LuaFunction *)this->allocate(sizeof(LuaFunction));
+    fobj->is_lua = true;
+    fobj->fn = (void *)bin;
+    val.data.ptr = (void *)fobj;
+    return val;
 }
 LuaValue LuaRuntime::create_cppfn(LuaCppFunction fn)
 {
@@ -163,7 +170,7 @@ void LuaRuntime::new_frame(size_t stack_size)
     frame->ret_count = 0;
     this->frame = frame;
 }
-LuaRuntime::LuaRuntime()
+LuaRuntime::LuaRuntime(IInterpretor *interpretor) : interpretor(interpretor)
 {
     this->new_frame(INITIAL_FRAME_SIZE);
 }
@@ -208,9 +215,15 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
         // todo: throw error
         return;
     }
-    LuaValue *fn = prev->stack() - total_argc - 1;
-    bool is_lua = ((LuaFunction *)fn->data.ptr)->is_lua;
-    Lfunction *bin = is_lua ? (Lfunction *)((LuaFunction *)fn->data.ptr)->fn : nullptr;
+    LuaValue *fn = prev->stack() + prev->sp - total_argc - 1;
+    // check if pushed value is a function
+    if (fn->kind != LuaType::LVFunction)
+    {
+        // todo: throw error
+        return;
+    }
+    bool is_lua = fn->as_function()->is_lua;
+    Lfunction *bin = is_lua ? fn->as_function()->binary() : nullptr;
     this->new_frame(argc + 1024 /* THIS NUMBER MUST BE PROVIDED BY THE COMPILER */);
     Frame *frame = this->frame;
     // move values bwtween frames
@@ -219,20 +232,25 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
     frame->vargs_count = 0;
     this->copy_values(prev, frame, total_argc);
     if (is_lua && bin->parcount > total_argc)
+    {
         this->push_nils(frame, bin->parcount - total_argc);
+    }
     else
-        frame->vargs_count += total_argc - is_lua ? bin->parcount : 0;
+    {
+        frame->vargs_count += total_argc - (is_lua ? bin->parcount : 0);
+    }
     prev->sp--;
     prev->ret_count = 0;
     // execute function
     size_t return_count = 0;
     if (is_lua)
     {
+        // todo : handle error returned by interpretor
         return_count = this->interpretor->run(this);
     }
     else
     {
-        LuaCppFunction cppfn = (LuaCppFunction)((LuaFunction *)fn->data.ptr)->fn;
+        LuaCppFunction cppfn = fn->as_function()->native();
         return_count = cppfn(this);
     }
     this->fnret(return_count);

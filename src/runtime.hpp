@@ -152,7 +152,7 @@ private:
     void push_nils(Frame *fsrc, size_t count);
 
 public:
-    LuaRuntime();
+    LuaRuntime(IInterpretor *interpretor);
 
     vector<Lfunction *> functable; // todo: this must be private
     LuaValue create_nil();

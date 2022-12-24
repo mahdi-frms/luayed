@@ -64,17 +64,10 @@ size_t Interpretor::run(LuaRuntime *rt)
         this->fetch();
         this->exec();
     }
-    if (this->state == InterpretorState::End)
-    {
-        this->state = InterpretorState::Run;
-        size_t retc = this->retc;
-        this->retc = 0;
-        return retc;
-    }
-    else // error
-    {
-        return 0;
-    }
+    size_t retc = this->retc;
+    this->retc = 0;
+    this->state = InterpretorState::Run;
+    return retc;
 }
 
 lbyte Interpretor::iread()

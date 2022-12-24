@@ -4,6 +4,10 @@
 #include "generator.hpp"
 #include "compiler.hpp"
 
+Lua::Lua() : runtime((IInterpretor *)&this->interpretor)
+{
+    Interpretor::optable_init();
+}
 void Lua::compile(const char *lua_code)
 {
     Lexer lexer(lua_code);

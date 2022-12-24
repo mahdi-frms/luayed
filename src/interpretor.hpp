@@ -23,15 +23,15 @@ enum class Comparison
     LE
 };
 
-class Interpretor
+class Interpretor : IInterpretor
 {
 public:
     size_t run(LuaRuntime *rt);
     LError get_error();
+    static void optable_init();
 
 private:
     static opimpl optable[256];
-    static void optable_init();
 
     size_t ip = 0;
     lbyte op;

@@ -100,7 +100,7 @@ bool runfile(const char *path)
     Lua lua;
     const char *text = readfile(path);
     lua.compile(text);
-    lua.call(1, 0);
+    lua.call(0, 0);
     return true; // todo: must check for errors
 }
 
