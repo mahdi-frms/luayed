@@ -83,6 +83,7 @@ void Interpretor::fetch()
         this->arg1 = this->iread();
         if (op & 0x01)
         {
+            op &= 0b11111110;
             this->arg1 += this->iread() << 8;
         }
 
@@ -91,6 +92,7 @@ void Interpretor::fetch()
             this->arg2 = this->iread();
             if (op & 0x02)
             {
+                op &= 0b11111101;
                 this->arg2 += this->iread() << 8;
             }
         }
@@ -222,8 +224,8 @@ void Interpretor::i_len()
 
 bool Interpretor::compare(Comparison cmp)
 {
-    LuaValue a = this->rt->stack_pop();
     LuaValue b = this->rt->stack_pop();
+    LuaValue a = this->rt->stack_pop();
     bool rsl;
     if (a.kind != b.kind || (a.kind != LuaType::LVNumber && a.kind != LuaType::LVString))
     {
