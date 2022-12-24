@@ -187,10 +187,14 @@ public:
     void stack_push(LuaValue value);
     LuaValue stack_read(size_t idx);
     void stack_write(size_t idx, LuaValue value);
+    LuaValue stack_back_read(size_t idx);
+    void stack_back_write(size_t idx, LuaValue value);
     size_t stack_ptr();
     void set_stack_ptr(size_t sp);
     void hookpush();
     void hookpop();
+    LuaValue hookread(Hook *hook);
+    void hookwrite(Hook *hook, LuaValue value);
     size_t load_ip();
     void save_ip(size_t sp);
 };

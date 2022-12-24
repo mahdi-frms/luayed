@@ -343,3 +343,42 @@ bool LuaValue::truth()
 {
     return this->kind != LuaType::LVNil && (this->kind != LuaType::LVBool || this->data.b);
 }
+LuaValue Lua::stack_back_read(size_t idx)
+{
+    idx = this->frame->sp - idx + 1;
+    return this->stack_read(idx);
+}
+void Lua::stack_back_write(size_t idx, LuaValue value)
+{
+    idx = this->frame->sp - idx + 1;
+    this->stack_back_write(idx, value);
+}
+LuaValue Lua::hookread(Hook *hook)
+{
+    if (hook->is_detached)
+    {
+        return this->clone_value(hook->val);
+    }
+    else
+    {
+        Frame *frame = hook->frame;
+        size_t idx = frame->stack_address(hook->stack_idx);
+        return this->clone_value(frame->stack()[idx]);
+    }
+}
+void Lua::hookwrite(Hook *hook, LuaValue value)
+{
+    if (hook->is_detached)
+    {
+        this->destroy_value(hook->val);
+        hook->val = value;
+    }
+    else
+    {
+        Frame *frame = hook->frame;
+        size_t idx = frame->stack_address(hook->stack_idx);
+        LuaValue *vptr = frame->stack() + idx;
+        this->destroy_value(*vptr);
+        *vptr = value;
+    }
+}

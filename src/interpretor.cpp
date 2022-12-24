@@ -193,6 +193,9 @@ void Interpretor::i_tset()
 void Interpretor::i_tnew()
 {
 }
+void Interpretor::i_tlist()
+{
+}
 void Interpretor::i_gget()
 {
 }
@@ -244,21 +247,35 @@ void Interpretor::i_fconst()
 }
 void Interpretor::i_local()
 {
+    LuaValue value = this->rt->stack_read(this->arg1);
+    this->rt->stack_push(value);
 }
 void Interpretor::i_lstore()
 {
+    LuaValue value = this->rt->stack_pop();
+    this->rt->stack_write(this->arg1, value);
 }
 void Interpretor::i_blocal()
 {
+    LuaValue value = this->rt->stack_back_read(this->arg1);
+    this->rt->stack_push(value);
 }
 void Interpretor::i_blstore()
 {
+    LuaValue value = this->rt->stack_pop();
+    this->rt->stack_back_write(this->arg1, value);
 }
 void Interpretor::i_upvalue()
 {
+    Hook *hook = this->upvalue(this->arg1);
+    LuaValue value = this->rt->hookread(hook);
+    this->rt->stack_push(value);
 }
 void Interpretor::i_ustore()
 {
+    Hook *hook = this->upvalue(this->arg1);
+    LuaValue value = this->rt->stack_pop();
+    this->rt->hookwrite(hook, value);
 }
 void Interpretor::i_upush()
 {
@@ -275,7 +292,4 @@ void Interpretor::i_pop()
         LuaValue v = this->rt->stack_pop();
         this->rt->destroy_value(v);
     }
-}
-void Interpretor::i_tlist()
-{
 }
