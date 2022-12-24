@@ -2,15 +2,24 @@
 #define INTERPRETOR_HPP
 
 #include "runtime.hpp"
+#include "lerror.hpp"
 
 class Interpretor;
 
 typedef void (Interpretor::*opimpl)();
 
+enum class InterpretorState
+{
+    Run,
+    End,
+    Error,
+};
+
 class Interpretor
 {
 public:
     size_t run(Lua *rt);
+    LError get_error();
 
 private:
     static opimpl optable[256];
@@ -20,8 +29,11 @@ private:
     lbyte op;
     size_t arg1;
     size_t arg2;
+
     size_t retc = 0;
-    bool end = false;
+    LError error = error_ok();
+    InterpretorState state = InterpretorState::Run;
+
     Lua *rt = nullptr;
 
     lbyte iread();

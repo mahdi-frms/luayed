@@ -58,15 +58,22 @@ void Interpretor::optable_init()
 size_t Interpretor::run(Lua *rt)
 {
     this->rt = rt;
-    while (!this->end)
+    while (this->state == InterpretorState::Run)
     {
         this->fetch();
         this->exec();
     }
-    this->end = false;
-    size_t retc = this->retc;
-    this->retc = 0;
-    return retc;
+    if (this->state == InterpretorState::End)
+    {
+        this->state = InterpretorState::Run;
+        size_t retc = this->retc;
+        this->retc = 0;
+        return retc;
+    }
+    else // error
+    {
+        return 0;
+    }
 }
 
 lbyte Interpretor::iread()
@@ -95,6 +102,11 @@ void Interpretor::fetch()
         }
     }
     this->op = op;
+}
+
+LError Interpretor::get_error()
+{
+    return this->error;
 }
 
 void Interpretor::exec()
@@ -217,7 +229,7 @@ void Interpretor::i_false()
 void Interpretor::i_ret()
 {
     this->retc = this->arg1;
-    this->end = true;
+    this->state = InterpretorState::End;
 }
 void Interpretor::i_call()
 {
