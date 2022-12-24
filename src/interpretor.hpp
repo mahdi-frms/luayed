@@ -54,6 +54,8 @@ private:
     void push_bool(bool b);
     bool compare();
     bool compare(Comparison cmp);
+    bool compare_number(LuaValue &a, LuaValue &b, Comparison cmp);
+    bool compare_string(LuaValue &a, LuaValue &b, Comparison cmp);
 
     void i_add();
     void i_sub();

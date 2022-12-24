@@ -183,12 +183,6 @@ void Interpretor::i_not()
 void Interpretor::i_bnot()
 {
 }
-void Interpretor::i_lt()
-{
-}
-void Interpretor::i_gt()
-{
-}
 
 bool Interpretor::compare(Comparison cmp)
 {
@@ -202,36 +196,48 @@ bool Interpretor::compare(Comparison cmp)
         return false;
     }
     else if (a.kind == LuaType::LVNumber)
-    {
-        if (cmp == Comparison::GE)
-            rsl = a.data.n >= b.data.n;
-        else if (cmp == Comparison::GT)
-            rsl = a.data.n > b.data.n;
-        else if (cmp == Comparison::LE)
-            rsl = a.data.n <= b.data.n;
-        else
-            rsl = a.data.n < b.data.n;
-    }
+        rsl = this->compare_number(a, b, cmp);
     else
-    {
-        if (cmp == Comparison::GE)
-            rsl = strcmp((char *)a.data.ptr, (char *)b.data.ptr) != -1;
-        else if (cmp == Comparison::GT)
-            rsl = strcmp((char *)a.data.ptr, (char *)b.data.ptr) == 1;
-        else if (cmp == Comparison::LE)
-            rsl = strcmp((char *)a.data.ptr, (char *)b.data.ptr) != 1;
-        else
-            rsl = strcmp((char *)a.data.ptr, (char *)b.data.ptr) == -1;
-    }
+        rsl = this->compare_string(a, b, cmp);
     this->rt->destroy_value(a);
     this->rt->destroy_value(b);
     return rsl;
 }
+bool Interpretor::compare_number(LuaValue &a, LuaValue &b, Comparison cmp)
+{
+    if (cmp == Comparison::GE)
+        return a.data.n >= b.data.n;
+    if (cmp == Comparison::GT)
+        return a.data.n > b.data.n;
+    if (cmp == Comparison::LE)
+        return a.data.n <= b.data.n;
+    return a.data.n < b.data.n;
+}
+bool Interpretor::compare_string(LuaValue &a, LuaValue &b, Comparison cmp)
+{
+    if (cmp == Comparison::GE)
+        return strcmp((char *)a.data.ptr, (char *)b.data.ptr) != -1;
+    if (cmp == Comparison::GT)
+        return strcmp((char *)a.data.ptr, (char *)b.data.ptr) == 1;
+    if (cmp == Comparison::LE)
+        return strcmp((char *)a.data.ptr, (char *)b.data.ptr) != 1;
+    return strcmp((char *)a.data.ptr, (char *)b.data.ptr) == -1;
+}
+void Interpretor::i_lt()
+{
+    this->push_bool(this->compare(Comparison::LT));
+}
+void Interpretor::i_gt()
+{
+    this->push_bool(this->compare(Comparison::GT));
+}
 void Interpretor::i_ge()
 {
+    this->push_bool(this->compare(Comparison::GE));
 }
 void Interpretor::i_le()
 {
+    this->push_bool(this->compare(Comparison::LE));
 }
 void Interpretor::i_eq()
 {
