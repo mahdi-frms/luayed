@@ -1,8 +1,8 @@
-#ifndef INTERPRETOR_HPP
-#define INTERPRETOR_HPP
+#ifndef INTERPRETOR_h
+#define INTERPRETOR_h
 
-#include "runtime.hpp"
-#include "lerror.hpp"
+#include "runtime.h"
+#include "lerror.h"
 
 class Interpretor;
 

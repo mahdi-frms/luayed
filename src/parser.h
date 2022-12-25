@@ -1,7 +1,7 @@
-#ifndef PARSER_HPP
-#define PARSER_HPP
+#ifndef PARSER_h
+#define PARSER_h
 
-#include "ast.hpp"
+#include "ast.h"
 #include <variant>
 #include <memory>
 

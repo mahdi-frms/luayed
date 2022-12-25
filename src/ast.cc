@@ -1,4 +1,4 @@
-#include "ast.hpp"
+#include "ast.h"
 
 const char *node_names[34] = {
     "Primary",

@@ -1,8 +1,8 @@
-#ifndef GENERATOR_HPP
-#define GENERATOR_HPP
+#ifndef GENERATOR_h
+#define GENERATOR_h
 
-#include "runtime.hpp"
-#include "luabin.hpp"
+#include "runtime.h"
+#include "luabin.h"
 
 class LuaGenerator final : IGenerator
 {

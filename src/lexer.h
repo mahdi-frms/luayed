@@ -1,11 +1,11 @@
-#ifndef LEXER_HPP
-#define LEXER_HPP
+#ifndef LEXER_h
+#define LEXER_h
 
 #include <string>
 #include <vector>
-#include "luadef.hpp"
-#include "lerror.hpp"
-#include "token.hpp"
+#include "luadef.h"
+#include "lerror.h"
+#include "token.h"
 
 class ILexer
 {

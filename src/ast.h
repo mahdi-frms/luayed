@@ -1,9 +1,9 @@
-#ifndef AST_HPP
-#define AST_HPP
+#ifndef AST_h
+#define AST_h
 
 #include <stddef.h>
 #include <vector>
-#include "lexer.hpp"
+#include "lexer.h"
 
 extern const char *node_names[34];
 

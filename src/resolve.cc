@@ -1,4 +1,4 @@
-#include "resolve.hpp"
+#include "resolve.h"
 
 #define scope(N) ((MetaScope *)N->getannot(MetaKind::MScope))
 #define map(N) (*((Varmap *)(scope(N)->map)))

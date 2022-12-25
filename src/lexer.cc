@@ -1,4 +1,4 @@
-#include "lexer.hpp"
+#include "lexer.h"
 #include <cstring>
 
 #define RET(T)                           \

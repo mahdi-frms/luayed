@@ -1,8 +1,8 @@
-#include "lua.hpp"
-#include "parser.hpp"
-#include "resolve.hpp"
-#include "generator.hpp"
-#include "compiler.hpp"
+#include "lua.h"
+#include "parser.h"
+#include "resolve.h"
+#include "generator.h"
+#include "compiler.h"
 
 Lua::Lua() : runtime((IInterpretor *)&this->interpretor)
 {

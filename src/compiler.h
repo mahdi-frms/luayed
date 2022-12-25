@@ -1,8 +1,8 @@
-#ifndef COMPILER_HPP
-#define COMPILER_HPP
+#ifndef COMPILER_h
+#define COMPILER_h
 
-#include "ast.hpp"
-#include "luabin.hpp"
+#include "ast.h"
+#include "luabin.h"
 
 using namespace ast;
 

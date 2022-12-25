@@ -1,8 +1,8 @@
-#ifndef LERROR_HPP
-#define LERROR_HPP
+#ifndef LERROR_h
+#define LERROR_h
 
 #include <stddef.h>
-#include "token.hpp"
+#include "token.h"
 
 struct LError
 {

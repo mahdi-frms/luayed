@@ -1,4 +1,4 @@
-#include "lerror.hpp"
+#include "lerror.h"
 #include <iostream>
 
 LError error_ok()

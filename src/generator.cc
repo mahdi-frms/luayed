@@ -1,4 +1,4 @@
-#include "generator.hpp"
+#include "generator.h"
 
 LuaGenerator::LuaGenerator(LuaRuntime *rt) : rt(rt), gfn(nullptr)
 {

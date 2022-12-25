@@ -1,8 +1,8 @@
-#ifndef LUA_HPP
+#ifndef LUA_h
 #define LUA_CPP
 
-#include "runtime.hpp"
-#include "interpretor.hpp"
+#include "runtime.h"
+#include "interpretor.h"
 
 class Lua
 {

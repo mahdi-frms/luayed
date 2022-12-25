@@ -1,6 +1,6 @@
-#include <compiler.hpp>
-#include <parser.hpp>
-#include <resolve.hpp>
+#include <compiler.h>
+#include <parser.h>
+#include <resolve.h>
 #include <map>
 #include <cstring>
 #include <iostream>

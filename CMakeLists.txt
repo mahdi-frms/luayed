@@ -3,30 +3,30 @@ cmake_minimum_required(VERSION 3.16)
 project(luayed VERSION 0.1.0)
 
 add_library(luacomp
-    src/lexer.cpp
-    src/ast.cpp
-    src/parser.cpp
-    src/resolve.cpp
-    src/compiler.cpp
-    src/luabin.cpp
-    src/lerror.cpp
-    src/token.cpp
+    src/lexer.cc
+    src/ast.cc
+    src/parser.cc
+    src/resolve.cc
+    src/compiler.cc
+    src/luabin.cc
+    src/lerror.cc
+    src/token.cc
 )
 
 add_executable(luayed
-    src/main.cpp
-    src/runtime.cpp
-    src/generator.cpp
-    src/interpretor.cpp
-    src/lerror.cpp
-    src/lua.cpp
+    src/main.cc
+    src/runtime.cc
+    src/generator.cc
+    src/interpretor.cc
+    src/lerror.cc
+    src/lua.cc
 )
     
 add_executable(luaytest
-    test/lexer.cpp
-    test/compiler.cpp
-    test/test.cpp
-    test/parser.cpp
+    test/lexer.cc
+    test/compiler.cc
+    test/test.cc
+    test/parser.cc
     lib/tap/tap.c
 )
 

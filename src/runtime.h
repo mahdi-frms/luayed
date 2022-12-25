@@ -1,10 +1,10 @@
-#ifndef RUNTIME_HPP
-#define RUNTIME_HPP
+#ifndef RUNTIME_h
+#define RUNTIME_h
 
 #include <set>
 #include <map>
 #include <vector>
-#include "luabin.hpp"
+#include "luabin.h"
 
 #define lstrnull nullptr
 

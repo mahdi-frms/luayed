@@ -1,7 +1,7 @@
-#ifndef LUABIN_HPP
-#define LUABIN_HPP
+#ifndef LUABIN_h
+#define LUABIN_h
 
-#include "luadef.hpp"
+#include "luadef.h"
 
 enum Instruction
 {

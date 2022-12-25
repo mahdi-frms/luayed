@@ -1,4 +1,4 @@
-#include "interpretor.hpp"
+#include "interpretor.h"
 #include <cstring>
 
 opimpl Interpretor::optable[256];

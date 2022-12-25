@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cstring>
-#include "lua.hpp"
+#include "lua.h"
 
 char *readfile(const char *path)
 {

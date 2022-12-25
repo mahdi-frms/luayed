@@ -1,4 +1,4 @@
-#include "compiler.hpp"
+#include "compiler.h"
 
 #define EXPECT_FREE 0xffff
 

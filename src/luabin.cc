@@ -1,4 +1,4 @@
-#include "luabin.hpp"
+#include "luabin.h"
 
 Opcode::Opcode(lbyte op, size_t idx1, size_t idx2)
 {

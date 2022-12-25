@@ -1,5 +1,5 @@
 #include <tap/tap.h>
-#include <lexer.hpp>
+#include <lexer.h>
 #include <cstring>
 #include <stdarg.h>
 

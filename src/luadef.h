@@ -1,5 +1,5 @@
-#ifndef LUADEF_HPP
-#define LUADEF_HPP
+#ifndef LUADEF_h
+#define LUADEF_h
 
 #include <vector>
 #include <string>

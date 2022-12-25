@@ -1,6 +1,6 @@
 #include <tap/tap.h>
-#include <ast.hpp>
-#include <parser.hpp>
+#include <ast.h>
+#include <parser.h>
 
 #define T(K) NodeKind::TKN, K
 

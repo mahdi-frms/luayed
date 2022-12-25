@@ -1,7 +1,7 @@
-#ifndef RESOLVE_HPP
-#define RESOLVE_HPP
+#ifndef RESOLVE_h
+#define RESOLVE_h
 
-#include "ast.hpp"
+#include "ast.h"
 #include <map>
 
 using namespace ast;
