@@ -18,8 +18,7 @@ void Lua::compile(const char *lua_code)
         // todo : should return error
         return;
     }
-    size_t bin_fidx = this->runtime.functable.size();
-    SemanticAnalyzer sem(ast, bin_fidx);
+    SemanticAnalyzer sem(ast);
     auto errs = sem.analyze();
     if (errs.size())
     {
@@ -28,8 +27,8 @@ void Lua::compile(const char *lua_code)
     }
     LuaGenerator gen(&this->runtime);
     Compiler compiler((IGenerator *)&gen);
-    compiler.compile(ast);
-    Lfunction *bin = this->runtime.functable[bin_fidx];
+    fidx_t fidx = compiler.compile(ast);
+    Lfunction *bin = this->runtime.bin(fidx);
     LuaValue fn = this->runtime.create_luafn(bin);
     this->runtime.stack_push(fn);
 }

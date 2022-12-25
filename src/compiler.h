@@ -62,11 +62,11 @@ private:
     void loop_end();
     size_t arglist_count(Noderef arglist);
     lbyte translate_token(TokenKind kind, bool bin);
-    void compile(Noderef root);
+    fidx_t compile(Noderef root);
 
 public:
     Compiler(IGenerator *gen);
-    void compile(Ast ast);
+    fidx_t compile(Ast ast);
 };
 
 #endif

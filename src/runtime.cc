@@ -172,6 +172,7 @@ void LuaRuntime::new_frame(size_t stack_size)
 }
 LuaRuntime::LuaRuntime(IInterpretor *interpretor) : interpretor(interpretor)
 {
+    this->functable.push_back(nullptr);
     this->new_frame(INITIAL_FRAME_SIZE);
 }
 void LuaRuntime::destroy_frame()
@@ -281,7 +282,7 @@ void LuaRuntime::fnret(size_t count)
         this->copy_values(frame, prev, exp);
     if (frame->exp_count)
         prev->ret_count = total_count;
-    while (this->stack_ptr())
+    while (this->frame->sp)
     {
         LuaValue v = this->stack_pop();
         this->destroy_value(v);
@@ -381,14 +382,6 @@ void LuaRuntime::stack_write(size_t idx, LuaValue value)
     this->destroy_value(this->frame->stack()[real_idx]);
     this->frame->stack()[idx] = value;
 }
-size_t LuaRuntime::stack_ptr()
-{
-    return this->frame->sp;
-}
-void LuaRuntime::set_stack_ptr(size_t sp)
-{
-    this->frame->sp = sp;
-}
 size_t LuaRuntime::load_ip()
 {
     return this->frame->ip;
@@ -471,4 +464,17 @@ LuaValue LuaRuntime::arg(size_t idx)
 Lfunction *LuaRuntime::bin(size_t fidx)
 {
     return this->functable[fidx];
+}
+Hook *LuaRuntime::upvalue(size_t idx)
+{
+    return this->uptable()[idx];
+}
+Hook *LuaRuntime::hook(size_t idx)
+{
+    return this->hooktable()[idx];
+}
+fidx_t LuaRuntime::gen_fidx()
+{
+    this->functable.push_back(nullptr);
+    return this->functable.size() - 1;
 }

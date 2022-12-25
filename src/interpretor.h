@@ -48,8 +48,6 @@ private:
     void fetch();
     void exec();
     Lfunction *bin();
-    Hook *upvalue(size_t idx);
-    Hook *hook(size_t idx);
 
     void push_bool(bool b);
     bool compare();

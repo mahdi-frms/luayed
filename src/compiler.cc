@@ -31,10 +31,10 @@ lnumber token_number(Token t)
     return num;
 }
 
-void Compiler::compile(Noderef root)
+fidx_t Compiler::compile(Noderef root)
 {
     MetaScope *fnscp = (MetaScope *)root->getannot(MetaKind::MScope);
-    this->gen->pushf(fnscp->fidx);
+    fnscp->fidx = this->gen->pushf();
     if (root->get_kind() == NodeKind::Block)
     {
         this->compile_node(root);
@@ -69,11 +69,12 @@ void Compiler::compile(Noderef root)
     this->gen->meta_hookmax(this->hookmax);
     this->emit(Opcode(Instruction::IRet, 0));
     this->gen->popf();
+    return fnscp->fidx;
 }
 
-void Compiler::compile(Ast ast)
+fidx_t Compiler::compile(Ast ast)
 {
-    this->compile(ast.root());
+    return this->compile(ast.root());
 }
 
 lbyte tkn_binops[] = {

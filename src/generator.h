@@ -21,7 +21,7 @@ public:
     size_t const_number(lnumber num);
     size_t const_string(const char *str);
 
-    void pushf(fidx_t fidx);
+    fidx_t pushf();
     void popf();
 
     size_t upval(fidx_t fidx, size_t offset, size_t hidx);

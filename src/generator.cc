@@ -4,12 +4,14 @@ LuaGenerator::LuaGenerator(LuaRuntime *rt) : rt(rt), gfn(nullptr)
 {
 }
 
-void LuaGenerator::pushf(fidx_t fidx)
+fidx_t LuaGenerator::pushf()
 {
+    fidx_t fidx = this->rt->gen_fidx();
     GenFunction *gfn = new GenFunction();
     gfn->fidx = fidx;
     gfn->prev = this->gfn;
     this->gfn = gfn;
+    return fidx;
 }
 void LuaGenerator::popf()
 {

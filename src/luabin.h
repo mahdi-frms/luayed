@@ -94,7 +94,7 @@ public:
     virtual size_t const_number(lnumber num) = 0;
     virtual size_t const_string(const char *str) = 0;
 
-    virtual void pushf(fidx_t fidx) = 0;
+    virtual fidx_t pushf() = 0;
     virtual void popf() = 0;
 
     virtual size_t upval(fidx_t fidx, size_t offset, size_t hidx) = 0;

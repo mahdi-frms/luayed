@@ -145,16 +145,24 @@ private:
     StringInterner interner;
     Frame *frame;
     IInterpretor *interpretor;
+    vector<Lfunction *> functable;
 
     void new_frame(size_t stack_size);
     void destroy_frame();
     void copy_values(Frame *fsrc, Frame *fdest, size_t count);
     void push_nils(Frame *fsrc, size_t count);
 
+    LuaValue *stack();
+    LuaValue *args();
+    Hook **hooktable();
+    Hook **uptable();
+
+    void *allocate(size_t size);
+    void deallocate(void *ptr);
+
 public:
     LuaRuntime(IInterpretor *interpretor);
 
-    vector<Lfunction *> functable; // todo: this must be private
     LuaValue create_nil();
     LuaValue create_boolean(bool b);
     LuaValue create_number(lnumber n);
@@ -164,20 +172,13 @@ public:
     LuaValue create_cppfn(LuaCppFunction fn);
     LuaValue create_luafn(Lfunction *bin);
 
-    LuaValue clone_value(LuaValue &value);
-    void destroy_value(LuaValue &value);
-    void *allocate(size_t size);
-    void deallocate(void *ptr);
-
     void fncall(size_t argc, size_t retc);
     void fnret(size_t count);
 
-    Lfunction *bin();
-    Lfunction *bin(size_t fidx);
-    LuaValue *stack();
-    LuaValue *args();
-    Hook **hooktable();
-    Hook **uptable();
+    fidx_t gen_fidx();
+
+    void destroy_value(LuaValue &value);
+    LuaValue clone_value(LuaValue &value);
 
     LuaValue stack_pop();
     void stack_push(LuaValue value);
@@ -185,8 +186,6 @@ public:
     void stack_write(size_t idx, LuaValue value);
     LuaValue stack_back_read(size_t idx);
     void stack_back_write(size_t idx, LuaValue value);
-    size_t stack_ptr();
-    void set_stack_ptr(size_t sp);
     void hookpush();
     void hookpop();
     LuaValue hookread(Hook *hook);
@@ -194,6 +193,10 @@ public:
     void hookwrite(Hook *hook, LuaValue value);
     size_t load_ip();
     void save_ip(size_t sp);
+    Hook *upvalue(size_t idx);
+    Hook *hook(size_t idx);
+    Lfunction *bin();
+    Lfunction *bin(size_t fidx);
 };
 
 struct LuaFunction

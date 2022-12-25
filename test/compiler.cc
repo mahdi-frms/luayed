@@ -49,6 +49,7 @@ private:
     FuncTest *current;
     const char *message;
     FuncTest *test;
+    fidx_t fidx_counter = 1;
 
 public:
     GenTest(const char *message) : current(nullptr), message(message), test(nullptr)
@@ -75,9 +76,10 @@ public:
     {
         return this->current->ccount++;
     }
-    void pushf(fidx_t fidx)
+    fidx_t pushf()
     {
         FuncTest *fnt = new FuncTest();
+        fidx_t fidx = this->fidx_counter++;
         fnt->ccount = 0;
         fnt->prev = nullptr;
         fnt->hookmax = 0;
@@ -85,6 +87,7 @@ public:
         fnt->prev = this->current;
         fnt->fidx = fidx;
         this->current = fnt;
+        return fidx;
     }
     void popf()
     {
@@ -186,7 +189,7 @@ GenTest compiler_test_case(const char *message, const char *text)
                   << parser.get_error() << "\n";
         exit(1);
     }
-    SemanticAnalyzer analyzer(ast, 1);
+    SemanticAnalyzer analyzer(ast);
     analyzer.analyze();
     Compiler compiler((IGenerator *)&gentest);
     compiler.compile(ast);

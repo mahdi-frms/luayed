@@ -114,14 +114,6 @@ Lfunction *Interpretor::bin()
 {
     return (Lfunction *)this->rt->bin();
 }
-Hook *Interpretor::upvalue(size_t idx)
-{
-    return this->rt->uptable()[idx];
-}
-Hook *Interpretor::hook(size_t idx)
-{
-    return this->rt->hooktable()[idx];
-}
 void Interpretor::push_bool(bool b)
 {
     this->rt->stack_push(this->rt->create_boolean(b));
@@ -403,13 +395,13 @@ void Interpretor::i_blstore()
 }
 void Interpretor::i_upvalue()
 {
-    Hook *hook = this->upvalue(this->arg1);
+    Hook *hook = this->rt->upvalue(this->arg1);
     LuaValue value = this->rt->hookread(hook);
     this->rt->stack_push(value);
 }
 void Interpretor::i_ustore()
 {
-    Hook *hook = this->upvalue(this->arg1);
+    Hook *hook = this->rt->upvalue(this->arg1);
     LuaValue value = this->rt->stack_pop();
     this->rt->hookwrite(hook, value);
 }

@@ -22,7 +22,6 @@ private:
     vector<SemanticError> errors;
     Ast ast;
     Noderef current;
-    size_t fn_idx;
 
     void analyze_node(Noderef node);
     void analyze_var_decl(Noderef node);
@@ -38,7 +37,7 @@ private:
     Varmap &curmap();
 
 public:
-    SemanticAnalyzer(Ast ast, size_t first_fidx);
+    SemanticAnalyzer(Ast ast);
     vector<SemanticError> analyze();
 };
 
