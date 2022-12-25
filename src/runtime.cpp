@@ -432,7 +432,7 @@ LuaValue LuaRuntime::stack_back_read(size_t idx)
 void LuaRuntime::stack_back_write(size_t idx, LuaValue value)
 {
     idx = this->frame->sp - idx + 1;
-    this->stack_back_write(idx, value);
+    this->stack_write(idx, value);
 }
 LuaValue LuaRuntime::hookread(Hook *hook)
 {
