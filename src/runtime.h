@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 #include "luabin.h"
+#include "virtuals.h"
 
 #define lstrnull nullptr
 
@@ -62,12 +63,6 @@ struct InternString
     friend bool operator<(const InternString &l, const InternString &r);
 };
 
-class IInterpreter
-{
-public:
-    virtual size_t run(LuaRuntime *rt) = 0;
-};
-
 class StringInterner
 {
 private:
@@ -76,30 +71,6 @@ private:
 public:
     char *insert(char *lstr);
     void remove(char *lstr);
-};
-
-class LuaValue
-{
-public:
-    LuaType kind;
-    union
-    {
-        bool b;
-        lnumber n;
-        void *ptr;
-    } data;
-
-    bool truth();
-    LuaFunction *as_function();
-    const char *as_string();
-};
-
-struct Hook
-{
-    bool is_detached;
-    LuaValue val;
-    Frame *frame;
-    size_t stack_idx;
 };
 
 struct Frame
@@ -139,7 +110,7 @@ struct GenFunction
     size_t parcount;
     size_t hookmax;
 };
-class LuaRuntime
+class LuaRuntime : IRuntime
 {
 private:
     StringInterner interner;
@@ -190,9 +161,7 @@ public:
     void stack_back_write(size_t idx, LuaValue value);
     void hookpush();
     void hookpop();
-    LuaValue hookread(Hook *hook);
     LuaValue arg(size_t idx);
-    void hookwrite(Hook *hook, LuaValue value);
     size_t load_ip();
     void save_ip(size_t sp);
     Hook *upvalue(size_t idx);

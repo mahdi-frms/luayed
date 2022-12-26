@@ -1,5 +1,6 @@
-#include "interpreter.h"
 #include <cstring>
+#include "virtuals.h"
+#include "interpreter.h"
 
 opimpl Interpreter::optable[256];
 
@@ -56,7 +57,7 @@ void Interpreter::optable_init()
     Interpreter::optable[IPop] = &Interpreter::i_pop;
 }
 
-size_t Interpreter::run(LuaRuntime *rt, Opcode op)
+size_t Interpreter::run(IRuntime *rt, Opcode op)
 {
     this->rt = rt;
     this->fetch(op.bytes);
@@ -66,7 +67,7 @@ size_t Interpreter::run(LuaRuntime *rt, Opcode op)
     this->state = InterpreterState::Run;
     return retc;
 }
-size_t Interpreter::run(LuaRuntime *rt)
+size_t Interpreter::run(IRuntime *rt)
 {
     this->rt = rt;
     while (this->state == InterpreterState::Run)
@@ -256,6 +257,28 @@ bool Interpreter::compare_string(LuaValue &a, LuaValue &b, Comparison cmp)
         return strcmp((char *)a.data.ptr, (char *)b.data.ptr) != 1;
     return strcmp((char *)a.data.ptr, (char *)b.data.ptr) == -1;
 }
+LuaValue Interpreter::hookread(Hook *hook)
+{
+    if (hook->is_detached)
+    {
+        return hook->val;
+    }
+    else
+    {
+        return *hook->original;
+    }
+}
+void Interpreter::hookwrite(Hook *hook, LuaValue value)
+{
+    if (hook->is_detached)
+    {
+        hook->val = value;
+    }
+    else
+    {
+        *hook->original = value;
+    }
+}
 void Interpreter::i_lt()
 {
     this->push_bool(this->compare(Comparison::LT));
@@ -399,14 +422,14 @@ void Interpreter::i_blstore()
 void Interpreter::i_upvalue()
 {
     Hook *hook = this->rt->upvalue(this->arg1);
-    LuaValue value = this->rt->hookread(hook);
+    LuaValue value = this->hookread(hook);
     this->rt->stack_push(value);
 }
 void Interpreter::i_ustore()
 {
     Hook *hook = this->rt->upvalue(this->arg1);
     LuaValue value = this->rt->stack_pop();
-    this->rt->hookwrite(hook, value);
+    this->hookwrite(hook, value);
 }
 void Interpreter::i_upush()
 {

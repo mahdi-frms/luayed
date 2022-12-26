@@ -56,7 +56,7 @@ void interpetor_test_case(
     // execute instructions
     for (size_t i = 0; i < text.size(); i++)
     {
-        intrp.run(&rt, text[i]);
+        intrp.run((IRuntime *)&rt, text[i]);
     }
     LuaValue top = rt.stack_pop();
     ok(top.kind == LuaType::LVBool && top.data.b, mes.c_str());

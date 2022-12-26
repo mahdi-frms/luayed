@@ -24,4 +24,26 @@ enum LuaType
     LVFunction = 5,
 };
 
+class LuaValue
+{
+public:
+    LuaType kind;
+    union
+    {
+        bool b;
+        lnumber n;
+        void *ptr;
+    } data;
+
+    bool truth();
+    const char *as_string();
+};
+
+struct Hook
+{
+    bool is_detached;
+    LuaValue val;
+    LuaValue *original;
+};
+
 #endif

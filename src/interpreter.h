@@ -26,8 +26,8 @@ enum class Comparison
 class Interpreter : IInterpreter
 {
 public:
-    size_t run(LuaRuntime *rt);
-    size_t run(LuaRuntime *rt, Opcode op);
+    size_t run(IRuntime *rt);
+    size_t run(IRuntime *rt, Opcode op);
     LError get_error();
     static void optable_init();
 
@@ -43,7 +43,7 @@ private:
     LError error = error_ok();
     InterpreterState state = InterpreterState::Run;
 
-    LuaRuntime *rt = nullptr;
+    IRuntime *rt = nullptr;
 
     lbyte iread();
     size_t fetch(lbyte *bin);
@@ -54,6 +54,8 @@ private:
     bool compare(Comparison cmp);
     bool compare_number(LuaValue &a, LuaValue &b, Comparison cmp);
     bool compare_string(LuaValue &a, LuaValue &b, Comparison cmp);
+    LuaValue hookread(Hook *hook);
+    void hookwrite(Hook *hook, LuaValue value);
 
     void i_add();
     void i_sub();
