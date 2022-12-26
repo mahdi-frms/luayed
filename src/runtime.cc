@@ -98,14 +98,14 @@ LuaValue LuaRuntime::create_number(lnumber n)
     val.data.n = n;
     return val;
 }
-LuaValue LuaRuntime::create_luafn(Lfunction *bin)
+LuaValue LuaRuntime::create_luafn(fidx_t fidx)
 {
     // todo : uptable must be created
     LuaValue val;
     val.kind = LuaType::LVFunction;
     LuaFunction *fobj = (LuaFunction *)this->allocate(sizeof(LuaFunction));
     fobj->is_lua = true;
-    fobj->fn = (void *)bin;
+    fobj->fn = (void *)this->bin(fidx);
     val.data.ptr = (void *)fobj;
     return val;
 }
@@ -168,6 +168,7 @@ void LuaRuntime::new_frame(size_t stack_size)
     frame->hookptr = 0;
     frame->sp = 0;
     frame->ret_count = 0;
+    frame->fn = this->create_nil();
     this->frame = frame;
 }
 LuaRuntime::LuaRuntime(IInterpretor *interpretor) : interpretor(interpretor)
@@ -311,16 +312,16 @@ LuaCppFunction LuaFunction::native()
 
 size_t Frame::parcount()
 {
-    LuaFunction *fn = this->fn.as_function();
-    if (!fn)
+    if (this->fn.kind == LuaType::LVNil)
         return 0;
+    LuaFunction *fn = this->fn.as_function();
     return fn->is_lua ? fn->binary()->parcount : 0;
 }
 size_t Frame::hookmax()
 {
-    LuaFunction *fn = this->fn.as_function();
-    if (!fn)
+    if (this->fn.kind == LuaType::LVNil)
         return 0;
+    LuaFunction *fn = this->fn.as_function();
     return fn->is_lua ? fn->binary()->hookmax : 0;
 }
 Lfunction *Frame::bin()
@@ -477,4 +478,12 @@ fidx_t LuaRuntime::gen_fidx()
 {
     this->functable.push_back(nullptr);
     return this->functable.size() - 1;
+}
+LuaValue LuaRuntime::rodata(size_t idx)
+{
+    return this->bin()->rodata()[idx];
+}
+lbyte *LuaRuntime::text()
+{
+    return this->bin()->text();
 }

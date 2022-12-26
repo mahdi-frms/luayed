@@ -27,6 +27,7 @@ class Interpretor : IInterpretor
 {
 public:
     size_t run(LuaRuntime *rt);
+    size_t run(LuaRuntime *rt, Opcode op);
     LError get_error();
     static void optable_init();
 
@@ -45,9 +46,8 @@ private:
     LuaRuntime *rt = nullptr;
 
     lbyte iread();
-    void fetch();
+    size_t fetch(lbyte *bin);
     void exec();
-    Lfunction *bin();
 
     void push_bool(bool b);
     bool compare();

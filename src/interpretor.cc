@@ -56,12 +56,22 @@ void Interpretor::optable_init()
     Interpretor::optable[IPop] = &Interpretor::i_pop;
 }
 
+size_t Interpretor::run(LuaRuntime *rt, Opcode op)
+{
+    this->rt = rt;
+    this->fetch(op.bytes);
+    this->exec();
+    size_t retc = this->retc;
+    this->retc = 0;
+    this->state = InterpretorState::Run;
+    return retc;
+}
 size_t Interpretor::run(LuaRuntime *rt)
 {
     this->rt = rt;
     while (this->state == InterpretorState::Run)
     {
-        this->fetch();
+        this->ip += this->fetch(this->rt->text() + this->ip);
         this->exec();
     }
     size_t retc = this->retc;
@@ -70,34 +80,31 @@ size_t Interpretor::run(LuaRuntime *rt)
     return retc;
 }
 
-lbyte Interpretor::iread()
+size_t Interpretor::fetch(lbyte *bin)
 {
-    return this->bin()->text()[this->ip++];
-}
-
-void Interpretor::fetch()
-{
-    lbyte op = this->iread();
+    size_t ptr = 0;
+    lbyte op = bin[ptr++];
     if (op & 0x80)
     {
-        this->arg1 = this->iread();
+        this->arg1 = bin[ptr++];
         if (op & 0x01)
         {
             op &= 0b11111110;
-            this->arg1 += this->iread() << 8;
+            this->arg1 += bin[ptr++] << 8;
         }
 
         if (op == Instruction::ICall)
         {
-            this->arg2 = this->iread();
+            this->arg2 = bin[ptr++];
             if (op & 0x02)
             {
                 op &= 0b11111101;
-                this->arg2 += this->iread() << 8;
+                this->arg2 += bin[ptr++] << 8;
             }
         }
     }
     this->op = op;
+    return ptr;
 }
 
 LError Interpretor::get_error()
@@ -110,10 +117,6 @@ void Interpretor::exec()
     (this->*optable[this->op])();
 }
 
-Lfunction *Interpretor::bin()
-{
-    return (Lfunction *)this->rt->bin();
-}
 void Interpretor::push_bool(bool b)
 {
     this->rt->stack_push(this->rt->create_boolean(b));
@@ -365,12 +368,12 @@ void Interpretor::i_cjmp()
 }
 void Interpretor::i_const()
 {
-    LuaValue val = this->bin()->rodata()[this->arg1];
+    LuaValue val = this->rt->rodata(this->arg1);
     this->rt->stack_push(this->rt->clone_value(val));
 }
 void Interpretor::i_fconst()
 {
-    LuaValue fn = this->rt->create_luafn(this->rt->bin(this->arg1));
+    LuaValue fn = this->rt->create_luafn(this->arg1);
     this->rt->stack_push(fn);
 }
 void Interpretor::i_local()

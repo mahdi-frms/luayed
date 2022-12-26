@@ -28,8 +28,7 @@ void Lua::compile(const char *lua_code)
     LuaGenerator gen(&this->runtime);
     Compiler compiler((IGenerator *)&gen);
     fidx_t fidx = compiler.compile(ast);
-    Lfunction *bin = this->runtime.bin(fidx);
-    LuaValue fn = this->runtime.create_luafn(bin);
+    LuaValue fn = this->runtime.create_luafn(fidx);
     this->runtime.stack_push(fn);
 }
 void Lua::push_cppfn(LuaCppFunction cppfn)

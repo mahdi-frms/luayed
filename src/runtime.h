@@ -156,6 +156,8 @@ private:
     LuaValue *args();
     Hook **hooktable();
     Hook **uptable();
+    Lfunction *bin();
+    Lfunction *bin(size_t fidx);
 
     void *allocate(size_t size);
     void deallocate(void *ptr);
@@ -170,7 +172,7 @@ public:
     LuaValue create_table();
     Lfunction *create_binary(GenFunction *gfn);
     LuaValue create_cppfn(LuaCppFunction fn);
-    LuaValue create_luafn(Lfunction *bin);
+    LuaValue create_luafn(fidx_t fidx);
 
     void fncall(size_t argc, size_t retc);
     void fnret(size_t count);
@@ -195,8 +197,8 @@ public:
     void save_ip(size_t sp);
     Hook *upvalue(size_t idx);
     Hook *hook(size_t idx);
-    Lfunction *bin();
-    Lfunction *bin(size_t fidx);
+    LuaValue rodata(size_t idx);
+    lbyte *text();
 };
 
 struct LuaFunction
