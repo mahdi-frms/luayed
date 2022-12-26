@@ -1,14 +1,14 @@
-#ifndef INTERPRETOR_h
-#define INTERPRETOR_h
+#ifndef INTERPRETER_h
+#define INTERPRETER_h
 
 #include "runtime.h"
 #include "lerror.h"
 
-class Interpretor;
+class Interpreter;
 
-typedef void (Interpretor::*opimpl)();
+typedef void (Interpreter::*opimpl)();
 
-enum class InterpretorState
+enum class InterpreterState
 {
     Run,
     End,
@@ -23,7 +23,7 @@ enum class Comparison
     LE
 };
 
-class Interpretor : IInterpretor
+class Interpreter : IInterpreter
 {
 public:
     size_t run(LuaRuntime *rt);
@@ -41,7 +41,7 @@ private:
 
     size_t retc = 0;
     LError error = error_ok();
-    InterpretorState state = InterpretorState::Run;
+    InterpreterState state = InterpreterState::Run;
 
     LuaRuntime *rt = nullptr;
 

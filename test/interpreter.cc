@@ -1,7 +1,7 @@
 #include <luadef.h>
 #include <luabin.h>
 #include <runtime.h>
-#include <interpretor.h>
+#include <interpreter.h>
 #include <generator.h>
 #include <generator.h>
 #include <tap/tap.h>
@@ -45,9 +45,9 @@ void interpetor_test_case(
     string mes;
     mes.append("interpreter : ");
     mes.append(message);
-    Interpretor::optable_init();
-    Interpretor intrp;
-    LuaRuntime rt((IInterpretor *)&intrp);
+    Interpreter::optable_init();
+    Interpreter intrp;
+    LuaRuntime rt((IInterpreter *)&intrp);
     // init stack
     for (size_t i = 0; i < stack.size(); i++)
     {
@@ -62,7 +62,7 @@ void interpetor_test_case(
     ok(top.kind == LuaType::LVBool && top.data.b, mes.c_str());
 }
 
-void interpretor_tests()
+void interpreter_tests()
 {
     interpetor_test_case("push true", {itrue}, {}, {});
 }

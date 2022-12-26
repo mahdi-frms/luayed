@@ -62,7 +62,7 @@ struct InternString
     friend bool operator<(const InternString &l, const InternString &r);
 };
 
-class IInterpretor
+class IInterpreter
 {
 public:
     virtual size_t run(LuaRuntime *rt) = 0;
@@ -144,7 +144,7 @@ class LuaRuntime
 private:
     StringInterner interner;
     Frame *frame;
-    IInterpretor *interpretor;
+    IInterpreter *interpreter;
     vector<Lfunction *> functable;
 
     void new_frame(size_t stack_size);
@@ -163,7 +163,7 @@ private:
     void deallocate(void *ptr);
 
 public:
-    LuaRuntime(IInterpretor *interpretor);
+    LuaRuntime(IInterpreter *interpreter);
 
     LuaValue create_nil();
     LuaValue create_boolean(bool b);

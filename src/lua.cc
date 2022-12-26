@@ -4,9 +4,9 @@
 #include "generator.h"
 #include "compiler.h"
 
-Lua::Lua() : runtime((IInterpretor *)&this->interpretor)
+Lua::Lua() : runtime((IInterpreter *)&this->interpreter)
 {
-    Interpretor::optable_init();
+    Interpreter::optable_init();
 }
 void Lua::compile(const char *lua_code)
 {

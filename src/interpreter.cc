@@ -1,86 +1,86 @@
-#include "interpretor.h"
+#include "interpreter.h"
 #include <cstring>
 
-opimpl Interpretor::optable[256];
+opimpl Interpreter::optable[256];
 
-void Interpretor::optable_init()
+void Interpreter::optable_init()
 {
-    Interpretor::optable[IAdd] = &Interpretor::i_add;
-    Interpretor::optable[ISub] = &Interpretor::i_sub;
-    Interpretor::optable[IMult] = &Interpretor::i_mult;
-    Interpretor::optable[IFlrDiv] = &Interpretor::i_flrdiv;
-    Interpretor::optable[IFltDiv] = &Interpretor::i_fltdiv;
-    Interpretor::optable[IMod] = &Interpretor::i_mod;
-    Interpretor::optable[IPow] = &Interpretor::i_pow;
-    Interpretor::optable[IConcat] = &Interpretor::i_concat;
-    Interpretor::optable[IBOr] = &Interpretor::i_bor;
-    Interpretor::optable[IBAnd] = &Interpretor::i_band;
-    Interpretor::optable[IBXor] = &Interpretor::i_bxor;
-    Interpretor::optable[ISHR] = &Interpretor::i_shr;
-    Interpretor::optable[ISHL] = &Interpretor::i_shl;
-    Interpretor::optable[ILength] = &Interpretor::i_len;
-    Interpretor::optable[INegate] = &Interpretor::i_neg;
-    Interpretor::optable[INot] = &Interpretor::i_not;
-    Interpretor::optable[IBNot] = &Interpretor::i_bnot;
-    Interpretor::optable[IEq] = &Interpretor::i_eq;
-    Interpretor::optable[INe] = &Interpretor::i_ne;
-    Interpretor::optable[IGe] = &Interpretor::i_ge;
-    Interpretor::optable[IGt] = &Interpretor::i_gt;
-    Interpretor::optable[ILe] = &Interpretor::i_le;
-    Interpretor::optable[ILt] = &Interpretor::i_lt;
-    Interpretor::optable[ITGet] = &Interpretor::i_tget;
-    Interpretor::optable[ITSet] = &Interpretor::i_tset;
-    Interpretor::optable[ITNew] = &Interpretor::i_tnew;
-    Interpretor::optable[ITList] = &Interpretor::i_tlist;
-    Interpretor::optable[IGGet] = &Interpretor::i_gget;
-    Interpretor::optable[IGSet] = &Interpretor::i_gset;
-    Interpretor::optable[INil] = &Interpretor::i_nil;
-    Interpretor::optable[ITrue] = &Interpretor::i_true;
-    Interpretor::optable[IFalse] = &Interpretor::i_false;
-    Interpretor::optable[IRet] = &Interpretor::i_ret;
-    Interpretor::optable[ICall] = &Interpretor::i_call;
-    Interpretor::optable[IVargs] = &Interpretor::i_vargs;
-    Interpretor::optable[IJmp] = &Interpretor::i_jmp;
-    Interpretor::optable[ICjmp] = &Interpretor::i_cjmp;
-    Interpretor::optable[IConst] = &Interpretor::i_const;
-    Interpretor::optable[IConst] = &Interpretor::i_const;
-    Interpretor::optable[IFConst] = &Interpretor::i_fconst;
-    Interpretor::optable[ILocal] = &Interpretor::i_local;
-    Interpretor::optable[ILStore] = &Interpretor::i_lstore;
-    Interpretor::optable[IBLocal] = &Interpretor::i_blocal;
-    Interpretor::optable[IBLStore] = &Interpretor::i_blstore;
-    Interpretor::optable[IUpvalue] = &Interpretor::i_upvalue;
-    Interpretor::optable[IUStore] = &Interpretor::i_ustore;
-    Interpretor::optable[IUPush] = &Interpretor::i_upush;
-    Interpretor::optable[IUPop] = &Interpretor::i_upop;
-    Interpretor::optable[IPop] = &Interpretor::i_pop;
+    Interpreter::optable[IAdd] = &Interpreter::i_add;
+    Interpreter::optable[ISub] = &Interpreter::i_sub;
+    Interpreter::optable[IMult] = &Interpreter::i_mult;
+    Interpreter::optable[IFlrDiv] = &Interpreter::i_flrdiv;
+    Interpreter::optable[IFltDiv] = &Interpreter::i_fltdiv;
+    Interpreter::optable[IMod] = &Interpreter::i_mod;
+    Interpreter::optable[IPow] = &Interpreter::i_pow;
+    Interpreter::optable[IConcat] = &Interpreter::i_concat;
+    Interpreter::optable[IBOr] = &Interpreter::i_bor;
+    Interpreter::optable[IBAnd] = &Interpreter::i_band;
+    Interpreter::optable[IBXor] = &Interpreter::i_bxor;
+    Interpreter::optable[ISHR] = &Interpreter::i_shr;
+    Interpreter::optable[ISHL] = &Interpreter::i_shl;
+    Interpreter::optable[ILength] = &Interpreter::i_len;
+    Interpreter::optable[INegate] = &Interpreter::i_neg;
+    Interpreter::optable[INot] = &Interpreter::i_not;
+    Interpreter::optable[IBNot] = &Interpreter::i_bnot;
+    Interpreter::optable[IEq] = &Interpreter::i_eq;
+    Interpreter::optable[INe] = &Interpreter::i_ne;
+    Interpreter::optable[IGe] = &Interpreter::i_ge;
+    Interpreter::optable[IGt] = &Interpreter::i_gt;
+    Interpreter::optable[ILe] = &Interpreter::i_le;
+    Interpreter::optable[ILt] = &Interpreter::i_lt;
+    Interpreter::optable[ITGet] = &Interpreter::i_tget;
+    Interpreter::optable[ITSet] = &Interpreter::i_tset;
+    Interpreter::optable[ITNew] = &Interpreter::i_tnew;
+    Interpreter::optable[ITList] = &Interpreter::i_tlist;
+    Interpreter::optable[IGGet] = &Interpreter::i_gget;
+    Interpreter::optable[IGSet] = &Interpreter::i_gset;
+    Interpreter::optable[INil] = &Interpreter::i_nil;
+    Interpreter::optable[ITrue] = &Interpreter::i_true;
+    Interpreter::optable[IFalse] = &Interpreter::i_false;
+    Interpreter::optable[IRet] = &Interpreter::i_ret;
+    Interpreter::optable[ICall] = &Interpreter::i_call;
+    Interpreter::optable[IVargs] = &Interpreter::i_vargs;
+    Interpreter::optable[IJmp] = &Interpreter::i_jmp;
+    Interpreter::optable[ICjmp] = &Interpreter::i_cjmp;
+    Interpreter::optable[IConst] = &Interpreter::i_const;
+    Interpreter::optable[IConst] = &Interpreter::i_const;
+    Interpreter::optable[IFConst] = &Interpreter::i_fconst;
+    Interpreter::optable[ILocal] = &Interpreter::i_local;
+    Interpreter::optable[ILStore] = &Interpreter::i_lstore;
+    Interpreter::optable[IBLocal] = &Interpreter::i_blocal;
+    Interpreter::optable[IBLStore] = &Interpreter::i_blstore;
+    Interpreter::optable[IUpvalue] = &Interpreter::i_upvalue;
+    Interpreter::optable[IUStore] = &Interpreter::i_ustore;
+    Interpreter::optable[IUPush] = &Interpreter::i_upush;
+    Interpreter::optable[IUPop] = &Interpreter::i_upop;
+    Interpreter::optable[IPop] = &Interpreter::i_pop;
 }
 
-size_t Interpretor::run(LuaRuntime *rt, Opcode op)
+size_t Interpreter::run(LuaRuntime *rt, Opcode op)
 {
     this->rt = rt;
     this->fetch(op.bytes);
     this->exec();
     size_t retc = this->retc;
     this->retc = 0;
-    this->state = InterpretorState::Run;
+    this->state = InterpreterState::Run;
     return retc;
 }
-size_t Interpretor::run(LuaRuntime *rt)
+size_t Interpreter::run(LuaRuntime *rt)
 {
     this->rt = rt;
-    while (this->state == InterpretorState::Run)
+    while (this->state == InterpreterState::Run)
     {
         this->ip += this->fetch(this->rt->text() + this->ip);
         this->exec();
     }
     size_t retc = this->retc;
     this->retc = 0;
-    this->state = InterpretorState::Run;
+    this->state = InterpreterState::Run;
     return retc;
 }
 
-size_t Interpretor::fetch(lbyte *bin)
+size_t Interpreter::fetch(lbyte *bin)
 {
     size_t ptr = 0;
     lbyte op = bin[ptr++];
@@ -107,22 +107,22 @@ size_t Interpretor::fetch(lbyte *bin)
     return ptr;
 }
 
-LError Interpretor::get_error()
+LError Interpreter::get_error()
 {
     return this->error;
 }
 
-void Interpretor::exec()
+void Interpreter::exec()
 {
     (this->*optable[this->op])();
 }
 
-void Interpretor::push_bool(bool b)
+void Interpreter::push_bool(bool b)
 {
     this->rt->stack_push(this->rt->create_boolean(b));
 }
 
-void Interpretor::i_add()
+void Interpreter::i_add()
 {
     // todo: string conversion
     LuaValue a = this->rt->stack_pop();
@@ -130,7 +130,7 @@ void Interpretor::i_add()
     if (a.kind != LuaType::LVNumber || b.kind != LuaType::LVNumber)
     {
         this->error = error_invalid_operands(a.kind, b.kind);
-        this->state = InterpretorState::Error;
+        this->state = InterpreterState::Error;
         return;
     }
     LuaValue sum = this->rt->create_number(a.data.n + b.data.n);
@@ -138,7 +138,7 @@ void Interpretor::i_add()
     this->rt->destroy_value(b);
     this->rt->stack_push(sum);
 }
-void Interpretor::i_sub()
+void Interpreter::i_sub()
 {
     // todo: string conversion
     LuaValue a = this->rt->stack_pop();
@@ -146,7 +146,7 @@ void Interpretor::i_sub()
     if (a.kind != LuaType::LVNumber || b.kind != LuaType::LVNumber)
     {
         this->error = error_invalid_operands(a.kind, b.kind);
-        this->state = InterpretorState::Error;
+        this->state = InterpreterState::Error;
         return;
     }
     LuaValue sum = this->rt->create_number(a.data.n - b.data.n);
@@ -154,29 +154,29 @@ void Interpretor::i_sub()
     this->rt->destroy_value(b);
     this->rt->stack_push(sum);
 }
-void Interpretor::i_mult()
+void Interpreter::i_mult()
 {
 }
-void Interpretor::i_flrdiv()
+void Interpreter::i_flrdiv()
 {
 }
-void Interpretor::i_fltdiv()
+void Interpreter::i_fltdiv()
 {
 }
-void Interpretor::i_mod()
+void Interpreter::i_mod()
 {
 }
-void Interpretor::i_pow()
+void Interpreter::i_pow()
 {
 }
-void Interpretor::i_neg()
+void Interpreter::i_neg()
 {
     // todo: string conversion
     LuaValue a = this->rt->stack_pop();
     if (a.kind != LuaType::LVNumber)
     {
         this->error = error_invalid_operands(a.kind, a.kind);
-        this->state = InterpretorState::Error;
+        this->state = InterpreterState::Error;
         return;
     }
     LuaValue num = this->rt->create_number(-a.data.n);
@@ -184,40 +184,40 @@ void Interpretor::i_neg()
     this->rt->stack_push(num);
 }
 
-void Interpretor::i_bor()
+void Interpreter::i_bor()
 {
 }
-void Interpretor::i_band()
+void Interpreter::i_band()
 {
 }
-void Interpretor::i_bxor()
+void Interpreter::i_bxor()
 {
 }
-void Interpretor::i_bnot()
+void Interpreter::i_bnot()
 {
 }
-void Interpretor::i_shr()
+void Interpreter::i_shr()
 {
 }
-void Interpretor::i_shl()
+void Interpreter::i_shl()
 {
 }
 
-void Interpretor::i_not()
+void Interpreter::i_not()
 {
     LuaValue val = this->rt->stack_pop();
     bool rsl = !val.truth();
     this->rt->destroy_value(val);
     this->push_bool(rsl);
 }
-void Interpretor::i_concat()
+void Interpreter::i_concat()
 {
 }
-void Interpretor::i_len()
+void Interpreter::i_len()
 {
 }
 
-bool Interpretor::compare(Comparison cmp)
+bool Interpreter::compare(Comparison cmp)
 {
     LuaValue b = this->rt->stack_pop();
     LuaValue a = this->rt->stack_pop();
@@ -225,7 +225,7 @@ bool Interpretor::compare(Comparison cmp)
     if (a.kind != b.kind || (a.kind != LuaType::LVNumber && a.kind != LuaType::LVString))
     {
         this->error = error_invalid_operands(a.kind, b.kind);
-        this->state = InterpretorState::Error;
+        this->state = InterpreterState::Error;
         return false;
     }
     else if (a.kind == LuaType::LVNumber)
@@ -236,7 +236,7 @@ bool Interpretor::compare(Comparison cmp)
     this->rt->destroy_value(b);
     return rsl;
 }
-bool Interpretor::compare_number(LuaValue &a, LuaValue &b, Comparison cmp)
+bool Interpreter::compare_number(LuaValue &a, LuaValue &b, Comparison cmp)
 {
     if (cmp == Comparison::GE)
         return a.data.n >= b.data.n;
@@ -246,7 +246,7 @@ bool Interpretor::compare_number(LuaValue &a, LuaValue &b, Comparison cmp)
         return a.data.n <= b.data.n;
     return a.data.n < b.data.n;
 }
-bool Interpretor::compare_string(LuaValue &a, LuaValue &b, Comparison cmp)
+bool Interpreter::compare_string(LuaValue &a, LuaValue &b, Comparison cmp)
 {
     if (cmp == Comparison::GE)
         return strcmp((char *)a.data.ptr, (char *)b.data.ptr) != -1;
@@ -256,31 +256,31 @@ bool Interpretor::compare_string(LuaValue &a, LuaValue &b, Comparison cmp)
         return strcmp((char *)a.data.ptr, (char *)b.data.ptr) != 1;
     return strcmp((char *)a.data.ptr, (char *)b.data.ptr) == -1;
 }
-void Interpretor::i_lt()
+void Interpreter::i_lt()
 {
     this->push_bool(this->compare(Comparison::LT));
 }
-void Interpretor::i_gt()
+void Interpreter::i_gt()
 {
     this->push_bool(this->compare(Comparison::GT));
 }
-void Interpretor::i_ge()
+void Interpreter::i_ge()
 {
     this->push_bool(this->compare(Comparison::GE));
 }
-void Interpretor::i_le()
+void Interpreter::i_le()
 {
     this->push_bool(this->compare(Comparison::LE));
 }
-void Interpretor::i_eq()
+void Interpreter::i_eq()
 {
     this->push_bool(this->compare());
 }
-void Interpretor::i_ne()
+void Interpreter::i_ne()
 {
     this->push_bool(!this->compare());
 }
-bool Interpretor::compare()
+bool Interpreter::compare()
 {
     LuaValue a = this->rt->stack_pop();
     LuaValue b = this->rt->stack_pop();
@@ -309,114 +309,114 @@ bool Interpretor::compare()
     this->rt->destroy_value(b);
     return rsl;
 }
-void Interpretor::i_tget()
+void Interpreter::i_tget()
 {
 }
-void Interpretor::i_tset()
+void Interpreter::i_tset()
 {
 }
-void Interpretor::i_tnew()
+void Interpreter::i_tnew()
 {
 }
-void Interpretor::i_tlist()
+void Interpreter::i_tlist()
 {
 }
-void Interpretor::i_gget()
+void Interpreter::i_gget()
 {
 }
-void Interpretor::i_gset()
+void Interpreter::i_gset()
 {
 }
-void Interpretor::i_nil()
+void Interpreter::i_nil()
 {
     this->rt->stack_push(this->rt->create_nil());
 }
-void Interpretor::i_true()
+void Interpreter::i_true()
 {
     this->push_bool(true);
 }
-void Interpretor::i_false()
+void Interpreter::i_false()
 {
     this->push_bool(false);
 }
-void Interpretor::i_ret()
+void Interpreter::i_ret()
 {
     this->retc = this->arg1;
-    this->state = InterpretorState::End;
+    this->state = InterpreterState::End;
 }
-void Interpretor::i_call()
+void Interpreter::i_call()
 {
     this->rt->save_ip(this->ip);
     this->rt->fncall(this->arg1, this->arg2);
     this->ip = this->rt->load_ip();
 }
-void Interpretor::i_vargs()
+void Interpreter::i_vargs()
 {
     for (size_t i = 0; i < this->arg1; i++)
         this->rt->stack_push(this->rt->arg(i));
 }
-void Interpretor::i_jmp()
+void Interpreter::i_jmp()
 {
     this->ip = this->arg1;
 }
-void Interpretor::i_cjmp()
+void Interpreter::i_cjmp()
 {
     LuaValue value = this->rt->stack_pop();
     if (value.truth())
         this->ip = this->arg1;
     this->rt->destroy_value(value);
 }
-void Interpretor::i_const()
+void Interpreter::i_const()
 {
     LuaValue val = this->rt->rodata(this->arg1);
     this->rt->stack_push(this->rt->clone_value(val));
 }
-void Interpretor::i_fconst()
+void Interpreter::i_fconst()
 {
     LuaValue fn = this->rt->create_luafn(this->arg1);
     this->rt->stack_push(fn);
 }
-void Interpretor::i_local()
+void Interpreter::i_local()
 {
     LuaValue value = this->rt->stack_read(this->arg1);
     this->rt->stack_push(value);
 }
-void Interpretor::i_lstore()
+void Interpreter::i_lstore()
 {
     LuaValue value = this->rt->stack_pop();
     this->rt->stack_write(this->arg1, value);
 }
-void Interpretor::i_blocal()
+void Interpreter::i_blocal()
 {
     LuaValue value = this->rt->stack_back_read(this->arg1);
     this->rt->stack_push(value);
 }
-void Interpretor::i_blstore()
+void Interpreter::i_blstore()
 {
     LuaValue value = this->rt->stack_pop();
     this->rt->stack_back_write(this->arg1 - 1, value);
 }
-void Interpretor::i_upvalue()
+void Interpreter::i_upvalue()
 {
     Hook *hook = this->rt->upvalue(this->arg1);
     LuaValue value = this->rt->hookread(hook);
     this->rt->stack_push(value);
 }
-void Interpretor::i_ustore()
+void Interpreter::i_ustore()
 {
     Hook *hook = this->rt->upvalue(this->arg1);
     LuaValue value = this->rt->stack_pop();
     this->rt->hookwrite(hook, value);
 }
-void Interpretor::i_upush()
+void Interpreter::i_upush()
 {
     this->rt->hookpush();
 }
-void Interpretor::i_upop()
+void Interpreter::i_upop()
 {
     this->rt->hookpop();
 }
-void Interpretor::i_pop()
+void Interpreter::i_pop()
 {
     for (size_t i = 0; i < this->arg1; i++)
     {

@@ -171,7 +171,7 @@ void LuaRuntime::new_frame(size_t stack_size)
     frame->fn = this->create_nil();
     this->frame = frame;
 }
-LuaRuntime::LuaRuntime(IInterpretor *interpretor) : interpretor(interpretor)
+LuaRuntime::LuaRuntime(IInterpreter *interpreter) : interpreter(interpreter)
 {
     this->functable.push_back(nullptr);
     this->new_frame(INITIAL_FRAME_SIZE);
@@ -248,8 +248,8 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
     size_t return_count = 0;
     if (is_lua)
     {
-        // todo : handle error returned by interpretor
-        return_count = this->interpretor->run(this);
+        // todo : handle error returned by interpreter
+        return_count = this->interpreter->run(this);
     }
     else
     {

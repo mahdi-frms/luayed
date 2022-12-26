@@ -12,7 +12,7 @@ add_library(luacomp
     src/lerror.cc
     src/token.cc
     src/runtime.cc
-    src/interpretor.cc
+    src/interpreter.cc
 )
 
 add_executable(luayed
@@ -25,7 +25,7 @@ add_executable(luayed
 add_executable(luaytest
     test/lexer.cc
     test/compiler.cc
-    test/interpretor.cc
+    test/interpreter.cc
     test/test.cc
     test/parser.cc
     lib/tap/tap.c

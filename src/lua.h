@@ -2,13 +2,13 @@
 #define LUA_CPP
 
 #include "runtime.h"
-#include "interpretor.h"
+#include "interpreter.h"
 
 class Lua
 {
 private:
     LuaRuntime runtime;
-    Interpretor interpretor;
+    Interpreter interpreter;
 
 public:
     Lua();
