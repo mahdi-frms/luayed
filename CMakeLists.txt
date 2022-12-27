@@ -26,6 +26,7 @@ add_executable(luaytest
     test/lexer.cc
     test/compiler.cc
     test/interpreter.cc
+    test/mockruntime.cc
     test/test.cc
     test/parser.cc
     lib/tap/tap.c

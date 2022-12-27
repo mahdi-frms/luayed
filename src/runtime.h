@@ -150,9 +150,6 @@ public:
 
     fidx_t gen_fidx();
 
-    void destroy_value(LuaValue &value);
-    LuaValue clone_value(LuaValue &value);
-
     LuaValue stack_pop();
     void stack_push(LuaValue value);
     LuaValue stack_read(size_t idx);

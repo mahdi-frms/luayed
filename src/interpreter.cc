@@ -135,8 +135,6 @@ void Interpreter::i_add()
         return;
     }
     LuaValue sum = this->rt->create_number(a.data.n + b.data.n);
-    this->rt->destroy_value(a);
-    this->rt->destroy_value(b);
     this->rt->stack_push(sum);
 }
 void Interpreter::i_sub()
@@ -151,8 +149,6 @@ void Interpreter::i_sub()
         return;
     }
     LuaValue sum = this->rt->create_number(a.data.n - b.data.n);
-    this->rt->destroy_value(a);
-    this->rt->destroy_value(b);
     this->rt->stack_push(sum);
 }
 void Interpreter::i_mult()
@@ -181,7 +177,6 @@ void Interpreter::i_neg()
         return;
     }
     LuaValue num = this->rt->create_number(-a.data.n);
-    this->rt->destroy_value(a);
     this->rt->stack_push(num);
 }
 
@@ -208,7 +203,6 @@ void Interpreter::i_not()
 {
     LuaValue val = this->rt->stack_pop();
     bool rsl = !val.truth();
-    this->rt->destroy_value(val);
     this->push_bool(rsl);
 }
 void Interpreter::i_concat()
@@ -233,8 +227,6 @@ bool Interpreter::compare(Comparison cmp)
         rsl = this->compare_number(a, b, cmp);
     else
         rsl = this->compare_string(a, b, cmp);
-    this->rt->destroy_value(a);
-    this->rt->destroy_value(b);
     return rsl;
 }
 bool Interpreter::compare_number(LuaValue &a, LuaValue &b, Comparison cmp)
@@ -328,8 +320,6 @@ bool Interpreter::compare()
     {
         rsl = a.data.ptr == b.data.ptr;
     }
-    this->rt->destroy_value(a);
-    this->rt->destroy_value(b);
     return rsl;
 }
 void Interpreter::i_tget()
@@ -387,12 +377,11 @@ void Interpreter::i_cjmp()
     LuaValue value = this->rt->stack_pop();
     if (value.truth())
         this->ip = this->arg1;
-    this->rt->destroy_value(value);
 }
 void Interpreter::i_const()
 {
     LuaValue val = this->rt->rodata(this->arg1);
-    this->rt->stack_push(this->rt->clone_value(val));
+    this->rt->stack_push(val);
 }
 void Interpreter::i_fconst()
 {
@@ -443,7 +432,6 @@ void Interpreter::i_pop()
 {
     for (size_t i = 0; i < this->arg1; i++)
     {
-        LuaValue v = this->rt->stack_pop();
-        this->rt->destroy_value(v);
+        this->rt->stack_pop();
     }
 }

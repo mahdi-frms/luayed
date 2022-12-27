@@ -44,6 +44,5 @@ lnumber Lua::pop_number()
 {
     LuaValue value = this->runtime.stack_pop();
     lnumber num = value.data.n;
-    runtime.destroy_value(value);
     return num;
 }

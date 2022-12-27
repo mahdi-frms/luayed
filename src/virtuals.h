@@ -16,9 +16,6 @@ public:
 
     virtual void fncall(size_t argc, size_t retc) = 0;
 
-    virtual void destroy_value(LuaValue &value) = 0;
-    virtual LuaValue clone_value(LuaValue &value) = 0;
-
     virtual LuaValue stack_pop() = 0;
     virtual void stack_push(LuaValue value) = 0;
     virtual LuaValue stack_read(size_t idx) = 0;

@@ -24,6 +24,8 @@ enum LuaType
     LVFunction = 5,
 };
 
+#define is_obj(V) ((V).kind > 2)
+
 class LuaValue
 {
 public:

@@ -156,10 +156,6 @@ Lfunction *LuaRuntime::create_binary(GenFunction *gfn)
     return fn;
 }
 
-void LuaRuntime::destroy_value(LuaValue &value)
-{
-}
-
 void *LuaRuntime::allocate(size_t size)
 {
     return malloc(size);
@@ -186,7 +182,6 @@ LuaRuntime::LuaRuntime(IInterpreter *interpreter) : interpreter(interpreter)
 }
 void LuaRuntime::destroy_frame()
 {
-    this->destroy_value(this->frame->fn);
     Frame *frame = this->frame;
     this->frame = frame->prev;
     this->deallocate(frame);
@@ -293,8 +288,7 @@ void LuaRuntime::fnret(size_t count)
         prev->ret_count = total_count;
     while (this->frame->sp)
     {
-        LuaValue v = this->stack_pop();
-        this->destroy_value(v);
+        this->stack_pop();
     }
     this->destroy_frame();
 }
@@ -364,18 +358,10 @@ Hook **Frame::hooktable()
 {
     return (Hook **)(this + 1);
 }
-LuaValue LuaRuntime::clone_value(LuaValue &value)
-{
-    // todo : must increase reference counters
-    LuaValue v;
-    v.kind = value.kind;
-    v.data = value.data;
-    return v;
-}
 LuaValue LuaRuntime::stack_read(size_t idx)
 {
     size_t real_idx = this->frame->stack_address(idx);
-    return this->clone_value(this->frame->stack()[real_idx]);
+    return this->frame->stack()[real_idx];
 }
 size_t Frame::stack_address(size_t idx)
 {
@@ -384,8 +370,7 @@ size_t Frame::stack_address(size_t idx)
 void LuaRuntime::stack_write(size_t idx, LuaValue value)
 {
     size_t real_idx = this->frame->stack_address(idx);
-    this->destroy_value(this->frame->stack()[real_idx]);
-    this->frame->stack()[idx] = value;
+    this->frame->stack()[real_idx] = value;
 }
 size_t LuaRuntime::load_ip()
 {
@@ -433,7 +418,7 @@ void LuaRuntime::stack_back_write(size_t idx, LuaValue value)
 }
 LuaValue LuaRuntime::arg(size_t idx)
 {
-    LuaValue value = this->clone_value(this->frame->vargs()[idx]);
+    LuaValue value = this->frame->vargs()[idx];
     return value;
 }
 Lfunction *LuaRuntime::bin(size_t fidx)
