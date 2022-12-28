@@ -130,7 +130,6 @@ public:
     InterpretorTestCase &execute(vector<Opcode> opcodes)
     {
         const char *suffix = "execution";
-        Interpreter::optable_init();
         Interpreter intp;
         try
         {

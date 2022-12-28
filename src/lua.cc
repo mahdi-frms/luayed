@@ -6,8 +6,8 @@
 
 Lua::Lua() : runtime((IInterpreter *)&this->interpreter)
 {
-    Interpreter::optable_init();
 }
+
 void Lua::compile(const char *lua_code)
 {
     Lexer lexer(lua_code);
