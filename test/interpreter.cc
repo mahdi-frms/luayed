@@ -176,4 +176,32 @@ void interpreter_tests()
         .test_stack({
             lvnil(),
         });
+
+    InterpretorTestCase("pop value")
+        .set_stack({
+            lvnumber(3),
+            lvbool(true),
+            lvnumber(1),
+        })
+        .execute({
+            ipop(1),
+        })
+        .test_stack({
+            lvnumber(3),
+            lvbool(true),
+        });
+
+    InterpretorTestCase("pop multiple values")
+        .set_stack({
+            lvnumber(3),
+            lvbool(true),
+            lvnumber(1),
+            lvnil(),
+        })
+        .execute({
+            ipop(3),
+        })
+        .test_stack({
+            lvnumber(3),
+        });
 }
