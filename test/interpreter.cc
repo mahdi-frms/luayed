@@ -221,4 +221,22 @@ void interpreter_tests()
             lvnumber(3),
             lvnumber(10),
         });
+
+    InterpretorTestCase("push arg")
+        .set_args({
+            lvbool(true),
+            lvnumber(10),
+            lvbool(false),
+        })
+        .set_stack({
+            lvnil(),
+        })
+        .execute({
+            ivargs(2),
+        })
+        .test_stack({
+            lvnil(),
+            lvbool(true),
+            lvnumber(10),
+        });
 }
