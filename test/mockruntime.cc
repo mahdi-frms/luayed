@@ -193,7 +193,7 @@ Hook *MockRuntime::hook(size_t idx)
 }
 LuaValue MockRuntime::rodata(size_t idx)
 {
-    if (idx >= this->args.size())
+    if (idx >= this->constants.size())
     {
         throw MOCK_RUNTIME_FAULT_CONSTIDX;
     }

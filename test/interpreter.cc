@@ -41,7 +41,7 @@ class InterpretorTestCase
 {
 private:
     MockRuntime rt;
-    int errcode = 0;
+    int fault_code = 0;
     size_t retarg = 0;
     const char *message;
 
@@ -86,7 +86,7 @@ public:
             this->rt.stack_push(top);
             this->test(top.truth(), suffix);
         }
-        catch (int errcode)
+        catch (int fault_code)
         {
             this->test(false, suffix);
         }
@@ -119,10 +119,11 @@ public:
             this->retarg = intp.run((IRuntime *)&this->rt);
             this->test(true, suffix);
         }
-        catch (int errcode)
+        catch (int fault_code)
         {
-            this->errcode = errcode;
+            this->fault_code = fault_code;
             this->test(false, suffix);
+            std::cerr << "execution failed with fault code : " << this->fault_code << "\n";
         }
         return *this;
     }
@@ -137,10 +138,11 @@ public:
                 this->retarg = intp.run(&this->rt, opcodes[i]);
             this->test(true, suffix);
         }
-        catch (int errcode)
+        catch (int fault_code)
         {
-            this->errcode = errcode;
+            this->fault_code = fault_code;
             this->test(false, suffix);
+            std::cerr << "execution failed with fault code : " << this->fault_code << "\n";
         }
         return *this;
     }
@@ -203,5 +205,21 @@ void interpreter_tests()
         })
         .test_stack({
             lvnumber(3),
+        });
+
+    InterpretorTestCase("push constants")
+        .set_constants({
+            lvnumber(2),
+            lvnumber(10),
+        })
+        .set_stack({
+            lvnumber(3),
+        })
+        .execute({
+            iconst(1),
+        })
+        .test_stack({
+            lvnumber(3),
+            lvnumber(10),
         });
 }
