@@ -13,7 +13,7 @@ std::set<string> strset;
 LuaValue lvnil()
 {
     LuaValue v;
-    v.kind = LuaType::LVNumber;
+    v.kind = LuaType::LVNil;
     return v;
 }
 LuaValue lvbool(bool b)
@@ -26,7 +26,7 @@ LuaValue lvbool(bool b)
 LuaValue lvnumber(lnumber n)
 {
     LuaValue v;
-    v.kind = LuaType::LVBool;
+    v.kind = LuaType::LVNumber;
     v.data.n = n;
     return v;
 }
@@ -39,14 +39,14 @@ LuaValue lvstring(const char *s)
         s = it->c_str();
     }
     LuaValue v;
-    v.kind = LuaType::LVBool;
+    v.kind = LuaType::LVString;
     v.data.ptr = new string(s);
     return v;
 }
 LuaValue lvtable()
 {
     LuaValue v;
-    v.kind = LuaType::LVBool;
+    v.kind = LuaType::LVTable;
     v.data.ptr = new std::map<LuaValue, LuaValue>;
     return v;
 }

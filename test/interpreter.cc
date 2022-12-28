@@ -157,5 +157,23 @@ void interpreter_tests()
         .execute({
             itrue,
         })
-        .test_top();
+        .test_stack({
+            lvbool(true),
+        });
+
+    InterpretorTestCase("push false")
+        .execute({
+            ifalse,
+        })
+        .test_stack({
+            lvbool(false),
+        });
+
+    InterpretorTestCase("push nil")
+        .execute({
+            inil,
+        })
+        .test_stack({
+            lvnil(),
+        });
 }

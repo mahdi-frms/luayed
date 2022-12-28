@@ -26,7 +26,7 @@ std::ostream &operator<<(std::ostream &strm, const LuaValue &v)
 {
     strm << v.kind;
     if (v.kind == LuaType::LVBool)
-        strm << '(' << v.data.b << ')';
+        strm << '(' << (v.data.b ? "true" : "false") << ')';
     else if (v.kind == LuaType::LVNumber)
         strm << '(' << v.data.n << ')';
     else if (v.kind == LuaType::LVString)
