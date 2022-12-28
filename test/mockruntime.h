@@ -17,12 +17,14 @@ public:
     bool check(size_t arg1, size_t arg2);
 };
 
-class MockRuntime : IRuntime
+class MockRuntime : public IRuntime
 {
 private:
-    vector<LuaValue> constants;
     vector<LuaValue> stack;
+    vector<LuaValue> constants;
     vector<LuaValue> args;
+    vector<lbyte> instructions;
+
     size_t back_stack(size_t idx);
 
 public:
@@ -33,9 +35,13 @@ public:
     Intercept icp_load_ip;
     Intercept icp_save_ip;
 
-    MockRuntime(vector<LuaValue> stack,
-                vector<LuaValue> constants,
-                vector<LuaValue> args);
+    void set_stack(vector<LuaValue> stack);
+    void set_constants(vector<LuaValue> constants);
+    void set_args(vector<LuaValue> args);
+    void set_text(vector<Opcode> text);
+    bool compare_stack(vector<LuaValue> values);
+
+    vector<LuaValue> &get_stack();
 
     LuaValue create_nil();
     LuaValue create_boolean(bool b);

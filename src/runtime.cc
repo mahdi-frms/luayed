@@ -293,11 +293,6 @@ void LuaRuntime::fnret(size_t count)
     this->destroy_frame();
 }
 
-const char *LuaValue::as_string()
-{
-    return (const char *)this->data.ptr;
-}
-
 Lfunction *LuaFunction::binary()
 {
     return (Lfunction *)this->fn;
@@ -401,10 +396,6 @@ void LuaRuntime::hookpop()
     hook.is_detached = true;
     hook.val = *hook.original;
     *ptr = nullptr;
-}
-bool LuaValue::truth()
-{
-    return this->kind != LuaType::LVNil && (this->kind != LuaType::LVBool || this->data.b);
 }
 LuaValue LuaRuntime::stack_back_read(size_t idx)
 {

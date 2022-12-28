@@ -48,4 +48,8 @@ struct Hook
     LuaValue *original;
 };
 
+bool operator==(const LuaValue &v1, const LuaValue &v2);
+std::ostream &operator<<(std::ostream &strm, const LuaValue &v);
+std::ostream &operator<<(std::ostream &strm, const LuaType &t);
+
 #endif

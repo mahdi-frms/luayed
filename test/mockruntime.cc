@@ -203,3 +203,32 @@ lbyte *MockRuntime::text()
 {
     return nullptr;
 }
+
+void MockRuntime::set_stack(vector<LuaValue> stack)
+{
+    this->stack = stack;
+}
+void MockRuntime::set_constants(vector<LuaValue> constants)
+{
+    this->constants = constants;
+}
+void MockRuntime::set_args(vector<LuaValue> args)
+{
+    this->args = args;
+}
+void MockRuntime::set_text(vector<Opcode> text)
+{
+    this->instructions.clear();
+    for (size_t i = 0; i < text.size(); i++)
+    {
+        Opcode op = text[i];
+        for (lbyte j = 0; j < op.count; j++)
+        {
+            this->instructions.push_back(op.bytes[j]);
+        }
+    }
+}
+vector<LuaValue> &MockRuntime::get_stack()
+{
+    return this->stack;
+}

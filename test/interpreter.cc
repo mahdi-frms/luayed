@@ -1,10 +1,11 @@
+#include <iostream>
 #include <luadef.h>
 #include <luabin.h>
-#include <runtime.h>
 #include <interpreter.h>
 #include <generator.h>
 #include <generator.h>
 #include <tap/tap.h>
+#include "mockruntime.h"
 
 #define IPTR(I) Opcode(0x00, I)
 
@@ -36,33 +37,125 @@ LuaValue vnil()
     return v;
 }
 
-void interpetor_test_case(
-    const char *message,
-    vector<Opcode> text,
-    vector<LuaValue> rodata = {},
-    vector<LuaValue> stack = {})
+class InterpretorTestCase
 {
-    string mes;
-    mes.append("interpreter : ");
-    mes.append(message);
-    Interpreter::optable_init();
-    Interpreter intrp;
-    LuaRuntime rt((IInterpreter *)&intrp);
-    // init stack
-    for (size_t i = 0; i < stack.size(); i++)
+private:
+    MockRuntime rt;
+    int errcode = 0;
+    size_t retarg = 0;
+    const char *message;
+
+    void test(bool rsl, const char *suffix)
     {
-        rt.stack_push(stack[i]);
+        string mes = message;
+        mes.append(" : ");
+        mes.append(suffix);
+        ok(rsl, mes.c_str());
     }
-    // execute instructions
-    for (size_t i = 0; i < text.size(); i++)
+
+public:
+    InterpretorTestCase(const char *message) : message(message)
     {
-        intrp.run((IRuntime *)&rt, text[i]);
     }
-    LuaValue top = rt.stack_pop();
-    ok(top.kind == LuaType::LVBool && top.data.b, mes.c_str());
-}
+    InterpretorTestCase &set_stack(vector<LuaValue> stack)
+    {
+        this->rt.set_stack(stack);
+        return *this;
+    }
+    InterpretorTestCase &set_constants(vector<LuaValue> constants)
+    {
+        this->rt.set_constants(constants);
+        return *this;
+    }
+    InterpretorTestCase &set_args(vector<LuaValue> args)
+    {
+        this->rt.set_args(args);
+        return *this;
+    }
+    InterpretorTestCase &set_text(vector<Opcode> text)
+    {
+        this->set_text(text);
+        return *this;
+    }
+    InterpretorTestCase &test_top()
+    {
+        const char *suffix = "stack top";
+        try
+        {
+            LuaValue top = this->rt.stack_pop();
+            this->rt.stack_push(top);
+            this->test(top.truth(), suffix);
+        }
+        catch (int errcode)
+        {
+            this->test(false, suffix);
+        }
+        return *this;
+    }
+    void print_valvec(vector<LuaValue> &stack)
+    {
+        for (size_t i = 0; i < stack.size(); i++)
+            std::cerr << stack[i] << "\n";
+    }
+    InterpretorTestCase &test_stack(vector<LuaValue> expected_stack)
+    {
+        bool rsl = this->rt.get_stack() == expected_stack;
+        this->test(rsl, "stack elements");
+        if (!rsl)
+        {
+            std::cout << "stack:\n";
+            this->print_valvec(this->rt.get_stack());
+            std::cout << "expected:\n";
+            this->print_valvec(expected_stack);
+        }
+        return *this;
+    }
+    InterpretorTestCase &execute()
+    {
+        const char *suffix = "execution";
+        Interpreter intp;
+        try
+        {
+            this->retarg = intp.run((IRuntime *)&this->rt);
+            this->test(true, suffix);
+        }
+        catch (int errcode)
+        {
+            this->errcode = errcode;
+            this->test(false, suffix);
+        }
+        return *this;
+    }
+    InterpretorTestCase &execute(vector<Opcode> opcodes)
+    {
+        const char *suffix = "execution";
+        Interpreter::optable_init();
+        Interpreter intp;
+        try
+        {
+            for (size_t i = 0; i < opcodes.size(); i++)
+                this->retarg = intp.run(&this->rt, opcodes[i]);
+            this->test(true, suffix);
+        }
+        catch (int errcode)
+        {
+            this->errcode = errcode;
+            this->test(false, suffix);
+        }
+        return *this;
+    }
+    InterpretorTestCase &test_ret(size_t retc)
+    {
+        this->test(this->retarg == retc, "return count");
+        return *this;
+    }
+};
 
 void interpreter_tests()
 {
-    interpetor_test_case("push true", {itrue}, {}, {});
+    InterpretorTestCase("push true")
+        .execute({
+            itrue,
+        })
+        .test_top();
 }

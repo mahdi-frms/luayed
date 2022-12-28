@@ -12,6 +12,7 @@ add_library(luacomp
     src/lerror.cc
     src/token.cc
     src/runtime.cc
+    src/luadef.cc
     src/interpreter.cc
 )
 

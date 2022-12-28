@@ -299,28 +299,7 @@ bool Interpreter::compare()
 {
     LuaValue a = this->rt->stack_pop();
     LuaValue b = this->rt->stack_pop();
-    bool rsl;
-    if (a.kind != b.kind)
-    {
-        rsl = false;
-    }
-    else if (a.kind == LuaType::LVNumber)
-    {
-        rsl = a.data.n == b.data.n;
-    }
-    else if (a.kind == LuaType::LVBool)
-    {
-        rsl = a.data.b == b.data.b;
-    }
-    else if (a.kind == LuaType::LVNil)
-    {
-        rsl = true;
-    }
-    else
-    {
-        rsl = a.data.ptr == b.data.ptr;
-    }
-    return rsl;
+    return a == b;
 }
 void Interpreter::i_tget()
 {
