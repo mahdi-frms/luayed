@@ -30,9 +30,11 @@ public:
     size_t run(IRuntime *rt, Opcode op);
     LError get_error();
     static void optable_init();
+    Interpreter();
 
 private:
     static opimpl optable[256];
+    static bool is_initialized;
 
     size_t ip = 0;
     lbyte op;

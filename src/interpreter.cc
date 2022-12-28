@@ -2,7 +2,8 @@
 #include "virtuals.h"
 #include "interpreter.h"
 
-opimpl Interpreter::optable[256];
+opimpl Interpreter::optable[256] = {};
+bool Interpreter::is_initialized = false;
 
 void Interpreter::optable_init()
 {
@@ -55,6 +56,15 @@ void Interpreter::optable_init()
     Interpreter::optable[IUPush] = &Interpreter::i_upush;
     Interpreter::optable[IUPop] = &Interpreter::i_upop;
     Interpreter::optable[IPop] = &Interpreter::i_pop;
+}
+
+Interpreter::Interpreter()
+{
+    if (!Interpreter::is_initialized)
+    {
+        this->is_initialized = true;
+        Interpreter::optable_init();
+    }
 }
 
 size_t Interpreter::run(IRuntime *rt, Opcode op)
