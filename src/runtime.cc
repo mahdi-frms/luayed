@@ -224,8 +224,8 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
         // todo: throw error
         return;
     }
-    bool is_lua = fn->as_function()->is_lua;
-    Lfunction *bin = is_lua ? fn->as_function()->binary() : nullptr;
+    bool is_lua = fn->as<LuaFunction *>()->is_lua;
+    Lfunction *bin = is_lua ? fn->as<LuaFunction *>()->binary() : nullptr;
     this->new_frame(argc + 1024 /* THIS NUMBER MUST BE PROVIDED BY THE COMPILER */);
     Frame *frame = this->frame;
     // move values bwtween frames
@@ -253,7 +253,7 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
     }
     else
     {
-        LuaCppFunction cppfn = fn->as_function()->native();
+        LuaCppFunction cppfn = fn->as<LuaFunction *>()->native();
         return_count = cppfn(this);
     }
     this->fnret(return_count);
@@ -291,15 +291,6 @@ void LuaRuntime::fnret(size_t count)
     this->destroy_frame();
 }
 
-LuaFunction *LuaValue::as_function()
-{
-    return (LuaFunction *)this->data.ptr;
-}
-const char *LuaValue::as_string()
-{
-    return (const char *)this->data.ptr;
-}
-
 Lfunction *LuaFunction::binary()
 {
     return (Lfunction *)this->fn;
@@ -314,19 +305,19 @@ size_t Frame::parcount()
 {
     if (this->fn.kind == LuaType::LVNil)
         return 0;
-    LuaFunction *fn = this->fn.as_function();
+    LuaFunction *fn = this->fn.as<LuaFunction *>();
     return fn->is_lua ? fn->binary()->parcount : 0;
 }
 size_t Frame::hookmax()
 {
     if (this->fn.kind == LuaType::LVNil)
         return 0;
-    LuaFunction *fn = this->fn.as_function();
+    LuaFunction *fn = this->fn.as<LuaFunction *>();
     return fn->is_lua ? fn->binary()->hookmax : 0;
 }
 Lfunction *Frame::bin()
 {
-    return (Lfunction *)this->fn.as_function()->binary();
+    return (Lfunction *)this->fn.as<LuaFunction *>()->binary();
 }
 LuaValue *Frame::stack()
 {
@@ -413,10 +404,6 @@ void LuaRuntime::hookpop()
     size_t stack_idx = hook.frame->stack_address(hook.stack_idx);
     hook.val = hook.frame->stack()[stack_idx];
     *ptr = nullptr;
-}
-bool LuaValue::truth()
-{
-    return this->kind != LuaType::LVNil && (this->kind != LuaType::LVBool || this->data.b);
 }
 LuaValue LuaRuntime::stack_back_read(size_t idx)
 {

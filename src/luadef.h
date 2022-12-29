@@ -24,4 +24,26 @@ enum LuaType
     LVFunction = 5,
 };
 
+class LuaValue
+{
+public:
+    LuaType kind;
+    union
+    {
+        bool b;
+        lnumber n;
+        void *ptr;
+    } data;
+
+    bool truth()
+    {
+        return this->kind != LuaType::LVNil && (this->kind != LuaType::LVBool || this->data.b);
+    }
+    template <typename T>
+    T as()
+    {
+        return ((T)this->data.ptr);
+    }
+};
+
 #endif

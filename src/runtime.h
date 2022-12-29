@@ -78,22 +78,6 @@ public:
     void remove(char *lstr);
 };
 
-class LuaValue
-{
-public:
-    LuaType kind;
-    union
-    {
-        bool b;
-        lnumber n;
-        void *ptr;
-    } data;
-
-    bool truth();
-    LuaFunction *as_function();
-    const char *as_string();
-};
-
 struct Hook
 {
     bool is_detached;
