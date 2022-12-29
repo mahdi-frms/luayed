@@ -178,7 +178,7 @@ void Compiler::compile_methcall(Noderef node, size_t expect)
     size_t idx = this->const_string(token_cstring(node->child(1)->get_token()));
     this->emit(Opcode(Instruction::IConst, idx));
     this->emit(Opcode(Instruction::ITGet));
-    this->emit(Opcode(Instruction::IBLStore, 3));
+    this->emit(Opcode(Instruction::IBLStore, 2));
     Noderef arglist = node->child(2);
     this->compile_explist(arglist, EXPECT_FREE);
     size_t argcount = this->arglist_count(arglist) + 1;
@@ -507,8 +507,8 @@ void Compiler::compile_generic_for_swap_pair(size_t back_offset1, size_t back_of
 {
     this->emit(Opcode(Instruction::IBLocal, back_offset1));
     this->emit(Opcode(Instruction::IBLocal, back_offset2 + 1));
-    this->emit(Opcode(Instruction::IBLStore, back_offset1 + 2));
-    this->emit(Opcode(Instruction::IBLStore, back_offset2 + 1));
+    this->emit(Opcode(Instruction::IBLStore, back_offset1 + 1));
+    this->emit(Opcode(Instruction::IBLStore, back_offset2));
 }
 
 void Compiler::compile_generic_for_swap(size_t varcount)
@@ -597,7 +597,7 @@ void Compiler::compile_generic_for(Noderef node)
     this->emit(Opcode(Instruction::ILocal, this->varmem(lvalue)->offset)); // prev
     this->emit(Opcode(Instruction::ICall, 2, varcount + 1));
     for (size_t i = 0; i < varcount; i++)
-        this->emit(Opcode(Instruction::IBLStore, varcount + 3));
+        this->emit(Opcode(Instruction::IBLStore, varcount + 2));
     //-- loop check
     this->emit(Opcode(Instruction::ILocal, this->varmem(lvalue)->offset));
     this->emit(Instruction::INil);
@@ -659,7 +659,7 @@ void Compiler::compile_numeric_for(Noderef node)
     this->emit(Opcode(Instruction::IBLocal, 2));
     this->emit(Instruction::IAdd);
     this->emit(Opcode(Instruction::IBLocal, 1));
-    this->emit(Opcode(Instruction::IBLStore, 5));
+    this->emit(Opcode(Instruction::IBLStore, 4));
     this->emit(Opcode(Instruction::IBLocal, 3));
     this->emit(Instruction::ILe);
     this->emit(Opcode(Instruction::ICjmp, loop_start));
@@ -684,7 +684,7 @@ void Compiler::compile_assignment(Noderef node)
         size_t v = vcount;
         while (v)
         {
-            this->emit(Opcode(Instruction::IBLStore, v + this->vstack_nearest_nil() + 1));
+            this->emit(Opcode(Instruction::IBLStore, v + this->vstack_nearest_nil()));
             v--;
         }
     }
