@@ -4,7 +4,7 @@
 
 #define T(K) NodeKind::TKN, K
 
-class MockLexer : ILexer
+class MockLexer : public ILexer
 {
 private:
     vector<Token> tkns;
@@ -144,7 +144,7 @@ void partest(bool exp, const char *message, ...)
     tkns.push_back(tokenk(TokenKind::Eof));
 
     MockLexer mlx = MockLexer(tkns);
-    Parser parser = Parser((ILexer *)&mlx);
+    Parser parser = Parser(&mlx);
     Ast parser_ast = exp ? parser.parse_exp() : parser.parse();
     Ast maker_ast = am.get_tree();
     char *mes = concat("parser : ", message);

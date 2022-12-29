@@ -4,14 +4,14 @@
 #include "generator.h"
 #include "compiler.h"
 
-Lua::Lua() : runtime((IInterpreter *)&this->interpreter)
+Lua::Lua() : runtime(&this->interpreter)
 {
 }
 
 void Lua::compile(const char *lua_code)
 {
     Lexer lexer(lua_code);
-    Parser parser((ILexer *)&lexer);
+    Parser parser(&lexer);
     Ast ast = parser.parse();
     if (ast.root() == nullptr)
     {
@@ -26,7 +26,7 @@ void Lua::compile(const char *lua_code)
         return;
     }
     LuaGenerator gen(&this->runtime);
-    Compiler compiler((IGenerator *)&gen);
+    Compiler compiler(&gen);
     fidx_t fidx = compiler.compile(ast);
     LuaValue fn = this->runtime.create_luafn(fidx);
     this->runtime.stack_push(fn);

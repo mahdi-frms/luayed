@@ -4,7 +4,7 @@
 #include "runtime.h"
 #include "luabin.h"
 
-class LuaGenerator final : IGenerator
+class LuaGenerator final : public IGenerator
 {
 private:
     LuaRuntime *rt;

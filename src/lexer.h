@@ -6,15 +6,9 @@
 #include "luadef.h"
 #include "lerror.h"
 #include "token.h"
+#include "virtuals.h"
 
-class ILexer
-{
-public:
-    virtual LError get_error() = 0;
-    virtual Token next() = 0;
-};
-
-class Lexer : ILexer
+class Lexer : public ILexer
 {
 private:
     const char *text;

@@ -42,7 +42,7 @@ char *compiler_test_message(const char *item, const char *property)
     return message;
 }
 
-class GenTest final : IGenerator
+class GenTest final : public IGenerator
 {
 private:
     std::map<fidx_t, FuncTest *> funcs;
@@ -181,7 +181,7 @@ GenTest compiler_test_case(const char *message, const char *text)
 {
     GenTest gentest(message);
     Lexer lexer(text);
-    Parser parser((ILexer *)&lexer);
+    Parser parser(&lexer);
     Ast ast = parser.parse();
     if (ast.root() == nullptr)
     {
@@ -191,7 +191,7 @@ GenTest compiler_test_case(const char *message, const char *text)
     }
     SemanticAnalyzer analyzer(ast);
     analyzer.analyze();
-    Compiler compiler((IGenerator *)&gentest);
+    Compiler compiler(&gentest);
     compiler.compile(ast);
     ast.destroy();
     return gentest;

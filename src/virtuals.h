@@ -3,6 +3,34 @@
 
 #include "luadef.h"
 #include "luabin.h"
+#include "token.h"
+#include "lerror.h"
+
+class IGenerator
+{
+public:
+    virtual void emit(Opcode opcode) = 0;
+    virtual size_t len() = 0;
+    virtual void seti(size_t idx, lbyte b) = 0;
+
+    virtual size_t const_number(lnumber num) = 0;
+    virtual size_t const_string(const char *str) = 0;
+
+    virtual fidx_t pushf() = 0;
+    virtual void popf() = 0;
+
+    virtual size_t upval(fidx_t fidx, size_t offset, size_t hidx) = 0;
+
+    virtual void meta_parcount(size_t parcount) = 0;
+    virtual void meta_hookmax(size_t hookmax) = 0;
+};
+
+class ILexer
+{
+public:
+    virtual LError get_error() = 0;
+    virtual Token next() = 0;
+};
 
 class IRuntime
 {

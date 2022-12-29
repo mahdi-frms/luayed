@@ -23,7 +23,7 @@ enum class Comparison
     LE
 };
 
-class Interpreter : IInterpreter
+class Interpreter : public IInterpreter
 {
 public:
     size_t run(IRuntime *rt);

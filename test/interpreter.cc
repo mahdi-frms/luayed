@@ -119,7 +119,7 @@ public:
         Interpreter intp;
         try
         {
-            this->retarg = intp.run((IRuntime *)&this->rt);
+            this->retarg = intp.run(&this->rt);
             this->test(true, suffix);
         }
         catch (int fault_code)
