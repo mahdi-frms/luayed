@@ -24,6 +24,7 @@ private:
     vector<LuaValue> constants;
     vector<LuaValue> args;
     vector<lbyte> instructions;
+    size_t ip;
 
     size_t back_stack(size_t idx);
 
@@ -32,8 +33,6 @@ public:
     Intercept icp_fncall;
     Intercept icp_hookpush;
     Intercept icp_hookpop;
-    Intercept icp_load_ip;
-    Intercept icp_save_ip;
 
     void set_stack(vector<LuaValue> stack);
     void set_constants(vector<LuaValue> constants);
@@ -60,7 +59,7 @@ public:
     void hookpop();
     LuaValue arg(size_t idx);
     size_t load_ip();
-    void save_ip(size_t sp);
+    void save_ip(size_t ip);
     Hook *upvalue(size_t idx);
     Hook *hook(size_t idx);
     LuaValue rodata(size_t idx);

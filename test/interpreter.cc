@@ -72,7 +72,12 @@ public:
     }
     InterpretorTestCase &set_text(vector<Opcode> text)
     {
-        this->set_text(text);
+        if (!text.size() || (text.back().bytes[0] & 0b11111110) != Instruction::IRet)
+        {
+            std::cerr << "instructions at text '" << this->message << "' do not end with ret!\n";
+            exit(1);
+        }
+        this->rt.set_text(text);
         return *this;
     }
     InterpretorTestCase &test_top()
@@ -155,17 +160,7 @@ public:
     }
     InterpretorTestCase &test_call_fncall(size_t argc, size_t retc)
     {
-        this->test(this->rt.icp_luafn.check(argc, retc), "call [fncall]");
-        return *this;
-    }
-    InterpretorTestCase &test_call_load_ip()
-    {
-        this->test(this->rt.icp_load_ip.check(0, 0), "call [load_ip]");
-        return *this;
-    }
-    InterpretorTestCase &test_call_save_ip(size_t ip)
-    {
-        this->test(this->rt.icp_save_ip.check(ip, 0), "call [save_ip]");
+        this->test(this->rt.icp_fncall.check(argc, retc), "call [fncall]");
         return *this;
     }
     InterpretorTestCase &test_call_hookpush()
@@ -285,4 +280,18 @@ void interpreter_tests()
             iupop,
         })
         .test_call_hookpop();
+
+    InterpretorTestCase("ret")
+        .execute({
+            iret(5),
+        })
+        .test_ret(5);
+
+    InterpretorTestCase("call")
+        .set_text({
+            icall(4, 2),
+            iret(0),
+        })
+        .execute()
+        .test_call_fncall(4, 2);
 }

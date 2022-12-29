@@ -59,6 +59,7 @@ void Intercept::enable(size_t arg1)
 {
     this->used = true;
     this->arg1 = arg1;
+    this->arg2 = 0;
 }
 void Intercept::enable(size_t arg1, size_t arg2)
 {
@@ -174,12 +175,11 @@ LuaValue MockRuntime::arg(size_t idx)
 }
 size_t MockRuntime::load_ip()
 {
-    this->icp_save_ip.enable();
-    return 0;
+    return this->ip;
 }
-void MockRuntime::save_ip(size_t sp)
+void MockRuntime::save_ip(size_t ip)
 {
-    this->icp_save_ip.enable(sp);
+    this->ip = ip;
 }
 Hook *MockRuntime::upvalue(size_t idx)
 {
@@ -201,7 +201,7 @@ LuaValue MockRuntime::rodata(size_t idx)
 }
 lbyte *MockRuntime::text()
 {
-    return nullptr;
+    return &this->instructions.front();
 }
 
 void MockRuntime::set_stack(vector<LuaValue> stack)
