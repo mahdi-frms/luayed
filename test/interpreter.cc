@@ -80,6 +80,16 @@ public:
         this->rt.set_text(text);
         return *this;
     }
+    InterpretorTestCase &add_upvalue(LuaValue value)
+    {
+        this->rt.add_upvalue(value);
+        return *this;
+    }
+    InterpretorTestCase &add_detached_upvalue(LuaValue value)
+    {
+        this->rt.add_detached_upvalue(value);
+        return *this;
+    }
     InterpretorTestCase &test_top()
     {
         const char *suffix = "stack top";
@@ -171,6 +181,26 @@ public:
     InterpretorTestCase &test_call_hookpop()
     {
         this->test(this->rt.icp_hookpop.check(0, 0), "call [hookpop]");
+        return *this;
+    }
+    InterpretorTestCase &test_upvalue(size_t idx, LuaValue value)
+    {
+        Hook *hook = this->rt.upvalue(idx);
+        if (!hook)
+        {
+            std::cerr << "invalid upvalue index (" << idx << ")\n";
+            exit(1);
+        }
+        bool rsl;
+        if (hook->is_detached)
+        {
+            rsl = hook->val == value;
+        }
+        else
+        {
+            rsl = *hook->original == value;
+        }
+        this->test(rsl, "upvalue");
         return *this;
     }
 };
@@ -388,4 +418,30 @@ void interpreter_tests()
         .test_stack({
             lvnumber(1),
         });
+
+    InterpretorTestCase("upvalue")
+        .add_upvalue(lvnumber(7))
+        .add_detached_upvalue(lvnumber(3))
+        .add_detached_upvalue(lvnumber(8))
+        .execute({
+            iupvalue(0),
+            iupvalue(2),
+        })
+        .test_stack({
+            lvnumber(7),
+            lvnumber(8),
+        });
+
+    InterpretorTestCase("upvalue store")
+        .add_upvalue(lvnumber(7))
+        .add_detached_upvalue(lvnumber(3))
+        .add_detached_upvalue(lvnumber(8))
+        .execute({
+            itrue,
+            iustore(2),
+        })
+        .test_stack({})
+        .test_upvalue(0, lvnumber(7))
+        .test_upvalue(1, lvnumber(3))
+        .test_upvalue(2, lvbool(true));
 }

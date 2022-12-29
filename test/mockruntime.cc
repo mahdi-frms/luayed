@@ -181,10 +181,28 @@ void MockRuntime::save_ip(size_t ip)
 {
     this->ip = ip;
 }
+void MockRuntime::add_upvalue(LuaValue value)
+{
+    this->upvalues.push_back(value);
+    Hook hook;
+    hook.is_detached = false;
+    hook.val = lvnil();
+    hook.original = &this->upvalues.back();
+    this->upvalue_hooks.push_back(hook);
+}
+void MockRuntime::add_detached_upvalue(LuaValue value)
+{
+    Hook hook;
+    hook.is_detached = true;
+    hook.val = value;
+    hook.original = nullptr;
+    this->upvalue_hooks.push_back(hook);
+}
 Hook *MockRuntime::upvalue(size_t idx)
 {
-    // toto
-    return nullptr;
+    if (idx >= this->upvalue_hooks.size())
+        return nullptr;
+    return &this->upvalue_hooks[idx];
 }
 LuaValue MockRuntime::rodata(size_t idx)
 {

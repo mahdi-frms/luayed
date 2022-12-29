@@ -24,6 +24,8 @@ private:
     vector<LuaValue> constants;
     vector<LuaValue> args;
     vector<lbyte> instructions;
+    vector<Hook> upvalue_hooks;
+    vector<LuaValue> upvalues;
     size_t ip;
 
     size_t back_stack(size_t idx);
@@ -39,6 +41,9 @@ public:
     void set_args(vector<LuaValue> args);
     void set_text(vector<Opcode> text);
     bool compare_stack(vector<LuaValue> values);
+
+    void add_upvalue(LuaValue value);
+    void add_detached_upvalue(LuaValue value);
 
     vector<LuaValue> &get_stack();
 
