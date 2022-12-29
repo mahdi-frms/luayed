@@ -267,4 +267,10 @@ void interpreter_tests()
             lvbool(true),
             lvnumber(10),
         });
+
+    InterpretorTestCase("push function")
+        .execute({
+            ifconst(1),
+        })
+        .test_call_luafn(1);
 }
