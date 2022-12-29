@@ -186,11 +186,6 @@ Hook *MockRuntime::upvalue(size_t idx)
     // toto
     return nullptr;
 }
-Hook *MockRuntime::hook(size_t idx)
-{
-    // toto
-    return nullptr;
-}
 LuaValue MockRuntime::rodata(size_t idx)
 {
     if (idx >= this->constants.size())

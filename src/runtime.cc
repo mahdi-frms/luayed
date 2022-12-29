@@ -420,10 +420,6 @@ Hook *LuaRuntime::upvalue(size_t idx)
 {
     return this->uptable()[idx];
 }
-Hook *LuaRuntime::hook(size_t idx)
-{
-    return this->hooktable()[idx];
-}
 fidx_t LuaRuntime::gen_fidx()
 {
     this->functable.push_back(nullptr);

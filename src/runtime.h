@@ -162,7 +162,6 @@ public:
     size_t load_ip();
     void save_ip(size_t sp);
     Hook *upvalue(size_t idx);
-    Hook *hook(size_t idx);
     LuaValue rodata(size_t idx);
     lbyte *text();
 };
