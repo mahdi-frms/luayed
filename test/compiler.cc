@@ -320,8 +320,8 @@ void compiler_tests()
             iconst(2),
             itrue,
             // write to buffers
+            iblstore(2),
             iblstore(3),
-            iblstore(4),
             // global set
             igset,
             igset,
@@ -349,8 +349,8 @@ void compiler_tests()
             iconst(2),
             inil,
             // write to buffers
+            iblstore(2),
             iblstore(3),
-            iblstore(4),
             // global set
             igset,
             igset,
@@ -378,8 +378,8 @@ void compiler_tests()
             iconst(2),
             iconst(3),
             // write to buffers
+            iblstore(2),
             iblstore(3),
-            iblstore(4),
             // global set
             igset,
             igset,
@@ -454,9 +454,9 @@ void compiler_tests()
             iconst(1),
             iconst(2),
             // write to buffers
-            iblstore(4),
-            iblstore(4),
-            iblstore(4),
+            iblstore(3),
+            iblstore(3),
+            iblstore(3),
             // local set
             ilstore(2),
             ilstore(1),
@@ -1069,7 +1069,7 @@ void compiler_tests()
             iblocal(2), // step
             iadd,
             iblocal(1),  // copy new counter
-            iblstore(5), // store new counter
+            iblstore(4), // store new counter
             iblocal(3),  // limit
             ile,
             icjmp(7),
@@ -1116,24 +1116,24 @@ void compiler_tests()
             // swap
             iblocal(1),
             iblocal(4),
-            iblstore(3),
-            iblstore(4),
-            iblocal(2),
-            iblocal(3),
-            iblstore(4),
-            iblstore(3),
-            iblocal(3),
-            iblocal(2),
-            iblstore(5),
             iblstore(2),
+            iblstore(3),
+            iblocal(2),
+            iblocal(3),
+            iblstore(3),
+            iblstore(2),
+            iblocal(3),
+            iblocal(2),
+            iblstore(4),
+            iblstore(1),
             // loop start 36
             iblocal(1),
             iblocal(3),
             ilocal(4),
             icall(2, 4),
-            iblstore(6),
-            iblstore(6),
-            iblstore(6),
+            iblstore(5),
+            iblstore(5),
+            iblstore(5),
             // loop check
             ilocal(4),
             inil,
@@ -1297,7 +1297,7 @@ void compiler_tests()
             iblocal(2), // step
             iadd,
             iblocal(1),  // copy new counter
-            iblstore(5), // store new counter
+            iblstore(4), // store new counter
             iblocal(3),  // limit
             ile,
             icjmp(7),
@@ -1656,8 +1656,8 @@ void compiler_tests()
             itrue,
             ifalse,
             // fill buffers
-            iblstore(3),
-            iblstore(5),
+            iblstore(2),
+            iblstore(4),
             // operators
             itset,
             itset,
@@ -1833,7 +1833,7 @@ void compiler_tests()
             iblocal(1),
             iconst(0),
             itget,
-            iblstore(3),
+            iblstore(2),
             ilocal(1),
             icall(2, 1),
             // end
