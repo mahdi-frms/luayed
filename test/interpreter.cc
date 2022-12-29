@@ -294,4 +294,68 @@ void interpreter_tests()
         })
         .execute()
         .test_call_fncall(4, 2);
+
+    InterpretorTestCase("local")
+        .set_stack({
+            lvnumber(5),
+            lvbool(false),
+            lvnumber(10),
+        })
+        .execute({
+            ilocal(1),
+            ilocal(3),
+        })
+        .test_stack({
+            lvnumber(5),
+            lvbool(false),
+            lvnumber(10),
+            lvbool(false),
+            lvbool(false),
+        });
+
+    InterpretorTestCase("store")
+        .set_stack({
+            lvnumber(5),
+            lvbool(false),
+            lvnumber(10),
+        })
+        .execute({
+            ilocal(1),
+            ilstore(0),
+        })
+        .test_stack({
+            lvbool(false),
+            lvbool(false),
+            lvnumber(10),
+        });
+
+    InterpretorTestCase("back local")
+        .set_stack({
+            lvnumber(5),
+            lvbool(false),
+            lvnumber(10),
+        })
+        .execute({
+            iblocal(1),
+        })
+        .test_stack({
+            lvnumber(5),
+            lvbool(false),
+            lvnumber(10),
+            lvnumber(10),
+        });
+
+    InterpretorTestCase("back store")
+        .set_stack({
+            lvnumber(5),
+            lvbool(false),
+            lvnumber(10),
+        })
+        .execute({
+            iblstore(2),
+        })
+        .test_stack({
+            lvnumber(10),
+            lvbool(false),
+        });
 }

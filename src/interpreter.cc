@@ -395,7 +395,7 @@ void Interpreter::i_blocal()
 void Interpreter::i_blstore()
 {
     LuaValue value = this->rt->stack_pop();
-    this->rt->stack_back_write(this->arg1 - 1, value);
+    this->rt->stack_back_write(this->arg1, value);
 }
 void Interpreter::i_upvalue()
 {
