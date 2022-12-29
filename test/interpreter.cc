@@ -273,4 +273,16 @@ void interpreter_tests()
             ifconst(1),
         })
         .test_call_luafn(1);
+
+    InterpretorTestCase("push new hook")
+        .execute({
+            iupush,
+        })
+        .test_call_hookpush();
+
+    InterpretorTestCase("pop hook")
+        .execute({
+            iupop,
+        })
+        .test_call_hookpop();
 }
