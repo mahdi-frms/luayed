@@ -7,8 +7,6 @@
 #include <tap/tap.h>
 #include "mockruntime.h"
 
-#define IPTR(I) Opcode(0x00, I)
-
 LuaValue vnumber(lnumber n)
 {
     LuaValue v;
@@ -148,6 +146,36 @@ public:
     InterpretorTestCase &test_ret(size_t retc)
     {
         this->test(this->retarg == retc, "return count");
+        return *this;
+    }
+    InterpretorTestCase &test_call_luafn(fidx_t fidx)
+    {
+        this->test(this->rt.icp_luafn.check(fidx, 0), "call [luafn]");
+        return *this;
+    }
+    InterpretorTestCase &test_call_fncall(size_t argc, size_t retc)
+    {
+        this->test(this->rt.icp_luafn.check(argc, retc), "call [fncall]");
+        return *this;
+    }
+    InterpretorTestCase &test_call_load_ip()
+    {
+        this->test(this->rt.icp_load_ip.check(0, 0), "call [load_ip]");
+        return *this;
+    }
+    InterpretorTestCase &test_call_save_ip(size_t ip)
+    {
+        this->test(this->rt.icp_save_ip.check(ip, 0), "call [save_ip]");
+        return *this;
+    }
+    InterpretorTestCase &test_call_hookpush()
+    {
+        this->test(this->rt.icp_hookpush.check(0, 0), "call [hookpush]");
+        return *this;
+    }
+    InterpretorTestCase &test_call_hookpop()
+    {
+        this->test(this->rt.icp_hookpop.check(0, 0), "call [hookpop]");
         return *this;
     }
 };
