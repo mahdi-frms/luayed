@@ -358,4 +358,34 @@ void interpreter_tests()
             lvnumber(10),
             lvbool(false),
         });
+
+    InterpretorTestCase("jump")
+        .set_text({
+            inil,
+            ijmp(5),
+            inil,
+            inil,
+            iret(0),
+        })
+        .execute()
+        .test_stack({
+            lvnil(),
+            lvnil(),
+        });
+
+    InterpretorTestCase("conditional jump")
+        .set_stack({
+            lvnumber(1),
+            lvnil(),
+            lvnumber(0),
+            lvbool(true),
+        })
+        .set_text({
+            icjmp(0),
+            iret(0),
+        })
+        .execute()
+        .test_stack({
+            lvnumber(1),
+        });
 }
