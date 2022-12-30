@@ -30,7 +30,7 @@ bool runfile(const char *path)
     lua.compile(text);
     lua.call(0, 1);
     lnumber num = lua.pop_number();
-    printf("result: %f\n", num);
+    std::cout << "result: " << num << "\n";
     return true; // todo: must check for errors
 }
 
@@ -45,6 +45,6 @@ int main(int argc, char **argv)
             // return 1;
         }
     }
-    printf("PARSING DONE!\n");
+    std::cout << "PARSING DONE!\n";
     return 0;
 }

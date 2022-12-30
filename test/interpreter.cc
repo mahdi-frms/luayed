@@ -4,7 +4,7 @@
 #include <interpreter.h>
 #include <generator.h>
 #include <generator.h>
-#include <tap/tap.h>
+#include "test.h"
 #include "mockruntime.h"
 #include "lstrep.h"
 
@@ -49,7 +49,7 @@ private:
         string mes = message;
         mes.append(" : ");
         mes.append(suffix);
-        ok(rsl, mes.c_str());
+        test_assert(rsl, mes.c_str());
     }
 
 public:

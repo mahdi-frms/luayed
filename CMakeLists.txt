@@ -14,6 +14,7 @@ add_library(luacomp
     src/luadef.cc
     src/interpreter.cc
     src/lstrep.cc
+    src/luadef.cc
 )
     
 add_executable(luayed

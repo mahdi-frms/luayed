@@ -1,6 +1,7 @@
-#include <tap/tap.h>
+#include "test.h"
 #include <ast.h>
 #include <parser.h>
+#include <stdarg.h>
 
 #define T(K) NodeKind::TKN, K
 
@@ -148,7 +149,7 @@ void partest(bool exp, const char *message, ...)
     Ast parser_ast = exp ? parser.parse_exp() : parser.parse();
     Ast maker_ast = am.get_tree();
     char *mes = concat("parser : ", message);
-    ok(cmp_node(parser_ast.root(), maker_ast.root()), mes);
+    test_assert(cmp_node(parser_ast.root(), maker_ast.root()), mes);
     parser_ast.destroy();
     maker_ast.destroy();
     delete[] mes;

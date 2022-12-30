@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 
 template <typename T>
 using vector = std::vector<T>;
@@ -11,6 +12,8 @@ typedef std::string string;
 
 typedef unsigned char lbyte;
 typedef double lnumber;
+
+extern std::ostream &dbg;
 
 typedef size_t fidx_t;
 

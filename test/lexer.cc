@@ -1,7 +1,8 @@
-#include <tap/tap.h>
+#include "test.h"
 #include <lexer.h>
 #include <cstring>
 #include <stdarg.h>
+#include <iostream>
 
 char *tokenize_test(const char *text, vector<TokenKind> &kinds, vector<Token> &tokens)
 {
@@ -79,7 +80,7 @@ bool lexer_test(const char *text, vector<TokenKind> kinds)
     char *orig = tokenize_test(text, kinds, tkns);
     if (orig == nullptr)
     {
-        fprintf(stderr, "LEXER TEST CRASH!\n");
+        std::cerr << "LEXER TEST CRASH!\n";
         exit(1);
     }
     Lexer lxr = Lexer(orig);
@@ -132,7 +133,7 @@ void lxerrr(const char *message, const char *text)
         }
     }
     char *mes = concat("lexer : ", message);
-    ok(rsl, mes);
+    test_assert(rsl, mes);
     delete[] mes;
 }
 
@@ -155,7 +156,7 @@ void lxtest(const char *message, const char *text, ...)
     va_end(list);
 
     char *mes = concat("lexer : ", message);
-    ok(lexer_test(text, kinds), mes);
+    test_assert(lexer_test(text, kinds), mes);
     delete[] mes;
 }
 

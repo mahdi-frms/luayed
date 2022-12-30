@@ -1,6 +1,8 @@
 #include "luadef.h"
 #include <iostream>
 
+std::ostream &dbg = std::cout;
+
 bool operator==(const LuaValue &v1, const LuaValue &v2)
 {
     if (v1.kind != v2.kind)
