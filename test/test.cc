@@ -1,9 +1,15 @@
+#include "test.h"
 #include <tap/tap.h>
 
 void lexer_tests();
 void parser_tests();
 void compiler_tests();
 void interpreter_tests();
+
+void test_assert(bool result, const char *message)
+{
+    ok(result, message);
+}
 
 int main()
 {

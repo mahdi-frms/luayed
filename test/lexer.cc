@@ -1,4 +1,4 @@
-#include <tap/tap.h>
+#include "test.h"
 #include <lexer.h>
 #include <cstring>
 #include <stdarg.h>
@@ -132,7 +132,7 @@ void lxerrr(const char *message, const char *text)
         }
     }
     char *mes = concat("lexer : ", message);
-    ok(rsl, mes);
+    test_assert(rsl, mes);
     delete[] mes;
 }
 
@@ -155,7 +155,7 @@ void lxtest(const char *message, const char *text, ...)
     va_end(list);
 
     char *mes = concat("lexer : ", message);
-    ok(lexer_test(text, kinds), mes);
+    test_assert(lexer_test(text, kinds), mes);
     delete[] mes;
 }
 

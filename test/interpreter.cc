@@ -4,7 +4,7 @@
 #include <interpreter.h>
 #include <generator.h>
 #include <generator.h>
-#include <tap/tap.h>
+#include "test.h"
 
 #define IPTR(I) Opcode(0x00, I)
 
@@ -59,7 +59,7 @@ void interpetor_test_case(
         intrp.run(&rt, text[i]);
     }
     LuaValue top = rt.stack_pop();
-    ok(top.kind == LuaType::LVBool && top.data.b, mes.c_str());
+    test_assert(top.kind == LuaType::LVBool && top.data.b, mes.c_str());
 }
 
 void interpreter_tests()

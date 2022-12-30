@@ -4,7 +4,7 @@
 #include <map>
 #include <cstring>
 #include <iostream>
-#include <tap/tap.h>
+#include "test.h"
 #include <lstrep.h>
 
 struct FuncTest
@@ -22,7 +22,7 @@ typedef void (*test_case_function_t)(const char *, bool);
 
 void test_case(const char *mes, bool rsl)
 {
-    ok(rsl, mes);
+    test_assert(rsl, mes);
 }
 
 char *compiler_test_message(const char *item, const char *property)
