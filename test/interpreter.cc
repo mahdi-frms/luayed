@@ -36,7 +36,7 @@ LuaValue vnil()
     return v;
 }
 
-class InterpretorTestCase
+class InterpreterTestCase
 {
 private:
     MockRuntime rt;
@@ -53,25 +53,25 @@ private:
     }
 
 public:
-    InterpretorTestCase(const char *message) : message(message)
+    InterpreterTestCase(const char *message) : message(message)
     {
     }
-    InterpretorTestCase &set_stack(vector<LuaValue> stack)
+    InterpreterTestCase &set_stack(vector<LuaValue> stack)
     {
         this->rt.set_stack(stack);
         return *this;
     }
-    InterpretorTestCase &set_constants(vector<LuaValue> constants)
+    InterpreterTestCase &set_constants(vector<LuaValue> constants)
     {
         this->rt.set_constants(constants);
         return *this;
     }
-    InterpretorTestCase &set_args(vector<LuaValue> args)
+    InterpreterTestCase &set_args(vector<LuaValue> args)
     {
         this->rt.set_args(args);
         return *this;
     }
-    InterpretorTestCase &set_text(vector<Opcode> text)
+    InterpreterTestCase &set_text(vector<Opcode> text)
     {
         if (!text.size() || (text.back().bytes[0] & 0b11111110) != Instruction::IRet)
         {
@@ -81,17 +81,17 @@ public:
         this->rt.set_text(text);
         return *this;
     }
-    InterpretorTestCase &add_upvalue(LuaValue value)
+    InterpreterTestCase &add_upvalue(LuaValue value)
     {
         this->rt.add_upvalue(value);
         return *this;
     }
-    InterpretorTestCase &add_detached_upvalue(LuaValue value)
+    InterpreterTestCase &add_detached_upvalue(LuaValue value)
     {
         this->rt.add_detached_upvalue(value);
         return *this;
     }
-    InterpretorTestCase &test_top()
+    InterpreterTestCase &test_top()
     {
         const char *suffix = "stack top";
         try
@@ -111,7 +111,7 @@ public:
         for (size_t i = 0; i < stack.size(); i++)
             std::cerr << stack[i] << "\n";
     }
-    InterpretorTestCase &test_stack(vector<LuaValue> expected_stack)
+    InterpreterTestCase &test_stack(vector<LuaValue> expected_stack)
     {
         bool rsl = this->rt.get_stack() == expected_stack;
         this->test(rsl, "stack elements");
@@ -124,7 +124,7 @@ public:
         }
         return *this;
     }
-    InterpretorTestCase &execute()
+    InterpreterTestCase &execute()
     {
         const char *suffix = "execution";
         Interpreter intp;
@@ -141,7 +141,7 @@ public:
         }
         return *this;
     }
-    InterpretorTestCase &execute(vector<Opcode> opcodes)
+    InterpreterTestCase &execute(vector<Opcode> opcodes)
     {
         const char *suffix = "execution";
         Interpreter intp;
@@ -159,32 +159,32 @@ public:
         }
         return *this;
     }
-    InterpretorTestCase &test_ret(size_t retc)
+    InterpreterTestCase &test_ret(size_t retc)
     {
         this->test(this->retarg == retc, "return count");
         return *this;
     }
-    InterpretorTestCase &test_call_luafn(fidx_t fidx)
+    InterpreterTestCase &test_call_luafn(fidx_t fidx)
     {
         this->test(this->rt.icp_luafn.check(fidx, 0), "call [luafn]");
         return *this;
     }
-    InterpretorTestCase &test_call_fncall(size_t argc, size_t retc)
+    InterpreterTestCase &test_call_fncall(size_t argc, size_t retc)
     {
         this->test(this->rt.icp_fncall.check(argc, retc), "call [fncall]");
         return *this;
     }
-    InterpretorTestCase &test_call_hookpush()
+    InterpreterTestCase &test_call_hookpush()
     {
         this->test(this->rt.icp_hookpush.check(0, 0), "call [hookpush]");
         return *this;
     }
-    InterpretorTestCase &test_call_hookpop()
+    InterpreterTestCase &test_call_hookpop()
     {
         this->test(this->rt.icp_hookpop.check(0, 0), "call [hookpop]");
         return *this;
     }
-    InterpretorTestCase &test_upvalue(size_t idx, LuaValue value)
+    InterpreterTestCase &test_upvalue(size_t idx, LuaValue value)
     {
         Hook *hook = this->rt.upvalue(idx);
         if (!hook)
@@ -208,7 +208,7 @@ public:
 
 void interpreter_tests()
 {
-    InterpretorTestCase("push true")
+    InterpreterTestCase("push true")
         .execute({
             itrue,
         })
@@ -216,7 +216,7 @@ void interpreter_tests()
             lvbool(true),
         });
 
-    InterpretorTestCase("push false")
+    InterpreterTestCase("push false")
         .execute({
             ifalse,
         })
@@ -224,7 +224,7 @@ void interpreter_tests()
             lvbool(false),
         });
 
-    InterpretorTestCase("push nil")
+    InterpreterTestCase("push nil")
         .execute({
             inil,
         })
@@ -232,7 +232,7 @@ void interpreter_tests()
             lvnil(),
         });
 
-    InterpretorTestCase("pop value")
+    InterpreterTestCase("pop value")
         .set_stack({
             lvnumber(3),
             lvbool(true),
@@ -246,7 +246,7 @@ void interpreter_tests()
             lvbool(true),
         });
 
-    InterpretorTestCase("pop multiple values")
+    InterpreterTestCase("pop multiple values")
         .set_stack({
             lvnumber(3),
             lvbool(true),
@@ -260,7 +260,7 @@ void interpreter_tests()
             lvnumber(3),
         });
 
-    InterpretorTestCase("push constants")
+    InterpreterTestCase("push constants")
         .set_constants({
             lvnumber(2),
             lvnumber(10),
@@ -276,7 +276,7 @@ void interpreter_tests()
             lvnumber(10),
         });
 
-    InterpretorTestCase("push arg")
+    InterpreterTestCase("push arg")
         .set_args({
             lvbool(true),
             lvnumber(10),
@@ -294,31 +294,31 @@ void interpreter_tests()
             lvnumber(10),
         });
 
-    InterpretorTestCase("push function")
+    InterpreterTestCase("push function")
         .execute({
             ifconst(1),
         })
         .test_call_luafn(1);
 
-    InterpretorTestCase("push new hook")
+    InterpreterTestCase("push new hook")
         .execute({
             iupush,
         })
         .test_call_hookpush();
 
-    InterpretorTestCase("pop hook")
+    InterpreterTestCase("pop hook")
         .execute({
             iupop,
         })
         .test_call_hookpop();
 
-    InterpretorTestCase("ret")
+    InterpreterTestCase("ret")
         .execute({
             iret(5),
         })
         .test_ret(5);
 
-    InterpretorTestCase("call")
+    InterpreterTestCase("call")
         .set_text({
             icall(4, 2),
             iret(0),
@@ -326,7 +326,7 @@ void interpreter_tests()
         .execute()
         .test_call_fncall(4, 2);
 
-    InterpretorTestCase("local")
+    InterpreterTestCase("local")
         .set_stack({
             lvnumber(5),
             lvbool(false),
@@ -344,7 +344,7 @@ void interpreter_tests()
             lvbool(false),
         });
 
-    InterpretorTestCase("store")
+    InterpreterTestCase("store")
         .set_stack({
             lvnumber(5),
             lvbool(false),
@@ -360,7 +360,7 @@ void interpreter_tests()
             lvnumber(10),
         });
 
-    InterpretorTestCase("back local")
+    InterpreterTestCase("back local")
         .set_stack({
             lvnumber(5),
             lvbool(false),
@@ -376,7 +376,7 @@ void interpreter_tests()
             lvnumber(10),
         });
 
-    InterpretorTestCase("back store")
+    InterpreterTestCase("back store")
         .set_stack({
             lvnumber(5),
             lvbool(false),
@@ -390,7 +390,7 @@ void interpreter_tests()
             lvbool(false),
         });
 
-    InterpretorTestCase("jump")
+    InterpreterTestCase("jump")
         .set_text({
             inil,
             ijmp(5),
@@ -404,7 +404,7 @@ void interpreter_tests()
             lvnil(),
         });
 
-    InterpretorTestCase("conditional jump")
+    InterpreterTestCase("conditional jump")
         .set_stack({
             lvnumber(1),
             lvnil(),
@@ -420,7 +420,7 @@ void interpreter_tests()
             lvnumber(1),
         });
 
-    InterpretorTestCase("upvalue")
+    InterpreterTestCase("upvalue")
         .add_upvalue(lvnumber(7))
         .add_detached_upvalue(lvnumber(3))
         .add_detached_upvalue(lvnumber(8))
@@ -433,7 +433,7 @@ void interpreter_tests()
             lvnumber(8),
         });
 
-    InterpretorTestCase("upvalue store")
+    InterpreterTestCase("upvalue store")
         .add_upvalue(lvnumber(7))
         .add_detached_upvalue(lvnumber(3))
         .add_detached_upvalue(lvnumber(8))
@@ -446,7 +446,7 @@ void interpreter_tests()
         .test_upvalue(1, lvnumber(3))
         .test_upvalue(2, lvbool(true));
 
-    InterpretorTestCase("eq/non-equal/number")
+    InterpreterTestCase("eq/non-equal/number")
         .set_stack({
             lvnumber(3),
             lvnumber(5),
@@ -458,7 +458,7 @@ void interpreter_tests()
             lvbool(false),
         });
 
-    InterpretorTestCase("eq/equal/number")
+    InterpreterTestCase("eq/equal/number")
         .set_stack({
             lvnumber(5),
             lvnumber(5),
@@ -470,7 +470,7 @@ void interpreter_tests()
             lvbool(true),
         });
 
-    InterpretorTestCase("eq/non-equal/bool")
+    InterpreterTestCase("eq/non-equal/bool")
         .set_stack({
             lvbool(true),
             lvbool(false),
@@ -482,7 +482,7 @@ void interpreter_tests()
             lvbool(false),
         });
 
-    InterpretorTestCase("eq/equal/bool")
+    InterpreterTestCase("eq/equal/bool")
         .set_stack({
             lvbool(false),
             lvbool(false),
@@ -494,7 +494,7 @@ void interpreter_tests()
             lvbool(true),
         });
 
-    InterpretorTestCase("eq/equal/nil")
+    InterpreterTestCase("eq/equal/nil")
         .set_stack({
             lvnil(),
             lvnil(),
@@ -506,7 +506,7 @@ void interpreter_tests()
             lvbool(true),
         });
 
-    InterpretorTestCase("eq/equal/empty strings")
+    InterpreterTestCase("eq/equal/empty strings")
         .set_stack({
             lvstring(""),
             lvstring(""),
@@ -518,7 +518,7 @@ void interpreter_tests()
             lvbool(true),
         });
 
-    InterpretorTestCase("eq/equal/strings")
+    InterpreterTestCase("eq/equal/strings")
         .set_stack({
             lvstring("lua"),
             lvstring("lua"),
@@ -530,7 +530,7 @@ void interpreter_tests()
             lvbool(true),
         });
 
-    InterpretorTestCase("eq/non-equal/strings")
+    InterpreterTestCase("eq/non-equal/strings")
         .set_stack({
             lvstring("lua"),
             lvstring("luac"),
@@ -542,7 +542,7 @@ void interpreter_tests()
             lvbool(false),
         });
 
-    InterpretorTestCase("eq/non-equal(case)/strings")
+    InterpreterTestCase("eq/non-equal(case)/strings")
         .set_stack({
             lvstring("lua"),
             lvstring("lUa"),
@@ -554,7 +554,7 @@ void interpreter_tests()
             lvbool(false),
         });
 
-    InterpretorTestCase("eq/non-equal/tables")
+    InterpreterTestCase("eq/non-equal/tables")
         .set_stack({
             lvtable(),
             lvtable(),
@@ -566,7 +566,7 @@ void interpreter_tests()
             lvbool(false),
         });
 
-    InterpretorTestCase("eq/equal/tables")
+    InterpreterTestCase("eq/equal/tables")
         .set_stack({
             lvtable(),
         })
@@ -578,7 +578,7 @@ void interpreter_tests()
             lvbool(true),
         });
 
-    InterpretorTestCase("eq/non-equal/different")
+    InterpreterTestCase("eq/non-equal/different")
         .set_stack({
             lvtable(),
             lvstring("lua"),
@@ -590,7 +590,7 @@ void interpreter_tests()
             lvbool(false),
         });
 
-    InterpretorTestCase("ne/non-equal/different")
+    InterpreterTestCase("ne/non-equal/different")
         .set_stack({
             lvtable(),
             lvstring("lua"),
@@ -602,7 +602,7 @@ void interpreter_tests()
             lvbool(true),
         });
 
-    InterpretorTestCase("gt/numbers")
+    InterpreterTestCase("gt/numbers")
         .set_stack({
             lvnumber(6),
             lvnumber(5),
@@ -628,7 +628,7 @@ void interpreter_tests()
             lvbool(false),
         });
 
-    InterpretorTestCase("ge/numbers")
+    InterpreterTestCase("ge/numbers")
         .set_stack({
             lvnumber(6),
             lvnumber(5),
@@ -654,7 +654,7 @@ void interpreter_tests()
             lvbool(false),
         });
 
-    InterpretorTestCase("lt/numbers")
+    InterpreterTestCase("lt/numbers")
         .set_stack({
             lvnumber(6),
             lvnumber(5),
@@ -680,7 +680,7 @@ void interpreter_tests()
             lvbool(true),
         });
 
-    InterpretorTestCase("le/numbers")
+    InterpreterTestCase("le/numbers")
         .set_stack({
             lvnumber(6),
             lvnumber(5),
@@ -706,7 +706,7 @@ void interpreter_tests()
             lvbool(true),
         });
 
-    InterpretorTestCase("gt/string")
+    InterpreterTestCase("gt/string")
         .set_stack({
             lvstring("luo"),
             lvstring("lue"),
@@ -732,7 +732,7 @@ void interpreter_tests()
             lvbool(false),
         });
 
-    InterpretorTestCase("ge/string")
+    InterpreterTestCase("ge/string")
         .set_stack({
             lvstring("luo"),
             lvstring("lue"),
@@ -758,7 +758,7 @@ void interpreter_tests()
             lvbool(false),
         });
 
-    InterpretorTestCase("lt/string")
+    InterpreterTestCase("lt/string")
         .set_stack({
             lvstring("luo"),
             lvstring("lue"),
@@ -784,7 +784,7 @@ void interpreter_tests()
             lvbool(true),
         });
 
-    InterpretorTestCase("le/string")
+    InterpreterTestCase("le/string")
         .set_stack({
             lvstring("luo"),
             lvstring("lue"),
