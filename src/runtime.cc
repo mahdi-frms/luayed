@@ -1,4 +1,5 @@
 #include "runtime.h"
+#include "lstrep.h"
 #include <cstring>
 
 #define INITIAL_FRAME_SIZE 1024 // must be expandable
@@ -61,11 +62,6 @@ Upvalue *Lfunction::ups()
 LuaValue *Lfunction::rodata()
 {
     return (LuaValue *)(this->text() + this->codelen);
-}
-
-string Lfunction::stringify()
-{
-    return binary_stringify(this->text(), this->codelen);
 }
 
 LuaValue LuaRuntime::create_nil()

@@ -13,6 +13,7 @@ add_library(luacomp
     src/token.cc
     src/runtime.cc
     src/interpreter.cc
+    src/lstrep.cc
 )
 
 add_executable(luayed

@@ -29,8 +29,6 @@ public:
     Upvalue *ups();
     LuaValue *rodata();
 
-    string stringify();
-
     ~Lfunction();
     Lfunction &operator=(const Lfunction &other) = delete;
     Lfunction(const Lfunction &other) = delete;

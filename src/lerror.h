@@ -75,8 +75,6 @@ struct LError
             LuaType t2;
         } invalid_operands;
     } as;
-
-    string to_string();
 };
 
 LError error_ok();
@@ -92,7 +90,5 @@ LError error_expected_token(TokenKind kind);
 LError error_expected_expression();
 LError error_expected_variable();
 LError error_invalid_operands(LuaType t1, LuaType t2);
-
-std::ostream &operator<<(std::ostream &os, const LError &err);
 
 #endif
