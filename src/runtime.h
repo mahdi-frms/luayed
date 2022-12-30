@@ -138,6 +138,7 @@ public:
     LuaValue create_boolean(bool b);
     LuaValue create_number(lnumber n);
     LuaValue create_string(const char *s);
+    LuaValue create_string(const char *s1, const char *s2);
     LuaValue create_table();
     Lfunction *create_binary(GenFunction *gfn);
     LuaValue create_cppfn(LuaCppFunction fn);

@@ -39,6 +39,7 @@ public:
     virtual LuaValue create_boolean(bool b) = 0;
     virtual LuaValue create_number(lnumber n) = 0;
     virtual LuaValue create_string(const char *s) = 0;
+    virtual LuaValue create_string(const char *s1, const char *s2) = 0;
     virtual LuaValue create_table() = 0;
     virtual LuaValue create_luafn(fidx_t fidx) = 0;
 

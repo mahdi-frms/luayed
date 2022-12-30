@@ -1,8 +1,10 @@
 #include "mockruntime.h"
 #include <map>
 #include <set>
+#include <cstring>
 
 std::set<string> strset;
+vector<string> allocstrings;
 
 #define MOCK_RUNTIME_FAULT_POP 1
 #define MOCK_RUNTIME_FAULT_IDX 2
@@ -40,7 +42,7 @@ LuaValue lvstring(const char *s)
     }
     LuaValue v;
     v.kind = LuaType::LVString;
-    v.data.ptr = new string(s);
+    v.data.ptr = (void *)s;
     return v;
 }
 LuaValue lvtable()
@@ -91,6 +93,14 @@ LuaValue MockRuntime::create_number(lnumber n)
 LuaValue MockRuntime::create_string(const char *s)
 {
     return lvstring(s);
+}
+LuaValue MockRuntime::create_string(const char *s1, const char *s2)
+{
+    string str;
+    str.append(s1);
+    str.append(s2);
+    allocstrings.push_back(std::move(str));
+    return lvstring(str.c_str());
 }
 LuaValue MockRuntime::create_table()
 {
