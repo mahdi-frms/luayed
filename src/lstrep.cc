@@ -412,7 +412,7 @@ string to_string(const LError &err)
 #define WRITE_TO_STREAM_OPERATOR(TYPE)                        \
     std::ostream &operator<<(std::ostream &os, const TYPE &o) \
     {                                                         \
-        os << o;                                              \
+        os << to_string(o);                                   \
         return os;                                            \
     }
 

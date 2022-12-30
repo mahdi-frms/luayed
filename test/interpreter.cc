@@ -445,4 +445,160 @@ void interpreter_tests()
         .test_upvalue(0, lvnumber(7))
         .test_upvalue(1, lvnumber(3))
         .test_upvalue(2, lvbool(true));
+
+    InterpretorTestCase("eq/non-equal/number")
+        .set_stack({
+            lvnumber(3),
+            lvnumber(5),
+        })
+        .execute({
+            ieq,
+        })
+        .test_stack({
+            lvbool(false),
+        });
+
+    InterpretorTestCase("eq/equal/number")
+        .set_stack({
+            lvnumber(5),
+            lvnumber(5),
+        })
+        .execute({
+            ieq,
+        })
+        .test_stack({
+            lvbool(true),
+        });
+
+    InterpretorTestCase("eq/non-equal/bool")
+        .set_stack({
+            lvbool(true),
+            lvbool(false),
+        })
+        .execute({
+            ieq,
+        })
+        .test_stack({
+            lvbool(false),
+        });
+
+    InterpretorTestCase("eq/equal/bool")
+        .set_stack({
+            lvbool(false),
+            lvbool(false),
+        })
+        .execute({
+            ieq,
+        })
+        .test_stack({
+            lvbool(true),
+        });
+
+    InterpretorTestCase("eq/equal/nil")
+        .set_stack({
+            lvnil(),
+            lvnil(),
+        })
+        .execute({
+            ieq,
+        })
+        .test_stack({
+            lvbool(true),
+        });
+
+    InterpretorTestCase("eq/equal/empty strings")
+        .set_stack({
+            lvstring(""),
+            lvstring(""),
+        })
+        .execute({
+            ieq,
+        })
+        .test_stack({
+            lvbool(true),
+        });
+
+    InterpretorTestCase("eq/equal/strings")
+        .set_stack({
+            lvstring("lua"),
+            lvstring("lua"),
+        })
+        .execute({
+            ieq,
+        })
+        .test_stack({
+            lvbool(true),
+        });
+
+    InterpretorTestCase("eq/non-equal/strings")
+        .set_stack({
+            lvstring("lua"),
+            lvstring("luac"),
+        })
+        .execute({
+            ieq,
+        })
+        .test_stack({
+            lvbool(false),
+        });
+
+    InterpretorTestCase("eq/non-equal(case)/strings")
+        .set_stack({
+            lvstring("lua"),
+            lvstring("lUa"),
+        })
+        .execute({
+            ieq,
+        })
+        .test_stack({
+            lvbool(false),
+        });
+
+    InterpretorTestCase("eq/non-equal/tables")
+        .set_stack({
+            lvtable(),
+            lvtable(),
+        })
+        .execute({
+            ieq,
+        })
+        .test_stack({
+            lvbool(false),
+        });
+
+    InterpretorTestCase("eq/equal/tables")
+        .set_stack({
+            lvtable(),
+        })
+        .execute({
+            iblocal(1),
+            ieq,
+        })
+        .test_stack({
+            lvbool(true),
+        });
+
+    InterpretorTestCase("eq/non-equal/different")
+        .set_stack({
+            lvtable(),
+            lvstring("lua"),
+        })
+        .execute({
+            ieq,
+        })
+        .test_stack({
+            lvbool(false),
+        });
+
+    InterpretorTestCase("ne/non-equal/different")
+        .set_stack({
+            lvtable(),
+            lvstring("lua"),
+        })
+        .execute({
+            ine,
+        })
+        .test_stack({
+            lvbool(true),
+        });
 }
