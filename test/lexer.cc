@@ -2,6 +2,7 @@
 #include <lexer.h>
 #include <cstring>
 #include <stdarg.h>
+#include <iostream>
 
 char *tokenize_test(const char *text, vector<TokenKind> &kinds, vector<Token> &tokens)
 {
@@ -79,7 +80,7 @@ bool lexer_test(const char *text, vector<TokenKind> kinds)
     char *orig = tokenize_test(text, kinds, tkns);
     if (orig == nullptr)
     {
-        fprintf(stderr, "LEXER TEST CRASH!\n");
+        std::cerr << "LEXER TEST CRASH!\n";
         exit(1);
     }
     Lexer lxr = Lexer(orig);
