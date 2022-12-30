@@ -17,6 +17,12 @@ public:
     bool check(size_t arg1, size_t arg2);
 };
 
+LuaValue lvnil();
+LuaValue lvbool(bool b);
+LuaValue lvnumber(lnumber n);
+LuaValue lvstring(const char *s);
+LuaValue lvtable();
+
 class MockRuntime : public IRuntime
 {
 private:
@@ -26,7 +32,8 @@ private:
     vector<lbyte> instructions;
     vector<Hook> upvalue_hooks;
     vector<LuaValue> upvalues;
-    size_t ip;
+    size_t ip = 0;
+    LuaValue error = lvnil();
 
     size_t back_stack(size_t idx);
 
@@ -69,12 +76,8 @@ public:
     Hook *upvalue(size_t idx);
     LuaValue rodata(size_t idx);
     lbyte *text();
+    void set_error(LuaValue value);
+    LuaValue get_error();
 };
-
-LuaValue lvnil();
-LuaValue lvbool(bool b);
-LuaValue lvnumber(lnumber n);
-LuaValue lvstring(const char *s);
-LuaValue lvtable();
 
 #endif

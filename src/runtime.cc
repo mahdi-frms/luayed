@@ -437,3 +437,11 @@ lbyte *LuaRuntime::text()
 {
     return this->bin()->text();
 }
+void LuaRuntime::set_error(LuaValue value)
+{
+    this->frame->error = value;
+}
+LuaValue LuaRuntime::get_error()
+{
+    return this->frame->error;
+}

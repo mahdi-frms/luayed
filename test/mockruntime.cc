@@ -255,3 +255,11 @@ vector<LuaValue> &MockRuntime::get_stack()
 {
     return this->stack;
 }
+void MockRuntime::set_error(LuaValue value)
+{
+    this->error = value;
+}
+LuaValue MockRuntime::get_error()
+{
+    return this->error;
+}

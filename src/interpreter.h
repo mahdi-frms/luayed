@@ -28,7 +28,6 @@ class Interpreter : public IInterpreter
 public:
     size_t run(IRuntime *rt);
     size_t run(IRuntime *rt, Opcode op);
-    LError get_error();
     static void optable_init();
     Interpreter();
 
@@ -42,7 +41,6 @@ private:
     size_t arg2;
 
     size_t retc = 0;
-    LError error = error_ok();
     InterpreterState state = InterpreterState::Run;
 
     IRuntime *rt = nullptr;
@@ -52,6 +50,7 @@ private:
     void exec();
 
     void push_bool(bool b);
+    void generate_error(LError error);
     bool compare();
     bool compare(Comparison cmp);
     bool compare_number(LuaValue &a, LuaValue &b, Comparison cmp);

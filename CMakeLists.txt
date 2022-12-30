@@ -11,13 +11,13 @@ add_library(luacomp
     src/luabin.cc
     src/lerror.cc
     src/token.cc
-    src/runtime.cc
     src/luadef.cc
     src/interpreter.cc
     src/lstrep.cc
 )
-
+    
 add_executable(luayed
+    src/runtime.cc
     src/main.cc
     src/generator.cc
     src/lerror.cc

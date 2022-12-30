@@ -77,6 +77,7 @@ struct Frame
     size_t sp;
     size_t ip;
     LuaValue fn;
+    LuaValue error;
     Frame *prev;
     size_t hookptr;
 
@@ -146,7 +147,8 @@ public:
 
     void fncall(size_t argc, size_t retc);
     void fnret(size_t count);
-
+    void set_error(LuaValue value);
+    LuaValue get_error();
     fidx_t gen_fidx();
 
     LuaValue stack_pop();

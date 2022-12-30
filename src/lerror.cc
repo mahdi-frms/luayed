@@ -67,11 +67,18 @@ LError error_expected_variable()
     err.kind = LError::LE_ExpectedVariable;
     return err;
 }
-LError error_invalid_operands(LuaType t1, LuaType t2)
+LError error_invalid_binary_operands(LuaType t1, LuaType t2)
 {
     LError err;
-    err.kind = LError::LE_InvalidOperands;
-    err.as.invalid_operands.t1 = t1;
-    err.as.invalid_operands.t2 = t2;
+    err.kind = LError::LE_InvalidBinaryOperands;
+    err.as.invalid_binary_operands.t1 = t1;
+    err.as.invalid_binary_operands.t2 = t2;
+    return err;
+}
+LError error_invalid_unary_operand(LuaType t)
+{
+    LError err;
+    err.kind = LError::LE_InvalidUnaryOperand;
+    err.as.invalid_unary_operands.t = t;
     return err;
 }

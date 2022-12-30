@@ -20,7 +20,8 @@ struct LError
         LE_ExpectedToken,
         LE_ExpectedExpression,
         LE_ExpectedVariable,
-        LE_InvalidOperands,
+        LE_InvalidBinaryOperands,
+        LE_InvalidUnaryOperand,
     } kind;
     union
     {
@@ -73,7 +74,11 @@ struct LError
         {
             LuaType t1;
             LuaType t2;
-        } invalid_operands;
+        } invalid_binary_operands;
+        struct
+        {
+            LuaType t;
+        } invalid_unary_operands;
     } as;
 };
 
@@ -89,6 +94,7 @@ LError error_missing_end_of_comment(size_t level);
 LError error_expected_token(TokenKind kind);
 LError error_expected_expression();
 LError error_expected_variable();
-LError error_invalid_operands(LuaType t1, LuaType t2);
+LError error_invalid_binary_operands(LuaType t1, LuaType t2);
+LError error_invalid_unary_operand(LuaType t);
 
 #endif

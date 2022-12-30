@@ -401,6 +401,10 @@ string to_string(const LError &err)
     {
         os << "expected expression";
     }
+    else
+    {
+        os << "FAULT: THIS ERROR CAN'T BE DISPLAYED";
+    }
     os << "\n";
     return os.str();
 }

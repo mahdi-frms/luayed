@@ -118,11 +118,6 @@ size_t Interpreter::fetch(lbyte *bin)
     return ptr;
 }
 
-LError Interpreter::get_error()
-{
-    return this->error;
-}
-
 void Interpreter::exec()
 {
     (this->*optable[this->op])();
@@ -140,7 +135,7 @@ void Interpreter::i_add()
     LuaValue b = this->rt->stack_pop();
     if (a.kind != LuaType::LVNumber || b.kind != LuaType::LVNumber)
     {
-        this->error = error_invalid_operands(a.kind, b.kind);
+        this->generate_error(error_invalid_binary_operands(a.kind, b.kind));
         this->state = InterpreterState::Error;
         return;
     }
@@ -154,7 +149,7 @@ void Interpreter::i_sub()
     LuaValue b = this->rt->stack_pop();
     if (a.kind != LuaType::LVNumber || b.kind != LuaType::LVNumber)
     {
-        this->error = error_invalid_operands(a.kind, b.kind);
+        this->generate_error(error_invalid_binary_operands(a.kind, b.kind));
         this->state = InterpreterState::Error;
         return;
     }
@@ -182,7 +177,7 @@ void Interpreter::i_neg()
     LuaValue a = this->rt->stack_pop();
     if (a.kind != LuaType::LVNumber)
     {
-        this->error = error_invalid_operands(a.kind, a.kind);
+        this->generate_error(error_invalid_unary_operand(a.kind));
         this->state = InterpreterState::Error;
         return;
     }
@@ -229,7 +224,7 @@ bool Interpreter::compare(Comparison cmp)
     bool rsl;
     if (a.kind != b.kind || (a.kind != LuaType::LVNumber && a.kind != LuaType::LVString))
     {
-        this->error = error_invalid_operands(a.kind, b.kind);
+        this->generate_error(error_invalid_binary_operands(a.kind, b.kind));
         this->state = InterpreterState::Error;
         return false;
     }
@@ -423,4 +418,9 @@ void Interpreter::i_pop()
     {
         this->rt->stack_pop();
     }
+}
+void Interpreter::generate_error(LError error)
+{
+    LuaValue errval = this->rt->create_number(0xc0debed); // todo
+    this->rt->set_error(errval);
 }
