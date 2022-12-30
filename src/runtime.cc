@@ -1,5 +1,4 @@
 #include "runtime.h"
-#include "lstrep.h"
 #include <cstring>
 
 #define INITIAL_FRAME_SIZE 1024 // must be expandable
