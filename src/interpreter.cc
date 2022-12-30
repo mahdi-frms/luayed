@@ -247,12 +247,12 @@ bool Interpreter::compare_number(LuaValue &a, LuaValue &b, Comparison cmp)
 bool Interpreter::compare_string(LuaValue &a, LuaValue &b, Comparison cmp)
 {
     if (cmp == Comparison::GE)
-        return strcmp((char *)a.data.ptr, (char *)b.data.ptr) != -1;
+        return strcmp((char *)a.data.ptr, (char *)b.data.ptr) >= 0;
     if (cmp == Comparison::GT)
-        return strcmp((char *)a.data.ptr, (char *)b.data.ptr) == 1;
+        return strcmp((char *)a.data.ptr, (char *)b.data.ptr) > 0;
     if (cmp == Comparison::LE)
-        return strcmp((char *)a.data.ptr, (char *)b.data.ptr) != 1;
-    return strcmp((char *)a.data.ptr, (char *)b.data.ptr) == -1;
+        return strcmp((char *)a.data.ptr, (char *)b.data.ptr) <= 0;
+    return strcmp((char *)a.data.ptr, (char *)b.data.ptr) < 0;
 }
 LuaValue Interpreter::hookread(Hook *hook)
 {
