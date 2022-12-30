@@ -118,8 +118,6 @@ namespace ast
         NodeKind kind;
         MetaNode *meta = nullptr;
 
-        void stringify(int depth, std::string &buffer);
-
     public:
         NodeKind get_kind();
         Token get_token();
@@ -128,7 +126,6 @@ namespace ast
         size_t child_count();
         Node(Token token, NodeKind kind);
         Node(Noderef *children, size_t count, NodeKind kind);
-        std::string to_string();
         void annotate(MetaNode *md);
         MetaNode *getannot(MetaKind kind);
     };

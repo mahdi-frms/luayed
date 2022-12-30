@@ -1,4 +1,5 @@
 #include "runtime.h"
+#include "lstrep.h"
 #include <cstring>
 
 #define INITIAL_FRAME_SIZE 1024 // must be expandable
@@ -62,11 +63,6 @@ Upvalue *Lfunction::ups()
 LuaValue *Lfunction::rodata()
 {
     return (LuaValue *)(this->text() + this->codelen);
-}
-
-string Lfunction::stringify()
-{
-    return binary_stringify(this->text(), this->codelen);
 }
 
 LuaValue LuaRuntime::create_nil()
@@ -227,8 +223,8 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
         // todo: throw error
         return;
     }
-    bool is_lua = LV_AS_FUNC(fn)->is_lua;
-    Lfunction *bin = is_lua ? LV_AS_FUNC(fn)->binary() : nullptr;
+    bool is_lua = fn->as<LuaFunction *>()->is_lua;
+    Lfunction *bin = is_lua ? fn->as<LuaFunction *>()->binary() : nullptr;
     this->new_frame(argc + 1024 /* THIS NUMBER MUST BE PROVIDED BY THE COMPILER */);
     Frame *frame = this->frame;
     // move values bwtween frames
@@ -256,7 +252,7 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
     }
     else
     {
-        LuaCppFunction cppfn = LV_AS_FUNC(fn)->native();
+        LuaCppFunction cppfn = fn->as<LuaFunction *>()->native();
         return_count = cppfn(this);
     }
     this->fnret(return_count);
@@ -307,19 +303,19 @@ size_t Frame::parcount()
 {
     if (this->fn.kind == LuaType::LVNil)
         return 0;
-    LuaFunction *fn = LV_AS_FUNC(&this->fn);
+    LuaFunction *fn = this->fn.as<LuaFunction *>();
     return fn->is_lua ? fn->binary()->parcount : 0;
 }
 size_t Frame::hookmax()
 {
     if (this->fn.kind == LuaType::LVNil)
         return 0;
-    LuaFunction *fn = LV_AS_FUNC(&this->fn);
+    LuaFunction *fn = this->fn.as<LuaFunction *>();
     return fn->is_lua ? fn->binary()->hookmax : 0;
 }
 Lfunction *Frame::bin()
 {
-    return (Lfunction *)LV_AS_FUNC(&this->fn)->binary();
+    return (Lfunction *)this->fn.as<LuaFunction *>()->binary();
 }
 LuaValue *Frame::stack()
 {

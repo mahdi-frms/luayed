@@ -37,19 +37,24 @@ public:
         void *ptr;
     } data;
 
-    bool truth();
-    const char *as_string();
+    bool truth()
+    {
+        return this->kind != LuaType::LVNil && (this->kind != LuaType::LVBool || this->data.b);
+    }
+    template <typename T>
+    T as()
+    {
+        return ((T)this->data.ptr);
+    }
 };
 
 struct Hook
 {
     bool is_detached;
-    LuaValue val;
     LuaValue *original;
+    LuaValue val;
 };
 
 bool operator==(const LuaValue &v1, const LuaValue &v2);
-std::ostream &operator<<(std::ostream &strm, const LuaValue &v);
-std::ostream &operator<<(std::ostream &strm, const LuaType &t);
 
 #endif

@@ -84,8 +84,6 @@ struct Opcode
     Opcode(lbyte op);
 };
 
-string binary_stringify(lbyte *text, size_t codelen);
-
 #define iadd IAdd
 #define isub ISub
 #define imult IMult

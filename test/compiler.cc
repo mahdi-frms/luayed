@@ -5,6 +5,7 @@
 #include <cstring>
 #include <iostream>
 #include <tap/tap.h>
+#include <lstrep.h>
 
 struct FuncTest
 {
@@ -156,9 +157,9 @@ public:
         {
             std::cerr << "generated and expected binaries do not match!\n"
                       << "expected binary:\n"
-                      << binary_stringify(&bin[0], bin.size())
+                      << to_string(&bin[0], bin.size())
                       << "generated binary:\n"
-                      << binary_stringify(&gen[0], gen.size());
+                      << to_string(&gen[0], gen.size());
         }
         delete[] mes;
         return *this;

@@ -1,4 +1,5 @@
 #include "lerror.h"
+#include "lstrep.h"
 #include <iostream>
 
 LError error_ok()
@@ -73,63 +74,4 @@ LError error_invalid_operands(LuaType t1, LuaType t2)
     err.as.invalid_operands.t1 = t1;
     err.as.invalid_operands.t2 = t2;
     return err;
-}
-std::ostream &operator<<(std::ostream &os, const LError &err)
-{
-    if (err.kind == LError::LE_OK)
-        return os;
-    os << "lua: error(line: "
-       << err.line + 1
-       << ", offset: "
-       << err.offset + 1
-       << "): ";
-    if (err.kind == LError::LE_MissingEndOfComment)
-    {
-        os << "missing symbol ']";
-        for (size_t i = 0; i < err.as.missing_end_of_comment.level; i++)
-            os << '=';
-        os << "]'";
-    }
-    else if (err.kind == LError::LE_MisingEndOfString)
-    {
-        os << "missing symbol ']";
-        for (size_t i = 0; i < err.as.missing_end_of_string.level; i++)
-            os << '=';
-        os << "]'";
-    }
-    else if (err.kind == LError::LE_MissingChar)
-    {
-        os << "missing character '" << err.as.missing_char.c << "'";
-    }
-    else if (err.kind == LError::LE_InvalidChar)
-    {
-        os << "invalid character '" << err.as.invalid_char.c << "'";
-    }
-    else if (err.kind == LError::LE_InvalidEscape)
-    {
-        os << "invalid escape";
-    }
-    else if (err.kind == LError::LE_MalformedNumber)
-    {
-        os << "malformed number";
-    }
-    else if (err.kind == LError::LE_ExpectedToken)
-    {
-        os << "expected token '" << token_kind_stringify(err.as.expected_token.token_kind) << "'";
-    }
-    else if (err.kind == LError::LE_ExpectedVariable)
-    {
-        os << "expected variable";
-    }
-    else if (err.kind == LError::LE_ExpectedExpression)
-    {
-        os << "expected expression";
-    }
-    else
-    {
-        os << "LUA CRASH: ERROR NOT SUPPORTED FOR DISPLAY";
-        exit(1);
-    }
-    os << "\n";
-    return os;
 }

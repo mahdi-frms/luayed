@@ -95,10 +95,9 @@ struct Token
     TokenKind kind;
 
     Token(const char *str, size_t len, size_t line, size_t offset, TokenKind kind);
-    string text();
+    string text() const;
 };
 
-string token_kind_stringify(TokenKind kind);
 Token token_none();
 
 #endif

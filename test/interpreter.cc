@@ -6,6 +6,7 @@
 #include <generator.h>
 #include <tap/tap.h>
 #include "mockruntime.h"
+#include "lstrep.h"
 
 LuaValue vnumber(lnumber n)
 {
