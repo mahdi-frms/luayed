@@ -46,8 +46,9 @@ private:
 
     void test(bool rsl, const char *suffix)
     {
-        string mes = message;
-        mes.append(" : ");
+        string mes = "interpreter : ";
+        mes.append(message);
+        mes.append(" ");
         mes.append(suffix);
         test_assert(rsl, mes.c_str());
     }
@@ -93,7 +94,7 @@ public:
     }
     InterpreterTestCase &test_top()
     {
-        const char *suffix = "stack top";
+        const char *suffix = "(stack top)";
         try
         {
             LuaValue top = this->rt.stack_pop();
@@ -114,7 +115,7 @@ public:
     InterpreterTestCase &test_stack(vector<LuaValue> expected_stack)
     {
         bool rsl = this->rt.get_stack() == expected_stack;
-        this->test(rsl, "stack elements");
+        this->test(rsl, "(stack elements)");
         if (!rsl)
         {
             std::cout << "stack:\n";
@@ -126,7 +127,7 @@ public:
     }
     InterpreterTestCase &execute()
     {
-        const char *suffix = "execution";
+        const char *suffix = "(execution)";
         Interpreter intp;
         try
         {
@@ -143,7 +144,7 @@ public:
     }
     InterpreterTestCase &execute(vector<Opcode> opcodes)
     {
-        const char *suffix = "execution";
+        const char *suffix = "(execution)";
         Interpreter intp;
         try
         {
@@ -161,27 +162,27 @@ public:
     }
     InterpreterTestCase &test_ret(size_t retc)
     {
-        this->test(this->retarg == retc, "return count");
+        this->test(this->retarg == retc, "(return count)");
         return *this;
     }
     InterpreterTestCase &test_call_luafn(fidx_t fidx)
     {
-        this->test(this->rt.icp_luafn.check(fidx, 0), "call [luafn]");
+        this->test(this->rt.icp_luafn.check(fidx, 0), "(call [luafn])");
         return *this;
     }
     InterpreterTestCase &test_call_fncall(size_t argc, size_t retc)
     {
-        this->test(this->rt.icp_fncall.check(argc, retc), "call [fncall]");
+        this->test(this->rt.icp_fncall.check(argc, retc), "(call [fncall])");
         return *this;
     }
     InterpreterTestCase &test_call_hookpush()
     {
-        this->test(this->rt.icp_hookpush.check(0, 0), "call [hookpush]");
+        this->test(this->rt.icp_hookpush.check(0, 0), "(call [hookpush])");
         return *this;
     }
     InterpreterTestCase &test_call_hookpop()
     {
-        this->test(this->rt.icp_hookpop.check(0, 0), "call [hookpop]");
+        this->test(this->rt.icp_hookpop.check(0, 0), "(call [hookpop])");
         return *this;
     }
     InterpreterTestCase &test_upvalue(size_t idx, LuaValue value)
@@ -201,7 +202,7 @@ public:
         {
             rsl = *hook->original == value;
         }
-        this->test(rsl, "upvalue");
+        this->test(rsl, "(upvalue)");
         return *this;
     }
 };
