@@ -74,4 +74,11 @@ void lua_tests()
         {
             lvnumber(9),
         });
+
+    lua_test_case(
+        "return local",
+        "local a = 9 return a",
+        {
+            lvnumber(9),
+        });
 }
