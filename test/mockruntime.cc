@@ -4,7 +4,6 @@
 #include <cstring>
 
 std::set<string> strset;
-vector<string> allocstrings;
 
 #define MOCK_RUNTIME_FAULT_POP 1
 #define MOCK_RUNTIME_FAULT_IDX 2
@@ -39,6 +38,11 @@ LuaValue lvstring(const char *s)
     if ((it = strset.find(s)) != strset.cend())
     {
         s = it->c_str();
+    }
+    else
+    {
+        strset.insert(str);
+        s = strset.find(str)->c_str();
     }
     LuaValue v;
     v.kind = LuaType::LVString;
@@ -99,7 +103,6 @@ LuaValue MockRuntime::create_string(const char *s1, const char *s2)
     string str;
     str.append(s1);
     str.append(s2);
-    allocstrings.push_back(std::move(str));
     return lvstring(str.c_str());
 }
 LuaValue MockRuntime::create_table()
