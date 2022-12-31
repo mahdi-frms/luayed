@@ -213,6 +213,7 @@ void Interpreter::i_not()
 void Interpreter::i_concat()
 {
     // todo : convert numbers
+    // todo : error on invalid types
     LuaValue b = this->rt->stack_pop();
     LuaValue a = this->rt->stack_pop();
     LuaValue c = this->rt->create_string(a.as<const char *>(), b.as<const char *>());
@@ -220,6 +221,10 @@ void Interpreter::i_concat()
 }
 void Interpreter::i_len()
 {
+    // todo : table length
+    // todo : error on invalid types
+    LuaValue s = this->rt->stack_pop();
+    this->rt->stack_push(this->rt->create_number(strlen(s.as<const char *>())));
 }
 
 bool Interpreter::compare(Comparison cmp)

@@ -799,4 +799,15 @@ void interpreter_tests()
         .test_stack({
             lvstring("foobar"),
         });
+
+    InterpreterTestCase("len")
+        .set_stack({
+            lvstring("foo"),
+        })
+        .execute({
+            ilength,
+        })
+        .test_stack({
+            lvnumber(3),
+        });
 }
