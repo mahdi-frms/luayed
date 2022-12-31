@@ -81,4 +81,11 @@ void lua_tests()
         {
             lvnumber(9),
         });
+
+    lua_test_case(
+        "simple math",
+        "local a = 1 + 8 return a",
+        {
+            lvnumber(9),
+        });
 }
