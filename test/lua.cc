@@ -88,4 +88,11 @@ void lua_tests()
         {
             lvnumber(9),
         });
+
+    lua_test_case(
+        "more complex math",
+        "local a = -(-(1 + (10 - 2))) + 10 return a",
+        {
+            lvnumber(19),
+        });
 }
