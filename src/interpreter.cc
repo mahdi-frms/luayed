@@ -62,7 +62,7 @@ Interpreter::Interpreter()
 {
     if (!Interpreter::is_initialized)
     {
-        this->is_initialized = true;
+        Interpreter::is_initialized = true;
         Interpreter::optable_init();
     }
 }
@@ -80,6 +80,7 @@ size_t Interpreter::run(IRuntime *rt, Opcode op)
 size_t Interpreter::run(IRuntime *rt)
 {
     this->rt = rt;
+    this->ip = 0;
     while (this->state == InterpreterState::Run)
     {
         this->ip += this->fetch(this->rt->text() + this->ip);
