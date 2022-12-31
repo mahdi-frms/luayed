@@ -131,8 +131,8 @@ void Interpreter::push_bool(bool b)
 void Interpreter::i_add()
 {
     // todo: string conversion
-    LuaValue a = this->rt->stack_pop();
     LuaValue b = this->rt->stack_pop();
+    LuaValue a = this->rt->stack_pop();
     if (a.kind != LuaType::LVNumber || b.kind != LuaType::LVNumber)
     {
         this->generate_error(error_invalid_binary_operands(a.kind, b.kind));
@@ -145,8 +145,8 @@ void Interpreter::i_add()
 void Interpreter::i_sub()
 {
     // todo: string conversion
-    LuaValue a = this->rt->stack_pop();
     LuaValue b = this->rt->stack_pop();
+    LuaValue a = this->rt->stack_pop();
     if (a.kind != LuaType::LVNumber || b.kind != LuaType::LVNumber)
     {
         this->generate_error(error_invalid_binary_operands(a.kind, b.kind));

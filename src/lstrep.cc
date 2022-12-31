@@ -321,7 +321,7 @@ string to_string(const LuaValue &lv)
     else if (lv.kind == LuaType::LVNumber)
     {
         s += "(";
-        s += lv.data.n;
+        s += std::to_string(lv.data.n);
         s += ")";
     }
     else if (lv.kind == LuaType::LVString)

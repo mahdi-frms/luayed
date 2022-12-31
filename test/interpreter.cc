@@ -810,4 +810,39 @@ void interpreter_tests()
         .test_stack({
             lvnumber(3),
         });
+
+    InterpreterTestCase("add")
+        .set_stack({
+            lvnumber(3),
+            lvnumber(5),
+        })
+        .execute({
+            iadd,
+        })
+        .test_stack({
+            lvnumber(8),
+        });
+
+    InterpreterTestCase("subtract")
+        .set_stack({
+            lvnumber(3),
+            lvnumber(5),
+        })
+        .execute({
+            isub,
+        })
+        .test_stack({
+            lvnumber(-2),
+        });
+
+    InterpreterTestCase("negate")
+        .set_stack({
+            lvnumber(7),
+        })
+        .execute({
+            inegate,
+        })
+        .test_stack({
+            lvnumber(-7),
+        });
 }
