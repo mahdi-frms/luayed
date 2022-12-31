@@ -212,6 +212,11 @@ void Interpreter::i_not()
 }
 void Interpreter::i_concat()
 {
+    // todo : convert numbers
+    LuaValue b = this->rt->stack_pop();
+    LuaValue a = this->rt->stack_pop();
+    LuaValue c = this->rt->create_string(a.as<const char *>(), b.as<const char *>());
+    this->rt->stack_push(c);
 }
 void Interpreter::i_len()
 {

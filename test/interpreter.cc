@@ -787,4 +787,16 @@ void interpreter_tests()
             lvbool(true),
             lvbool(true),
         });
+
+    InterpreterTestCase("concat")
+        .set_stack({
+            lvstring("foo"),
+            lvstring("bar"),
+        })
+        .execute({
+            iconcat,
+        })
+        .test_stack({
+            lvstring("foobar"),
+        });
 }
