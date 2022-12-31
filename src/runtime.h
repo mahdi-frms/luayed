@@ -165,6 +165,7 @@ public:
     Hook *upvalue(size_t idx);
     LuaValue rodata(size_t idx);
     lbyte *text();
+    size_t stack_size();
 };
 
 struct LuaFunction

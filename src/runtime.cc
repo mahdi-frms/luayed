@@ -445,3 +445,7 @@ LuaValue LuaRuntime::get_error()
 {
     return this->frame->error;
 }
+size_t LuaRuntime::stack_size()
+{
+    return this->frame->sp;
+}

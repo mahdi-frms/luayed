@@ -15,12 +15,12 @@ add_library(luacomp
     src/interpreter.cc
     src/lstrep.cc
     src/luadef.cc
+    src/runtime.cc
+    src/generator.cc
 )
     
 add_executable(luayed
-    src/runtime.cc
     src/main.cc
-    src/generator.cc
     src/lerror.cc
     src/lua.cc
 )
@@ -32,6 +32,8 @@ add_executable(luaytest
     test/mockruntime.cc
     test/test.cc
     test/parser.cc
+    test/lua.cc
+    test/values.cc
     lib/tap/tap.c
 )
 

@@ -5,6 +5,7 @@ void lexer_tests();
 void parser_tests();
 void compiler_tests();
 void interpreter_tests();
+void lua_tests();
 
 void test_assert(bool result, const char *message)
 {
@@ -19,6 +20,7 @@ int main()
     parser_tests();
     compiler_tests();
     interpreter_tests();
+    lua_tests();
 
     done_testing();
     return 0;
