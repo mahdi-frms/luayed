@@ -101,9 +101,18 @@ void lua_tests()
 
         "local a = 8\n"
         "local b = 1\n"
-        " if a == 6 then b = b - 1 else b = b + 1 end\n"
+        "if a == 6 then b = b - 1 else b = b + 1 end\n"
         "return b",
         {
             lvnumber(2),
+        });
+
+    lua_test_case(
+        "return explist",
+
+        "return true, 7",
+        {
+            lvbool(true),
+            lvnumber(7),
         });
 }
