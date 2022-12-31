@@ -8,34 +8,6 @@
 #include "mockruntime.h"
 #include "lstrep.h"
 
-LuaValue vnumber(lnumber n)
-{
-    LuaValue v;
-    v.kind = LuaType::LVNumber;
-    v.data.n = n;
-    return v;
-}
-LuaValue vstring(const char *s)
-{
-    LuaValue v;
-    v.kind = LuaType::LVString;
-    v.data.ptr = (void *)s;
-    return v;
-}
-LuaValue vbool(bool b)
-{
-    LuaValue v;
-    v.kind = LuaType::LVBool;
-    v.data.b = b;
-    return v;
-}
-LuaValue vnil()
-{
-    LuaValue v;
-    v.kind = LuaType::LVNil;
-    return v;
-}
-
 class InterpreterTestCase
 {
 private:
@@ -203,6 +175,11 @@ public:
             rsl = *hook->original == value;
         }
         this->test(rsl, "(upvalue)");
+        return *this;
+    }
+    InterpreterTestCase &test_error(LError err)
+    {
+        this->test(this->rt.get_error() == lvstring(to_string(err).c_str()), "(error)");
         return *this;
     }
 };

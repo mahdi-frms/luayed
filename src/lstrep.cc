@@ -401,6 +401,17 @@ string to_string(const LError &err)
     {
         os << "expected expression";
     }
+    else if (err.kind == LError::LE_InvalidBinaryOperands)
+    {
+        LuaType t1 = err.as.invalid_binary_operands.t1;
+        LuaType t2 = err.as.invalid_binary_operands.t2;
+        os << "invalid operation on types [" << t1 << "] and [" << t2 << "]";
+    }
+    else if (err.kind == LError::LE_InvalidUnaryOperand)
+    {
+        LuaType t = err.as.invalid_unary_operands.t;
+        os << "invalid operation on type [" << t << "]";
+    }
     else
     {
         os << "FAULT: THIS ERROR CAN'T BE DISPLAYED";
