@@ -115,4 +115,13 @@ void lua_tests()
             lvbool(true),
             lvnumber(7),
         });
+
+    lua_test_case(
+        "varlist declaration",
+
+        "local i,j = 12,10 return i,j",
+        {
+            lvnumber(12),
+            lvnumber(10),
+        });
 }
