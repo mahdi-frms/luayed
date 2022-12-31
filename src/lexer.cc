@@ -529,7 +529,10 @@ void Lexer::skip_line()
 {
     char c = this->peek();
     while (c != '\n' && c != '\0')
-        c = this->pop();
+    {
+        this->pop();
+        c = this->peek();
+    }
 }
 
 LError Lexer::get_error()
