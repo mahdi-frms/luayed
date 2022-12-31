@@ -27,7 +27,7 @@ lnumber token_number(Token t)
         str[i] = t.str[i];
     str[t.len] = '\0';
     lnumber num = atof(str);
-    delete str;
+    delete[] str;
     return num;
 }
 
