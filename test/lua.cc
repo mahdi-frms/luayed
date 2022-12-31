@@ -95,4 +95,15 @@ void lua_tests()
         {
             lvnumber(19),
         });
+
+    lua_test_case(
+        "simple control",
+
+        "local a = 8\n"
+        "local b = 1\n"
+        " if a == 6 then b = b - 1 else b = b + 1 end\n"
+        "return b",
+        {
+            lvnumber(2),
+        });
 }
