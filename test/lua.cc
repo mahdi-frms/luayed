@@ -136,4 +136,13 @@ void lua_tests()
         {
             lvnumber(8),
         });
+
+    lua_test_case(
+        "return call",
+
+        "local function v() return 8 end\n"
+        "return v()",
+        {
+            lvnumber(8),
+        });
 }
