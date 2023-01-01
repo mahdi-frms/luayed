@@ -6,12 +6,6 @@
 #include <compiler.h>
 #include <lstrep.h>
 
-void print_valvec(vector<LuaValue> &stack)
-{
-    for (size_t i = 0; i < stack.size(); i++)
-        std::cerr << stack[i] << "\n";
-}
-
 void lua_test_case(
     const char *message,
     const char *code,

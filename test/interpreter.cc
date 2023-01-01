@@ -79,21 +79,16 @@ public:
         }
         return *this;
     }
-    void print_valvec(vector<LuaValue> &stack)
-    {
-        for (size_t i = 0; i < stack.size(); i++)
-            std::cerr << stack[i] << "\n";
-    }
     InterpreterTestCase &test_stack(vector<LuaValue> expected_stack)
     {
         bool rsl = this->rt.get_stack() == expected_stack;
         this->test(rsl, "(stack elements)");
         if (!rsl)
         {
-            std::cout << "stack:\n";
-            this->print_valvec(this->rt.get_stack());
-            std::cout << "expected:\n";
-            this->print_valvec(expected_stack);
+            std::cout << "stack:\n"
+                      << this->rt.get_stack()
+                      << "expected:\n"
+                      << expected_stack;
         }
         return *this;
     }
