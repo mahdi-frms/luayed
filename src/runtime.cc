@@ -290,7 +290,7 @@ void LuaRuntime::fnret(size_t count)
         // todo: error
     }
     size_t exp = frame->exp_count;
-    if (exp--)
+    if (exp-- == 0)
         this->copy_values(frame, prev, total_count);
     else if (total_count < exp)
     {

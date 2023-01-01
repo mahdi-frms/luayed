@@ -47,7 +47,7 @@ void lua_test_case(
     {
         rt.stack_push(args[i]);
     }
-    rt.fncall(args.size(), results.size());
+    rt.fncall(args.size(), results.size() + 1);
     for (size_t i = 0; i < args.size(); i++)
     {
         rt.stack_push(args[i]);
