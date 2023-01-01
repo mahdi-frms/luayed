@@ -157,9 +157,69 @@ void test_cxx_calls_cxx()
     test_cxx_calls_cxx_less();
 }
 
+size_t lfcxx3(void *r)
+{
+    LuaRuntime *rt = (LuaRuntime *)r;
+    size_t count = rt->stack_pop().data.n;
+    for (size_t i = 0; i < count; i++)
+    {
+        rt->stack_push(rt->create_number(1));
+    }
+    return count;
+}
+
+size_t lfcxx4(void *r)
+{
+    LuaRuntime *rt = (LuaRuntime *)r;
+    vector<LuaValue> stack = drain(rt);
+    for (size_t i = 0; i < stack.size(); i++)
+        stack[i].data.n = -stack[i].data.n;
+    pipe(rt, stack);
+    return rt->stack_size();
+}
+
+size_t lfcxx5(void *r)
+{
+    LuaRuntime *rt = (LuaRuntime *)r;
+    rt->stack_push(rt->create_boolean(true));
+    rt->stack_push(rt->create_boolean(true));
+    rt->stack_push(rt->create_cppfn(lfcxx4));
+    rt->stack_push(rt->create_cppfn(lfcxx3));
+    rt->stack_push(rt->create_number(3));
+    rt->fncall(1, 0);
+    rt->fncall(0, 0);
+    return 0;
+}
+
+void test_lua_calls_cxx()
+{
+    LuaRuntime rt(nullptr);
+    rt.set_lua_interface(&rt);
+    rt.stack_push(rt.create_cppfn(lfcxx5));
+    rt.fncall(0, 6);
+    vector<LuaValue> stack = drain(&rt);
+    vector<LuaValue> expected = {
+        rt.create_number(-1),
+        rt.create_number(-1),
+        rt.create_number(-1),
+        rt.create_nil(),
+        rt.create_nil(),
+    };
+    bool rsl = stack == expected;
+    rt_assert(rsl, "Lua calls CXX", 1);
+    if (!rsl)
+    {
+        std::cerr << "stack:\n"
+                  << stack
+                  << "expected:\n"
+                  << expected;
+    }
+}
+
 void test_calls()
 {
     test_cxx_calls_cxx();
+    test_lua_calls_cxx();
 }
 
 void runtime_tests()

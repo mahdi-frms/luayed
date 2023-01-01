@@ -289,9 +289,12 @@ void LuaRuntime::fnret(size_t count)
     {
         // todo: error
     }
-    size_t exp = frame->exp_count - 1;
-    if (exp == 0)
+    size_t exp = frame->exp_count;
+    if (exp-- == 0)
+    {
         this->copy_values(frame, prev, total_count);
+        prev->ret_count = total_count;
+    }
     else if (total_count < exp)
     {
         this->copy_values(frame, prev, total_count);
@@ -299,8 +302,6 @@ void LuaRuntime::fnret(size_t count)
     }
     else
         this->copy_values(frame, prev, exp);
-    if (frame->exp_count)
-        prev->ret_count = total_count;
     this->destroy_frame();
 }
 
