@@ -256,7 +256,14 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
     if (is_lua)
     {
         // todo : handle error returned by interpreter
-        return_count = this->interpreter->run(this);
+        if (this->interpreter)
+            return_count = this->interpreter->run(this);
+        else
+        {
+            // todo : must be refactored
+            std::cerr << "LUA RUNTIME CRASH: NO INTERPRETER PROVIDED";
+            exit(1);
+        }
     }
     else
     {
