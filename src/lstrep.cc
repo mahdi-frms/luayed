@@ -420,6 +420,17 @@ string to_string(const LError &err)
     return os.str();
 }
 
+string to_string(const vector<LuaValue> &vv)
+{
+    string text;
+    for (size_t i = 0; i < vv.size(); i++)
+    {
+        text.append(to_string(vv[i]));
+        text.push_back('\n');
+    }
+    return text;
+}
+
 #define WRITE_TO_STREAM_OPERATOR(TYPE)                        \
     std::ostream &operator<<(std::ostream &os, const TYPE &o) \
     {                                                         \
@@ -435,3 +446,4 @@ WRITE_TO_STREAM_OPERATOR(TokenKind)
 WRITE_TO_STREAM_OPERATOR(LuaType)
 WRITE_TO_STREAM_OPERATOR(LuaValue)
 WRITE_TO_STREAM_OPERATOR(LError)
+WRITE_TO_STREAM_OPERATOR(vector<LuaValue>)

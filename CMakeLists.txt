@@ -30,6 +30,7 @@ add_executable(luaytest
     test/compiler.cc
     test/interpreter.cc
     test/mockruntime.cc
+    test/runtime.cc
     test/test.cc
     test/parser.cc
     test/lua.cc

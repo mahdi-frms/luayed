@@ -6,6 +6,7 @@
 
 Lua::Lua() : runtime(&this->interpreter)
 {
+    this->runtime.set_lua_interface(this);
 }
 
 void Lua::compile(const char *lua_code)
@@ -33,7 +34,7 @@ void Lua::compile(const char *lua_code)
 }
 void Lua::push_cppfn(LuaCppFunction cppfn)
 {
-    LuaValue fn = this->runtime.create_cppfn(cppfn);
+    LuaValue fn = this->runtime.create_cppfn((LuaRTCppFunction)cppfn);
     this->runtime.stack_push(fn);
 }
 void Lua::call(size_t arg_count, size_t return_count)

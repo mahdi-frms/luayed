@@ -13,7 +13,7 @@ class LuaValue;
 class LuaRuntime;
 class Frame;
 class GenFunction;
-typedef size_t (*LuaCppFunction)(LuaRuntime *);
+typedef size_t (*LuaRTCppFunction)(void *);
 struct LuaFunction;
 
 class Lfunction
@@ -116,6 +116,7 @@ private:
     Frame *frame;
     IInterpreter *interpreter;
     vector<Lfunction *> functable;
+    void *lua_interface = nullptr;
 
     void new_frame(size_t stack_size);
     void destroy_frame();
@@ -134,6 +135,7 @@ private:
 
 public:
     LuaRuntime(IInterpreter *interpreter);
+    void set_lua_interface(void *lua_interface);
 
     LuaValue create_nil();
     LuaValue create_boolean(bool b);
@@ -142,7 +144,7 @@ public:
     LuaValue create_string(const char *s1, const char *s2);
     LuaValue create_table();
     Lfunction *create_binary(GenFunction *gfn);
-    LuaValue create_cppfn(LuaCppFunction fn);
+    LuaValue create_cppfn(LuaRTCppFunction fn);
     LuaValue create_luafn(fidx_t fidx);
 
     void fncall(size_t argc, size_t retc);
@@ -174,7 +176,7 @@ struct LuaFunction
     bool is_lua;
 
     Lfunction *binary();
-    LuaCppFunction native();
+    LuaRTCppFunction native();
 };
 
 #endif

@@ -121,7 +121,7 @@ LuaValue LuaRuntime::create_luafn(fidx_t fidx)
     val.data.ptr = (void *)fobj;
     return val;
 }
-LuaValue LuaRuntime::create_cppfn(LuaCppFunction fn)
+LuaValue LuaRuntime::create_cppfn(LuaRTCppFunction fn)
 {
     LuaValue val;
     val.kind = LuaType::LVFunction;
@@ -211,7 +211,11 @@ void LuaRuntime::push_nils(
     size_t idx = 0;
     while (count--)
         frame->stack()[frame->sp + idx++] = this->create_nil();
-    frame->sp += count;
+    frame->sp += idx;
+}
+void LuaRuntime::set_lua_interface(void *lua_interface)
+{
+    this->lua_interface = lua_interface;
 }
 
 void LuaRuntime::fncall(size_t argc, size_t retc)
@@ -233,9 +237,9 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
     }
     bool is_lua = fn->as<LuaFunction *>()->is_lua;
     Lfunction *bin = is_lua ? fn->as<LuaFunction *>()->binary() : nullptr;
-    this->new_frame(argc + 1024 /* THIS NUMBER MUST BE PROVIDED BY THE COMPILER */);
+    this->new_frame(argc + 1024 /* todo: THIS NUMBER MUST BE PROVIDED BY THE COMPILER */);
     Frame *frame = this->frame;
-    // move values bwtween frames
+    // move values between frames
     frame->fn = *fn;
     frame->exp_count = retc;
     frame->vargs_count = 0;
@@ -256,12 +260,19 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
     if (is_lua)
     {
         // todo : handle error returned by interpreter
-        return_count = this->interpreter->run(this);
+        if (this->interpreter)
+            return_count = this->interpreter->run(this);
+        else
+        {
+            // todo : must be refactored
+            std::cerr << "LUA RUNTIME CRASH: NO INTERPRETER PROVIDED";
+            exit(1);
+        }
     }
     else
     {
-        LuaCppFunction cppfn = fn->as<LuaFunction *>()->native();
-        return_count = cppfn(this);
+        LuaRTCppFunction cppfn = fn->as<LuaFunction *>()->native();
+        return_count = cppfn(this->lua_interface);
     }
     this->fnret(return_count);
 }
@@ -278,22 +289,18 @@ void LuaRuntime::fnret(size_t count)
     {
         // todo: error
     }
-    size_t exp = frame->exp_count;
-    if (exp--)
+    size_t exp = frame->exp_count - 1;
+    if (exp == 0)
         this->copy_values(frame, prev, total_count);
     else if (total_count < exp)
     {
         this->copy_values(frame, prev, total_count);
-        this->push_nils(frame, exp - total_count);
+        this->push_nils(prev, exp - total_count);
     }
     else
         this->copy_values(frame, prev, exp);
     if (frame->exp_count)
         prev->ret_count = total_count;
-    while (this->frame->sp)
-    {
-        this->stack_pop();
-    }
     this->destroy_frame();
 }
 
@@ -302,9 +309,9 @@ Lfunction *LuaFunction::binary()
     return (Lfunction *)this->fn;
 }
 
-LuaCppFunction LuaFunction::native()
+LuaRTCppFunction LuaFunction::native()
 {
-    return (LuaCppFunction)this->fn;
+    return (LuaRTCppFunction)this->fn;
 }
 
 size_t Frame::parcount()
