@@ -211,7 +211,7 @@ void LuaRuntime::push_nils(
     size_t idx = 0;
     while (count--)
         frame->stack()[frame->sp + idx++] = this->create_nil();
-    frame->sp += count;
+    frame->sp += idx;
 }
 void LuaRuntime::set_lua_interface(void *lua_interface)
 {
@@ -289,22 +289,18 @@ void LuaRuntime::fnret(size_t count)
     {
         // todo: error
     }
-    size_t exp = frame->exp_count;
-    if (exp-- == 0)
+    size_t exp = frame->exp_count - 1;
+    if (exp == 0)
         this->copy_values(frame, prev, total_count);
     else if (total_count < exp)
     {
         this->copy_values(frame, prev, total_count);
-        this->push_nils(frame, exp - total_count);
+        this->push_nils(prev, exp - total_count);
     }
     else
         this->copy_values(frame, prev, exp);
     if (frame->exp_count)
         prev->ret_count = total_count;
-    while (this->frame->sp)
-    {
-        this->stack_pop();
-    }
     this->destroy_frame();
 }
 

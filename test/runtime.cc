@@ -1,5 +1,6 @@
 #include <runtime.h>
 #include "test.h"
+#include <lstrep.h>
 
 vector<LuaValue> drain(LuaRuntime *rt)
 {
@@ -76,9 +77,9 @@ size_t lfcxx1(void *r)
     return rt->stack_size() - 2;
 }
 
-void test_cxx_calls_cxx()
+void test_cxx_calls_cxx_extra()
 {
-    const char *mes = "CXX calls CXX";
+    const char *mes = "CXX calls CXX returning extra args";
     LuaRuntime rt(nullptr);
     rt.set_lua_interface(&rt);
     rt.stack_push(rt.create_cppfn(lfcxx1));
@@ -103,6 +104,57 @@ void test_cxx_calls_cxx()
                       rt.create_boolean(false),
                   }),
               mes, 2);
+}
+
+size_t lfcxx2(void *r)
+{
+    LuaRuntime *rt = (LuaRuntime *)r;
+    rt->stack_push(rt->create_boolean(true));
+    return 1;
+}
+
+void test_cxx_calls_cxx_less()
+{
+    const char *mes = "CXX calls CXX returning less args";
+    LuaRuntime rt(nullptr);
+    rt.set_lua_interface(&rt);
+    rt.stack_push(rt.create_number(14));
+    rt.stack_push(rt.create_cppfn(lfcxx2));
+
+    pipe(&rt,
+         {
+             rt.create_number(8),
+             rt.create_number(15),
+             rt.create_number(-44),
+             rt.create_number(0),
+             rt.create_number(600),
+         });
+    rt.fncall(5, 5);
+
+    rt_assert(rt.stack_size() == 5, mes, 1);
+    vector<LuaValue> stack = drain(&rt);
+    vector<LuaValue> expected = {
+        rt.create_number(14),
+        rt.create_boolean(true),
+        rt.create_nil(),
+        rt.create_nil(),
+        rt.create_nil(),
+    };
+    bool rsl = stack == expected;
+    rt_assert(rsl, mes, 2);
+    if (!rsl)
+    {
+        std::cerr << "stack:\n"
+                  << stack
+                  << "expected:\n"
+                  << expected;
+    }
+}
+
+void test_cxx_calls_cxx()
+{
+    test_cxx_calls_cxx_extra();
+    test_cxx_calls_cxx_less();
 }
 
 void test_calls()
