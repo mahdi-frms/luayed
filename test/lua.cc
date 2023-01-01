@@ -167,4 +167,13 @@ void lua_tests()
         {
             lvnumber(8),
         });
+
+    lua_test_case(
+        "return function",
+
+        "local function v() return function(b) return not b end end\n"
+        "return v()(false)",
+        {
+            lvbool(true),
+        });
 }
