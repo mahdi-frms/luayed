@@ -176,4 +176,12 @@ void lua_tests()
         {
             lvbool(true),
         });
+
+    lua_test_case(
+        "while loop",
+
+        "local t,v = 10,0 while t > 0 do t = t - 1 v = v + 5 end return v",
+        {
+            lvnumber(50),
+        });
 }
