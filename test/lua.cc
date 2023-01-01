@@ -184,4 +184,12 @@ void lua_tests()
         {
             lvnumber(50),
         });
+
+    lua_test_case(
+        "repeat loop",
+
+        "local t,v = 10,0 repeat t = t - 1 v = v + 5 until t == 0 return v",
+        {
+            lvnumber(50),
+        });
 }
