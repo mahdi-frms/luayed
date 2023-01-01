@@ -18,6 +18,7 @@ void test_pushpop()
 {
     const char *mes = "stack operations";
     LuaRuntime rt(nullptr);
+    rt.set_lua_interface(&rt);
     vector<LuaValue> values = {
         lvnil(),
         lvnumber(200),
@@ -60,8 +61,18 @@ void test_create_values()
     rt_assert(values[2].data.b == false, mes, 5);
 }
 
+void test_cxx_calls()
+{
+}
+
+void test_calls()
+{
+    test_cxx_calls();
+}
+
 void runtime_tests()
 {
     test_pushpop();
     test_create_values();
+    test_calls();
 }

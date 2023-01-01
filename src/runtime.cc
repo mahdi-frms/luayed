@@ -121,7 +121,7 @@ LuaValue LuaRuntime::create_luafn(fidx_t fidx)
     val.data.ptr = (void *)fobj;
     return val;
 }
-LuaValue LuaRuntime::create_cppfn(LuaCppFunction fn)
+LuaValue LuaRuntime::create_cppfn(LuaRTCppFunction fn)
 {
     LuaValue val;
     val.kind = LuaType::LVFunction;
@@ -213,6 +213,10 @@ void LuaRuntime::push_nils(
         frame->stack()[frame->sp + idx++] = this->create_nil();
     frame->sp += count;
 }
+void LuaRuntime::set_lua_interface(void *lua_interface)
+{
+    this->lua_interface = lua_interface;
+}
 
 void LuaRuntime::fncall(size_t argc, size_t retc)
 {
@@ -267,8 +271,8 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
     }
     else
     {
-        LuaCppFunction cppfn = fn->as<LuaFunction *>()->native();
-        return_count = cppfn(this);
+        LuaRTCppFunction cppfn = fn->as<LuaFunction *>()->native();
+        return_count = cppfn(this->lua_interface);
     }
     this->fnret(return_count);
 }
@@ -309,9 +313,9 @@ Lfunction *LuaFunction::binary()
     return (Lfunction *)this->fn;
 }
 
-LuaCppFunction LuaFunction::native()
+LuaRTCppFunction LuaFunction::native()
 {
-    return (LuaCppFunction)this->fn;
+    return (LuaRTCppFunction)this->fn;
 }
 
 size_t Frame::parcount()

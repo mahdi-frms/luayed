@@ -4,6 +4,10 @@
 #include "runtime.h"
 #include "interpreter.h"
 
+class Lua;
+
+typedef size_t (*LuaCppFunction)(Lua *);
+
 class Lua
 {
 private:
