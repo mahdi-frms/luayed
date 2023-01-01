@@ -6,16 +6,8 @@
 #include <compiler.h>
 #include <lstrep.h>
 
-void lua_test_case(
-    const char *message,
-    const char *code,
-    vector<LuaValue> results = {},
-    vector<LuaValue> args = {})
+LuaValue lua_test_compile(const char *code, LuaRuntime &rt, vector<lbyte> &bin)
 {
-    string mes = "lua : ";
-    mes.append(message);
-    Interpreter intp;
-    LuaRuntime rt(&intp);
     Lexer lexer(code);
     Parser parser(&lexer);
     Ast ast = parser.parse();
@@ -37,27 +29,32 @@ void lua_test_case(
     fidx_t fidx = compiler.compile(ast);
     LuaValue fn = rt.create_luafn(fidx);
 
-    // used for debugging
     size_t bytecodelen = rt.bin(fidx)->codelen;
-    lbyte bytecode[bytecodelen];
+    bin.resize(bytecodelen);
     std::copy(
         rt.bin(fidx)->text(),
         rt.bin(fidx)->text() + bytecodelen,
-        bytecode);
+        bin.begin());
 
+    return fn;
+}
+
+void lua_test_case(
+    const char *message,
+    const char *code,
+    vector<LuaValue> results = {},
+    vector<LuaValue> args = {})
+{
+    string mes = "lua : ";
+    mes.append(message);
+    Interpreter intp;
+    LuaRuntime rt(&intp);
+    vector<lbyte> bytecode;
+    LuaValue fn = lua_test_compile(code, rt, bytecode);
     rt.stack_push(fn);
-    for (size_t i = 0; i < args.size(); i++)
-    {
-        rt.stack_push(args[i]);
-    }
+    pipe(&rt, args);
     rt.fncall(args.size(), results.size() + 1);
-    for (size_t i = 0; i < args.size(); i++)
-    {
-        rt.stack_push(args[i]);
-    }
-    vector<LuaValue> stack;
-    while (rt.stack_size())
-        stack.insert(stack.begin(), rt.stack_pop());
+    vector<LuaValue> stack = drain(&rt);
     bool rsl = stack == results;
     test_assert(rsl, mes.c_str());
     if (!rsl)
@@ -68,7 +65,7 @@ void lua_test_case(
                   << results << "\n"
 
                   << "binary:\n"
-                  << to_string(bytecode, bytecodelen)
+                  << bytecode
                   << "\n";
     }
 }

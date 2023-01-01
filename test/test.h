@@ -1,7 +1,10 @@
 #ifndef TEST_H
 #define TEST_H
 
-#include <luadef.h>
+#include <runtime.h>
+
+vector<LuaValue> drain(LuaRuntime *rt);
+void pipe(LuaRuntime *rt, vector<LuaValue> values);
 
 LuaValue lvnil();
 LuaValue lvbool(bool b);

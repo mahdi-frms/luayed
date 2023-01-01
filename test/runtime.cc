@@ -2,19 +2,6 @@
 #include "test.h"
 #include <lstrep.h>
 
-vector<LuaValue> drain(LuaRuntime *rt)
-{
-    vector<LuaValue> stack;
-    while (rt->stack_size())
-        stack.insert(stack.begin(), rt->stack_pop());
-    return stack;
-}
-void pipe(LuaRuntime *rt, vector<LuaValue> values)
-{
-    for (size_t i = 0; i < values.size(); i++)
-        rt->stack_push(values[i]);
-}
-
 void rt_assert(bool rsl, const char *message, size_t idx = 0)
 {
     string mes = "runtime : ";
