@@ -233,9 +233,9 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
     }
     bool is_lua = fn->as<LuaFunction *>()->is_lua;
     Lfunction *bin = is_lua ? fn->as<LuaFunction *>()->binary() : nullptr;
-    this->new_frame(argc + 1024 /* THIS NUMBER MUST BE PROVIDED BY THE COMPILER */);
+    this->new_frame(argc + 1024 /* todo: THIS NUMBER MUST BE PROVIDED BY THE COMPILER */);
     Frame *frame = this->frame;
-    // move values bwtween frames
+    // move values between frames
     frame->fn = *fn;
     frame->exp_count = retc;
     frame->vargs_count = 0;

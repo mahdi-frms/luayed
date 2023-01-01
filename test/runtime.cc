@@ -18,7 +18,13 @@ void test_pushpop()
 {
     const char *mes = "stack operations";
     LuaRuntime rt(nullptr);
-    vector<LuaValue> values = {};
+    vector<LuaValue> values = {
+        lvnil(),
+        lvnumber(200),
+        lvnumber(13),
+        lvnil(),
+        lvbool(true),
+    };
 
     rt_assert(rt.stack_size() == 0, mes, 1);
 
@@ -36,7 +42,26 @@ void test_pushpop()
     rt_assert(values == stack, mes, 3);
 }
 
+void test_create_values()
+{
+    const char *mes = "value creation";
+    LuaRuntime rt(nullptr);
+
+    LuaValue values[3] = {
+        rt.create_nil(),
+        rt.create_number(11),
+        rt.create_boolean(false),
+    };
+
+    rt_assert(values[0].kind == LuaType::LVNil, mes, 1);
+    rt_assert(values[1].kind == LuaType::LVNumber, mes, 2);
+    rt_assert(values[1].data.n == 11, mes, 3);
+    rt_assert(values[2].kind == LuaType::LVBool, mes, 4);
+    rt_assert(values[2].data.b == false, mes, 5);
+}
+
 void runtime_tests()
 {
     test_pushpop();
+    test_create_values();
 }
