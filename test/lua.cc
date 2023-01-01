@@ -42,6 +42,15 @@ void lua_test_case(
     Compiler compiler(&gen);
     fidx_t fidx = compiler.compile(ast);
     LuaValue fn = rt.create_luafn(fidx);
+
+    // used for debugging
+    size_t bytecodelen = rt.bin(fidx)->codelen;
+    lbyte bytecode[bytecodelen];
+    std::copy(
+        rt.bin(fidx)->text(),
+        rt.bin(fidx)->text() + bytecodelen,
+        bytecode);
+
     rt.stack_push(fn);
     for (size_t i = 0; i < args.size(); i++)
     {
@@ -59,10 +68,14 @@ void lua_test_case(
     test_assert(rsl, mes.c_str());
     if (!rsl)
     {
-        std::cerr << "stack: \n";
-        print_valvec(stack);
-        std::cerr << "expected: \n";
-        print_valvec(results);
+        std::cerr << "stack:\n"
+                  << stack
+                  << "expected:\n"
+                  << results << "\n"
+
+                  << "binary:\n"
+                  << to_string(bytecode, bytecodelen)
+                  << "\n";
     }
 }
 
@@ -122,6 +135,15 @@ void lua_tests()
         "varlist declaration",
 
         "local i,j = 12,10 return i,j",
+        {
+            lvnumber(12),
+            lvnumber(10),
+        });
+
+    lua_test_case(
+        "group assignment",
+
+        "local i,j i,j = 12,10 return i,j",
         {
             lvnumber(12),
             lvnumber(10),

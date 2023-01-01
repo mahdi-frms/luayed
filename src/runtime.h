@@ -128,7 +128,6 @@ private:
     Hook **hooktable();
     Hook **uptable();
     Lfunction *bin();
-    Lfunction *bin(size_t fidx);
 
     void *allocate(size_t size);
     void deallocate(void *ptr);
@@ -152,6 +151,7 @@ public:
     void set_error(LuaValue value);
     LuaValue get_error();
     fidx_t gen_fidx();
+    Lfunction *bin(size_t fidx);
 
     LuaValue stack_pop();
     void stack_push(LuaValue value);

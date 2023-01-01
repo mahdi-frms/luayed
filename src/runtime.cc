@@ -411,12 +411,12 @@ void LuaRuntime::hookpop()
 }
 LuaValue LuaRuntime::stack_back_read(size_t idx)
 {
-    idx = this->frame->sp - idx + 1;
+    idx = this->frame->sp - idx;
     return this->stack_read(idx);
 }
 void LuaRuntime::stack_back_write(size_t idx, LuaValue value)
 {
-    idx = this->frame->sp - idx + 1;
+    idx = this->frame->sp - idx;
     this->stack_write(idx, value);
 }
 LuaValue LuaRuntime::arg(size_t idx)
