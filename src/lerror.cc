@@ -82,3 +82,30 @@ LError error_invalid_unary_operand(LuaType t)
     err.as.invalid_unary_operands.t = t;
     return err;
 }
+LError error_vargs_outside_function()
+{
+    LError err;
+    err.kind = LError::LE_VargsOutsideFunction;
+    return err;
+}
+LError error_breake_outside_loop()
+{
+    LError err;
+    err.kind = LError::LE_BreakOutsideLoop;
+    return err;
+}
+LError error_label_undefined()
+{
+
+    LError err;
+    err.kind = LError::LE_LabelUndefined;
+    return err;
+}
+LError error_label_redefined(size_t line, size_t offset)
+{
+    LError err;
+    err.kind = LError::LE_LabelRedefined;
+    err.as.label_redefined.line = line;
+    err.as.label_redefined.offset = offset;
+    return err;
+}

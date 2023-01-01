@@ -412,6 +412,24 @@ string to_string(const LError &err)
         LuaType t = err.as.invalid_unary_operands.t;
         os << "invalid operation on type [" << t << "]";
     }
+    else if (err.kind == LError::LE_VargsOutsideFunction)
+    {
+        os << "can not use '...' outside a vararg function";
+    }
+    else if (err.kind == LError::LE_BreakOutsideLoop)
+    {
+        os << "break not inside a loop";
+    }
+    else if (err.kind == LError::LE_LabelUndefined)
+    {
+        os << "label not visible";
+    }
+    else if (err.kind == LError::LE_LabelRedefined)
+    {
+        size_t line = err.as.label_redefined.line;
+        size_t offset = err.as.label_redefined.offset;
+        os << "label previously defined at (line: " << line << ", offset: " << offset << ")";
+    }
     else
     {
         os << "FAULT: THIS ERROR CAN'T BE DISPLAYED";

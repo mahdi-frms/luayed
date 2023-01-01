@@ -22,6 +22,11 @@ struct LError
         LE_ExpectedVariable,
         LE_InvalidBinaryOperands,
         LE_InvalidUnaryOperand,
+
+        LE_VargsOutsideFunction,
+        LE_BreakOutsideLoop,
+        LE_LabelUndefined,
+        LE_LabelRedefined,
     } kind;
     union
     {
@@ -79,6 +84,20 @@ struct LError
         {
             LuaType t;
         } invalid_unary_operands;
+        struct
+        {
+        } vargs_outside_function;
+        struct
+        {
+        } breake_outside_loop;
+        struct
+        {
+        } label_undefined;
+        struct
+        {
+            size_t line;
+            size_t offset;
+        } label_redefined;
     } as;
 };
 
@@ -96,5 +115,9 @@ LError error_expected_expression();
 LError error_expected_variable();
 LError error_invalid_binary_operands(LuaType t1, LuaType t2);
 LError error_invalid_unary_operand(LuaType t);
+LError error_vargs_outside_function();
+LError error_breake_outside_loop();
+LError error_label_undefined();
+LError error_label_redefined(size_t line, size_t offset);
 
 #endif
