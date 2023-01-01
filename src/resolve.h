@@ -8,18 +8,12 @@ using namespace ast;
 
 typedef std::map<std::string, Noderef> Varmap;
 
-struct SemanticError
-{
-    Noderef node;
-    string text;
-};
-
 class SemanticAnalyzer
 {
 private:
     Varmap labels;
     vector<Noderef> gotolist;
-    vector<SemanticError> errors;
+    vector<LError> errors;
     Ast ast;
     Noderef current;
 
@@ -38,7 +32,7 @@ private:
 
 public:
     SemanticAnalyzer(Ast ast);
-    vector<SemanticError> analyze();
+    vector<LError> analyze();
 };
 
 #endif

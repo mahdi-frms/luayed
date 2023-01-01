@@ -5,7 +5,7 @@
 #define mem(N) ((MetaMemory *)N->getannot(MetaKind::MMemory))
 #define is_meth(N) (N->get_kind() == NodeKind::MethodBody)
 
-vector<SemanticError> SemanticAnalyzer::analyze()
+vector<LError> SemanticAnalyzer::analyze()
 {
     this->current = nullptr;
     this->analyze_node(ast.root());
@@ -100,9 +100,9 @@ void SemanticAnalyzer::analyze_identifier(Noderef node)
     {
         if (!scope(this->curscope()->func)->variadic)
         {
-            SemanticError error;
-            error.node = node;
-            error.text = "cannot use '...' outside a vararg function";
+            LError error = error_vargs_outside_function();
+            error.line = t.line;
+            error.offset = t.offset;
             this->errors.push_back(error);
         }
     }
@@ -170,7 +170,13 @@ void SemanticAnalyzer::analyze_break(Noderef node)
     while (!is_loop(it->get_kind()))
         it = scope(it)->parent;
     if (!it)
-        this->errors.push_back(SemanticError{.node = node, .text = "break statement not in a loop"});
+    {
+        LError err = error_breake_outside_loop();
+        // todo : BreakStmt node must include the token
+        err.line = 0;
+        err.offset = 0;
+        this->errors.push_back(err);
+    }
 }
 
 void SemanticAnalyzer::analyze_label(Noderef node)
@@ -178,7 +184,7 @@ void SemanticAnalyzer::analyze_label(Noderef node)
     string name = node->child(0)->get_token().text();
     if (this->labels.find(name) != this->labels.cend())
     {
-        this->errors.push_back(SemanticError{.node = node, .text = "redefined label"});
+        // todo: generate error
     }
     else
     {
@@ -231,7 +237,7 @@ void SemanticAnalyzer::finalize()
         }
         else
         {
-            this->errors.push_back(SemanticError{.node = node, .text = string("label '") + name + string("' does not exist")});
+            // todo: generate error
         }
         gotolist.pop_back();
     }
