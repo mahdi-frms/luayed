@@ -18,10 +18,12 @@ LuaValue lua_test_compile(const char *code, LuaRuntime &rt, vector<lbyte> &bin)
         exit(1);
     }
     SemanticAnalyzer sem(ast);
-    auto errs = sem.analyze();
+    vector<LError> errs = sem.analyze();
     if (errs.size())
     {
-        std::cerr << "Compiling test case failed!\n";
+        std::cerr << "Compiling test case failed: \n";
+        for (size_t i = 0; i < errs.size(); i++)
+            std::cerr << errs[i];
         exit(1);
     }
     LuaGenerator gen(&rt);

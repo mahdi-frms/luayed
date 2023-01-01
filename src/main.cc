@@ -27,11 +27,19 @@ bool runfile(const char *path)
 {
     Lua lua;
     const char *text = readfile(path);
-    lua.compile(text);
-    lua.call(0, 1);
-    lnumber num = lua.pop_number();
-    std::cout << "result: " << num << "\n";
-    return true; // todo: must check for errors
+    string errors;
+    if (lua.compile(text, errors) == LUA_COMPILE_RESULT_OK)
+    {
+        lua.call(0, 1);
+        lnumber num = lua.pop_number();
+        std::cout << "result: " << num << "\n";
+        return true; // todo: must check for runtime errors
+    }
+    else
+    {
+        std::cerr << errors;
+        return false;
+    }
 }
 
 int main(int argc, char **argv)

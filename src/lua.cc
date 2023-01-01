@@ -3,34 +3,41 @@
 #include "resolve.h"
 #include "generator.h"
 #include "compiler.h"
+#include "lstrep.h"
 
 Lua::Lua() : runtime(&this->interpreter)
 {
     this->runtime.set_lua_interface(this);
 }
 
-void Lua::compile(const char *lua_code)
+int Lua::compile(const char *lua_code, string &errors)
 {
     Lexer lexer(lua_code);
     Parser parser(&lexer);
     Ast ast = parser.parse();
     if (ast.root() == nullptr)
     {
-        // todo : should return error
-        return;
+        errors.append(to_string(parser.get_error()));
+        errors.push_back('\n');
+        return LUA_COMPILE_RESULT_FAILED;
     }
     SemanticAnalyzer sem(ast);
-    auto errs = sem.analyze();
+    vector<LError> errs = sem.analyze();
     if (errs.size())
     {
-        // todo : should return error
-        return;
+        for (size_t i = 0; i < errs.size(); i++)
+        {
+            errors.append(to_string(errs[i]));
+            errors.push_back('\n');
+        }
+        return LUA_COMPILE_RESULT_FAILED;
     }
     LuaGenerator gen(&this->runtime);
     Compiler compiler(&gen);
     fidx_t fidx = compiler.compile(ast);
     LuaValue fn = this->runtime.create_luafn(fidx);
     this->runtime.stack_push(fn);
+    return LUA_COMPILE_RESULT_OK;
 }
 void Lua::push_cppfn(LuaCppFunction cppfn)
 {
