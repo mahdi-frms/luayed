@@ -198,4 +198,13 @@ void lua_tests()
         {
             lvnumber(25),
         });
+
+    lua_test_case(
+        "operator precedence",
+
+        "return (100/100 + 6) * -2 + -4 ^ 2",
+
+        {
+            lvnumber(-30),
+        });
 }

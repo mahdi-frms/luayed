@@ -840,4 +840,64 @@ void interpreter_tests()
         .test_stack({
             lvnumber(-7),
         });
+
+    InterpreterTestCase("multiply")
+        .set_stack({
+            lvnumber(-3),
+            lvnumber(5),
+        })
+        .execute({
+            imult,
+        })
+        .test_stack({
+            lvnumber(-15),
+        });
+
+    InterpreterTestCase("floor division")
+        .set_stack({
+            lvnumber(12),
+            lvnumber(5),
+        })
+        .execute({
+            iflrdiv,
+        })
+        .test_stack({
+            lvnumber(2),
+        });
+
+    InterpreterTestCase("float division")
+        .set_stack({
+            lvnumber(12),
+            lvnumber(5),
+        })
+        .execute({
+            ifltdiv,
+        })
+        .test_stack({
+            lvnumber(2.4),
+        });
+
+    InterpreterTestCase("modulo")
+        .set_stack({
+            lvnumber(8),
+            lvnumber(3),
+        })
+        .execute({
+            imod,
+        })
+        .test_stack({
+            lvnumber(2),
+        });
+
+    InterpreterTestCase("power")
+        .set_stack({
+            lvnumber(6),
+            lvnumber(3),
+        })
+        .execute({
+            ipow,
+        })
+        .test_stack({
+            lvnumber(216),
+        });
 }
