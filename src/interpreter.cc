@@ -174,13 +174,11 @@ void Interpreter::arith(Arithmetic ar)
 
     if (a.kind != LuaType::LVNumber)
     {
-        this->generate_error(error_invalid_operand(at));
-        return;
+        return this->generate_error(error_invalid_operand(at));
     }
     if (b.kind != LuaType::LVNumber)
     {
-        this->generate_error(error_invalid_operand(bt));
-        return;
+        return this->generate_error(error_invalid_operand(bt));
     }
 
     lnumber rsl = this->arith_calc(ar, a.data.n, b.data.n);
@@ -226,8 +224,7 @@ void Interpreter::i_neg()
     }
     if (a.kind != LuaType::LVNumber)
     {
-        this->generate_error(error_invalid_operand(at));
-        return;
+        return this->generate_error(error_invalid_operand(at));
     }
     LuaValue num = this->rt->create_number(-a.data.n);
     this->rt->stack_push(num);
@@ -267,19 +264,17 @@ void Interpreter::i_concat()
         a = this->rt->create_string(a.data.n);
     if (a.kind != LuaType::LVString)
     {
-        this->generate_error(error_invalid_operand(a.kind));
-        return;
+        return this->generate_error(error_invalid_operand(a.kind));
     }
 
     if (b.kind == LuaType::LVNumber)
         b = this->rt->create_string(b.data.n);
     if (b.kind != LuaType::LVString)
     {
-        this->generate_error(error_invalid_operand(b.kind));
-        return;
+        return this->generate_error(error_invalid_operand(b.kind));
     }
 
-    LuaValue c = this->rt->create_string(a.as<const char *>(), b.as<const char *>());
+    LuaValue c = this->concat(a, b);
     this->rt->stack_push(c);
 }
 void Interpreter::i_len()
@@ -288,27 +283,25 @@ void Interpreter::i_len()
     LuaValue s = this->rt->stack_pop();
     if (s.kind != LuaType::LVTable && s.kind != LuaType::LVString)
     {
-        this->generate_error(error_invalid_operand(s.kind));
-        return;
+        return this->generate_error(error_invalid_operand(s.kind));
     }
     this->rt->stack_push(this->rt->create_number(strlen(s.as<const char *>())));
 }
 
-bool Interpreter::compare(Comparison cmp)
+void Interpreter::compare(Comparison cmp)
 {
     LuaValue b = this->rt->stack_pop();
     LuaValue a = this->rt->stack_pop();
     bool rsl;
     if (a.kind != b.kind || (a.kind != LuaType::LVNumber && a.kind != LuaType::LVString))
     {
-        this->generate_error(error_invalid_comparison(a.kind, b.kind));
-        return false;
+        return this->generate_error(error_invalid_comparison(a.kind, b.kind));
     }
     else if (a.kind == LuaType::LVNumber)
         rsl = this->compare_number(a, b, cmp);
     else
         rsl = this->compare_string(a, b, cmp);
-    return rsl;
+    this->push_bool(rsl);
 }
 bool Interpreter::compare_number(LuaValue &a, LuaValue &b, Comparison cmp)
 {
@@ -354,19 +347,19 @@ void Interpreter::hookwrite(Hook *hook, LuaValue value)
 }
 void Interpreter::i_lt()
 {
-    this->push_bool(this->compare(Comparison::LT));
+    this->compare(Comparison::LT);
 }
 void Interpreter::i_gt()
 {
-    this->push_bool(this->compare(Comparison::GT));
+    this->compare(Comparison::GT);
 }
 void Interpreter::i_ge()
 {
-    this->push_bool(this->compare(Comparison::GE));
+    this->compare(Comparison::GE);
 }
 void Interpreter::i_le()
 {
-    this->push_bool(this->compare(Comparison::LE));
+    this->compare(Comparison::LE);
 }
 void Interpreter::i_eq()
 {
@@ -497,7 +490,46 @@ void Interpreter::i_pop()
 }
 void Interpreter::generate_error(Lerror error)
 {
-    LuaValue errval = this->rt->create_number(0xc0debed); // todo
+    LuaValue errval = this->error_to_string(error);
     this->state = InterpreterState::Error;
     this->rt->set_error(errval);
+}
+LuaValue Interpreter::error_to_string(Lerror error)
+{
+    if (error.kind == Lerror::LE_InvalidOperand)
+    {
+        LuaValue s1 = this->rt->create_string("invalid operation on type [");
+        LuaValue s2 = this->lua_type_to_string(error.as.invalid_operand.t);
+        LuaValue s3 = this->rt->create_string("]");
+        return this->concat(s1, this->concat(s2, s3));
+    }
+    else if (error.kind == Lerror::LE_InvalidComparison)
+    {
+        LuaValue s1 = this->rt->create_string("attemp to compare ");
+        LuaValue s2 = this->lua_type_to_string(error.as.invalid_comparison.t1);
+        LuaValue s3 = this->rt->create_string(" with ");
+        LuaValue s4 = this->lua_type_to_string(error.as.invalid_comparison.t2);
+        return this->concat(s1, this->concat(s2, this->concat(s3, s4)));
+    }
+    else
+    {
+        return this->rt->create_nil();
+    }
+}
+
+LuaValue Interpreter::concat(LuaValue s1, LuaValue s2)
+{
+    return this->rt->create_string(s1.as<const char *>(), s2.as<const char *>());
+}
+LuaValue Interpreter::lua_type_to_string(LuaType t)
+{
+    const char *texts[6] = {
+        [LVNil] = "nil",
+        [LVBool] = "boolean",
+        [LVNumber] = "number",
+        [LVString] = "string",
+        [LVTable] = "table",
+        [LVFunction] = "function",
+    };
+    return this->rt->create_string(texts[t]);
 }

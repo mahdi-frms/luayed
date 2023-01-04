@@ -10,6 +10,7 @@ struct Lerror
     size_t offset;
     enum
     {
+        // Lexer
         LE_OK,
         LE_MisingEndOfString,
         LE_MissingChar,
@@ -17,16 +18,18 @@ struct Lerror
         LE_InvalidEscape,
         LE_MalformedNumber,
         LE_MissingEndOfComment,
+        // Parser
         LE_ExpectedToken,
         LE_ExpectedExpression,
         LE_ExpectedVariable,
-        LE_InvalidOperand,
-        LE_InvalidComparison,
-
+        // Resolver
         LE_VargsOutsideFunction,
         LE_BreakOutsideLoop,
         LE_LabelUndefined,
         LE_LabelRedefined,
+        // Interpretor
+        LE_InvalidOperand,
+        LE_InvalidComparison,
     } kind;
     union
     {
