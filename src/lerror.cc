@@ -2,109 +2,109 @@
 #include "lstrep.h"
 #include <iostream>
 
-LError error_ok()
+Lerror error_ok()
 {
-    LError err;
-    err.kind = LError::LE_OK;
+    Lerror err;
+    err.kind = Lerror::LE_OK;
     return err;
 }
-LError error_missing_end_of_string(size_t level)
+Lerror error_missing_end_of_string(size_t level)
 {
-    LError err;
-    err.kind = LError::LE_MisingEndOfString;
+    Lerror err;
+    err.kind = Lerror::LE_MisingEndOfString;
     err.as.missing_end_of_string.level = level;
     return err;
 }
-LError error_missing_char(char c)
+Lerror error_missing_char(char c)
 {
-    LError err;
-    err.kind = LError::LE_MissingChar;
+    Lerror err;
+    err.kind = Lerror::LE_MissingChar;
     err.as.missing_char.c = c;
     return err;
 }
-LError error_invalid_char(char c)
+Lerror error_invalid_char(char c)
 {
-    LError err;
-    err.kind = LError::LE_InvalidChar;
+    Lerror err;
+    err.kind = Lerror::LE_InvalidChar;
     err.as.invalid_char.c = c;
     return err;
 }
-LError error_invalid_escape()
+Lerror error_invalid_escape()
 {
-    LError err;
-    err.kind = LError::LE_InvalidEscape;
+    Lerror err;
+    err.kind = Lerror::LE_InvalidEscape;
     return err;
 }
-LError error_malformed_number()
+Lerror error_malformed_number()
 {
-    LError err;
-    err.kind = LError::LE_MalformedNumber;
+    Lerror err;
+    err.kind = Lerror::LE_MalformedNumber;
     return err;
 }
-LError error_missing_end_of_comment(size_t level)
+Lerror error_missing_end_of_comment(size_t level)
 {
-    LError err;
-    err.kind = LError::LE_MissingEndOfComment;
+    Lerror err;
+    err.kind = Lerror::LE_MissingEndOfComment;
     err.as.missing_end_of_comment.level = level;
     return err;
 }
-LError error_expected_token(TokenKind kind)
+Lerror error_expected_token(TokenKind kind)
 {
-    LError err;
-    err.kind = LError::LE_ExpectedToken;
+    Lerror err;
+    err.kind = Lerror::LE_ExpectedToken;
     err.as.expected_token.token_kind = kind;
     return err;
 }
-LError error_expected_expression()
+Lerror error_expected_expression()
 {
-    LError err;
-    err.kind = LError::LE_ExpectedExpression;
+    Lerror err;
+    err.kind = Lerror::LE_ExpectedExpression;
     return err;
 }
-LError error_expected_variable()
+Lerror error_expected_variable()
 {
-    LError err;
-    err.kind = LError::LE_ExpectedVariable;
+    Lerror err;
+    err.kind = Lerror::LE_ExpectedVariable;
     return err;
 }
-LError error_invalid_binary_operands(LuaType t1, LuaType t2)
+Lerror error_invalid_binary_operands(LuaType t1, LuaType t2)
 {
-    LError err;
-    err.kind = LError::LE_InvalidBinaryOperands;
+    Lerror err;
+    err.kind = Lerror::LE_InvalidBinaryOperands;
     err.as.invalid_binary_operands.t1 = t1;
     err.as.invalid_binary_operands.t2 = t2;
     return err;
 }
-LError error_invalid_unary_operand(LuaType t)
+Lerror error_invalid_unary_operand(LuaType t)
 {
-    LError err;
-    err.kind = LError::LE_InvalidUnaryOperand;
+    Lerror err;
+    err.kind = Lerror::LE_InvalidUnaryOperand;
     err.as.invalid_unary_operands.t = t;
     return err;
 }
-LError error_vargs_outside_function()
+Lerror error_vargs_outside_function()
 {
-    LError err;
-    err.kind = LError::LE_VargsOutsideFunction;
+    Lerror err;
+    err.kind = Lerror::LE_VargsOutsideFunction;
     return err;
 }
-LError error_breake_outside_loop()
+Lerror error_breake_outside_loop()
 {
-    LError err;
-    err.kind = LError::LE_BreakOutsideLoop;
+    Lerror err;
+    err.kind = Lerror::LE_BreakOutsideLoop;
     return err;
 }
-LError error_label_undefined()
+Lerror error_label_undefined()
 {
 
-    LError err;
-    err.kind = LError::LE_LabelUndefined;
+    Lerror err;
+    err.kind = Lerror::LE_LabelUndefined;
     return err;
 }
-LError error_label_redefined(size_t line, size_t offset)
+Lerror error_label_redefined(size_t line, size_t offset)
 {
-    LError err;
-    err.kind = LError::LE_LabelRedefined;
+    Lerror err;
+    err.kind = Lerror::LE_LabelRedefined;
     err.as.label_redefined.line = line;
     err.as.label_redefined.offset = offset;
     return err;

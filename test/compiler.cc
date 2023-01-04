@@ -190,7 +190,7 @@ GenTest compiler_test_case(const char *message, const char *text)
                   << parser.get_error() << "\n";
         exit(1);
     }
-    SemanticAnalyzer analyzer(ast);
+    Resolver analyzer(ast);
     analyzer.analyze();
     Compiler compiler(&gentest);
     compiler.compile(ast);

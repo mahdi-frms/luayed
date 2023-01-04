@@ -430,7 +430,7 @@ void Interpreter::i_pop()
         this->rt->stack_pop();
     }
 }
-void Interpreter::generate_error(LError error)
+void Interpreter::generate_error(Lerror error)
 {
     LuaValue errval = this->rt->create_number(0xc0debed); // todo
     this->rt->set_error(errval);

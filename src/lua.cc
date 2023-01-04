@@ -21,8 +21,8 @@ int Lua::compile(const char *lua_code, string &errors)
         errors.push_back('\n');
         return LUA_COMPILE_RESULT_FAILED;
     }
-    SemanticAnalyzer sem(ast);
-    vector<LError> errs = sem.analyze();
+    Resolver sem(ast);
+    vector<Lerror> errs = sem.analyze();
     if (errs.size())
     {
         for (size_t i = 0; i < errs.size(); i++)

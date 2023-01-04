@@ -50,7 +50,7 @@ private:
     void exec();
 
     void push_bool(bool b);
-    void generate_error(LError error);
+    void generate_error(Lerror error);
     bool compare();
     bool compare(Comparison cmp);
     bool compare_number(LuaValue &a, LuaValue &b, Comparison cmp);

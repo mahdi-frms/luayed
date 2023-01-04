@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include "token.h"
 
-struct LError
+struct Lerror
 {
     size_t line;
     size_t offset;
@@ -101,23 +101,23 @@ struct LError
     } as;
 };
 
-LError error_ok();
-LError error_expected_expression();
-LError error_expected_variable();
-LError error_missing_end_of_string(size_t level);
-LError error_missing_char(char c);
-LError error_invalid_char(char c);
-LError error_invalid_escape();
-LError error_malformed_number();
-LError error_missing_end_of_comment(size_t level);
-LError error_expected_token(TokenKind kind);
-LError error_expected_expression();
-LError error_expected_variable();
-LError error_invalid_binary_operands(LuaType t1, LuaType t2);
-LError error_invalid_unary_operand(LuaType t);
-LError error_vargs_outside_function();
-LError error_breake_outside_loop();
-LError error_label_undefined();
-LError error_label_redefined(size_t line, size_t offset);
+Lerror error_ok();
+Lerror error_expected_expression();
+Lerror error_expected_variable();
+Lerror error_missing_end_of_string(size_t level);
+Lerror error_missing_char(char c);
+Lerror error_invalid_char(char c);
+Lerror error_invalid_escape();
+Lerror error_malformed_number();
+Lerror error_missing_end_of_comment(size_t level);
+Lerror error_expected_token(TokenKind kind);
+Lerror error_expected_expression();
+Lerror error_expected_variable();
+Lerror error_invalid_binary_operands(LuaType t1, LuaType t2);
+Lerror error_invalid_unary_operand(LuaType t);
+Lerror error_vargs_outside_function();
+Lerror error_breake_outside_loop();
+Lerror error_label_undefined();
+Lerror error_label_redefined(size_t line, size_t offset);
 
 #endif

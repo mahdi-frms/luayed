@@ -12,7 +12,7 @@ string to_string(const ast::Noderef &n);
 string to_string(const vector<lbyte> &bin);
 string to_string(const LuaType &lt);
 string to_string(const LuaValue &lv);
-string to_string(const LError &err);
+string to_string(const Lerror &err);
 string to_string(const vector<LuaValue> &vv);
 
 string to_string(const lbyte *text, size_t codelen);
@@ -24,7 +24,7 @@ std::ostream &operator<<(std::ostream &os, const ast::Noderef &n);
 std::ostream &operator<<(std::ostream &os, const vector<lbyte> &tk);
 std::ostream &operator<<(std::ostream &os, const LuaType &lt);
 std::ostream &operator<<(std::ostream &os, const LuaValue &lv);
-std::ostream &operator<<(std::ostream &os, const LError &err);
+std::ostream &operator<<(std::ostream &os, const Lerror &err);
 std::ostream &operator<<(std::ostream &os, const vector<LuaValue> &vv);
 
 #endif

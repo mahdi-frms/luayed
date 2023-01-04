@@ -408,7 +408,7 @@ Noderef Parser::statement()
     return nullptr; // never reaches here
 }
 
-void Parser::error(LError err, Token token)
+void Parser::error(Lerror err, Token token)
 {
     err.line = token.line;
     err.offset = token.offset;
@@ -688,7 +688,7 @@ Ast Parser::parse_exp()
     }
 }
 
-LError Parser::get_error()
+Lerror Parser::get_error()
 {
     return this->err;
 }

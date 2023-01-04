@@ -476,7 +476,7 @@ Token Lexer::number(char c)
     return this->token(TokenKind::Number);
 }
 
-Token Lexer::error(LError err)
+Token Lexer::error(Lerror err)
 {
     Token errtok = Token(nullptr, 0, this->prev_line, this->prev_offset, TokenKind::Error);
     this->err = err;
@@ -535,7 +535,7 @@ void Lexer::skip_line()
     }
 }
 
-LError Lexer::get_error()
+Lerror Lexer::get_error()
 {
     return this->err;
 }

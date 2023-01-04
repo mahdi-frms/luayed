@@ -349,82 +349,82 @@ string to_string(const LuaType &lt)
     return "";
 }
 
-string to_string(const LError &err)
+string to_string(const Lerror &err)
 {
     std::stringstream os;
-    if (err.kind == LError::LE_OK)
+    if (err.kind == Lerror::LE_OK)
         return os.str();
     os << "lua: error(line: "
        << err.line + 1
        << ", offset: "
        << err.offset + 1
        << "): ";
-    if (err.kind == LError::LE_MissingEndOfComment)
+    if (err.kind == Lerror::LE_MissingEndOfComment)
     {
         os << "missing symbol ']";
         for (size_t i = 0; i < err.as.missing_end_of_comment.level; i++)
             os << '=';
         os << "]'";
     }
-    else if (err.kind == LError::LE_MisingEndOfString)
+    else if (err.kind == Lerror::LE_MisingEndOfString)
     {
         os << "missing symbol ']";
         for (size_t i = 0; i < err.as.missing_end_of_string.level; i++)
             os << '=';
         os << "]'";
     }
-    else if (err.kind == LError::LE_MissingChar)
+    else if (err.kind == Lerror::LE_MissingChar)
     {
         os << "missing character '" << err.as.missing_char.c << "'";
     }
-    else if (err.kind == LError::LE_InvalidChar)
+    else if (err.kind == Lerror::LE_InvalidChar)
     {
         os << "invalid character '" << err.as.invalid_char.c << "'";
     }
-    else if (err.kind == LError::LE_InvalidEscape)
+    else if (err.kind == Lerror::LE_InvalidEscape)
     {
         os << "invalid escape";
     }
-    else if (err.kind == LError::LE_MalformedNumber)
+    else if (err.kind == Lerror::LE_MalformedNumber)
     {
         os << "malformed number";
     }
-    else if (err.kind == LError::LE_ExpectedToken)
+    else if (err.kind == Lerror::LE_ExpectedToken)
     {
         os << "expected token '" << to_string(err.as.expected_token.token_kind) << "'";
     }
-    else if (err.kind == LError::LE_ExpectedVariable)
+    else if (err.kind == Lerror::LE_ExpectedVariable)
     {
         os << "expected variable";
     }
-    else if (err.kind == LError::LE_ExpectedExpression)
+    else if (err.kind == Lerror::LE_ExpectedExpression)
     {
         os << "expected expression";
     }
-    else if (err.kind == LError::LE_InvalidBinaryOperands)
+    else if (err.kind == Lerror::LE_InvalidBinaryOperands)
     {
         LuaType t1 = err.as.invalid_binary_operands.t1;
         LuaType t2 = err.as.invalid_binary_operands.t2;
         os << "invalid operation on types [" << t1 << "] and [" << t2 << "]";
     }
-    else if (err.kind == LError::LE_InvalidUnaryOperand)
+    else if (err.kind == Lerror::LE_InvalidUnaryOperand)
     {
         LuaType t = err.as.invalid_unary_operands.t;
         os << "invalid operation on type [" << t << "]";
     }
-    else if (err.kind == LError::LE_VargsOutsideFunction)
+    else if (err.kind == Lerror::LE_VargsOutsideFunction)
     {
         os << "can not use '...' outside a vararg function";
     }
-    else if (err.kind == LError::LE_BreakOutsideLoop)
+    else if (err.kind == Lerror::LE_BreakOutsideLoop)
     {
         os << "break not inside a loop";
     }
-    else if (err.kind == LError::LE_LabelUndefined)
+    else if (err.kind == Lerror::LE_LabelUndefined)
     {
         os << "label not visible";
     }
-    else if (err.kind == LError::LE_LabelRedefined)
+    else if (err.kind == Lerror::LE_LabelRedefined)
     {
         size_t line = err.as.label_redefined.line;
         size_t offset = err.as.label_redefined.offset;
@@ -462,5 +462,5 @@ WRITE_TO_STREAM_OPERATOR(Token)
 WRITE_TO_STREAM_OPERATOR(TokenKind)
 WRITE_TO_STREAM_OPERATOR(LuaType)
 WRITE_TO_STREAM_OPERATOR(LuaValue)
-WRITE_TO_STREAM_OPERATOR(LError)
+WRITE_TO_STREAM_OPERATOR(Lerror)
 WRITE_TO_STREAM_OPERATOR(vector<LuaValue>)

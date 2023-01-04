@@ -5,14 +5,14 @@
 #define mem(N) ((MetaMemory *)N->getannot(MetaKind::MMemory))
 #define is_meth(N) (N->get_kind() == NodeKind::MethodBody)
 
-vector<LError> SemanticAnalyzer::analyze()
+vector<Lerror> Resolver::analyze()
 {
     this->current = nullptr;
     this->analyze_node(ast.root());
     this->finalize();
     return std::move(this->errors);
 }
-void SemanticAnalyzer::analyze_var_decl(Noderef node)
+void Resolver::analyze_var_decl(Noderef node)
 {
     node = node->child(0);
     Token tkn = node->get_token();
@@ -36,16 +36,16 @@ void SemanticAnalyzer::analyze_var_decl(Noderef node)
     }
 }
 
-MetaScope *SemanticAnalyzer::curscope()
+MetaScope *Resolver::curscope()
 {
     return scope(this->current);
 }
-Varmap &SemanticAnalyzer::curmap()
+Varmap &Resolver::curmap()
 {
     return map(this->current);
 }
 
-void SemanticAnalyzer::reference(Noderef node, Noderef dec, bool func_past)
+void Resolver::reference(Noderef node, Noderef dec, bool func_past)
 {
     MetaDeclaration *meta = new MetaDeclaration;
     meta->decnode = dec;
@@ -62,7 +62,7 @@ void SemanticAnalyzer::reference(Noderef node, Noderef dec, bool func_past)
     }
 }
 
-void SemanticAnalyzer::self_ref(Noderef node)
+void Resolver::self_ref(Noderef node)
 {
     MetaSelf *meta = new MetaSelf;
     meta->header.kind = MetaKind::MSelf;
@@ -70,7 +70,7 @@ void SemanticAnalyzer::self_ref(Noderef node)
     node->annotate(&meta->header);
 }
 
-void SemanticAnalyzer::analyze_identifier(Noderef node)
+void Resolver::analyze_identifier(Noderef node)
 {
     Token t = node->get_token();
     if (t.kind == TokenKind::Identifier)
@@ -100,7 +100,7 @@ void SemanticAnalyzer::analyze_identifier(Noderef node)
     {
         if (!scope(this->curscope()->func)->variadic)
         {
-            LError error = error_vargs_outside_function();
+            Lerror error = error_vargs_outside_function();
             error.line = t.line;
             error.offset = t.offset;
             this->errors.push_back(error);
@@ -108,7 +108,7 @@ void SemanticAnalyzer::analyze_identifier(Noderef node)
     }
 }
 
-void SemanticAnalyzer::analyze_etc(Noderef node)
+void Resolver::analyze_etc(Noderef node)
 {
     bool is_fn = node->get_kind() == NodeKind::FunctionBody || is_meth(node);
 
@@ -164,14 +164,14 @@ bool is_loop(NodeKind kind)
            kind == NodeKind::RepeatStmt;
 }
 
-void SemanticAnalyzer::analyze_break(Noderef node)
+void Resolver::analyze_break(Noderef node)
 {
     Noderef it = this->current;
     while (!is_loop(it->get_kind()))
         it = scope(it)->parent;
     if (!it)
     {
-        LError err = error_breake_outside_loop();
+        Lerror err = error_breake_outside_loop();
         // todo : BreakStmt node must include the token
         err.line = 0;
         err.offset = 0;
@@ -179,7 +179,7 @@ void SemanticAnalyzer::analyze_break(Noderef node)
     }
 }
 
-void SemanticAnalyzer::analyze_label(Noderef node)
+void Resolver::analyze_label(Noderef node)
 {
     string name = node->child(0)->get_token().text();
     if (this->labels.find(name) != this->labels.cend())
@@ -192,7 +192,7 @@ void SemanticAnalyzer::analyze_label(Noderef node)
     }
 }
 
-void SemanticAnalyzer::analyze_node(Noderef node)
+void Resolver::analyze_node(Noderef node)
 {
     if (node->get_kind() == NodeKind::LabelStmt)
         this->analyze_label(node);
@@ -210,7 +210,7 @@ void SemanticAnalyzer::analyze_node(Noderef node)
         this->analyze_etc(node);
 }
 
-void SemanticAnalyzer::analyze_declaration(Noderef node)
+void Resolver::analyze_declaration(Noderef node)
 {
     if (node->child_count() > 1)
     {
@@ -221,7 +221,7 @@ void SemanticAnalyzer::analyze_declaration(Noderef node)
     this->analyze_node(vars);
 }
 
-void SemanticAnalyzer::finalize()
+void Resolver::finalize()
 {
     while (gotolist.size())
     {
@@ -244,6 +244,6 @@ void SemanticAnalyzer::finalize()
     this->labels.clear();
 }
 
-SemanticAnalyzer::SemanticAnalyzer(Ast ast) : ast(ast)
+Resolver::Resolver(Ast ast) : ast(ast)
 {
 }

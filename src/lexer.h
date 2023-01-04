@@ -20,7 +20,7 @@ private:
     size_t prev_line;
     size_t prev_pos;
 
-    LError err;
+    Lerror err;
 
     char peek();
     char pop();
@@ -51,7 +51,7 @@ private:
     Token op_length(char c);
     Token token(TokenKind kind);
     Token token_eof();
-    Token error(LError err);
+    Token error(Lerror err);
     Token none();
     Token empty();
     bool look_ahead();
@@ -59,7 +59,7 @@ private:
 public:
     Lexer(const char *text);
     Token next();
-    LError get_error();
+    Lerror get_error();
     vector<Token> drain();
 };
 

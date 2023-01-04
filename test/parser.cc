@@ -20,7 +20,7 @@ public:
         this->tkns.erase(this->tkns.begin());
         return last;
     }
-    LError get_error()
+    Lerror get_error()
     {
         return error_ok();
     }

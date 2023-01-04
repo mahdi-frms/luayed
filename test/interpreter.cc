@@ -172,7 +172,7 @@ public:
         this->test(rsl, "(upvalue)");
         return *this;
     }
-    InterpreterTestCase &test_error(LError err)
+    InterpreterTestCase &test_error(Lerror err)
     {
         this->test(this->rt.get_error() == lvstring(to_string(err).c_str()), "(error)");
         return *this;

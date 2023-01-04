@@ -20,7 +20,7 @@ class Parser
 private:
     ILexer *lexer;
     Token current;
-    LError err;
+    Lerror err;
 
     Noderef expr();
     Noderef expr(Token t);
@@ -37,7 +37,7 @@ private:
     Noderef while_stmt();
     Noderef repeat_stmt();
     Noderef vardecl();
-    void error(LError err, Token token);
+    void error(Lerror err, Token token);
     Noderef name_attrib();
     Noderef if_stmt();
     Noderef generic_for_stmt(Token identifier);
@@ -51,7 +51,7 @@ private:
 public:
     Parser(ILexer *lexer);
     Ast parse();
-    LError get_error();
+    Lerror get_error();
     Ast parse_exp();
 };
 

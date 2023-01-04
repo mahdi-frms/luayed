@@ -28,7 +28,7 @@ public:
 class ILexer
 {
 public:
-    virtual LError get_error() = 0;
+    virtual Lerror get_error() = 0;
     virtual Token next() = 0;
 };
 

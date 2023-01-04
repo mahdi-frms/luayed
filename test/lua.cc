@@ -17,8 +17,8 @@ LuaValue lua_test_compile(const char *code, LuaRuntime &rt, vector<lbyte> &bin)
                   << parser.get_error();
         exit(1);
     }
-    SemanticAnalyzer sem(ast);
-    vector<LError> errs = sem.analyze();
+    Resolver sem(ast);
+    vector<Lerror> errs = sem.analyze();
     if (errs.size())
     {
         std::cerr << "Compiling test case failed: \n";
