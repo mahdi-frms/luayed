@@ -185,4 +185,17 @@ void lua_tests()
         {
             lvnumber(50),
         });
+
+    lua_test_case(
+        "varargs",
+
+        "local function sum(...)\n"
+        "    local a, b, c, d, e = ...\n"
+        "    return a + b + c + d + e\n"
+        "end\n"
+        "return sum(1, 2, 7, 9, 6, 111)",
+
+        {
+            lvnumber(25),
+        });
 }
