@@ -59,7 +59,10 @@ LuaValue MockRuntime::create_string(const char *s1, const char *s2)
 }
 LuaValue MockRuntime::create_string(lnumber n)
 {
-    return lvstring(std::to_string(n).c_str());
+    string str = std::to_string(n);
+    str.erase(str.find_last_not_of('0') + 1);
+    str.erase(str.find_last_not_of('.') + 1);
+    return lvstring(str.c_str());
 }
 LuaValue MockRuntime::create_table()
 {

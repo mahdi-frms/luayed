@@ -900,4 +900,29 @@ void interpreter_tests()
         .test_stack({
             lvnumber(216),
         });
+
+    InterpreterTestCase("to string")
+        .set_stack({
+            lvnumber(10),
+            lvnumber(20),
+        })
+        .execute({
+            iconcat,
+        })
+        .test_stack({
+            lvstring("1020"),
+        });
+
+    InterpreterTestCase("parse string")
+        .set_stack({
+            lvstring("3"),
+            lvstring("4"),
+        })
+        .execute({
+            inegate,
+            imult,
+        })
+        .test_stack({
+            lvnumber(-12),
+        });
 }
