@@ -47,6 +47,7 @@ public:
     virtual void fncall(size_t argc, size_t retc) = 0;
     virtual void set_error(LuaValue value) = 0;
     virtual LuaValue get_error() = 0;
+    virtual bool error_raised() = 0;
 
     virtual LuaValue stack_pop() = 0;
     virtual void stack_push(LuaValue value) = 0;

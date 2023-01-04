@@ -221,8 +221,13 @@ vector<LuaValue> &MockRuntime::get_stack()
 void MockRuntime::set_error(LuaValue value)
 {
     this->error = value;
+    this->has_error = true;
 }
 LuaValue MockRuntime::get_error()
 {
     return this->error;
+}
+bool MockRuntime::error_raised()
+{
+    return this->has_error;
 }

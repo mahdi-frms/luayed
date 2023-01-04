@@ -34,6 +34,7 @@ private:
     vector<LuaValue> upvalues;
     size_t ip = 0;
     LuaValue error = lvnil();
+    bool has_error = false;
 
     size_t back_stack(size_t idx);
 
@@ -79,6 +80,7 @@ public:
     lbyte *text();
     void set_error(LuaValue value);
     LuaValue get_error();
+    bool error_raised();
 };
 
 #endif

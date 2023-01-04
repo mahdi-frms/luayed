@@ -96,7 +96,6 @@ Lerror error_breake_outside_loop()
 }
 Lerror error_label_undefined()
 {
-
     Lerror err;
     err.kind = Lerror::LE_LabelUndefined;
     return err;
@@ -107,5 +106,21 @@ Lerror error_label_redefined(size_t line, size_t offset)
     err.kind = Lerror::LE_LabelRedefined;
     err.as.label_redefined.line = line;
     err.as.label_redefined.offset = offset;
+    return err;
+}
+
+Lerror error_call_non_function(LuaType t)
+{
+    Lerror err;
+    err.kind = Lerror::LE_CallNonFunction;
+    err.as.call_non_function.t = t;
+    return err;
+}
+Lerror error_not_enough_args(size_t available, size_t expected)
+{
+    Lerror err;
+    err.kind = Lerror::LE_NotEnoughArgs;
+    err.as.not_enough_args.available = available;
+    err.as.not_enough_args.expected = expected;
     return err;
 }

@@ -176,12 +176,20 @@ public:
     {
         LuaValue expected = lvstring(to_string(err, true).c_str());
         LuaValue thrown = this->rt.get_error();
-        this->test(thrown == expected, "(error)");
-        if (thrown != expected)
+        bool rsl = this->rt.error_raised() && thrown == expected;
+        this->test(rsl, "(error)");
+        if (!rsl)
         {
-            std::cerr << "thrown:\n"
-                      << thrown << "\nexpected:\n"
-                      << expected << "\n";
+            if (this->rt.error_raised())
+            {
+                std::cerr << "No error was raised\n";
+            }
+            else
+            {
+                std::cerr << "thrown:\n"
+                          << thrown << "\nexpected:\n"
+                          << expected << "\n";
+            }
         }
         return *this;
     }

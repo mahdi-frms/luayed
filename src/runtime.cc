@@ -185,6 +185,8 @@ void LuaRuntime::new_frame(size_t stack_size)
     frame->sp = 0;
     frame->ret_count = 0;
     frame->fn = this->create_nil();
+    frame->has_error = false;
+    frame->error = this->create_nil();
     this->frame = frame;
 }
 LuaRuntime::LuaRuntime(IInterpreter *interpreter) : interpreter(interpreter)
@@ -225,6 +227,52 @@ void LuaRuntime::set_lua_interface(void *lua_interface)
 {
     this->lua_interface = lua_interface;
 }
+LuaValue LuaRuntime::concat(LuaValue v1, LuaValue v2)
+{
+    return this->create_string(v1.as<const char *>(), v2.as<const char *>());
+}
+LuaValue LuaRuntime::error_to_string(Lerror error)
+{
+    if (error.kind == Lerror::LE_CallNonFunction)
+    {
+        LuaValue s1 = this->create_string("attemp to call with ");
+        LuaValue s2 = this->create_string(error.as.not_enough_args.expected);
+        LuaValue s3 = this->create_string(" args, while there are ");
+        LuaValue s4 = this->create_string(error.as.not_enough_args.available);
+        LuaValue s5 = this->create_string(" on the stack ");
+        LuaValue s = s1;
+        s = this->concat(s, s2);
+        s = this->concat(s, s3);
+        s = this->concat(s, s4);
+        s = this->concat(s, s5);
+        return s;
+    }
+    else if (error.kind == Lerror::LE_CallNonFunction)
+    {
+        LuaValue s1 = this->create_string("attemp to call a ");
+        LuaValue s2 = this->lua_type_to_string(error.as.call_non_function.t);
+        LuaValue s3 = this->create_string(" value");
+        LuaValue s = s1;
+        s = this->concat(s, s2);
+        s = this->concat(s, s3);
+        return s;
+    }
+    else
+        return this->create_nil();
+}
+
+LuaValue LuaRuntime::lua_type_to_string(LuaType t)
+{
+    const char *texts[6] = {
+        [LVNil] = "nil",
+        [LVBool] = "boolean",
+        [LVNumber] = "number",
+        [LVString] = "string",
+        [LVTable] = "table",
+        [LVFunction] = "function",
+    };
+    return this->create_string(texts[t]);
+}
 
 void LuaRuntime::fncall(size_t argc, size_t retc)
 {
@@ -233,14 +281,16 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
     // check if there are enough values on the stack
     if (total_argc + 1 > prev->sp)
     {
-        // todo: throw error
+        Lerror err = error_not_enough_args(prev->sp - prev->ret_count, argc);
+        this->set_error(this->error_to_string(err));
         return;
     }
     LuaValue *fn = prev->stack() + prev->sp - total_argc - 1;
     // check if pushed value is a function
     if (fn->kind != LuaType::LVFunction)
     {
-        // todo: throw error
+        Lerror err = error_call_non_function(fn->kind);
+        this->set_error(this->error_to_string(err));
         return;
     }
     bool is_lua = fn->as<LuaFunction *>()->is_lua;
@@ -251,7 +301,7 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
     frame->fn = *fn;
     frame->exp_count = retc;
     frame->vargs_count = 0;
-    // todo: extra args most not be copied in case of fix return-count
+
     this->copy_values(prev, frame, total_argc);
     if (is_lua && bin->parcount > total_argc)
     {
@@ -267,23 +317,21 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
     size_t return_count = 0;
     if (is_lua)
     {
-        // todo : handle error returned by interpreter
-        if (this->interpreter)
-            return_count = this->interpreter->run(this);
-        else
-        {
-            // todo : must be refactored
-            std::cerr << "LUA RUNTIME CRASH: NO INTERPRETER PROVIDED";
-            exit(1);
-        }
+        return_count = this->interpreter->run(this);
     }
     else
     {
         LuaRTCppFunction cppfn = fn->as<LuaFunction *>()->native();
         return_count = cppfn(this->lua_interface);
     }
-    this->fnret(return_count);
+    if (!this->frame->has_error)
+        this->fnret(return_count);
 }
+bool LuaRuntime::error_raised()
+{
+    return this->frame->has_error;
+}
+
 void LuaRuntime::fnret(size_t count)
 {
     Frame *frame = this->frame;
@@ -456,6 +504,7 @@ lbyte *LuaRuntime::text()
 void LuaRuntime::set_error(LuaValue value)
 {
     this->frame->error = value;
+    this->frame->has_error = true;
 }
 LuaValue LuaRuntime::get_error()
 {

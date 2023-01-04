@@ -432,6 +432,17 @@ string to_string(const Lerror &err, bool pure)
     {
         os << "label not visible";
     }
+    else if (err.kind == Lerror::LE_NotEnoughArgs)
+    {
+        size_t available = err.as.not_enough_args.available;
+        size_t expected = err.as.not_enough_args.expected;
+        os << "attemp to call with " << expected << " args, while there are " << available << "on the stack";
+    }
+    else if (err.kind == Lerror::LE_CallNonFunction)
+    {
+        LuaType t = err.as.call_non_function.t;
+        os << "attemp to call a " << t << " value";
+    }
     else if (err.kind == Lerror::LE_LabelRedefined)
     {
         size_t line = err.as.label_redefined.line;

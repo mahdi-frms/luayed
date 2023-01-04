@@ -27,6 +27,9 @@ struct Lerror
         LE_BreakOutsideLoop,
         LE_LabelUndefined,
         LE_LabelRedefined,
+        // Runtime
+        LE_CallNonFunction,
+        LE_NotEnoughArgs,
         // Interpretor
         LE_InvalidOperand,
         LE_InvalidComparison,
@@ -82,25 +85,42 @@ struct Lerror
         {
             LuaType t;
         } invalid_operand;
+
         struct
         {
             LuaType t1;
             LuaType t2;
         } invalid_comparison;
+
         struct
         {
         } vargs_outside_function;
+
         struct
         {
         } breake_outside_loop;
+
         struct
         {
         } label_undefined;
+
         struct
         {
             size_t line;
             size_t offset;
         } label_redefined;
+
+        struct
+        {
+            LuaType t;
+        } call_non_function;
+
+        struct
+        {
+            size_t available;
+            size_t expected;
+        } not_enough_args;
+
     } as;
 };
 
@@ -122,5 +142,7 @@ Lerror error_vargs_outside_function();
 Lerror error_breake_outside_loop();
 Lerror error_label_undefined();
 Lerror error_label_redefined(size_t line, size_t offset);
+Lerror error_call_non_function(LuaType t);
+Lerror error_not_enough_args(size_t available, size_t expected);
 
 #endif

@@ -80,6 +80,7 @@ struct Frame
     LuaValue error;
     Frame *prev;
     size_t hookptr;
+    bool has_error;
 
     // number of args this frame is supposed to return
     size_t exp_count;
@@ -122,12 +123,15 @@ private:
     void destroy_frame();
     void copy_values(Frame *fsrc, Frame *fdest, size_t count);
     void push_nils(Frame *fsrc, size_t count);
+    LuaValue concat(LuaValue v1, LuaValue v2);
+    LuaValue lua_type_to_string(LuaType t);
 
     LuaValue *stack();
     LuaValue *args();
     Hook **hooktable();
     Hook **uptable();
     Lfunction *bin();
+    LuaValue error_to_string(Lerror error);
 
     void *allocate(size_t size);
     void deallocate(void *ptr);
@@ -153,6 +157,7 @@ public:
     LuaValue get_error();
     fidx_t gen_fidx();
     Lfunction *bin(size_t fidx);
+    bool error_raised();
 
     LuaValue stack_pop();
     void stack_push(LuaValue value);
