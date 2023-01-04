@@ -20,8 +20,8 @@ struct Lerror
         LE_ExpectedToken,
         LE_ExpectedExpression,
         LE_ExpectedVariable,
-        LE_InvalidBinaryOperands,
-        LE_InvalidUnaryOperand,
+        LE_InvalidOperand,
+        LE_InvalidComparison,
 
         LE_VargsOutsideFunction,
         LE_BreakOutsideLoop,
@@ -77,13 +77,13 @@ struct Lerror
 
         struct
         {
-            LuaType t1;
-            LuaType t2;
-        } invalid_binary_operands;
+            LuaType t;
+        } invalid_operand;
         struct
         {
-            LuaType t;
-        } invalid_unary_operands;
+            LuaType t1;
+            LuaType t2;
+        } invalid_comparison;
         struct
         {
         } vargs_outside_function;
@@ -113,8 +113,8 @@ Lerror error_missing_end_of_comment(size_t level);
 Lerror error_expected_token(TokenKind kind);
 Lerror error_expected_expression();
 Lerror error_expected_variable();
-Lerror error_invalid_binary_operands(LuaType t1, LuaType t2);
-Lerror error_invalid_unary_operand(LuaType t);
+Lerror error_invalid_operand(LuaType t);
+Lerror error_invalid_comparison(LuaType t1, LuaType t2);
 Lerror error_vargs_outside_function();
 Lerror error_breake_outside_loop();
 Lerror error_label_undefined();

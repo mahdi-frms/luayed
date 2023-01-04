@@ -87,6 +87,14 @@ LuaValue LuaRuntime::create_string(const char *s)
     return val;
 }
 
+LuaValue LuaRuntime::create_string(lnumber n)
+{
+    LuaValue val;
+    val.kind = LuaType::LVString;
+    val.data.ptr = nullptr; // todo
+    return val;
+}
+
 LuaValue LuaRuntime::create_string(const char *s1, const char *s2)
 {
     LuaValue val;

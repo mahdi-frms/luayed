@@ -2,6 +2,7 @@
 #include "virtuals.h"
 #include "interpreter.h"
 #include <cmath>
+#include "lexer.h"
 
 opimpl Interpreter::optable[256] = {};
 bool Interpreter::is_initialized = false;
@@ -149,15 +150,36 @@ lnumber Interpreter::arith_calc(Arithmetic ar, lnumber a, lnumber b)
     return 0;
 }
 
+LuaValue Interpreter::parse_number(const char *str)
+{
+    Lexer lx(str);
+    if (lx.next().kind != TokenKind::Number)
+        return this->rt->create_nil();
+    if (lx.next().kind != TokenKind::Eof)
+        return this->rt->create_nil();
+    return this->rt->create_number(atof(str));
+}
+
 void Interpreter::arith(Arithmetic ar)
 {
     LuaValue b = this->rt->stack_pop();
     LuaValue a = this->rt->stack_pop();
-    // todo: string conversion
-    if (a.kind != LuaType::LVNumber || b.kind != LuaType::LVNumber)
+    LuaType at = a.kind;
+    LuaType bt = b.kind;
+
+    if (at == LuaType::LVString)
+        a = this->parse_number(a.as<const char *>());
+    if (bt == LuaType::LVString)
+        b = this->parse_number(b.as<const char *>());
+
+    if (a.kind != LuaType::LVNumber)
     {
-        this->generate_error(error_invalid_binary_operands(a.kind, b.kind));
-        this->state = InterpreterState::Error;
+        this->generate_error(error_invalid_operand(at));
+        return;
+    }
+    if (b.kind != LuaType::LVNumber)
+    {
+        this->generate_error(error_invalid_operand(bt));
         return;
     }
 
@@ -196,12 +218,15 @@ void Interpreter::i_pow()
 }
 void Interpreter::i_neg()
 {
-    // todo: string conversion
     LuaValue a = this->rt->stack_pop();
+    LuaType at = a.kind;
+    if (a.kind == LuaType::LVString)
+    {
+        a = this->parse_number(a.as<const char *>());
+    }
     if (a.kind != LuaType::LVNumber)
     {
-        this->generate_error(error_invalid_unary_operand(a.kind));
-        this->state = InterpreterState::Error;
+        this->generate_error(error_invalid_operand(at));
         return;
     }
     LuaValue num = this->rt->create_number(-a.data.n);
@@ -235,18 +260,37 @@ void Interpreter::i_not()
 }
 void Interpreter::i_concat()
 {
-    // todo : convert numbers
-    // todo : error on invalid types
     LuaValue b = this->rt->stack_pop();
     LuaValue a = this->rt->stack_pop();
+
+    if (a.kind == LuaType::LVNumber)
+        a = this->rt->create_string(a.data.n);
+    if (a.kind != LuaType::LVString)
+    {
+        this->generate_error(error_invalid_operand(a.kind));
+        return;
+    }
+
+    if (b.kind == LuaType::LVNumber)
+        b = this->rt->create_string(b.data.n);
+    if (b.kind != LuaType::LVString)
+    {
+        this->generate_error(error_invalid_operand(b.kind));
+        return;
+    }
+
     LuaValue c = this->rt->create_string(a.as<const char *>(), b.as<const char *>());
     this->rt->stack_push(c);
 }
 void Interpreter::i_len()
 {
     // todo : table length
-    // todo : error on invalid types
     LuaValue s = this->rt->stack_pop();
+    if (s.kind != LuaType::LVTable && s.kind != LuaType::LVString)
+    {
+        this->generate_error(error_invalid_operand(s.kind));
+        return;
+    }
     this->rt->stack_push(this->rt->create_number(strlen(s.as<const char *>())));
 }
 
@@ -257,8 +301,7 @@ bool Interpreter::compare(Comparison cmp)
     bool rsl;
     if (a.kind != b.kind || (a.kind != LuaType::LVNumber && a.kind != LuaType::LVString))
     {
-        this->generate_error(error_invalid_binary_operands(a.kind, b.kind));
-        this->state = InterpreterState::Error;
+        this->generate_error(error_invalid_comparison(a.kind, b.kind));
         return false;
     }
     else if (a.kind == LuaType::LVNumber)
@@ -455,5 +498,6 @@ void Interpreter::i_pop()
 void Interpreter::generate_error(Lerror error)
 {
     LuaValue errval = this->rt->create_number(0xc0debed); // todo
+    this->state = InterpreterState::Error;
     this->rt->set_error(errval);
 }

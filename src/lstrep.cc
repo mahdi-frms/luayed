@@ -401,16 +401,16 @@ string to_string(const Lerror &err)
     {
         os << "expected expression";
     }
-    else if (err.kind == Lerror::LE_InvalidBinaryOperands)
+    else if (err.kind == Lerror::LE_InvalidOperand)
     {
-        LuaType t1 = err.as.invalid_binary_operands.t1;
-        LuaType t2 = err.as.invalid_binary_operands.t2;
-        os << "invalid operation on types [" << t1 << "] and [" << t2 << "]";
-    }
-    else if (err.kind == Lerror::LE_InvalidUnaryOperand)
-    {
-        LuaType t = err.as.invalid_unary_operands.t;
+        LuaType t = err.as.invalid_operand.t;
         os << "invalid operation on type [" << t << "]";
+    }
+    else if (err.kind == Lerror::LE_InvalidComparison)
+    {
+        LuaType t1 = err.as.invalid_comparison.t1;
+        LuaType t2 = err.as.invalid_comparison.t2;
+        os << "attemp to compare " << t1 << " with " << t2;
     }
     else if (err.kind == Lerror::LE_VargsOutsideFunction)
     {

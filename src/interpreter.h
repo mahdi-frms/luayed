@@ -70,6 +70,7 @@ private:
     void hookwrite(Hook *hook, LuaValue value);
     void arith(Arithmetic ar);
     lnumber arith_calc(Arithmetic ar, lnumber a, lnumber b);
+    LuaValue parse_number(const char *str);
 
     void i_add();
     void i_sub();

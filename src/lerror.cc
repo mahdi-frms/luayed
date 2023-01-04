@@ -67,19 +67,19 @@ Lerror error_expected_variable()
     err.kind = Lerror::LE_ExpectedVariable;
     return err;
 }
-Lerror error_invalid_binary_operands(LuaType t1, LuaType t2)
+Lerror error_invalid_operand(LuaType t)
 {
     Lerror err;
-    err.kind = Lerror::LE_InvalidBinaryOperands;
-    err.as.invalid_binary_operands.t1 = t1;
-    err.as.invalid_binary_operands.t2 = t2;
+    err.kind = Lerror::LE_InvalidOperand;
+    err.as.invalid_operand.t = t;
     return err;
 }
-Lerror error_invalid_unary_operand(LuaType t)
+Lerror error_invalid_comparison(LuaType t1, LuaType t2)
 {
     Lerror err;
-    err.kind = Lerror::LE_InvalidUnaryOperand;
-    err.as.invalid_unary_operands.t = t;
+    err.kind = Lerror::LE_InvalidComparison;
+    err.as.invalid_comparison.t1 = t1;
+    err.as.invalid_comparison.t2 = t2;
     return err;
 }
 Lerror error_vargs_outside_function()

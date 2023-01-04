@@ -57,6 +57,10 @@ LuaValue MockRuntime::create_string(const char *s1, const char *s2)
     str.append(s2);
     return lvstring(str.c_str());
 }
+LuaValue MockRuntime::create_string(lnumber n)
+{
+    return lvstring(std::to_string(n).c_str());
+}
 LuaValue MockRuntime::create_table()
 {
     return lvtable();
@@ -70,6 +74,7 @@ void MockRuntime::fncall(size_t argc, size_t retc)
 {
     this->icp_fncall.enable(argc, retc);
 }
+
 LuaValue MockRuntime::stack_pop()
 {
     if (!this->stack.size())
