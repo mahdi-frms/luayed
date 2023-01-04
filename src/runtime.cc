@@ -235,11 +235,11 @@ LuaValue LuaRuntime::error_to_string(Lerror error)
 {
     if (error.kind == Lerror::LE_CallNonFunction)
     {
-        LuaValue s1 = this->create_string("attemp to call with ");
+        LuaValue s1 = this->create_string("expected ");
         LuaValue s2 = this->create_string(error.as.not_enough_args.expected);
-        LuaValue s3 = this->create_string(" args, while there are ");
+        LuaValue s3 = this->create_string(" values, while there are ");
         LuaValue s4 = this->create_string(error.as.not_enough_args.available);
-        LuaValue s5 = this->create_string(" on the stack ");
+        LuaValue s5 = this->create_string(" on the stack");
         LuaValue s = s1;
         s = this->concat(s, s2);
         s = this->concat(s, s3);
@@ -335,15 +335,13 @@ bool LuaRuntime::error_raised()
 void LuaRuntime::fnret(size_t count)
 {
     Frame *frame = this->frame;
-    if (!frame->prev)
-    {
-        // todo: error
-    }
     size_t total_count = frame->ret_count + count;
     Frame *prev = this->frame->prev;
     if (frame->sp < total_count)
     {
-        // todo: error
+        Lerror err = error_not_enough_args(frame->sp - frame->ret_count, count);
+        this->set_error(this->error_to_string(err));
+        return;
     }
     size_t exp = frame->exp_count;
     if (exp-- == 0)

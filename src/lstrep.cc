@@ -436,7 +436,7 @@ string to_string(const Lerror &err, bool pure)
     {
         size_t available = err.as.not_enough_args.available;
         size_t expected = err.as.not_enough_args.expected;
-        os << "attemp to call with " << expected << " args, while there are " << available << "on the stack";
+        os << "expected " << expected << " values, while there are " << available << "on the stack";
     }
     else if (err.kind == Lerror::LE_CallNonFunction)
     {
