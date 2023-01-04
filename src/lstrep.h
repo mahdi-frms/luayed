@@ -13,6 +13,7 @@ string to_string(const vector<lbyte> &bin);
 string to_string(const LuaType &lt);
 string to_string(const LuaValue &lv);
 string to_string(const Lerror &err);
+string to_string(const Lerror &err, bool pure);
 string to_string(const vector<LuaValue> &vv);
 
 string to_string(const lbyte *text, size_t codelen);

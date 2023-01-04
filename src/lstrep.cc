@@ -337,7 +337,7 @@ string to_string(const LuaType &lt)
     if (lt == LuaType::LVNil)
         return "nil";
     else if (lt == LuaType::LVBool)
-        return "bool";
+        return "boolean";
     if (lt == LuaType::LVNumber)
         return "number";
     if (lt == LuaType::LVTable)
@@ -351,14 +351,22 @@ string to_string(const LuaType &lt)
 
 string to_string(const Lerror &err)
 {
+    return to_string(err, false);
+}
+
+string to_string(const Lerror &err, bool pure)
+{
     std::stringstream os;
     if (err.kind == Lerror::LE_OK)
         return os.str();
-    os << "lua: error(line: "
-       << err.line + 1
-       << ", offset: "
-       << err.offset + 1
-       << "): ";
+    if (!pure)
+    {
+        os << "lua: error(line: "
+           << err.line + 1
+           << ", offset: "
+           << err.offset + 1
+           << "): ";
+    }
     if (err.kind == Lerror::LE_MissingEndOfComment)
     {
         os << "missing symbol ']";

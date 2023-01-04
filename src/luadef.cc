@@ -16,3 +16,7 @@ bool operator==(const LuaValue &v1, const LuaValue &v2)
     else
         return v1.data.ptr == v2.data.ptr;
 }
+bool operator!=(const LuaValue &v1, const LuaValue &v2)
+{
+    return !(v1 == v2);
+}

@@ -6,8 +6,8 @@
 
 struct Lerror
 {
-    size_t line;
-    size_t offset;
+    size_t line = 0;
+    size_t offset = 0;
     enum
     {
         // Lexer

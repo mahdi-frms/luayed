@@ -174,7 +174,15 @@ public:
     }
     InterpreterTestCase &test_error(Lerror err)
     {
-        this->test(this->rt.get_error() == lvstring(to_string(err).c_str()), "(error)");
+        LuaValue expected = lvstring(to_string(err, true).c_str());
+        LuaValue thrown = this->rt.get_error();
+        this->test(thrown == expected, "(error)");
+        if (thrown != expected)
+        {
+            std::cerr << "thrown:\n"
+                      << thrown << "\nexpected:\n"
+                      << expected << "\n";
+        }
         return *this;
     }
 };
@@ -925,4 +933,53 @@ void interpreter_tests()
         .test_stack({
             lvnumber(-12),
         });
+
+    InterpreterTestCase("invalid arithmatic operand")
+        .set_stack({
+            lvnumber(3),
+            lvnil(),
+        })
+        .execute({
+            imult,
+        })
+        .test_error(error_invalid_operand(LuaType::LVNil));
+
+    InterpreterTestCase("unconvertible string")
+        .set_stack({
+            lvstring("30"),
+            lvstring("3o"),
+        })
+        .execute({
+            imult,
+        })
+        .test_error(error_invalid_operand(LuaType::LVString));
+
+    InterpreterTestCase("invalid comparison")
+        .set_stack({
+            lvnumber(3),
+            lvstring("3"),
+        })
+        .execute({
+            ile,
+        })
+        .test_error(error_invalid_comparison(LuaType::LVNumber, LuaType::LVString));
+
+    InterpreterTestCase("invalid concat operand")
+        .set_stack({
+            lvstring("30"),
+            lvbool(true),
+        })
+        .execute({
+            iconcat,
+        })
+        .test_error(error_invalid_operand(LuaType::LVBool));
+
+    InterpreterTestCase("invalid length operand")
+        .set_stack({
+            lvnumber(111),
+        })
+        .execute({
+            ilength,
+        })
+        .test_error(error_invalid_operand(LuaType::LVNumber));
 }
