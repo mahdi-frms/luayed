@@ -45,7 +45,9 @@ void lua_test_case(
     const char *message,
     const char *code,
     vector<LuaValue> results = {},
-    vector<LuaValue> args = {})
+    vector<LuaValue> args = {},
+    bool has_error = false,
+    LuaValue error = lvnil())
 {
     string mes = "lua : ";
     mes.append(message);
@@ -56,20 +58,56 @@ void lua_test_case(
     rt.stack_push(fn);
     pipe(&rt, args);
     rt.fncall(args.size(), results.size() + 1);
-    vector<LuaValue> stack = drain(&rt);
-    bool rsl = stack == results;
-    test_assert(rsl, mes.c_str());
-    if (!rsl)
+    if (has_error)
     {
-        std::cerr << "stack:\n"
-                  << stack
-                  << "expected:\n"
-                  << results << "\n"
-
-                  << "binary:\n"
-                  << bytecode
-                  << "\n";
+        if (rt.error_raised())
+        {
+            bool rsl = rt.get_error() == error;
+            test_assert(rsl, mes.c_str());
+            if (!rsl)
+            {
+                std::cerr << "thrown: " << rt.get_error() << "\nexpected: " << error << "\n";
+            }
+        }
+        else
+        {
+            test_assert(false, mes.c_str());
+            std::cerr << "no error raised\n";
+        }
     }
+    else
+    {
+        if (rt.error_raised())
+        {
+            test_assert(false, mes.c_str());
+            std::cerr << "error raised: " << rt.get_error() << "\n";
+        }
+        else
+        {
+            vector<LuaValue> stack = drain(&rt);
+            bool rsl = stack == results;
+            if (!rsl)
+            {
+                test_assert(rsl, mes.c_str());
+                std::cerr << "stack:\n"
+                          << stack
+                          << "expected:\n"
+                          << results << "\n"
+
+                          << "binary:\n"
+                          << bytecode
+                          << "\n";
+            }
+        }
+    }
+}
+
+void lua_test_case_error(
+    const char *message,
+    const char *code,
+    string error)
+{
+    lua_test_case(message, code, {}, {}, true, lvstring(error.c_str()));
 }
 
 void lua_tests()
