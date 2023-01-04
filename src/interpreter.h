@@ -23,6 +23,17 @@ enum class Comparison
     LE
 };
 
+enum class Arithmetic
+{
+    ArAdd,
+    ArSub,
+    ArMult,
+    ArFlrDiv,
+    ArFltDiv,
+    ArMod,
+    ArPow,
+};
+
 class Interpreter : public IInterpreter
 {
 public:
@@ -57,6 +68,8 @@ private:
     bool compare_string(LuaValue &a, LuaValue &b, Comparison cmp);
     LuaValue hookread(Hook *hook);
     void hookwrite(Hook *hook, LuaValue value);
+    void arith(Arithmetic ar);
+    lnumber arith_calc(Arithmetic ar, lnumber a, lnumber b);
 
     void i_add();
     void i_sub();

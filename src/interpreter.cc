@@ -1,6 +1,7 @@
 #include <cstring>
 #include "virtuals.h"
 #include "interpreter.h"
+#include <cmath>
 
 opimpl Interpreter::optable[256] = {};
 bool Interpreter::is_initialized = false;
@@ -129,48 +130,69 @@ void Interpreter::push_bool(bool b)
     this->rt->stack_push(this->rt->create_boolean(b));
 }
 
-void Interpreter::i_add()
+lnumber Interpreter::arith_calc(Arithmetic ar, lnumber a, lnumber b)
 {
-    // todo: string conversion
+    if (ar == Arithmetic::ArAdd)
+        return a + b;
+    if (ar == Arithmetic::ArSub)
+        return a - b;
+    if (ar == Arithmetic::ArMult)
+        return a * b;
+    if (ar == Arithmetic::ArFltDiv)
+        return a / b;
+    if (ar == Arithmetic::ArFlrDiv)
+        return floor(a / b);
+    if (ar == Arithmetic::ArMod)
+        return fmod(a, b);
+    if (ar == Arithmetic::ArPow)
+        return pow(a, b);
+    return 0;
+}
+
+void Interpreter::arith(Arithmetic ar)
+{
     LuaValue b = this->rt->stack_pop();
     LuaValue a = this->rt->stack_pop();
+    // todo: string conversion
     if (a.kind != LuaType::LVNumber || b.kind != LuaType::LVNumber)
     {
         this->generate_error(error_invalid_binary_operands(a.kind, b.kind));
         this->state = InterpreterState::Error;
         return;
     }
-    LuaValue sum = this->rt->create_number(a.data.n + b.data.n);
-    this->rt->stack_push(sum);
+
+    lnumber rsl = this->arith_calc(ar, a.data.n, b.data.n);
+    LuaValue rslval = this->rt->create_number(rsl);
+    this->rt->stack_push(rslval);
+}
+
+void Interpreter::i_add()
+{
+    this->arith(Arithmetic::ArAdd);
 }
 void Interpreter::i_sub()
 {
-    // todo: string conversion
-    LuaValue b = this->rt->stack_pop();
-    LuaValue a = this->rt->stack_pop();
-    if (a.kind != LuaType::LVNumber || b.kind != LuaType::LVNumber)
-    {
-        this->generate_error(error_invalid_binary_operands(a.kind, b.kind));
-        this->state = InterpreterState::Error;
-        return;
-    }
-    LuaValue sum = this->rt->create_number(a.data.n - b.data.n);
-    this->rt->stack_push(sum);
+    this->arith(Arithmetic::ArSub);
 }
 void Interpreter::i_mult()
 {
+    this->arith(Arithmetic::ArMult);
 }
 void Interpreter::i_flrdiv()
 {
+    this->arith(Arithmetic::ArFlrDiv);
 }
 void Interpreter::i_fltdiv()
 {
+    this->arith(Arithmetic::ArFltDiv);
 }
 void Interpreter::i_mod()
 {
+    this->arith(Arithmetic::ArMod);
 }
 void Interpreter::i_pow()
 {
+    this->arith(Arithmetic::ArPow);
 }
 void Interpreter::i_neg()
 {
