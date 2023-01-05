@@ -2,21 +2,72 @@
 
 #define EXPECT_FREE 0xffff
 
-char *token_cstring(Token t)
+int chex(char c)
 {
-    char *str = new char[t.len + 1];
-    for (size_t i = 0; i < t.len; i++)
-        str[i] = t.str[i];
-    str[t.len] = '\0';
-    return str;
+    return c > 'a' ? (c - 'a' + 10) : (c - '0');
+}
+int cdec(char c)
+{
+    return (c <= '9' && c >= '0') ? (c - '0') : -1;
 }
 
-char *token_lstring(Token t)
+string scan_lua_string(Token t)
 {
-    char *str = new char[t.len + 1];
-    for (size_t i = 0; i < t.len; i++)
-        str[i] = t.str[i];
-    str[t.len] = '\0';
+    string text = t.text();
+    string str = "";
+    bool escape = false;
+    for (size_t i = 1; i < text.size(); i++)
+    {
+        char c = text[i];
+        if (escape)
+        {
+            escape = false;
+            if (c == 'a')
+                str.push_back('\a');
+            else if (c == 'b')
+                str.push_back('\b');
+            else if (c == 'f')
+                str.push_back('\f');
+            else if (c == 'r')
+                str.push_back('\r');
+            else if (c == 't')
+                str.push_back('\t');
+            else if (c == '\n')
+                str.push_back('\n');
+            else if (c == '\v')
+                str.push_back('\v');
+            else if (c == '\\')
+                str.push_back('\\');
+            else if (c == '"')
+                str.push_back('"');
+            else if (c == '\'')
+                str.push_back('\'');
+            else if (c == 'x')
+            {
+                char c = chex(text[++i]) * 16;
+                c += chex(text[++i]);
+                str.push_back(c);
+            }
+            else
+            {
+                char v = 0;
+                while (cdec(c) != -1)
+                {
+                    v *= 10;
+                    v += c;
+                    c = text[++i];
+                }
+                str.push_back(v);
+            }
+        }
+        else
+        {
+            if (c == '\\')
+                escape = true;
+            else
+                str.push_back(c);
+        }
+    }
     return str;
 }
 
@@ -175,7 +226,7 @@ void Compiler::compile_methcall(Noderef node, size_t expect)
     this->emit(Instruction::INil);
     this->compile_exp(node->child(0));
     this->emit(Opcode(Instruction::IBLocal, 1));
-    size_t idx = this->const_string(token_cstring(node->child(1)->get_token()));
+    size_t idx = this->const_string(node->child(1)->get_token().text().c_str());
     this->emit(Opcode(Instruction::IConst, idx));
     this->emit(Opcode(Instruction::ITGet));
     this->emit(Opcode(Instruction::IBLStore, 2));
@@ -222,7 +273,7 @@ void Compiler::compile_identifier(Noderef node)
     }
     else
     {
-        size_t idx = this->const_string(token_cstring(node->get_token()));
+        size_t idx = this->const_string(node->get_token().text().c_str());
         this->emit(Opcode(Instruction::IConst, idx));
         this->emit(Instruction::IGGet);
     }
@@ -248,7 +299,7 @@ void Compiler::compile_primary(Noderef node, size_t expect)
     }
     else if (tkn.kind == TokenKind::Literal)
     {
-        size_t idx = this->const_string(token_lstring(tkn));
+        size_t idx = this->const_string(scan_lua_string(tkn).c_str());
         this->emit(Opcode(Instruction::IConst, idx));
     }
     else if (tkn.kind == TokenKind::Identifier)
@@ -259,8 +310,7 @@ void Compiler::compile_primary(Noderef node, size_t expect)
 void Compiler::compile_name(Noderef node)
 {
     Token tkn = node->get_token();
-    const char *cstr = token_cstring(tkn);
-    size_t idx = this->const_string(cstr);
+    size_t idx = this->const_string(tkn.text().c_str());
     this->emit(Opcode(Instruction::IConst, idx));
 }
 
@@ -327,7 +377,7 @@ void Compiler::compile_exp_e(Noderef node, size_t expect)
     else if (node->get_kind() == NodeKind::Property)
     {
         this->compile_exp(node->child(0));
-        size_t idx = this->const_string(token_cstring(node->child(1)->get_token()));
+        size_t idx = this->const_string(node->child(1)->get_token().text().c_str());
         this->emit(Opcode(IConst, idx));
         this->emit(ITGet);
     }
@@ -401,7 +451,7 @@ void Compiler::compile_lvalue_primary(Noderef node)
     }
     else
     {
-        const char *str = token_cstring(node->get_token());
+        const char *str = node->get_token().text().c_str();
         size_t idx = this->const_string(str);
         this->emit(Opcode(Instruction::IConst, idx));
         this->ops_push(Instruction::IGSet);
@@ -421,7 +471,7 @@ bool Compiler::compile_lvalue(Noderef node)
         Noderef lexp = node->child(0);
         Noderef prop = node->child(1);
         this->compile_exp(lexp);
-        const char *prop_str = token_cstring(prop->get_token());
+        const char *prop_str = prop->get_token().text().c_str();
         size_t idx = this->const_string(prop_str);
         this->emit(Opcode(Instruction::IConst, idx));
         this->ops_push(Opcode(Instruction::ITSet));
