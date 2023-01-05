@@ -70,4 +70,11 @@ public:
     virtual size_t run(IRuntime *rt, Opcode op) = 0;
 };
 
+class IAllocator
+{
+public:
+    virtual void *allocate(size_t size);
+    virtual void deallocate(void *ptr);
+};
+
 #endif
