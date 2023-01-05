@@ -62,7 +62,7 @@ void lua_test_case(
     {
         if (rt.error_raised())
         {
-            bool rsl = rt.get_error() == error;
+            bool rsl = rt.get_error() == lvclone(&rt, error);
             test_assert(rsl, mes.c_str());
             if (!rsl)
             {
@@ -85,6 +85,8 @@ void lua_test_case(
         else
         {
             vector<LuaValue> stack = drain(&rt);
+            for (size_t i = 0; i < results.size(); i++)
+                results[i] = lvclone(&rt, results[i]);
             bool rsl = stack == results;
             if (!rsl)
             {
@@ -244,5 +246,27 @@ void lua_tests()
 
         {
             lvnumber(-30),
+        });
+
+    lua_test_case(
+        "strings",
+
+        "return 'foo\\nbar' ",
+
+        {
+            lvstring("foo\nbar"),
+        });
+
+    lua_test_case(
+        "strings",
+
+        "local c1 = 'lua' == 'lua'\n"
+        "local c2 = 'lu0' ~= 'luo'\n"
+        "local c3 = 'lu' ..\"a\" == \"lua\"\n"
+        "local c4 = 2 .. 3 == '23'\n"
+        "return c1 and c2 and c3 and c4",
+
+        {
+            lvbool(true),
         });
 }

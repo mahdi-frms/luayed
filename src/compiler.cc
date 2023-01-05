@@ -16,7 +16,7 @@ string scan_lua_string(Token t)
     string text = t.text();
     string str = "";
     bool escape = false;
-    for (size_t i = 1; i < text.size(); i++)
+    for (size_t i = 1; i < text.size() - 1; i++)
     {
         char c = text[i];
         if (escape)
@@ -32,6 +32,8 @@ string scan_lua_string(Token t)
                 str.push_back('\r');
             else if (c == 't')
                 str.push_back('\t');
+            else if (c == 'n')
+                str.push_back('\n');
             else if (c == '\n')
                 str.push_back('\n');
             else if (c == '\v')

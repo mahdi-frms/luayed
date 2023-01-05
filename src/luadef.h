@@ -45,7 +45,7 @@ public:
         return this->kind != LuaType::LVNil && (this->kind != LuaType::LVBool || this->data.b);
     }
     template <typename T>
-    T as()
+    T as() const
     {
         return ((T)this->data.ptr);
     }

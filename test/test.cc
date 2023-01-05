@@ -21,23 +21,21 @@ vector<LuaValue> drain(LuaRuntime *rt)
     return stack;
 }
 
+LuaValue lvclone(LuaRuntime *rt, const LuaValue &v)
+{
+    if (v.kind == LuaType::LVString)
+        return rt->create_string(v.as<const char *>());
+    if (v.kind == LuaType::LVTable)
+        return rt->create_table();
+    else
+        return v;
+}
+
 void pipe(LuaRuntime *rt, vector<LuaValue> values)
 {
     for (size_t i = 0; i < values.size(); i++)
     {
-        LuaValue v = values[i];
-        LuaValue nv = rt->create_nil();
-        if (v.kind == LuaType::LVNumber)
-            nv = rt->create_number(v.data.n);
-        else if (v.kind == LuaType::LVBool)
-            nv = rt->create_boolean(v.data.b);
-        else if (v.kind == LuaType::LVString)
-            nv = rt->create_string(v.as<const char *>());
-        else if (v.kind == LuaType::LVTable)
-            nv = rt->create_table();
-        else
-            nv = v;
-        rt->stack_push(nv);
+        rt->stack_push(lvclone(rt, values[i]));
     }
 }
 
