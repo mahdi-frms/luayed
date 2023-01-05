@@ -88,9 +88,9 @@ void lua_test_case(
             for (size_t i = 0; i < results.size(); i++)
                 results[i] = lvclone(&rt, results[i]);
             bool rsl = stack == results;
+            test_assert(rsl, mes.c_str());
             if (!rsl)
             {
-                test_assert(rsl, mes.c_str());
                 std::cerr << "stack:\n"
                           << stack
                           << "expected:\n"
@@ -269,4 +269,25 @@ void lua_tests()
         {
             lvbool(true),
         });
+
+    lua_test_case_error(
+        "error: call non-function",
+
+        "return (3)()",
+
+        to_string(error_call_non_function(LuaType::LVNumber), true));
+
+    lua_test_case_error(
+        "error: invalid operands",
+
+        "return 2 + true",
+
+        to_string(error_invalid_operand(LuaType::LVBool), true));
+
+    lua_test_case_error(
+        "error: invalid comparison in another function",
+
+        "local function cmp (a) return a > 7 end return cmp('lua')",
+
+        to_string(error_invalid_comparison(LuaType::LVString, LuaType::LVNumber), true));
 }

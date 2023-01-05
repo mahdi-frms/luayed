@@ -217,7 +217,7 @@ LuaValue LuaRuntime::concat(LuaValue v1, LuaValue v2)
 }
 LuaValue LuaRuntime::error_to_string(Lerror error)
 {
-    if (error.kind == Lerror::LE_CallNonFunction)
+    if (error.kind == Lerror::LE_NotEnoughArgs)
     {
         LuaValue s1 = this->create_string("expected ");
         LuaValue s2 = this->create_string(error.as.not_enough_args.expected);
