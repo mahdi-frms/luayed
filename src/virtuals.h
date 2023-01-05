@@ -73,8 +73,8 @@ public:
 class IAllocator
 {
 public:
-    virtual void *allocate(size_t size);
-    virtual void deallocate(void *ptr);
+    virtual void *allocate(size_t size) = 0;
+    virtual void deallocate(void *ptr) = 0;
 };
 
 #endif

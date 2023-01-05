@@ -87,7 +87,7 @@ private:
     }
     Bucket<T> *allocate(size_t size)
     {
-        Bucket<T> *buf = this->allocator->allocate(sizeof(Bucket<T>) * size);
+        Bucket<T> *buf = (Bucket<T> *)this->allocator->allocate(sizeof(Bucket<T>) * size);
         for (size_t i = 0; i < size; i++)
             buf[i].flag = SET_FLAG_EMPTY;
         return buf;
@@ -115,8 +115,8 @@ public:
         : comp(comp),
           hash(hash),
           allocator(allocator),
-          count(0),
-          cap(cap)
+          cap(cap),
+          count(0)
     {
         this->buffer = this->allocate(cap);
     }
