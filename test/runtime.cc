@@ -22,11 +22,11 @@ void test_pushpop()
     LuaRuntime rt(nullptr);
     rt.set_lua_interface(&rt);
     vector<LuaValue> values = {
-        lvnil(),
-        lvnumber(200),
-        lvnumber(13),
-        lvnil(),
-        lvbool(true),
+        rt.create_nil(),
+        rt.create_number(200),
+        rt.create_number(13),
+        rt.create_nil(),
+        rt.create_boolean(true),
     };
     rt_assert(rt.stack_size() == 0, mes, 1);
     pipe(&rt, values);
