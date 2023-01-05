@@ -24,7 +24,21 @@ vector<LuaValue> drain(LuaRuntime *rt)
 void pipe(LuaRuntime *rt, vector<LuaValue> values)
 {
     for (size_t i = 0; i < values.size(); i++)
-        rt->stack_push(values[i]);
+    {
+        LuaValue v = values[i];
+        LuaValue nv = rt->create_nil();
+        if (v.kind == LuaType::LVNumber)
+            nv = rt->create_number(v.data.n);
+        else if (v.kind == LuaType::LVBool)
+            nv = rt->create_boolean(v.data.b);
+        else if (v.kind == LuaType::LVString)
+            nv = rt->create_string(v.as<const char *>());
+        else if (v.kind == LuaType::LVTable)
+            nv = rt->create_table();
+        else
+            nv = v;
+        rt->stack_push(nv);
+    }
 }
 
 int main()

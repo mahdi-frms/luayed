@@ -218,6 +218,13 @@ void test_string_concatenation()
     bool rsl = strcmp(v.as<const char *>(), "sample lua string") == 0;
     rt_assert(rsl, "string concatenation", 1);
 }
+void test_string_from_number()
+{
+    LuaRuntime rt(nullptr);
+    LuaValue v = rt.create_string(8.11);
+    bool rsl = strcmp(v.as<const char *>(), "8.11") == 0;
+    rt_assert(rsl, "string from number", 1);
+}
 void test_string_interning()
 {
     const char *str = "sample lua";
@@ -232,6 +239,7 @@ void test_string()
     test_string_creation();
     test_string_concatenation();
     test_string_interning();
+    test_string_from_number();
 }
 
 void test_calls()

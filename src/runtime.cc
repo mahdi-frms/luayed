@@ -1,4 +1,5 @@
 #include "runtime.h"
+#include <cstdlib>
 #include <cstring>
 
 #define INITIAL_FRAME_SIZE 1024 // must be expandable
@@ -53,10 +54,10 @@ LuaValue LuaRuntime::create_string(const char *s)
 
 LuaValue LuaRuntime::create_string(lnumber n)
 {
-    LuaValue val;
-    val.kind = LuaType::LVString;
-    val.data.ptr = nullptr; // todo
-    return val;
+    const size_t buffer_size = 64;
+    char buffer[buffer_size];
+    snprintf(buffer, buffer_size, "%g", n);
+    return this->create_string(buffer);
 }
 
 LuaValue LuaRuntime::create_string(const char *s1, const char *s2)
@@ -70,6 +71,7 @@ LuaValue LuaRuntime::create_string(const char *s1, const char *s2)
     lstr_p str = (lstr_p)this->allocate(strsize);
     strcpy((char *)str->cstr(), s1);
     strcpy((char *)(str->cstr() + slen1), s2);
+    *(char *)(str->cstr() + slen1 + slen2) = '\0';
     str->len = slen1 + slen2;
     lstr_p *p = this->lstrset.get(str);
     if (p)
