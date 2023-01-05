@@ -73,7 +73,7 @@ LuaValue LuaRuntime::create_string(const char *s1, const char *s2)
     {
         this->lstrset.insert(str);
     }
-    val.data.ptr = str;
+    val.data.ptr = (void *)str->cstr();
     return val;
 }
 
