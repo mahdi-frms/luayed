@@ -4,51 +4,18 @@
 #define INITIAL_FRAME_SIZE 1024 // must be expandable
 #define LV_AS_FUNC(V) ((LuaFunction *)((V)->data.ptr))
 
-bool operator>(const InternString &l, const InternString &r)
+int lstr_compare(const lstr_p &a, const lstr_p &b)
 {
-    return strcmp(l.lstr, r.lstr) == 1;
+    return strcmp(a->cstr(), b->cstr());
 }
-bool operator<(const InternString &l, const InternString &r)
+hash_t lstr_hash(const lstr_p &a)
 {
-    return strcmp(l.lstr, r.lstr) == -1;
+    return a->hash;
 }
-bool operator==(const InternString &l, const InternString &r)
-{
-    return strcmp(l.lstr, r.lstr) == 0;
-}
-bool operator!=(const InternString &l, const InternString &r)
-{
-    return strcmp(l.lstr, r.lstr) != 0;
-}
-bool operator>=(const InternString &l, const InternString &r)
-{
-    return strcmp(l.lstr, r.lstr) != -1;
-}
-bool operator<=(const InternString &l, const InternString &r)
-{
-    return strcmp(l.lstr, r.lstr) != 1;
-}
+
 bool Frame::is_Lua()
 {
     return ((LuaFunction *)this->fn.data.ptr)->is_lua;
-}
-
-char *StringInterner::insert(char *lstr)
-{
-    InternString istr = InternString{.lstr = lstr};
-    auto it = this->set.find(istr);
-    if (it == this->set.cend())
-    {
-        this->set.insert(istr);
-        return lstrnull;
-    }
-    else
-        return it->lstr;
-}
-void StringInterner::remove(char *lstr)
-{
-    InternString istr = InternString{.lstr = lstr};
-    this->set.erase(this->set.find(istr));
 }
 
 lbyte *Lfunction::text()
@@ -81,10 +48,7 @@ LuaValue LuaRuntime::create_boolean(bool b)
 
 LuaValue LuaRuntime::create_string(const char *s)
 {
-    LuaValue val;
-    val.kind = LuaType::LVString;
-    val.data.ptr = nullptr; // todo
-    return val;
+    return this->create_string(s, "");
 }
 
 LuaValue LuaRuntime::create_string(lnumber n)
@@ -99,7 +63,25 @@ LuaValue LuaRuntime::create_string(const char *s1, const char *s2)
 {
     LuaValue val;
     val.kind = LuaType::LVString;
-    val.data.ptr = nullptr; // todo
+
+    size_t slen1 = strlen(s1);
+    size_t slen2 = strlen(s2);
+    size_t strsize = sizeof(lstr_t) + slen1 + slen2 + 1;
+    lstr_p str = (lstr_p)this->allocate(strsize);
+    strcpy((char *)str->cstr(), s1);
+    strcpy((char *)(str->cstr() + slen1), s2);
+    str->len = slen1 + slen2;
+    lstr_p *p = this->lstrset.get(str);
+    if (p)
+    {
+        this->deallocate(str);
+        str = *p;
+    }
+    else
+    {
+        this->lstrset.insert(str);
+    }
+    val.data.ptr = (void *)str->cstr();
     return val;
 }
 
@@ -189,7 +171,7 @@ void LuaRuntime::new_frame(size_t stack_size)
     frame->error = this->create_nil();
     this->frame = frame;
 }
-LuaRuntime::LuaRuntime(IInterpreter *interpreter) : interpreter(interpreter)
+LuaRuntime::LuaRuntime(IInterpreter *interpreter) : lstrset(lstr_compare, lstr_hash, this), interpreter(interpreter)
 {
     this->functable.push_back(nullptr);
     this->new_frame(INITIAL_FRAME_SIZE);

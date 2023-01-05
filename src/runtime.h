@@ -1,11 +1,11 @@
 #ifndef RUNTIME_h
 #define RUNTIME_h
 
-#include <set>
 #include <map>
 #include <vector>
 #include "luabin.h"
 #include "virtuals.h"
+#include "set.h"
 
 #define lstrnull nullptr
 
@@ -49,28 +49,6 @@ public:
     LuaType get(LuaValue key);
 };
 
-struct InternString
-{
-    char *lstr;
-
-    friend bool operator==(const InternString &l, const InternString &r);
-    friend bool operator!=(const InternString &l, const InternString &r);
-    friend bool operator>=(const InternString &l, const InternString &r);
-    friend bool operator<=(const InternString &l, const InternString &r);
-    friend bool operator>(const InternString &l, const InternString &r);
-    friend bool operator<(const InternString &l, const InternString &r);
-};
-
-class StringInterner
-{
-private:
-    std::set<InternString> set;
-
-public:
-    char *insert(char *lstr);
-    void remove(char *lstr);
-};
-
 struct Frame
 {
     size_t ss;
@@ -110,10 +88,23 @@ struct GenFunction
     size_t parcount;
     size_t hookmax;
 };
-class LuaRuntime : IRuntime
+struct lstr_t
+{
+    hash_t hash;
+    size_t len;
+
+    const char *cstr()
+    {
+        return (const char *)(this + 1);
+    }
+};
+
+typedef lstr_t *lstr_p;
+
+class LuaRuntime : public IRuntime, public IAllocator
 {
 private:
-    StringInterner interner;
+    Set<lstr_p> lstrset;
     Frame *frame;
     IInterpreter *interpreter;
     vector<Lfunction *> functable;

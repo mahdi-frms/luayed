@@ -1,6 +1,7 @@
 #include <runtime.h>
 #include "test.h"
 #include <lstrep.h>
+#include <cstring>
 
 void rt_assert(bool rsl, const char *message, size_t idx = 0)
 {
@@ -21,11 +22,11 @@ void test_pushpop()
     LuaRuntime rt(nullptr);
     rt.set_lua_interface(&rt);
     vector<LuaValue> values = {
-        lvnil(),
-        lvnumber(200),
-        lvnumber(13),
-        lvnil(),
-        lvbool(true),
+        rt.create_nil(),
+        rt.create_number(200),
+        rt.create_number(13),
+        rt.create_nil(),
+        rt.create_boolean(true),
     };
     rt_assert(rt.stack_size() == 0, mes, 1);
     pipe(&rt, values);
@@ -203,6 +204,36 @@ void test_lua_calls_cxx()
     }
 }
 
+void test_string_creation()
+{
+    LuaRuntime rt(nullptr);
+    LuaValue v = rt.create_string("sample lua string");
+    bool rsl = strcmp(v.as<const char *>(), "sample lua string") == 0;
+    rt_assert(rsl, "string creation", 1);
+}
+void test_string_concatenation()
+{
+    LuaRuntime rt(nullptr);
+    LuaValue v = rt.create_string("sample lua", " string");
+    bool rsl = strcmp(v.as<const char *>(), "sample lua string") == 0;
+    rt_assert(rsl, "string concatenation", 1);
+}
+void test_string_interning()
+{
+    const char *str = "sample lua";
+    LuaRuntime rt(nullptr);
+    LuaValue v1 = rt.create_string(str);
+    LuaValue v2 = rt.create_string(str);
+    bool rsl = v1.as<const char *>() == v2.as<const char *>();
+    rt_assert(rsl, "string interning", 1);
+}
+void test_string()
+{
+    test_string_creation();
+    test_string_concatenation();
+    test_string_interning();
+}
+
 void test_calls()
 {
     test_cxx_calls_cxx();
@@ -214,4 +245,5 @@ void runtime_tests()
     test_pushpop();
     test_create_values();
     test_calls();
+    test_string();
 }
