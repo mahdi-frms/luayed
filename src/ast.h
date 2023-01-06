@@ -7,6 +7,8 @@
 
 extern const char *node_names[34];
 
+#define is_call(N) ((N)->get_kind() == NodeKind::Call || (N)->get_kind() == NodeKind::MethodCall)
+
 namespace ast
 {
     enum NodeKind

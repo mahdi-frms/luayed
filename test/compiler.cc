@@ -155,7 +155,8 @@ public:
         test_case(mes, rsl);
         if (!rsl)
         {
-            std::cerr << "generated and expected binaries do not match!\n"
+            std::cerr << "generated and expected binaries do not match!\nin: "
+                      << this->message << "\n"
                       << "expected binary:\n"
                       << to_string(&bin[0], bin.size())
                       << "generated binary:\n"
@@ -1511,27 +1512,27 @@ void compiler_tests()
         .test_fn(1)
         .test_parcount(0)
         .test_hookmax(0)
-        .test_ccount(3)
+        .test_ccount(5)
         .test_upvalues({})
         .test_opcodes({
             inil,
             itnew,
             // [1]
             iconst(0),
+            iconst(1),
             itset,
             // foo
-            iconst(1),
             iconst(2),
+            iconst(3),
             itset,
             // bar
             ilocal(0),
             itrue,
             itset,
             // [2]
+            iconst(4),
             ifalse,
             itset,
-            // expressions
-            itlist(2),
             // end
             ipop(2),
             iret(0),
@@ -1545,25 +1546,26 @@ void compiler_tests()
         .test_fn(1)
         .test_parcount(0)
         .test_hookmax(0)
-        .test_ccount(3)
+        .test_ccount(5)
         .test_upvalues({})
         .test_opcodes({
             inil,
             itnew,
             // [1]
             iconst(0),
+            iconst(1),
             itset,
             // foo
-            iconst(1),
             iconst(2),
+            iconst(3),
             itset,
             // [2]
+            iconst(4),
             itrue,
             itset,
             // extra
             ilocal(0),
             icall(0, 0),
-            itset,
             // expressions and extra
             itlist(2),
             // end
