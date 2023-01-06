@@ -1082,4 +1082,21 @@ void interpreter_tests()
         .test_stack({
             lvnumber(3),
         });
+
+    InterpreterTestCase("globals")
+        .set_constants({
+            lvstring("username"),
+            lvstring("mahdi"),
+        })
+        .execute({
+            iconst(0),
+            iconst(1),
+            igset,
+
+            iconst(0),
+            igget,
+        })
+        .test_stack({
+            lvstring("mahdi"),
+        });
 }

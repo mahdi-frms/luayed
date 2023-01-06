@@ -335,11 +335,12 @@ void lua_tests()
         });
 
     lua_test_case(
-        "table length",
+        "globals",
 
-        "return #{ 'date:', 2023, 1, 6, 'time:', 18, 38 }",
+        "function a() return 8 end\n"
+        "return 8",
 
         {
-            lvnumber(7),
+            lvnumber(8),
         });
 }

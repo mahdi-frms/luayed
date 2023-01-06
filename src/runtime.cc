@@ -199,6 +199,7 @@ LuaRuntime::LuaRuntime(IInterpreter *interpreter) : lstrset(lstr_compare, lstr_h
 {
     this->functable.push_back(nullptr);
     this->new_frame(INITIAL_FRAME_SIZE);
+    this->global = this->create_table();
 }
 void LuaRuntime::destroy_frame()
 {
