@@ -96,7 +96,7 @@ fidx_t Compiler::compile(Noderef root)
     else
     {
         Noderef params = root->child(0);
-        size_t parcount = 0;
+        size_t parcount = root->get_kind() == NodeKind::MethodBody;
         size_t upcount = 0;
         for (size_t i = 0; i < params->child_count(); i++)
         {

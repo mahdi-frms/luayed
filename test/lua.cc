@@ -343,4 +343,17 @@ void lua_tests()
         {
             lvnumber(8),
         });
+
+    lua_test_case(
+        "methods",
+
+        "local v = { val = 'attrib' }\n"
+        "function v:get()\n"
+        "    return self.val\n"
+        "end\n"
+        "return v:get()",
+
+        {
+            lvstring("attrib"),
+        });
 }
