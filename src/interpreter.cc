@@ -377,21 +377,48 @@ bool Interpreter::compare()
 }
 void Interpreter::i_tget()
 {
+    LuaValue k = this->rt->stack_pop();
+    LuaValue t = this->rt->stack_pop();
+    LuaValue v = this->rt->table_get(t, k);
+    this->rt->stack_push(v);
 }
 void Interpreter::i_tset()
 {
+    LuaValue v = this->rt->stack_pop();
+    LuaValue k = this->rt->stack_pop();
+    LuaValue t = this->rt->stack_pop();
+    this->rt->table_set(t, k, v);
 }
 void Interpreter::i_tnew()
 {
+    this->rt->stack_push(this->rt->create_table());
 }
 void Interpreter::i_tlist()
 {
+    size_t offset = this->arg1;
+    size_t count = this->rt->extras();
+    LuaValue t = this->rt->stack_back_read(-(count + 1));
+    for (size_t i = 0; i < count; i++)
+    {
+        LuaValue k = this->rt->create_number(i + offset);
+        LuaValue v = this->rt->stack_pop();
+        this->rt->table_set(t, k, v);
+    }
+    this->rt->stack_pop();
 }
 void Interpreter::i_gget()
 {
+    LuaValue g = this->rt->table_global();
+    LuaValue k = this->rt->stack_pop();
+    LuaValue v = this->rt->table_get(g, k);
+    this->rt->stack_push(v);
 }
 void Interpreter::i_gset()
 {
+    LuaValue g = this->rt->table_global();
+    LuaValue v = this->rt->stack_pop();
+    LuaValue k = this->rt->stack_pop();
+    this->rt->table_set(g, k, v);
 }
 void Interpreter::i_nil()
 {

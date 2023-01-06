@@ -1,8 +1,6 @@
 #ifndef RUNTIME_h
 #define RUNTIME_h
 
-#include <map>
-#include <vector>
 #include "luabin.h"
 #include "virtuals.h"
 #include "set.h"
@@ -37,16 +35,6 @@ public:
     Lfunction(Lfunction &&other) = default;
     Lfunction &operator=(Lfunction &&other) = default;
     Lfunction() = default;
-};
-
-class LuaTable
-{
-private:
-    std::map<LuaValue, LuaValue> map;
-
-public:
-    void set(LuaValue key, LuaValue value);
-    LuaType get(LuaValue key);
 };
 
 struct Frame
@@ -107,6 +95,7 @@ private:
     IInterpreter *interpreter;
     vector<Lfunction *> functable;
     void *lua_interface = nullptr;
+    LuaValue global;
 
     void new_frame(size_t stack_size);
     void destroy_frame();
@@ -140,6 +129,10 @@ public:
     LuaValue create_cppfn(LuaRTCppFunction fn);
     LuaValue create_luafn(fidx_t fidx);
 
+    void table_set(LuaValue t, LuaValue k, LuaValue v);
+    LuaValue table_get(LuaValue t, LuaValue k);
+    LuaValue table_global();
+
     void fncall(size_t argc, size_t retc);
     void fnret(size_t count);
     void set_error(LuaValue value);
@@ -161,6 +154,7 @@ public:
     LuaValue rodata(size_t idx);
     lbyte *text();
     size_t stack_size();
+    size_t extras();
 };
 
 struct LuaFunction

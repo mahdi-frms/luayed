@@ -20,3 +20,8 @@ bool operator!=(const LuaValue &v1, const LuaValue &v2)
 {
     return !(v1 == v2);
 }
+
+LuaValue::LuaValue()
+{
+    this->kind = LuaType::LVNil;
+}

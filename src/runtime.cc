@@ -1,4 +1,5 @@
 #include "runtime.h"
+#include "table.h"
 #include <cstdlib>
 #include <cstring>
 
@@ -91,8 +92,30 @@ LuaValue LuaRuntime::create_table()
 {
     LuaValue val;
     val.kind = LuaType::LVTable;
-    val.data.ptr = nullptr; // todo
+    Table *tp = (Table *)this->allocate(sizeof(Table));
+    *tp = Table(this);
+    val.data.ptr = tp;
     return val;
+}
+
+void LuaRuntime::table_set(LuaValue t, LuaValue k, LuaValue v)
+{
+    Table *tp = t.as<Table *>();
+    tp->set(k, v);
+}
+LuaValue LuaRuntime::table_get(LuaValue t, LuaValue k)
+{
+    Table *tp = t.as<Table *>();
+    return tp->get(k);
+}
+LuaValue LuaRuntime::table_global()
+{
+    return this->global;
+}
+
+size_t LuaRuntime::extras()
+{
+    return this->frame->ret_count;
 }
 
 LuaValue LuaRuntime::create_number(lnumber n)

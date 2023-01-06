@@ -40,6 +40,8 @@ public:
         void *ptr;
     } data;
 
+    LuaValue();
+
     bool truth()
     {
         return this->kind != LuaType::LVNil && (this->kind != LuaType::LVBool || this->data.b);

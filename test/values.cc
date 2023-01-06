@@ -4,8 +4,19 @@
 #include <luadef.h>
 #include <set>
 #include <map>
+#include "values.h"
 
 std::set<string> strset;
+std::vector<vector<LuaValue> *> tabset;
+
+void tabset_detroy()
+{
+    while (tabset.size())
+    {
+        delete tabset.back();
+        tabset.pop_back();
+    }
+}
 
 LuaValue lvnil()
 {
@@ -49,7 +60,7 @@ LuaValue lvtable()
 {
     LuaValue v;
     v.kind = LuaType::LVTable;
-    v.data.ptr = new std::map<LuaValue, LuaValue>;
+    v.data.ptr = new vector<LuaValue>;
     return v;
 }
 

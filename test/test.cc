@@ -1,4 +1,5 @@
 #include "test.h"
+#include "values.h"
 #include <tap/tap.h>
 
 void lexer_tests();
@@ -39,6 +40,11 @@ void pipe(LuaRuntime *rt, vector<LuaValue> values)
     }
 }
 
+void finalize_tests()
+{
+    tabset_detroy();
+}
+
 int main()
 {
     plan(NO_PLAN);
@@ -49,6 +55,8 @@ int main()
     interpreter_tests();
     runtime_tests();
     lua_tests();
+
+    finalize_tests();
 
     done_testing();
     return 0;

@@ -1,4 +1,5 @@
 #include "test.h"
+#include "values.h"
 #include <lua.h>
 #include <parser.h>
 #include <resolve.h>

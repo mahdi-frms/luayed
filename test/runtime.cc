@@ -1,5 +1,6 @@
 #include <runtime.h>
 #include "test.h"
+#include "values.h"
 #include <lstrep.h>
 #include <cstring>
 

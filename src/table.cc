@@ -1,5 +1,9 @@
 #include "table.h"
 
+TableElement::TableElement(LuaValue key, LuaValue value) : key(key), value(value)
+{
+}
+
 int table_compare(const TableElement &a, const TableElement &b)
 {
     if (a.key == b.key)
@@ -42,7 +46,12 @@ void Table::set(LuaValue key, LuaValue value)
 }
 LuaValue Table::get(LuaValue key)
 {
-    LuaValue undefined;
-    TableElement e(key, undefined);
-    return this->vset.get(e)->value;
+    LuaValue nil;
+    nil.kind = LuaType::LVNil;
+    TableElement e(key, nil);
+    TableElement *ep = this->vset.get(e);
+    if (ep)
+        return ep->value;
+    else
+        return nil;
 }

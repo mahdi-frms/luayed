@@ -33,6 +33,7 @@ private:
     vector<Hook> upvalue_hooks;
     vector<LuaValue> upvalues;
     LuaValue error = lvnil();
+    LuaValue global = lvtable();
     bool has_error = false;
 
     size_t back_stack(size_t idx);
@@ -48,6 +49,10 @@ public:
     void set_args(vector<LuaValue> args);
     void set_text(vector<Opcode> text);
     bool compare_stack(vector<LuaValue> values);
+
+    void table_set(LuaValue t, LuaValue k, LuaValue v);
+    LuaValue table_get(LuaValue t, LuaValue k);
+    LuaValue table_global();
 
     void add_upvalue(LuaValue value);
     void add_detached_upvalue(LuaValue value);
@@ -78,6 +83,7 @@ public:
     void set_error(LuaValue value);
     LuaValue get_error();
     bool error_raised();
+    size_t extras();
 };
 
 #endif

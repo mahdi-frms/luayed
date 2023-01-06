@@ -1,4 +1,5 @@
 #include "mockruntime.h"
+#include "values.h"
 #include <map>
 #include <set>
 #include <cstring>
@@ -222,4 +223,38 @@ LuaValue MockRuntime::get_error()
 bool MockRuntime::error_raised()
 {
     return this->has_error;
+}
+void MockRuntime::table_set(LuaValue t, LuaValue k, LuaValue v)
+{
+    vector<LuaValue> *mtp = t.as<vector<LuaValue> *>();
+    for (size_t i = 0; i < mtp->size(); i += 2)
+    {
+        if ((*mtp)[i] == k)
+        {
+            (*mtp)[i + 1] = v;
+            return;
+        }
+    }
+    mtp->push_back(k);
+    mtp->push_back(v);
+}
+LuaValue MockRuntime::table_get(LuaValue t, LuaValue k)
+{
+    vector<LuaValue> *mtp = t.as<vector<LuaValue> *>();
+    for (size_t i = 0; i < mtp->size(); i += 2)
+    {
+        if ((*mtp)[i] == k)
+        {
+            return (*mtp)[i + 1];
+        }
+    }
+    return lvnil();
+}
+LuaValue MockRuntime::table_global()
+{
+    return this->global;
+}
+size_t MockRuntime::extras()
+{
+    return 0;
 }
