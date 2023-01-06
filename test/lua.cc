@@ -297,16 +297,40 @@ void lua_tests()
 
         "local a,b,c,d = ... return d,c,b",
 
-        // returned
+        // returned values
         {
             lvnil(),
             lvstring("test-string"),
             lvnumber(12),
         },
-        // passed
+        // arguments
         {
             lvbool(true),            // a
             lvnumber(12),            // b
             lvstring("test-string"), // c
+        });
+
+    lua_test_case(
+        "tables",
+
+        "local function multiply(numbers)\n"
+        "    local idx = 1;\n"
+        "    local c = numbers[idx]\n"
+        "    local r = 0\n"
+        "    while c do\n"
+        "        if r == 0 then\n"
+        "            r = 1\n"
+        "        end\n"
+        "        r = r * c\n"
+        "        idx = idx + 1\n"
+        "        c = numbers[idx]\n"
+        "    end\n"
+        "    return r\n"
+        "end\n"
+
+        "return multiply {3,5,8}",
+
+        {
+            lvnumber(120),
         });
 }
