@@ -386,7 +386,7 @@ void Interpreter::i_tset()
 {
     LuaValue v = this->rt->stack_pop();
     LuaValue k = this->rt->stack_pop();
-    LuaValue t = this->rt->stack_pop();
+    LuaValue t = this->rt->stack_back_read(1);
     this->rt->table_set(t, k, v);
 }
 void Interpreter::i_tnew()

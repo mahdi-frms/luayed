@@ -990,4 +990,66 @@ void interpreter_tests()
             ilength,
         })
         .test_error(error_invalid_operand(LuaType::LVNumber));
+
+    InterpreterTestCase("basic table")
+        .set_stack({
+            lvnumber(1),         // key 1
+            lvbool(true),        // key 2
+            lvstring("3rd-key"), // key 3
+
+            lvbool(false),         // value 1
+            lvnumber(25),          // value 2
+            lvstring("3rd-value"), // value 3
+        })
+        .execute({
+            itnew,
+            ilocal(0),
+            ilocal(3),
+            itset,
+            ilocal(1),
+            ilocal(4),
+            itset,
+            ilocal(2),
+            ilocal(5),
+            itset,
+
+            iblocal(1),
+            iblocal(1),
+
+            ilocal(0),
+            itget,
+            ilstore(3),
+
+            ilocal(1),
+            itget,
+            ilstore(4),
+
+            ilocal(2),
+            itget,
+            ilstore(5),
+        })
+        // the same as before
+        .test_stack({
+            lvnumber(1),         // key 1
+            lvbool(true),        // key 2
+            lvstring("3rd-key"), // key 3
+
+            lvbool(false),         // value 1
+            lvnumber(25),          // value 2
+            lvstring("3rd-value"), // value 3
+        });
+
+    InterpreterTestCase("table non-existing property")
+        .set_stack({
+            lvstring("1st-key"), // key
+        })
+        .execute({
+            itnew,
+            ilocal(0),
+            itget,
+        })
+        .test_stack({
+            lvstring("1st-key"), // key
+            lvnil(),
+        });
 }
