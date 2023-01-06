@@ -17,6 +17,8 @@ add_library(luacomp
     src/luadef.cc
     src/runtime.cc
     src/generator.cc
+    src/table.cc
+    src/hash.cc
 )
     
 add_executable(luayed
