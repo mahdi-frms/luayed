@@ -333,4 +333,13 @@ void lua_tests()
         {
             lvnumber(120),
         });
+
+    lua_test_case(
+        "table length",
+
+        "return #{ 'date:', 2023, 1, 6, 'time:', 18, 38 }",
+
+        {
+            lvnumber(7),
+        });
 }

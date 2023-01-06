@@ -1052,4 +1052,34 @@ void interpreter_tests()
             lvstring("1st-key"), // key
             lvnil(),
         });
+
+    InterpreterTestCase("table length")
+        .set_stack({
+            lvnumber(1), // key 1
+            lvnumber(2), // key 2
+            lvnumber(3), // key 4
+
+            lvbool(false),         // value 1
+            lvnumber(25),          // value 2
+            lvstring("3rd-value"), // value 3
+        })
+        .execute({
+            itnew,
+            ilocal(0),
+            ilocal(3),
+            itset,
+            ilocal(1),
+            ilocal(4),
+            itset,
+            ilocal(2),
+            ilocal(5),
+            itset,
+            ilength,
+
+            ilstore(0),
+            ipop(5),
+        })
+        .test_stack({
+            lvnumber(3),
+        });
 }

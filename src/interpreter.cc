@@ -279,13 +279,19 @@ void Interpreter::i_concat()
 }
 void Interpreter::i_len()
 {
-    // todo : table length
     LuaValue s = this->rt->stack_pop();
-    if (s.kind != LuaType::LVTable && s.kind != LuaType::LVString)
+    if (s.kind == LuaType::LVString)
+        this->rt->stack_push(this->rt->create_number(strlen(s.as<const char *>())));
+    else if (s.kind == LuaType::LVTable)
     {
-        return this->generate_error(error_invalid_operand(s.kind));
+        LuaValue l = this->rt->create_number(1);
+        while (this->rt->table_get(s, l) != this->rt->create_nil())
+            l.data.n++;
+        l.data.n--;
+        this->rt->stack_push(l);
     }
-    this->rt->stack_push(this->rt->create_number(strlen(s.as<const char *>())));
+    else
+        return this->generate_error(error_invalid_operand(s.kind));
 }
 
 void Interpreter::compare(Comparison cmp)
