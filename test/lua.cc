@@ -23,7 +23,7 @@ LuaValue lua_test_compile(const char *code, LuaRuntime &rt, vector<lbyte> &bin)
     {
         std::cerr << "Compiling test case failed: \n";
         for (size_t i = 0; i < errs.size(); i++)
-            std::cerr << errs[i];
+            std::cerr << errs[i] << "\n";
         exit(1);
     }
     LuaGenerator gen(&rt);
@@ -290,4 +290,22 @@ void lua_tests()
         "local function cmp (a) return a > 7 end return cmp('lua')",
 
         to_string(error_invalid_comparison(LuaType::LVString, LuaType::LVNumber), true));
+
+    lua_test_case(
+        "passing args to main function",
+
+        "local a,b,c,d = ... return d,c,b",
+
+        // returned
+        {
+            lvnil(),
+            lvstring("test-string"),
+            lvnumber(12),
+        },
+        // passed
+        {
+            lvbool(true),            // a
+            lvnumber(12),            // b
+            lvstring("test-string"), // c
+        });
 }

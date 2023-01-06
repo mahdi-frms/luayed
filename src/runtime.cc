@@ -450,8 +450,10 @@ void LuaRuntime::stack_back_write(size_t idx, LuaValue value)
 }
 LuaValue LuaRuntime::arg(size_t idx)
 {
-    LuaValue value = this->frame->vargs()[idx];
-    return value;
+    if (idx >= this->frame->vargcount())
+        return this->create_nil();
+    else
+        return this->frame->vargs()[idx];
 }
 Lfunction *LuaRuntime::bin(size_t fidx)
 {

@@ -135,7 +135,7 @@ void Resolver::analyze_etc(Noderef node)
             sc->func = node;
 
         sc->map = new Varmap();
-        sc->variadic = false;
+        sc->variadic = node == this->ast.root();
         sc->parent = this->current;
         sc->stack_size = is_meth(node) ? 1 : 0;
         sc->fidx = 0;
