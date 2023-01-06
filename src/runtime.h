@@ -51,9 +51,7 @@ public:
 
 struct Frame
 {
-    size_t ss;
     size_t sp;
-    size_t ip;
     LuaValue fn;
     LuaValue error;
     Frame *prev;
@@ -159,8 +157,6 @@ public:
     void hookpush();
     void hookpop();
     LuaValue arg(size_t idx);
-    size_t load_ip();
-    void save_ip(size_t sp);
     Hook *upvalue(size_t idx);
     LuaValue rodata(size_t idx);
     lbyte *text();

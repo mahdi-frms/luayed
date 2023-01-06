@@ -163,7 +163,6 @@ void LuaRuntime::deallocate(void *ptr)
 void LuaRuntime::new_frame(size_t stack_size)
 {
     Frame *frame = (Frame *)this->allocate(sizeof(Frame) + stack_size);
-    frame->ss = stack_size;
     frame->prev = this->frame;
     frame->hookptr = 0;
     frame->sp = 0;
@@ -416,14 +415,6 @@ void LuaRuntime::stack_write(size_t idx, LuaValue value)
 {
     size_t real_idx = this->frame->stack_address(idx);
     this->frame->stack()[real_idx] = value;
-}
-size_t LuaRuntime::load_ip()
-{
-    return this->frame->ip;
-}
-void LuaRuntime::save_ip(size_t ip)
-{
-    this->frame->ip = ip;
 }
 LuaValue LuaRuntime::stack_pop()
 {

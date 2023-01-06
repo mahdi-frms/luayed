@@ -32,7 +32,6 @@ private:
     vector<lbyte> instructions;
     vector<Hook> upvalue_hooks;
     vector<LuaValue> upvalues;
-    size_t ip = 0;
     LuaValue error = lvnil();
     bool has_error = false;
 
@@ -73,8 +72,6 @@ public:
     void hookpush();
     void hookpop();
     LuaValue arg(size_t idx);
-    size_t load_ip();
-    void save_ip(size_t ip);
     Hook *upvalue(size_t idx);
     LuaValue rodata(size_t idx);
     lbyte *text();

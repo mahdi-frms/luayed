@@ -146,14 +146,6 @@ LuaValue MockRuntime::arg(size_t idx)
     }
     return this->args[idx];
 }
-size_t MockRuntime::load_ip()
-{
-    return this->ip;
-}
-void MockRuntime::save_ip(size_t ip)
-{
-    this->ip = ip;
-}
 void MockRuntime::add_upvalue(LuaValue value)
 {
     this->upvalues.push_back(value);

@@ -58,8 +58,6 @@ public:
     virtual void hookpush() = 0;
     virtual void hookpop() = 0;
     virtual LuaValue arg(size_t idx) = 0;
-    virtual size_t load_ip() = 0;
-    virtual void save_ip(size_t sp) = 0;
     virtual Hook *upvalue(size_t idx) = 0;
     virtual LuaValue rodata(size_t idx) = 0;
     virtual lbyte *text() = 0;
