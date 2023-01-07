@@ -390,6 +390,40 @@ void compiler_tests()
         });
 
     compiler_test_case(
+        "globals and locals",
+
+        "local a = 3\n"
+        "v = 4\n"
+        "a = v\n"
+        "v = a\n"
+        "")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(5)
+        .test_upvalues({})
+        .test_opcodes({
+            // decl
+            iconst(0),
+            // assign 1
+            iconst(1),
+            iconst(2),
+            igset,
+            // assign 2
+            iconst(3),
+            igget,
+            ilstore(0),
+            // assign 3
+            iconst(4),
+            ilocal(0),
+            igset,
+            // end
+            ipop(1),
+            iret(0),
+        });
+
+    compiler_test_case(
         "local assignment",
 
         "local a\n"
