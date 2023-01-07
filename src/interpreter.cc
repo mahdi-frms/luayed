@@ -386,6 +386,8 @@ void Interpreter::i_tget()
     LuaValue k = this->rt->stack_pop();
     LuaValue t = this->rt->stack_pop();
     LuaValue v = this->rt->table_get(t, k);
+    if (this->rt->error_raised())
+        this->state = InterpreterState::Error;
     this->rt->stack_push(v);
 }
 void Interpreter::i_tset()
@@ -394,6 +396,8 @@ void Interpreter::i_tset()
     LuaValue k = this->rt->stack_pop();
     LuaValue t = this->rt->stack_back_read(1);
     this->rt->table_set(t, k, v);
+    if (this->rt->error_raised())
+        this->state = InterpreterState::Error;
 }
 void Interpreter::i_tnew()
 {

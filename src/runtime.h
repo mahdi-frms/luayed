@@ -132,6 +132,7 @@ public:
     void table_set(LuaValue t, LuaValue k, LuaValue v);
     LuaValue table_get(LuaValue t, LuaValue k);
     LuaValue table_global();
+    bool table_check(LuaValue t, LuaValue k);
 
     void fncall(size_t argc, size_t retc);
     void fnret(size_t count);

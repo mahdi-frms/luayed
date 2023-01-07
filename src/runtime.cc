@@ -97,14 +97,31 @@ LuaValue LuaRuntime::create_table()
     val.data.ptr = tp;
     return val;
 }
-
+bool LuaRuntime::table_check(LuaValue t, LuaValue k)
+{
+    if (t.kind != LuaType::LVTable)
+    {
+        this->set_error(this->error_to_string(error_illegal_index(t.kind)));
+        return false;
+    }
+    if (k.kind == LuaType::LVNil)
+    {
+        this->set_error(this->error_to_string(error_nil_index()));
+        return false;
+    }
+    return true;
+}
 void LuaRuntime::table_set(LuaValue t, LuaValue k, LuaValue v)
 {
+    if (!this->table_check(t, k))
+        return;
     Table *tp = t.as<Table *>();
     tp->set(k, v);
 }
 LuaValue LuaRuntime::table_get(LuaValue t, LuaValue k)
 {
+    if (!this->table_check(t, k))
+        return this->create_nil();
     Table *tp = t.as<Table *>();
     return tp->get(k);
 }
@@ -258,6 +275,18 @@ LuaValue LuaRuntime::error_to_string(Lerror error)
     {
         LuaValue s1 = this->create_string("attemp to call a ");
         LuaValue s2 = this->lua_type_to_string(error.as.call_non_function.t);
+        LuaValue s3 = this->create_string(" value");
+        LuaValue s = s1;
+        s = this->concat(s, s2);
+        s = this->concat(s, s3);
+        return s;
+    }
+    else if (error.kind == Lerror::LE_NilIndex)
+        return this->create_string("table index is nil");
+    else if (error.kind == Lerror::LE_IllegalIndex)
+    {
+        LuaValue s1 = this->create_string("attemp to index a ");
+        LuaValue s2 = this->lua_type_to_string(error.as.illegal_index.t);
         LuaValue s3 = this->create_string(" value");
         LuaValue s = s1;
         s = this->concat(s, s2);
