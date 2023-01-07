@@ -356,4 +356,17 @@ void lua_tests()
         {
             lvstring("attrib"),
         });
+
+    lua_test_case_error(
+        "error: nil index",
+        "local t = {}"
+        "return t[nil]",
+
+        to_string(error_nil_index(), true));
+
+    lua_test_case_error(
+        "error: illegal indexing",
+        "return (4)['key']",
+
+        to_string(error_illegal_index(LuaType::LVNumber), true));
 }
