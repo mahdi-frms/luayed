@@ -449,6 +449,15 @@ string to_string(const Lerror &err, bool pure)
         size_t offset = err.as.label_redefined.offset;
         os << "label previously defined at (line: " << line << ", offset: " << offset << ")";
     }
+    else if (err.kind == Lerror::LE_NilIndex)
+    {
+        os << "table index is nil";
+    }
+    else if (err.kind == Lerror::LE_IllegalIndex)
+    {
+        LuaType t = err.as.illegal_index.t;
+        os << "attemp to index a " << t << " value";
+    }
     else
     {
         os << "FAULT: THIS ERROR CAN'T BE DISPLAYED";

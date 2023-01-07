@@ -124,3 +124,16 @@ Lerror error_not_enough_args(size_t available, size_t expected)
     err.as.not_enough_args.expected = expected;
     return err;
 }
+Lerror error_illegal_index(LuaType t)
+{
+    Lerror err;
+    err.kind = Lerror::LE_IllegalIndex;
+    err.as.illegal_index.t = t;
+    return err;
+}
+Lerror error_nil_index()
+{
+    Lerror err;
+    err.kind = Lerror::LE_NilIndex;
+    return err;
+}

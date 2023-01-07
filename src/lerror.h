@@ -30,6 +30,8 @@ struct Lerror
         // Runtime
         LE_CallNonFunction,
         LE_NotEnoughArgs,
+        LE_IllegalIndex,
+        LE_NilIndex,
         // Interpretor
         LE_InvalidOperand,
         LE_InvalidComparison,
@@ -121,6 +123,15 @@ struct Lerror
             size_t expected;
         } not_enough_args;
 
+        struct
+        {
+        } nil_index;
+
+        struct
+        {
+            LuaType t;
+        } illegal_index;
+
     } as;
 };
 
@@ -144,5 +155,7 @@ Lerror error_label_undefined();
 Lerror error_label_redefined(size_t line, size_t offset);
 Lerror error_call_non_function(LuaType t);
 Lerror error_not_enough_args(size_t available, size_t expected);
+Lerror error_nil_index();
+Lerror error_illegal_index(LuaType t);
 
 #endif
