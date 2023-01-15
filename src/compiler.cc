@@ -706,16 +706,23 @@ void Compiler::compile_numeric_for(Noderef node)
         this->emit(Opcode(Instruction::IConst, this->const_number(1)));
     size_t loop_start = this->len();
     this->loop_start();
+    // condition
+    this->emit(Opcode(Instruction::IBLocal, 3)); // index
+    this->emit(Opcode(Instruction::IBLocal, 3)); // limit
+    this->emit(Instruction::IGt);
+    // jmp to end
+    size_t jmp = this->len();
+    this->emit(Opcode(Instruction::ICjmp, 0));
+    // block
     this->compile_block(node->child(blk_idx));
-    this->emit(Opcode(Instruction::IBLocal, 3));
-    this->emit(Opcode(Instruction::IBLocal, 2));
+    // increment
+    this->emit(Opcode(Instruction::IBLocal, 3)); // index
+    this->emit(Opcode(Instruction::IBLocal, 2)); // step
     this->emit(Instruction::IAdd);
-    this->emit(Opcode(Instruction::IBLocal, 1));
-    this->emit(Opcode(Instruction::IBLStore, 4));
-    this->emit(Opcode(Instruction::IBLocal, 3));
-    this->emit(Instruction::ILe);
-    this->emit(Opcode(Instruction::ICjmp, loop_start));
+    this->emit(Opcode(Instruction::IBLStore, 3));
+    this->emit(Opcode(Instruction::IJmp, loop_start));
     this->loop_end();
+    this->edit_jmp(jmp, this->len());
     if (md->is_upvalue)
     {
         this->hookpop();

@@ -1088,30 +1088,32 @@ void compiler_tests()
         .test_upvalues({})
         .test_opcodes({
             inil,
-            // params
+            // params 1
             iconst(0),
             iconst(1),
             iconst(2),
-            // block 7
+            // condition 7
+            iblocal(3),
+            iblocal(3),
+            igt,
+            icjmp(40),
+            // block 15
             inil,
-            ijmp(37),
+            ijmp(40),
             ilocal(0),
             ilocal(4),
             ilocal(1),
             icall(2, 1),
             ipop(1),
-            // next
-            iblocal(3), // counter
-            iblocal(2), // step
+            // increment 30
+            iblocal(3),
+            iblocal(2),
             iadd,
-            iblocal(1),  // copy new counter
-            iblstore(4), // store new counter
-            iblocal(3),  // limit
-            ile,
-            icjmp(7),
-            // loop end 37
+            iblstore(3),
+            ijmp(7),
+            // loop end 40
             ipop(3),
-            // end
+            // end 42
             inil,
             ilocal(1),
             ilstore(0),
@@ -1320,24 +1322,26 @@ void compiler_tests()
         .test_ccount(3)
         .test_upvalues({})
         .test_opcodes({
-            // params
+            // params 0
             iconst(0),
             iupush,
             iconst(1),
             iconst(2),
-            // block
+            // condition 7
+            iblocal(3),
+            iblocal(3),
+            igt,
+            icjmp(29),
+            // block 15
             ifconst(2),
             ipop(1),
-            // next
+            // increment 19
             iblocal(3), // counter
             iblocal(2), // step
             iadd,
-            iblocal(1),  // copy new counter
-            iblstore(4), // store new counter
-            iblocal(3),  // limit
-            ile,
-            icjmp(7),
-            // loop end 37
+            iblstore(3), // store new counter
+            ijmp(7),
+            // loop end 29
             iupop,
             ipop(3),
             // end

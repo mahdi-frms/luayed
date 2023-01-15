@@ -391,6 +391,21 @@ void lua_tests()
         });
 
     lua_test_case(
+        "numeric for",
+
+        "local from, to = 1, 20\n"
+        "local expect = (from + to) * (to - from + 1) / 2\n"
+        "local sum = 0\n"
+        "for i = from, to do\n"
+        "    sum = sum + i\n"
+        "end\n"
+        "return sum == expect\n",
+
+        {
+            lvbool(true),
+        });
+
+    lua_test_case(
         "general case 1",
 
         "function push(arr, val)\n"
