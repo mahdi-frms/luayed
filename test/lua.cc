@@ -371,6 +371,26 @@ void lua_tests()
         to_string(error_illegal_index(LuaType::LVNumber), true));
 
     lua_test_case(
+        "generic for",
+
+        "function a(s, p)\n"
+        "    if p == 10\n"
+        "    then\n"
+        "        return nil\n"
+        "    end\n"
+        "    return p + 1\n"
+        "end\n"
+        "local sum = 0;\n"
+        "for i in a, {}, 0 do\n"
+        "    sum = sum + i\n"
+        "end\n"
+        "return sum\n",
+
+        {
+            lvnumber(55),
+        });
+
+    lua_test_case(
         "general case 1",
 
         "function push(arr, val)\n"
