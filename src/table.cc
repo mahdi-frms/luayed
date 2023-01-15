@@ -33,9 +33,15 @@ hash_t table_hash(const TableElement &e)
     return luavalue_hash(e.key);
 }
 
-Table::Table(LuaRuntime *rt) : vset(table_compare, table_hash, rt)
+void Table::init(LuaRuntime *rt)
 {
+    this->vset.init(table_compare, table_hash, rt);
 }
+void Table::destroy()
+{
+    this->vset.destroy();
+}
+
 void Table::set(LuaValue key, LuaValue value)
 {
     TableElement e(key, value);
@@ -44,7 +50,7 @@ void Table::set(LuaValue key, LuaValue value)
     else
         this->vset.insert(e);
 }
-LuaValue Table::get(LuaValue key)
+LuaValue Table::get(LuaValue key) const
 {
     LuaValue nil;
     nil.kind = LuaType::LVNil;

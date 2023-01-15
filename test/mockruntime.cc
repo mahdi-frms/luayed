@@ -1,5 +1,6 @@
 #include "mockruntime.h"
 #include "values.h"
+#include <lstrep.h>
 #include <map>
 #include <set>
 #include <cstring>
@@ -60,10 +61,7 @@ LuaValue MockRuntime::create_string(const char *s1, const char *s2)
 }
 LuaValue MockRuntime::create_string(lnumber n)
 {
-    string str = std::to_string(n);
-    str.erase(str.find_last_not_of('0') + 1);
-    str.erase(str.find_last_not_of('.') + 1);
-    return lvstring(str.c_str());
+    return lvstring(to_string(n).c_str());
 }
 LuaValue MockRuntime::create_table()
 {

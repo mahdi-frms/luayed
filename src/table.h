@@ -22,9 +22,12 @@ private:
 
 public:
     Table(LuaRuntime *rt);
+    void clean();
+    void init(LuaRuntime *rt);
+    void destroy();
 
     void set(LuaValue key, LuaValue value);
-    LuaValue get(LuaValue key);
+    LuaValue get(LuaValue key) const;
 };
 
 #endif

@@ -48,9 +48,55 @@ void Lua::call(size_t arg_count, size_t return_count)
 {
     this->runtime.fncall(arg_count, return_count + 1);
 }
-lnumber Lua::pop_number()
+int Lua::kind()
 {
     LuaValue value = this->runtime.stack_pop();
-    lnumber num = value.data.n;
-    return num;
+    this->runtime.stack_push(value);
+    return value.kind;
+}
+
+void Lua::pop()
+{
+    this->runtime.stack_pop();
+}
+lnumber Lua::pop_number()
+{
+    return this->runtime.stack_pop().data.n;
+}
+bool Lua::pop_boolean()
+{
+    return this->runtime.stack_pop().data.b;
+}
+const char *Lua::pop_string()
+{
+    return this->runtime.stack_pop().as<const char *>();
+}
+bool Lua::has_error()
+{
+    return this->runtime.error_raised();
+}
+void Lua::push_error()
+{
+    LuaValue e = this->runtime.get_error();
+    this->runtime.stack_push(e);
+}
+void Lua::push_string(const char *str)
+{
+    LuaValue s = this->runtime.create_string(str);
+    this->runtime.stack_push(s);
+}
+void Lua::set_global()
+{
+    // todo : handle error
+    LuaValue value = this->runtime.stack_pop();
+    LuaValue key = this->runtime.stack_pop();
+    this->runtime.table_set(this->runtime.table_global(), key, value);
+}
+size_t Lua::top()
+{
+    return this->runtime.stack_size();
+}
+void Lua::push_nil()
+{
+    this->runtime.stack_push(this->runtime.create_nil());
 }

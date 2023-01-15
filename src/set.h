@@ -37,7 +37,7 @@ private:
     size_t count;
     Bucket<T> *buffer;
 
-    size_t next_idx(size_t idx)
+    size_t next_idx(size_t idx) const
     {
         return (idx + 1) % this->cap;
     }
@@ -60,7 +60,7 @@ private:
         return b;
     }
 
-    Bucket<T> *search(const T &ele)
+    Bucket<T> *search(const T &ele) const
     {
         Bucket<T> *dead = nullptr;
         hash_t h = this->hash(ele) % this->cap, i = h;
@@ -111,16 +111,16 @@ private:
     }
 
 public:
-    Set(key_compare<T> comp, key_hash<T> hash, IAllocator *allocator, size_t cap = 16)
-        : comp(comp),
-          hash(hash),
-          allocator(allocator),
-          cap(cap),
-          count(0)
+    void init(key_compare<T> comp, key_hash<T> hash, IAllocator *allocator, size_t cap = 16)
     {
+        this->comp = comp;
+        this->hash = hash;
+        this->allocator = allocator;
+        this->cap = cap;
+        this->count = 0;
         this->buffer = this->allocate(cap);
     }
-    ~Set()
+    void destroy()
     {
         this->free(buffer);
     }
@@ -151,7 +151,7 @@ public:
             buck = prev(buck);
         }
     }
-    T *get(const T &ele)
+    T *get(const T &ele) const
     {
         Bucket<T> *buck = this->search(ele);
         if (buck->flag == SET_FLAG_FULL)

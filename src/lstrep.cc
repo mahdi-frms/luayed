@@ -332,6 +332,15 @@ string to_string(const LuaValue &lv)
     }
     return s;
 }
+
+string to_string(lnumber n)
+{
+    string str = std::to_string(n);
+    str.erase(str.find_last_not_of('0') + 1);
+    str.erase(str.find_last_not_of('.') + 1);
+    return str;
+}
+
 string to_string(const LuaType &lt)
 {
     if (lt == LuaType::LVNil)

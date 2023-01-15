@@ -338,7 +338,7 @@ void lua_tests()
         "globals",
 
         "function a() return 8 end\n"
-        "return 8",
+        "return a()",
 
         {
             lvnumber(8),
@@ -369,4 +369,22 @@ void lua_tests()
         "return (4)['key']",
 
         to_string(error_illegal_index(LuaType::LVNumber), true));
+
+    lua_test_case(
+        "general case 1",
+
+        "function push(arr, val)\n"
+        "    -- arr[#arr + 1] = val\n"
+        "end\n"
+        "local i = 1\n"
+        "local l = {}\n"
+        "while i <= 10 do\n"
+        "    push(l, i)\n"
+        "    i = i + 1\n"
+        "end\n"
+        "return 33\n",
+
+        {
+            lvnumber(33),
+        });
 }

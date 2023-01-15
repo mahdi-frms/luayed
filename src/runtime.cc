@@ -93,7 +93,7 @@ LuaValue LuaRuntime::create_table()
     LuaValue val;
     val.kind = LuaType::LVTable;
     Table *tp = (Table *)this->allocate(sizeof(Table));
-    *tp = Table(this);
+    tp->init(this);
     val.data.ptr = tp;
     return val;
 }
@@ -122,8 +122,9 @@ LuaValue LuaRuntime::table_get(LuaValue t, LuaValue k)
 {
     if (!this->table_check(t, k))
         return this->create_nil();
-    Table *tp = t.as<Table *>();
-    return tp->get(k);
+    const Table *tp = t.as<const Table *>();
+    LuaValue v = tp->get(k);
+    return v;
 }
 LuaValue LuaRuntime::table_global()
 {
@@ -212,8 +213,9 @@ void LuaRuntime::new_frame(size_t stack_size)
     frame->error = this->create_nil();
     this->frame = frame;
 }
-LuaRuntime::LuaRuntime(IInterpreter *interpreter) : lstrset(lstr_compare, lstr_hash, this), interpreter(interpreter)
+LuaRuntime::LuaRuntime(IInterpreter *interpreter) : interpreter(interpreter)
 {
+    this->lstrset.init(lstr_compare, lstr_hash, this);
     this->functable.push_back(nullptr);
     this->new_frame(INITIAL_FRAME_SIZE);
     this->global = this->create_table();
