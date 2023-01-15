@@ -409,7 +409,7 @@ void lua_tests()
         "general case 1",
 
         "function push(arr, val)\n"
-        "    -- arr[#arr + 1] = val\n"
+        "    arr[#arr + 1] = val\n"
         "end\n"
         "local i = 1\n"
         "local l = {}\n"
@@ -417,9 +417,9 @@ void lua_tests()
         "    push(l, i)\n"
         "    i = i + 1\n"
         "end\n"
-        "return 33\n",
+        "return #l\n",
 
         {
-            lvnumber(33),
+            lvnumber(10),
         });
 }
