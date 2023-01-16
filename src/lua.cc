@@ -39,6 +39,24 @@ int Lua::compile(const char *lua_code, string &errors)
     this->runtime.stack_push(fn);
     return LUA_COMPILE_RESULT_OK;
 }
+void Lua::push_number(lnumber num)
+{
+    this->runtime.stack_push(this->runtime.create_number(num));
+}
+void Lua::fetch_local(int idx)
+{
+    if (idx >= 0)
+        this->runtime.stack_push(this->runtime.stack_read(idx));
+    else
+        this->runtime.stack_push(this->runtime.stack_back_read(-idx));
+}
+void Lua::store_local(int idx)
+{
+    if (idx >= 0)
+        this->runtime.stack_write(idx, this->runtime.stack_pop());
+    else
+        this->runtime.stack_back_write(-idx, this->runtime.stack_pop());
+}
 void Lua::push_cppfn(LuaCppFunction cppfn)
 {
     LuaValue fn = this->runtime.create_cppfn((LuaRTCppFunction)cppfn);
@@ -99,4 +117,19 @@ size_t Lua::top()
 void Lua::push_nil()
 {
     this->runtime.stack_push(this->runtime.create_nil());
+}
+void Lua::set_table()
+{
+    LuaValue value = this->runtime.stack_pop();
+    LuaValue key = this->runtime.stack_pop();
+    LuaValue table = this->runtime.stack_pop();
+    this->runtime.table_set(table, key, value);
+    this->runtime.stack_push(table);
+}
+void Lua::get_table()
+{
+    LuaValue key = this->runtime.stack_pop();
+    LuaValue table = this->runtime.stack_pop();
+    LuaValue value = this->runtime.table_get(table, key);
+    this->runtime.stack_push(value);
 }

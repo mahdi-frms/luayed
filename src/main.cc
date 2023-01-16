@@ -57,12 +57,37 @@ string luavalue_to_string(Lua *lua)
 
 size_t lua_std_print(Lua *lua)
 {
-    while (lua->top())
+    for (size_t i = 0; i < lua->top(); i++)
     {
+        lua->fetch_local(i);
         std::cout << luavalue_to_string(lua);
-        std::cout << "\n";
+        std::cout << "\t";
     }
+    std::cout << "\n";
     return 0;
+}
+
+size_t lua_std_unpack(Lua *lua)
+{
+    size_t count = 1;
+    while (true)
+    {
+        lua->fetch_local(-1); // table
+        lua->push_number(count);
+        lua->get_table();
+        if (lua->kind() == LUA_TYPE_NIL)
+        {
+            lua->pop();
+            break;
+        }
+        count++;
+        lua->fetch_local(-2); // table
+        lua->fetch_local(-2); // value
+        lua->store_local(-3);
+        lua->store_local(-1);
+    }
+    lua->pop();
+    return count - 1;
 }
 
 size_t lua_std_to_string(Lua *lua)
@@ -87,6 +112,10 @@ void init_luastd(Lua *lua)
 
     lua->push_string("tostring");
     lua->push_cppfn(lua_std_to_string);
+    lua->set_global();
+
+    lua->push_string("unpack");
+    lua->push_cppfn(lua_std_unpack);
     lua->set_global();
 }
 

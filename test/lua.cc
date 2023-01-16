@@ -468,4 +468,38 @@ void lua_tests()
         {
             lvbool(true),
         });
+
+    lua_test_case(
+        "general case 3",
+
+        "local function iter(l)\n"
+        "    return function(s, _)\n"
+        "        local v = l[s.idx]\n"
+        "        s.idx = s.idx + 1\n"
+        "        return v\n"
+        "    end, { idx = 1 }, nil\n"
+        "end\n"
+        "\n"
+        "local function primes(to)\n"
+        "    local list = {}\n"
+        "    for i = 2, to do\n"
+        "        local flag = true\n"
+        "        for j in iter(list) do\n"
+        "            if (i % j == 0) then\n"
+        "                flag = false\n"
+        "                break\n"
+        "            end\n"
+        "        end\n"
+        "        if flag then\n"
+        "            list[#list + 1] = i\n"
+        "        end\n"
+        "    end\n"
+        "    return list\n"
+        "end\n"
+        "\n"
+        "return #primes(20) == 8 -- 2,3,5,7,11,13,17,19\n"
+        "\n",
+        {
+            lvbool(true),
+        });
 }
