@@ -56,9 +56,10 @@ void Resolver::reference(Noderef node, Noderef dec, bool func_past)
     if (func_past)
     {
         MetaMemory *mm = mem(dec);
-        mm->is_upvalue = true;
         MetaScope *sc = scope(mm->scope);
-        sc->upvalue_size++;
+        if (!mm->is_upvalue)
+            sc->upvalue_size++;
+        mm->is_upvalue = true;
     }
 }
 

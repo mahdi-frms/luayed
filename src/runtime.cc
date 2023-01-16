@@ -145,12 +145,50 @@ LuaValue LuaRuntime::create_number(lnumber n)
 }
 LuaValue LuaRuntime::create_luafn(fidx_t fidx)
 {
-    // todo : uptable must be created
+    Lfunction *lbin = this->bin(fidx);
+    LuaFunction *fobj = (LuaFunction *)this->allocate(sizeof(LuaFunction) + sizeof(Hook *) * lbin->uplen);
+    fobj->is_lua = true;
+    fobj->fn = (void *)lbin;
+
+    if (this->frame->fn.kind != LuaType::LVNil)
+    {
+        LuaFunction *parent = this->frame->fn.as<LuaFunction *>();
+        if (parent && parent->is_lua)
+        {
+            Lfunction *pbin = parent->binary();
+            for (size_t i = 0; i < lbin->uplen; i++)
+            {
+                Hook **child_hook = ((Hook **)(fobj + 1)) + i;
+                Upvalue child_upvalue = lbin->ups()[i];
+                if (child_upvalue.fidx == pbin->fidx)
+                {
+                    Hook **hook = this->frame->hooktable() + child_upvalue.hidx;
+                    if (*hook == nullptr)
+                    {
+                        *hook = (Hook *)this->allocate(sizeof(Hook));
+                        (*hook)->is_detached = false;
+                        (*hook)->original = &this->frame->stack()[this->frame->stack_address(child_upvalue.offset)];
+                    }
+                    *child_hook = *hook;
+                }
+                else
+                {
+                    for (size_t j = 0; j < pbin->uplen; i++)
+                    {
+                        Hook **parent_hook = ((Hook **)(parent + 1)) + i;
+                        Upvalue parent_upvalue = pbin->ups()[i];
+                        if (child_upvalue == parent_upvalue)
+                        {
+                            *child_hook = *parent_hook;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
     LuaValue val;
     val.kind = LuaType::LVFunction;
-    LuaFunction *fobj = (LuaFunction *)this->allocate(sizeof(LuaFunction));
-    fobj->is_lua = true;
-    fobj->fn = (void *)this->bin(fidx);
     val.data.ptr = (void *)fobj;
     return val;
 }
@@ -372,6 +410,8 @@ bool LuaRuntime::error_raised()
 
 void LuaRuntime::fnret(size_t count)
 {
+    while (this->frame->hookptr)
+        this->hookpop();
     Frame *frame = this->frame;
     size_t total_count = frame->ret_count + count;
     Frame *prev = this->frame->prev;
@@ -488,9 +528,9 @@ void LuaRuntime::hookpush()
 void LuaRuntime::hookpop()
 {
     Hook **ptr = this->hooktable() + --this->frame->hookptr;
-    Hook hook = **ptr;
-    hook.is_detached = true;
-    hook.val = *hook.original;
+    Hook *hook = *ptr;
+    hook->is_detached = true;
+    hook->val = *hook->original;
     *ptr = nullptr;
 }
 LuaValue LuaRuntime::stack_back_read(size_t idx)

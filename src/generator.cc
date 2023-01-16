@@ -16,9 +16,17 @@ fidx_t LuaGenerator::pushf()
 void LuaGenerator::popf()
 {
     rt->create_binary(this->gfn);
-    GenFunction *prev = this->gfn->prev;
-    delete this->gfn;
-    this->gfn = prev;
+    GenFunction *child = this->gfn;
+    GenFunction *parent = child->prev;
+    vector<Upvalue> &chups = child->upvalues;
+    this->gfn = parent;
+    for (size_t i = 0; i < chups.size(); i++)
+    {
+        Upvalue uv = chups[i];
+        if (uv.fidx != parent->fidx)
+            this->upval(uv.fidx, uv.offset, uv.hidx);
+    }
+    delete child;
 }
 
 void LuaGenerator::emit(Opcode opcode)
