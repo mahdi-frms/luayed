@@ -422,4 +422,50 @@ void lua_tests()
         {
             lvnumber(10),
         });
+
+    lua_test_case(
+        "general case 2",
+
+        "function range(f, t, s)\n"
+        "    if s == nil then\n"
+        "        s = 1\n"
+        "    end\n"
+        "    return function(_, p)\n"
+        "        if p == nil then\n"
+        "            return f\n"
+        "        end\n"
+        "        if p + s > t then\n"
+        "            return nil\n"
+        "        end\n"
+        "        return p + s\n"
+        "    end\n"
+        "end\n"
+        "\n"
+        "function collect(iter)\n"
+        "    local list = {}\n"
+        "    local idx = 0\n"
+        "    for i in iter do\n"
+        "        idx = idx + 1\n"
+        "        list[idx] = i\n"
+        "    end\n"
+        "    return list\n"
+        "end\n"
+        "\n"
+        "function compare(l1, l2)\n"
+        "    local i = 1\n"
+        "    while l1[i] == l2[i] do\n"
+        "        if (l1[i] == nil)\n"
+        "        then\n"
+        "            return true\n"
+        "        end\n"
+        "        i = i + 1\n"
+        "    end\n"
+        "    return false\n"
+        "end\n"
+        "\n"
+        "return compare(collect(range(0, 50, 10)), { 0, 10, 20, 30, 40, 50 })\n"
+        "\n",
+        {
+            lvbool(true),
+        });
 }

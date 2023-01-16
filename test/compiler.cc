@@ -1419,6 +1419,8 @@ void compiler_tests()
         .test_ccount(0)
         .test_upvalues({})
         .test_opcodes({
+            iupush,
+            iupush,
             ifconst(3),
             ipop(1),
             iupop,

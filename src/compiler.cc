@@ -109,6 +109,7 @@ fidx_t Compiler::compile(Noderef root)
             if (md->is_upvalue)
             {
                 md->upoffset = this->hooksize;
+                this->emit(Instruction::IUPush);
                 this->hookpush();
                 upcount++;
             }
