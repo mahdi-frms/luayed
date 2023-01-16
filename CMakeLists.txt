@@ -23,7 +23,6 @@ add_library(luacomp
     
 add_executable(luayed
     src/main.cc
-    src/lerror.cc
     src/lua.cc
 )
     
