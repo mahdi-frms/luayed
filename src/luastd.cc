@@ -102,8 +102,7 @@ void luastd::libcpp_init(Lua *lua)
 }
 void luastd::liblua_init(Lua *lua)
 {
-    string lib = readfile("./src/liblua.lua");
     string err;
-    lua->compile(lib.c_str(), err);
+    lua->compile(liblua_code, err);
     lua->call(0, 1);
 }

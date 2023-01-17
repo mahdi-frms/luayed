@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.16)
 
 project(luayed VERSION 0.1.0)
 
+add_custom_command(
+    OUTPUT liblua.cc
+    COMMAND lua ../loadlib.lua
+    DEPENDS loadlib.lua
+)
+
 add_library(luacomp
     src/lexer.cc
     src/ast.cc
@@ -22,6 +28,7 @@ add_library(luacomp
 )
     
 add_executable(luayed
+    build/liblua.cc    
     src/main.cc
     src/luastd.cc
     src/lua.cc

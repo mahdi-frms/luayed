@@ -3,7 +3,7 @@
 
 #include "lua.h"
 
-string readfile(const char *path);
+extern const char liblua_code[];
 
 namespace luastd
 {
