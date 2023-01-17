@@ -4,10 +4,12 @@
 #include "generator.h"
 #include "compiler.h"
 #include "lstrep.h"
+#include "luastd.h"
 
 Lua::Lua() : runtime(&this->interpreter)
 {
     this->runtime.set_lua_interface(this);
+    luastd::libinit(this);
 }
 
 int Lua::compile(const char *lua_code, string &errors)

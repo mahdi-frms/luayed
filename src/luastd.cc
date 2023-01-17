@@ -1,4 +1,5 @@
 #include "luastd.h"
+#include "lstrep.h"
 
 string luastd::luavalue_to_string(Lua *lua)
 {
@@ -15,7 +16,7 @@ string luastd::luavalue_to_string(Lua *lua)
     else if (k == LUA_TYPE_NUMBER)
     {
         poped = true;
-        str = std::to_string(lua->pop_number());
+        str = to_string(lua->pop_number());
     }
     else if (k == LUA_TYPE_STRING)
     {
@@ -66,7 +67,7 @@ size_t luastd::unpack(Lua *lua)
     return count - 1;
 }
 
-size_t luastd::to_string(Lua *lua)
+size_t luastd::tostring(Lua *lua)
 {
     if (lua->top())
     {
@@ -82,15 +83,27 @@ size_t luastd::to_string(Lua *lua)
 
 void luastd::libinit(Lua *lua)
 {
+    libcpp_init(lua);
+    liblua_init(lua);
+}
+void luastd::libcpp_init(Lua *lua)
+{
     lua->push_string("print");
     lua->push_cppfn(luastd::print);
     lua->set_global();
 
     lua->push_string("tostring");
-    lua->push_cppfn(luastd::to_string);
+    lua->push_cppfn(luastd::tostring);
     lua->set_global();
 
     lua->push_string("unpack");
     lua->push_cppfn(luastd::unpack);
     lua->set_global();
+}
+void luastd::liblua_init(Lua *lua)
+{
+    string lib = readfile("./src/liblua.lua");
+    string err;
+    lua->compile(lib.c_str(), err);
+    lua->call(0, 1);
 }

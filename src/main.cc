@@ -25,7 +25,6 @@ string readfile(const char *path)
 bool runfile(const char *path)
 {
     Lua lua;
-    luastd::libinit(&lua);
     string text = readfile(path);
     string errors;
     if (lua.compile(text.c_str(), errors) == LUA_COMPILE_RESULT_OK)
@@ -34,7 +33,7 @@ bool runfile(const char *path)
         if (lua.has_error())
         {
             lua.push_error();
-            std::cerr << lua.pop_string();
+            std::cerr << "lua: " << lua.pop_string() << "\n";
             return false;
         }
         else
