@@ -410,7 +410,7 @@ void Interpreter::i_tlist()
     LuaValue t = this->rt->stack_back_read(count + 1);
     for (ssize_t i = count - 1; i >= 0; i--)
     {
-        LuaValue k = this->rt->create_number(i + offset);
+        LuaValue k = this->rt->create_number(i + offset + 1);
         LuaValue v = this->rt->stack_pop();
         this->rt->table_set(t, k, v);
     }

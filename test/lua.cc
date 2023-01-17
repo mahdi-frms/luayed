@@ -502,4 +502,28 @@ void lua_tests()
         {
             lvbool(true),
         });
+
+    lua_test_case(
+        "general case 4",
+
+        "local function sum(...)\n"
+        "    local t = { ... }\n"
+        "    local s = 0\n"
+        "    local i = 1\n"
+        "    while true do\n"
+        "        local v = t[i]\n"
+        "        if v == nil then\n"
+        "            break\n"
+        "        end\n"
+        "        s = s + v\n"
+        "        i = i + 1\n"
+        "    end\n"
+        "    return s\n"
+        "end\n"
+        "\n"
+        "return sum(9, 8, 3, 11, 0, 4)\n"
+        "\n",
+        {
+            lvnumber(35),
+        });
 }
