@@ -11,7 +11,25 @@ int cdec(char c)
     return (c <= '9' && c >= '0') ? (c - '0') : -1;
 }
 
-string scan_lua_string(Token t)
+string scan_lua_multiline_string(Token t)
+{
+    string str;
+    size_t level = 0;
+    const char *ptr = t.str + 1;
+    while (*ptr == '=')
+    {
+        ptr++;
+        level++;
+    }
+    ptr++;
+    if (*ptr == '\n')
+        ptr++;
+    for (; ptr != t.str + t.len - 2 - level; ptr++)
+        str.push_back(*ptr);
+    return str;
+}
+
+string scan_lua_singleline_string(Token t)
 {
     string text = t.text();
     string str = "";
@@ -71,6 +89,14 @@ string scan_lua_string(Token t)
         }
     }
     return str;
+}
+
+string scan_lua_string(Token t)
+{
+    if (*t.str == '[')
+        return scan_lua_multiline_string(t);
+    else
+        return scan_lua_singleline_string(t);
 }
 
 lnumber token_number(Token t)
