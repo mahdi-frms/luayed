@@ -407,14 +407,14 @@ void Interpreter::i_tlist()
 {
     size_t offset = this->arg1;
     size_t count = this->rt->extras();
-    LuaValue t = this->rt->stack_back_read(-(count + 1));
-    for (size_t i = 0; i < count; i++)
+    LuaValue t = this->rt->stack_back_read(count + 1);
+    for (ssize_t i = count - 1; i >= 0; i--)
     {
         LuaValue k = this->rt->create_number(i + offset);
         LuaValue v = this->rt->stack_pop();
         this->rt->table_set(t, k, v);
     }
-    this->rt->stack_pop();
+    this->rt->extras(0);
 }
 void Interpreter::i_gget()
 {
@@ -457,8 +457,11 @@ void Interpreter::i_call()
 }
 void Interpreter::i_vargs()
 {
-    for (size_t i = 0; i < this->arg1; i++)
+    size_t count = this->arg1 ? (this->arg1 - 1) : this->rt->argcount();
+    for (size_t i = 0; i < count; i++)
         this->rt->stack_push(this->rt->arg(i));
+    if (this->arg1 == 0)
+        this->rt->extras(count);
 }
 void Interpreter::i_jmp()
 {

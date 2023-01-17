@@ -275,7 +275,7 @@ void interpreter_tests()
             lvnil(),
         })
         .execute({
-            ivargs(2),
+            ivargs(3),
         })
         .test_stack({
             lvnil(),

@@ -84,6 +84,8 @@ public:
     LuaValue get_error();
     bool error_raised();
     size_t extras();
+    void extras(size_t count);
+    size_t argcount();
 };
 
 #endif

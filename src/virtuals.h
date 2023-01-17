@@ -53,6 +53,8 @@ public:
     virtual LuaValue get_error() = 0;
     virtual bool error_raised() = 0;
     virtual size_t extras() = 0;
+    virtual void extras(size_t count) = 0;
+    virtual size_t argcount() = 0;
 
     virtual LuaValue stack_pop() = 0;
     virtual void stack_push(LuaValue value) = 0;

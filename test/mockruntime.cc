@@ -59,6 +59,10 @@ LuaValue MockRuntime::create_string(const char *s1, const char *s2)
     str.append(s2);
     return lvstring(str.c_str());
 }
+size_t MockRuntime::argcount()
+{
+    return this->args.size();
+}
 LuaValue MockRuntime::create_string(lnumber n)
 {
     return lvstring(to_string(n).c_str());
@@ -255,4 +259,7 @@ LuaValue MockRuntime::table_global()
 size_t MockRuntime::extras()
 {
     return 0;
+}
+void MockRuntime::extras(size_t count)
+{
 }

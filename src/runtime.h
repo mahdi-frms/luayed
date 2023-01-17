@@ -155,7 +155,9 @@ public:
     LuaValue rodata(size_t idx);
     lbyte *text();
     size_t stack_size();
+    size_t argcount();
     size_t extras();
+    void extras(size_t count);
 };
 
 struct LuaFunction

@@ -336,7 +336,7 @@ void Compiler::compile_table(Noderef node)
             this->compile_exp(ch->child(0));
             this->compile_exp(ch->child(1));
         }
-        else if (i == node->child_count() - 1 && is_call(ch))
+        else if (i == node->child_count() - 1 && (is_call(ch) || is_vargs(ch)))
         {
             this->compile_exp_e(ch, EXPECT_FREE);
             this->emit(Opcode(Instruction::ITList, list_len));

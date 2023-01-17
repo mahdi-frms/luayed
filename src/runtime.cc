@@ -135,7 +135,10 @@ size_t LuaRuntime::extras()
 {
     return this->frame->ret_count;
 }
-
+size_t LuaRuntime::argcount()
+{
+    return this->frame->vargs_count;
+}
 LuaValue LuaRuntime::create_number(lnumber n)
 {
     LuaValue val;
@@ -504,7 +507,7 @@ LuaValue LuaRuntime::stack_read(size_t idx)
 }
 size_t Frame::stack_address(size_t idx)
 {
-    return idx < this->bin()->parcount ? idx : idx + this->vargs_count;
+    return idx < this->bin()->parcount ? idx : (idx + this->vargs_count);
 }
 void LuaRuntime::stack_write(size_t idx, LuaValue value)
 {
@@ -535,13 +538,13 @@ void LuaRuntime::hookpop()
 }
 LuaValue LuaRuntime::stack_back_read(size_t idx)
 {
-    idx = this->frame->sp - idx;
-    return this->stack_read(idx);
+    idx = this->stack_size() - idx;
+    return this->frame->stack()[idx];
 }
 void LuaRuntime::stack_back_write(size_t idx, LuaValue value)
 {
-    idx = this->frame->sp - idx;
-    this->stack_write(idx, value);
+    idx = this->stack_size() - idx;
+    this->frame->stack()[idx] = value;
 }
 LuaValue LuaRuntime::arg(size_t idx)
 {
@@ -583,4 +586,8 @@ LuaValue LuaRuntime::get_error()
 size_t LuaRuntime::stack_size()
 {
     return this->frame->sp;
+}
+void LuaRuntime::extras(size_t count)
+{
+    this->frame->ret_count = count;
 }

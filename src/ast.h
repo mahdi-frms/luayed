@@ -8,6 +8,7 @@
 extern const char *node_names[34];
 
 #define is_call(N) ((N)->get_kind() == NodeKind::Call || (N)->get_kind() == NodeKind::MethodCall)
+#define is_vargs(N) ((N)->get_kind() == NodeKind::Primary && (N)->get_token().kind == TokenKind::DotDotDot)
 
 namespace ast
 {
