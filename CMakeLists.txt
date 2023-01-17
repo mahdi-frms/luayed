@@ -23,6 +23,7 @@ add_library(luacomp
     
 add_executable(luayed
     src/main.cc
+    src/luastd.cc
     src/lua.cc
 )
     

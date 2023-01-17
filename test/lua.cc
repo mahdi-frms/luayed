@@ -115,7 +115,7 @@ void lua_test_case_error(
 
 void lua_tests()
 {
-    lua_test_case("nothing", "return 7", {lvnumber(7)});
+    lua_test_case("nothing", "", {});
 
     lua_test_case(
         "simple return",

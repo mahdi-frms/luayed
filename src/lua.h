@@ -1,5 +1,5 @@
-#ifndef LUA_h
-#define LUA_CPP
+#ifndef LUA_H
+#define LUA_H
 
 #include "runtime.h"
 #include "interpreter.h"
