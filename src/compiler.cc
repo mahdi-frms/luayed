@@ -809,8 +809,7 @@ void Compiler::compile_block(Noderef node)
         this->stack_offset -= md->stack_size;
     }
 }
-
-void Compiler::compile_decl(Noderef node)
+void Compiler::compile_decl_var(Noderef node)
 {
     Noderef varlist = node->child(0);
     size_t upcount = 0;
@@ -836,7 +835,27 @@ void Compiler::compile_decl(Noderef node)
         this->emit(Instruction::IUPush);
     }
 }
+void Compiler::compile_decl_func(Noderef node)
+{
+    Noderef var = node->child(0)->child(0);
+    MetaMemory *mm = (MetaMemory *)var->getannot(MetaKind::MMemory);
+    mm->offset = this->stack_offset++;
+    this->compile_exp(node->child(1));
+    if (mm->is_upvalue)
+    {
+        mm->upoffset = this->hooksize;
+        this->hookpush();
+        this->emit(Instruction::IUPush);
+    }
+}
 
+void Compiler::compile_decl(Noderef node)
+{
+    if (node->child(0)->get_kind() == NodeKind::VarList)
+        this->compile_decl_var(node);
+    else
+        this->compile_decl_func(node);
+}
 void Compiler::compile_ret(Noderef node)
 {
     if (node->child_count())

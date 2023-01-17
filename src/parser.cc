@@ -361,10 +361,8 @@ Noderef Parser::statement()
 
             return Ast::make(
                 Ast::make(
-                    Ast::make(
-                        Ast::make(t, NodeKind::Name), NodeKind::VarDecl),
-                    NodeKind::VarList),
-                Ast::make(this->function_body(false), NodeKind::Explist), NodeKind::Declaration);
+                    Ast::make(t, NodeKind::Name), NodeKind::VarDecl),
+                this->function_body(false), NodeKind::Declaration);
         }
         else
         {

@@ -33,6 +33,8 @@ private:
     MetaMemory *varmem(Noderef lvalue);
     void compile_node(Noderef node);
     void compile_decl(Noderef node);
+    void compile_decl_var(Noderef node);
+    void compile_decl_func(Noderef node);
     void compile_ret(Noderef node);
     void compile_block(Noderef node);
     void compile_primary(Noderef node, size_t expect);

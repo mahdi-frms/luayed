@@ -526,4 +526,19 @@ void lua_tests()
         {
             lvnumber(35),
         });
+
+    lua_test_case(
+        "recursion",
+
+        "local function fib(n)\n"
+        "    if n > 2 then\n"
+        "        return fib(n - 1) + fib(n - 2)\n"
+        "    end\n"
+        "    return 1\n"
+        "end\n"
+        "\n"
+        "return fib(8)\n",
+        {
+            lvnumber(21),
+        });
 }

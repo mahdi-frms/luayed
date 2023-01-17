@@ -213,13 +213,20 @@ void Resolver::analyze_node(Noderef node)
 
 void Resolver::analyze_declaration(Noderef node)
 {
-    if (node->child_count() > 1)
+    if (node->child(0)->get_kind() == NodeKind::VarList) // var decl
     {
-        Noderef exps = node->child(1);
-        this->analyze_node(exps);
+        if (node->child_count() > 1)
+        {
+            Noderef exps = node->child(1);
+            this->analyze_node(exps);
+        }
+        Noderef vars = node->child(0);
+        this->analyze_node(vars);
     }
-    Noderef vars = node->child(0);
-    this->analyze_node(vars);
+    else // func decl
+    {
+        this->analyze_etc(node);
+    }
 }
 
 void Resolver::finalize()

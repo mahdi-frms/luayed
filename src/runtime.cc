@@ -532,9 +532,12 @@ void LuaRuntime::hookpop()
 {
     Hook **ptr = this->hooktable() + --this->frame->hookptr;
     Hook *hook = *ptr;
-    hook->is_detached = true;
-    hook->val = *hook->original;
-    *ptr = nullptr;
+    if (hook)
+    {
+        hook->is_detached = true;
+        hook->val = *hook->original;
+        *ptr = nullptr;
+    }
 }
 LuaValue LuaRuntime::stack_back_read(size_t idx)
 {
