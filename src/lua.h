@@ -43,12 +43,13 @@ public:
     size_t top();
     lnumber pop_number();
     bool pop_boolean();
-    const char *pop_string();
+    const char *peek_string();
     void fetch_local(int idx);
     void store_local(int idx);
 
     bool has_error();
     void push_error();
+    void pop_error();
 };
 
 #endif

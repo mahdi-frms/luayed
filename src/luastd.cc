@@ -20,8 +20,7 @@ string luastd::luavalue_to_string(Lua *lua)
     }
     else if (k == LUA_TYPE_STRING)
     {
-        poped = true;
-        str = lua->pop_string();
+        str = lua->peek_string();
     }
     else if (k == LUA_TYPE_TABLE)
         str = "[table]";
@@ -81,6 +80,51 @@ size_t luastd::tostring(Lua *lua)
     return 1;
 }
 
+size_t luastd::type(Lua *lua)
+{
+    return 0;
+}
+size_t luastd::load(Lua *lua)
+{
+    const char *arg_error = "bad argument to load function";
+    if (lua->top())
+    {
+        lua->fetch_local(0);
+        if (lua->kind() == LUA_TYPE_STRING)
+        {
+            const char *src = lua->peek_string();
+            string compile_errors;
+            int rsl = lua->compile(src, compile_errors);
+            if (rsl == 0)
+            {
+                lua->store_local(0);
+                while (lua->top() > 1)
+                    lua->pop();
+                return 1;
+            }
+            else
+            {
+                while (lua->top())
+                    lua->pop();
+                lua->push_nil();
+                lua->push_string(compile_errors.c_str());
+                return 2;
+            }
+        }
+        else
+        {
+            lua->push_string(arg_error);
+            lua->pop_error();
+        }
+    }
+    else
+    {
+        lua->push_string(arg_error);
+        lua->pop_error();
+    }
+    return 0;
+}
+
 void luastd::libinit(Lua *lua)
 {
     libcpp_init(lua);
@@ -98,6 +142,10 @@ void luastd::libcpp_init(Lua *lua)
 
     lua->push_string("unpack");
     lua->push_cppfn(luastd::unpack);
+    lua->set_global();
+
+    lua->push_string("load");
+    lua->push_cppfn(luastd::load);
     lua->set_global();
 }
 void luastd::liblua_init(Lua *lua)

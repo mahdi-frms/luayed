@@ -12,6 +12,8 @@ namespace luastd
     size_t print(Lua *lua);
     size_t unpack(Lua *lua);
     size_t tostring(Lua *lua);
+    size_t load(Lua *lua);
+    size_t type(Lua *lua);
 
     void libinit(Lua *lua);
     void liblua_init(Lua *lua);

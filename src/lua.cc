@@ -20,17 +20,17 @@ int Lua::compile(const char *lua_code, string &errors)
     if (ast.root() == nullptr)
     {
         errors.append(to_string(parser.get_error()));
-        errors.push_back('\n');
         return LUA_COMPILE_RESULT_FAILED;
     }
     Resolver sem(ast);
     vector<Lerror> errs = sem.analyze();
     if (errs.size())
     {
-        for (size_t i = 0; i < errs.size(); i++)
+        errors.append(to_string(errs[0]));
+        for (size_t i = 1; i < errs.size(); i++)
         {
-            errors.append(to_string(errs[i]));
             errors.push_back('\n');
+            errors.append(to_string(errs[i]));
         }
         return LUA_COMPILE_RESULT_FAILED;
     }
@@ -87,9 +87,9 @@ bool Lua::pop_boolean()
 {
     return this->runtime.stack_pop().data.b;
 }
-const char *Lua::pop_string()
+const char *Lua::peek_string()
 {
-    return this->runtime.stack_pop().as<const char *>();
+    return this->runtime.stack_back_read(1).as<const char *>();
 }
 bool Lua::has_error()
 {
@@ -100,6 +100,12 @@ void Lua::push_error()
     LuaValue e = this->runtime.get_error();
     this->runtime.stack_push(e);
 }
+void Lua::pop_error()
+{
+    LuaValue e = this->runtime.stack_pop();
+    this->runtime.set_error(e);
+}
+
 void Lua::push_string(const char *str)
 {
     LuaValue s = this->runtime.create_string(str);
