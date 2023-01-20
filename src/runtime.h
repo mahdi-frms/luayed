@@ -5,7 +5,7 @@
 #include "virtuals.h"
 #include "set.h"
 
-#define lstrnull nullptr
+#define STACK_BUFFER_SIZE 1024 * 1024
 
 class LuaValue;
 class LuaRuntime;
@@ -92,13 +92,13 @@ class LuaRuntime : public IRuntime, public IAllocator
 private:
     Set<lstr_p> lstrset;
     Frame *frame;
+    void *stack_buffer;
     IInterpreter *interpreter;
     vector<Lfunction *> functable;
     void *lua_interface = nullptr;
     LuaValue global;
 
-    void new_frame(size_t stack_size);
-    void destroy_frame();
+    void new_frame();
     void copy_values(Frame *fsrc, Frame *fdest, size_t count);
     void push_nils(Frame *fsrc, size_t count);
     LuaValue concat(LuaValue v1, LuaValue v2);

@@ -3,7 +3,6 @@
 #include <cstdlib>
 #include <cstring>
 
-#define INITIAL_FRAME_SIZE 1024 // must be expandable
 #define LV_AS_FUNC(V) ((LuaFunction *)((V)->data.ptr))
 
 int lstr_compare(const lstr_p &a, const lstr_p &b)
@@ -242,9 +241,17 @@ void LuaRuntime::deallocate(void *ptr)
 {
     free(ptr);
 }
-void LuaRuntime::new_frame(size_t stack_size)
+void LuaRuntime::new_frame()
 {
-    Frame *frame = (Frame *)this->allocate(sizeof(Frame) + stack_size);
+    Frame *frame;
+    if (this->frame)
+    {
+        frame = (Frame *)(this->frame->stack() + this->stack_size());
+    }
+    else
+    {
+        frame = (Frame *)this->stack_buffer;
+    }
     frame->prev = this->frame;
     frame->hookptr = 0;
     frame->sp = 0;
@@ -256,16 +263,12 @@ void LuaRuntime::new_frame(size_t stack_size)
 }
 LuaRuntime::LuaRuntime(IInterpreter *interpreter) : interpreter(interpreter)
 {
+    this->frame = nullptr;
+    this->stack_buffer = this->allocate(STACK_BUFFER_SIZE);
     this->lstrset.init(lstr_compare, lstr_hash, this);
     this->functable.push_back(nullptr);
-    this->new_frame(INITIAL_FRAME_SIZE);
+    this->new_frame();
     this->global = this->create_table();
-}
-void LuaRuntime::destroy_frame()
-{
-    Frame *frame = this->frame;
-    this->frame = frame->prev;
-    this->deallocate(frame);
 }
 void LuaRuntime::copy_values(
     Frame *fsrc,
@@ -273,12 +276,12 @@ void LuaRuntime::copy_values(
     size_t count)
 {
     size_t src_idx = fsrc->sp - count;
+    LuaValue *sstack = fsrc->stack();
     for (size_t idx = 0; idx < count; idx++)
     {
-        fdest->stack()[fdest->sp + idx] = fsrc->stack()[src_idx + idx];
+        fdest->stack()[fdest->sp + idx] = sstack[src_idx + idx];
     }
     fdest->sp += count;
-    fsrc->sp -= count;
 }
 
 void LuaRuntime::push_nils(
@@ -374,7 +377,7 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
     }
     bool is_lua = fn->as<LuaFunction *>()->is_lua;
     Lfunction *bin = is_lua ? fn->as<LuaFunction *>()->binary() : nullptr;
-    this->new_frame(argc + 1024 /* todo: THIS NUMBER MUST BE PROVIDED BY THE COMPILER */);
+    this->new_frame();
     Frame *frame = this->frame;
     // move values between frames
     frame->fn = *fn;
@@ -437,7 +440,7 @@ void LuaRuntime::fnret(size_t count)
     }
     else
         this->copy_values(frame, prev, exp);
-    this->destroy_frame();
+    this->frame = prev;
 }
 
 Lfunction *LuaFunction::binary()
