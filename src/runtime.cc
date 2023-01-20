@@ -385,6 +385,7 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
     frame->vargs_count = 0;
 
     this->copy_values(prev, frame, total_argc);
+    prev->sp -= total_argc;
     if (is_lua && bin->parcount > total_argc)
     {
         this->push_nils(frame, bin->parcount - total_argc);

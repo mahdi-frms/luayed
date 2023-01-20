@@ -59,7 +59,9 @@ size_t lfcxx1(void *r)
     LuaRuntime *rt = (LuaRuntime *)r;
     vector<LuaValue> stack = drain(rt);
     for (size_t i = 0; i < stack.size(); i++)
+    {
         stack[i].data.n = stack[i].data.n + 2;
+    }
     stack.push_back(rt->create_boolean(true));
     stack.push_back(rt->create_boolean(false));
     pipe(rt, stack);
@@ -85,14 +87,21 @@ void test_cxx_calls_cxx_extra()
 
     rt_assert(rt.stack_size() == 4, mes, 1);
     vector<LuaValue> stack = drain(&rt);
-    rt_assert(stack ==
-                  vector<LuaValue>({
-                      rt.create_number(2),
-                      rt.create_number(602),
-                      rt.create_boolean(true),
-                      rt.create_boolean(false),
-                  }),
-              mes, 2);
+    vector<LuaValue> expected = {
+        rt.create_number(2),
+        rt.create_number(602),
+        rt.create_boolean(true),
+        rt.create_boolean(false),
+    };
+    bool rsl = stack == expected;
+    rt_assert(rsl, mes, 2);
+    if (!rsl)
+    {
+        std::cerr << "stack:\n"
+                  << stack
+                  << "expected:\n"
+                  << expected;
+    }
 }
 
 size_t lfcxx2(void *r)
