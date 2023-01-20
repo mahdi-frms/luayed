@@ -270,6 +270,11 @@ LuaRuntime::LuaRuntime(IInterpreter *interpreter) : interpreter(interpreter)
     this->new_frame();
     this->global = this->create_table();
 }
+LuaRuntime::~LuaRuntime()
+{
+    this->deallocate(this->stack_buffer);
+}
+
 void LuaRuntime::copy_values(
     Frame *fsrc,
     Frame *fdest,

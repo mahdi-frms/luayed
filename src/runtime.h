@@ -116,6 +116,7 @@ private:
 
 public:
     LuaRuntime(IInterpreter *interpreter);
+    ~LuaRuntime();
     void set_lua_interface(void *lua_interface);
 
     LuaValue create_nil();
