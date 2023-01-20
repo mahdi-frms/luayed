@@ -98,6 +98,7 @@ private:
     size_t func_count;
     void *lua_interface = nullptr;
     LuaValue global;
+    bool test_mode = false;
 
     void new_frame();
     void copy_values(Frame *fsrc, Frame *fdest, size_t count);
@@ -140,9 +141,11 @@ public:
     void fnret(size_t count);
     void set_error(LuaValue value);
     LuaValue get_error();
+    void remove_error();
     fidx_t gen_fidx();
     Lfunction *bin(size_t fidx);
     bool error_raised();
+    void set_test_mode(bool mode);
 
     LuaValue stack_pop();
     void stack_push(LuaValue value);

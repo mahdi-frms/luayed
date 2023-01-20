@@ -106,6 +106,37 @@ size_t luastd::error(Lua *lua)
         lua->pop();
     return 0;
 }
+size_t luastd::pcall(Lua *lua)
+{
+    const char *arg_error = "bad argument to pcall function";
+    if (lua->top() == 0)
+    {
+        lua->push_string(arg_error);
+        lua->pop_error();
+        return 0;
+    }
+    lua->fetch_local(0);
+    if (lua->kind() != LUA_TYPE_FUNCTION)
+    {
+        lua->push_string(arg_error);
+        lua->pop_error();
+        return 0;
+    }
+    lua->pop();
+    lua->call(lua->top() - 1, 0);
+    if (lua->has_error())
+    {
+        lua->push_boolean(false);
+        lua->push_error();
+        return 2;
+    }
+    else
+    {
+        lua->push_boolean(true);
+        lua->insert(0);
+        return lua->top();
+    }
+}
 size_t luastd::load(Lua *lua)
 {
     const char *arg_error = "bad argument to load function";
@@ -176,6 +207,10 @@ void luastd::libcpp_init(Lua *lua)
 
     lua->push_string("error");
     lua->push_cppfn(luastd::error);
+    lua->set_global();
+
+    lua->push_string("pcall");
+    lua->push_cppfn(luastd::pcall);
     lua->set_global();
 }
 void luastd::liblua_init(Lua *lua)

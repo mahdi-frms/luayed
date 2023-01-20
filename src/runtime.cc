@@ -440,7 +440,8 @@ void LuaRuntime::fnret(size_t count)
     {
         this->copy_values(frame, prev, total_count);
         prev->sp += total_count;
-        prev->ret_count = total_count;
+        if (this->test_mode || prev->fn.as<LuaFunction *>()->is_lua)
+            prev->ret_count = total_count;
     }
     else if (total_count < exp)
     {
@@ -600,6 +601,15 @@ void LuaRuntime::set_error(LuaValue value)
 LuaValue LuaRuntime::get_error()
 {
     return this->frame->error;
+}
+void LuaRuntime::set_test_mode(bool mode)
+{
+    this->test_mode = mode;
+}
+void LuaRuntime::remove_error()
+{
+    this->frame->has_error = false;
+    this->frame->error = this->create_nil();
 }
 size_t LuaRuntime::stack_size()
 {

@@ -45,6 +45,20 @@ void Lua::push_number(lnumber num)
 {
     this->runtime.stack_push(this->runtime.create_number(num));
 }
+void Lua::push_boolean(bool b)
+{
+    this->runtime.stack_push(this->runtime.create_boolean(b));
+}
+void Lua::insert(size_t index)
+{
+    LuaValue v = this->runtime.stack_pop();
+    this->runtime.stack_push(this->runtime.create_nil());
+    for (size_t i = this->runtime.stack_size() - 1; i > index; i--)
+    {
+        this->runtime.stack_write(i, this->runtime.stack_read(i - 1));
+    }
+    this->runtime.stack_write(index, v);
+}
 void Lua::fetch_local(int idx)
 {
     if (idx >= 0)
@@ -66,7 +80,7 @@ void Lua::push_cppfn(LuaCppFunction cppfn)
 }
 void Lua::call(size_t arg_count, size_t return_count)
 {
-    this->runtime.fncall(arg_count, return_count + 1);
+    this->runtime.fncall(arg_count, return_count);
 }
 int Lua::kind()
 {
@@ -98,6 +112,7 @@ bool Lua::has_error()
 void Lua::push_error()
 {
     LuaValue e = this->runtime.get_error();
+    this->runtime.remove_error();
     this->runtime.stack_push(e);
 }
 void Lua::pop_error()

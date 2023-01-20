@@ -192,6 +192,7 @@ size_t lfcxx5(void *r)
 void test_lua_calls_cxx()
 {
     LuaRuntime rt(nullptr);
+    rt.set_test_mode(true);
     rt.set_lua_interface(&rt);
     rt.stack_push(rt.create_cppfn(lfcxx5));
     rt.fncall(0, 6);

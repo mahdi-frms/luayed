@@ -31,6 +31,8 @@ public:
     void push_string(const char *str);
     void push_nil();
     void push_number(lnumber num);
+    void push_boolean(bool b);
+    void insert(size_t index);
     void call(size_t arg_count, size_t return_count);
     int kind();
 
