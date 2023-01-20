@@ -94,7 +94,8 @@ private:
     Frame *frame;
     void *stack_buffer;
     IInterpreter *interpreter;
-    vector<Lfunction *> functable;
+    Lfunction **functable;
+    size_t func_count;
     void *lua_interface = nullptr;
     LuaValue global;
 

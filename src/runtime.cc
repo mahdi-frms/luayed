@@ -227,8 +227,6 @@ Lfunction *LuaRuntime::create_binary(GenFunction *gfn)
     for (size_t i = 0; i < gfn->upvalues.size(); i++)
         fn->ups()[i] = gfn->upvalues[i];
 
-    while (this->functable.size() <= gfn->fidx)
-        this->functable.push_back(nullptr);
     this->functable[gfn->fidx] = fn;
     return fn;
 }
@@ -266,13 +264,15 @@ LuaRuntime::LuaRuntime(IInterpreter *interpreter) : interpreter(interpreter)
     this->frame = nullptr;
     this->stack_buffer = this->allocate(STACK_BUFFER_SIZE);
     this->lstrset.init(lstr_compare, lstr_hash, this);
-    this->functable.push_back(nullptr);
+    this->functable = (Lfunction **)this->allocate(sizeof(Lfunction *) * 256 * 256);
+    this->func_count = 0;
     this->new_frame();
     this->global = this->create_table();
 }
 LuaRuntime::~LuaRuntime()
 {
     this->deallocate(this->stack_buffer);
+    this->deallocate(this->functable);
 }
 
 void LuaRuntime::copy_values(
@@ -582,8 +582,7 @@ Hook *LuaRuntime::upvalue(size_t idx)
 }
 fidx_t LuaRuntime::gen_fidx()
 {
-    this->functable.push_back(nullptr);
-    return this->functable.size() - 1;
+    return this->func_count++;
 }
 LuaValue LuaRuntime::rodata(size_t idx)
 {
