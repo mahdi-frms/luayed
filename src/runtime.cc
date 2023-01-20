@@ -276,12 +276,13 @@ void LuaRuntime::copy_values(
     size_t count)
 {
     size_t src_idx = fsrc->sp - count;
+    size_t dest_idx = fdest->sp;
     LuaValue *sstack = fsrc->stack();
+    LuaValue *dstack = fdest->stack();
     for (size_t idx = 0; idx < count; idx++)
     {
-        fdest->stack()[fdest->sp + idx] = sstack[src_idx + idx];
+        dstack[dest_idx + idx] = sstack[src_idx + idx];
     }
-    fdest->sp += count;
 }
 
 void LuaRuntime::push_nils(
@@ -386,6 +387,7 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
 
     this->copy_values(prev, frame, total_argc);
     prev->sp -= total_argc;
+    frame->sp += total_argc;
     if (is_lua && bin->parcount > total_argc)
     {
         this->push_nils(frame, bin->parcount - total_argc);
@@ -432,15 +434,20 @@ void LuaRuntime::fnret(size_t count)
     if (exp-- == 0)
     {
         this->copy_values(frame, prev, total_count);
+        prev->sp += total_count;
         prev->ret_count = total_count;
     }
     else if (total_count < exp)
     {
         this->copy_values(frame, prev, total_count);
+        prev->sp += total_count;
         this->push_nils(prev, exp - total_count);
     }
     else
+    {
         this->copy_values(frame, prev, exp);
+        prev->sp += exp;
+    }
     this->frame = prev;
 }
 
