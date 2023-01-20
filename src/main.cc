@@ -33,7 +33,7 @@ bool runfile(const char *path)
         if (lua.has_error())
         {
             lua.push_error();
-            std::cerr << "lua: " << lua.peek_string() << "\n";
+            std::cerr << "lua: " << luastd::luavalue_to_string(&lua) << "\n";
             return false;
         }
         else

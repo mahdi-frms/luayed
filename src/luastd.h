@@ -14,6 +14,7 @@ namespace luastd
     size_t tostring(Lua *lua);
     size_t load(Lua *lua);
     size_t type(Lua *lua);
+    size_t error(Lua *lua);
 
     void libinit(Lua *lua);
     void liblua_init(Lua *lua);

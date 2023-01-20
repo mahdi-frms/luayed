@@ -96,6 +96,16 @@ size_t luastd::type(Lua *lua)
         lua->pop();
     return 1;
 }
+size_t luastd::error(Lua *lua)
+{
+    if (lua->top() == 0)
+        lua->push_nil();
+    lua->fetch_local(0);
+    lua->pop_error();
+    while (lua->top() > 1)
+        lua->pop();
+    return 0;
+}
 size_t luastd::load(Lua *lua)
 {
     const char *arg_error = "bad argument to load function";
@@ -162,6 +172,10 @@ void luastd::libcpp_init(Lua *lua)
 
     lua->push_string("type");
     lua->push_cppfn(luastd::type);
+    lua->set_global();
+
+    lua->push_string("error");
+    lua->push_cppfn(luastd::error);
     lua->set_global();
 }
 void luastd::liblua_init(Lua *lua)
