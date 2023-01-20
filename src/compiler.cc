@@ -840,13 +840,13 @@ void Compiler::compile_decl_func(Noderef node)
     Noderef var = node->child(0)->child(0);
     MetaMemory *mm = (MetaMemory *)var->getannot(MetaKind::MMemory);
     mm->offset = this->stack_offset++;
-    this->compile_exp(node->child(1));
     if (mm->is_upvalue)
     {
         mm->upoffset = this->hooksize;
         this->hookpush();
         this->emit(Instruction::IUPush);
     }
+    this->compile_exp(node->child(1));
 }
 
 void Compiler::compile_decl(Noderef node)

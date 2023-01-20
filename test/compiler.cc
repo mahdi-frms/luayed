@@ -1883,4 +1883,35 @@ void compiler_tests()
             ipop(2),
             iret(0),
         });
+
+    compiler_test_case(
+        "recursive function",
+
+        "local function f() f() end")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(1)
+        .test_ccount(0)
+        .test_upvalues({})
+        .test_opcodes({
+            iupush,
+            ifconst(2),
+            iupop,
+            ipop(1),
+            iret(0),
+        })
+
+        .test_fn(2)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(0)
+        .test_upvalues({
+            Upvalue(1, 0, 0),
+        })
+        .test_opcodes({
+            iupvalue(0),
+            icall(0, 1),
+            iret(0),
+        });
 }
