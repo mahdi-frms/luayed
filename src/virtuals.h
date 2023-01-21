@@ -84,4 +84,10 @@ public:
     virtual void deallocate(void *ptr) = 0;
 };
 
+class IGarbageCollector
+{
+public:
+    virtual void reference(void *ptr) = 0;
+};
+
 #endif
