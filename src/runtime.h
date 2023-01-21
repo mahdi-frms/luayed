@@ -40,6 +40,7 @@ public:
     size_t codelen = 0;
     size_t uplen = 0;
     size_t rolen = 0;
+    size_t inlen = 0;
     size_t hookmax = 0;
     size_t parcount = 0;
     fidx_t fidx = 0;
@@ -47,6 +48,7 @@ public:
     lbyte *text();
     Upvalue *ups();
     LuaValue *rodata();
+    fidx_t *innerfns();
 
     ~Lfunction();
     Lfunction &operator=(const Lfunction &other) = delete;
@@ -90,6 +92,7 @@ struct GenFunction
     vector<lbyte> text;
     vector<LuaValue> rodata;
     vector<Upvalue> upvalues;
+    vector<fidx_t> innerfns;
     fidx_t fidx;
     size_t parcount;
     size_t hookmax;

@@ -25,13 +25,16 @@ lbyte *Lfunction::text()
 }
 Upvalue *Lfunction::ups()
 {
-    return (Upvalue *)(this->rodata() + this->rolen);
+    return (Upvalue *)(this->innerfns() + this->inlen);
 }
 LuaValue *Lfunction::rodata()
 {
     return (LuaValue *)(this->text() + this->codelen);
 }
-
+fidx_t *Lfunction::innerfns()
+{
+    return (fidx_t *)(this->rodata() + this->rolen);
+}
 LuaValue LuaRuntime::create_nil()
 {
     LuaValue val;
@@ -211,7 +214,8 @@ Lfunction *LuaRuntime::create_binary(GenFunction *gfn)
     size_t bin_size = sizeof(Lfunction) +
                       gfn->text.size() * sizeof(lbyte) +
                       gfn->rodata.size() * sizeof(LuaValue) +
-                      gfn->upvalues.size() * sizeof(Upvalue);
+                      gfn->upvalues.size() * sizeof(Upvalue) +
+                      gfn->innerfns.size() * sizeof(fidx_t);
 
     Lfunction *fn = (Lfunction *)this->allocate(bin_size, AllocType::ATBinary);
 
@@ -221,6 +225,7 @@ Lfunction *LuaRuntime::create_binary(GenFunction *gfn)
     fn->codelen = gfn->text.size();
     fn->rolen = gfn->rodata.size();
     fn->uplen = gfn->upvalues.size();
+    fn->inlen = gfn->innerfns.size();
 
     for (size_t i = 0; i < gfn->text.size(); i++)
         fn->text()[i] = gfn->text[i];
@@ -228,6 +233,8 @@ Lfunction *LuaRuntime::create_binary(GenFunction *gfn)
         fn->rodata()[i] = gfn->rodata[i];
     for (size_t i = 0; i < gfn->upvalues.size(); i++)
         fn->ups()[i] = gfn->upvalues[i];
+    for (size_t i = 0; i < gfn->innerfns.size(); i++)
+        fn->innerfns()[i] = gfn->innerfns[i];
 
     this->functable[gfn->fidx] = fn;
     return fn;
