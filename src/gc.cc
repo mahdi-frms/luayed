@@ -1,5 +1,4 @@
 #include "gc.h"
-#include "table.h"
 
 #define gcheadptr(GCH, T) ((T *)(GCH + 1))
 #define gcptrhead(PTR) (((gc_header *)PTR) - 1)
@@ -9,8 +8,19 @@ void GarbageCollector::scan(gc_header *obj)
     obj->marked = true;
     if (obj->alloc_type == AllocType::ATHook)
         this->scan(gcheadptr(obj, Hook));
-    // if (obj->alloc_type == AllocType::ATTable)
-    //     this->scan(gcheadptr(obj, Table));
+    if (obj->alloc_type == AllocType::ATTable)
+        this->scan(gcheadptr(obj, Table));
+}
+void GarbageCollector::scan(Table *table)
+{
+    TableIterator it = table->iter();
+    while (it.next())
+    {
+        LuaValue key = it.key();
+        LuaValue value = it.value();
+        this->scan(&key);
+        this->scan(&value);
+    }
 }
 void GarbageCollector::scan(Hook *hook)
 {

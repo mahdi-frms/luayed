@@ -2,6 +2,7 @@
 #define GC_H
 
 #include "runtime.h"
+#include "table.h"
 
 class GarbageCollector : public IGarbageCollector
 {
@@ -10,7 +11,7 @@ class GarbageCollector : public IGarbageCollector
 
     void scan(gc_header *obj);
     void scan(Hook *hook);
-    // void scan(Table *table);
+    void scan(Table *table);
     void scan(LuaValue *val);
 
 public:
