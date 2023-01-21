@@ -236,7 +236,7 @@ void LuaRuntime::heap_init()
 {
     gc_header *head = (gc_header *)this->allocate_raw(sizeof(gc_header));
     gc_header *tail = (gc_header *)this->allocate_raw(sizeof(gc_header));
-    head->free = tail->free = nullptr;
+    head->marked = tail->marked = true;
     head->scan = tail->scan = nullptr;
     head->next = tail->prev = nullptr;
     head->alloc_type = tail->alloc_type = AllocType::ATDummy;
@@ -259,7 +259,7 @@ void LuaRuntime::heap_insert(gc_header *node, gc_header *prev, gc_header *next)
 void *LuaRuntime::allocate(size_t size, AllocType at)
 {
     gc_header *obj = (gc_header *)this->allocate_raw(size + sizeof(gc_header));
-    obj->free = nullptr;
+    obj->marked = false;
     obj->scan = nullptr;
     obj->alloc_type = at;
     this->heap_insert(obj, this->heap_tail, this->heap_tail->next);
