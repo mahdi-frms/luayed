@@ -22,6 +22,7 @@ add_library(luacomp
     src/lstrep.cc
     src/luadef.cc
     src/runtime.cc
+    src/gc.cc
     src/generator.cc
     src/table.cc
     src/hash.cc
