@@ -232,8 +232,8 @@ Lfunction *LuaRuntime::create_binary(GenFunction *gfn)
 }
 void LuaRuntime::heap_init()
 {
-    heap_header *head = (heap_header *)this->allocate_raw(sizeof(heap_header));
-    heap_header *tail = (heap_header *)this->allocate_raw(sizeof(heap_header));
+    gc_header *head = (gc_header *)this->allocate_raw(sizeof(gc_header));
+    gc_header *tail = (gc_header *)this->allocate_raw(sizeof(gc_header));
     head->free = tail->free = nullptr;
     head->scan = tail->scan = nullptr;
     head->next = tail->prev = nullptr;
@@ -247,7 +247,7 @@ void *LuaRuntime::allocate_raw(size_t size)
 {
     return malloc(size);
 }
-void LuaRuntime::heap_insert(heap_header *node, heap_header *prev, heap_header *next)
+void LuaRuntime::heap_insert(gc_header *node, gc_header *prev, gc_header *next)
 {
     prev->next = node;
     next->prev = node;
@@ -256,7 +256,7 @@ void LuaRuntime::heap_insert(heap_header *node, heap_header *prev, heap_header *
 }
 void *LuaRuntime::allocate(size_t size, AllocType at)
 {
-    heap_header *obj = (heap_header *)this->allocate_raw(size + sizeof(heap_header));
+    gc_header *obj = (gc_header *)this->allocate_raw(size + sizeof(gc_header));
     obj->free = nullptr;
     obj->scan = nullptr;
     this->heap_insert(obj, this->heap_tail, this->heap_tail->next);
