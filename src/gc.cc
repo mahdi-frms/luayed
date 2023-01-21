@@ -1,22 +1,17 @@
 #include "gc.h"
 
 #define gcheadptr(GCH, T) ((T *)(GCH + 1))
-#define gcptrhead(PTR) (((gc_header *)PTR) - 1)
 
 void GarbageCollector::scan(gc_header *obj)
 {
-    if (!obj->marked)
-    {
-        obj->marked = true;
-        if (obj->alloc_type == AllocType::ATHook)
-            this->scan(gcheadptr(obj, Hook));
-        if (obj->alloc_type == AllocType::ATTable)
-            this->scan(gcheadptr(obj, Table));
-        if (obj->alloc_type == AllocType::ATFunction)
-            this->scan(gcheadptr(obj, LuaFunction));
-        if (obj->alloc_type == AllocType::ATBinary)
-            this->scan(gcheadptr(obj, Lfunction));
-    }
+    if (obj->alloc_type == AllocType::ATHook)
+        this->scan(gcheadptr(obj, Hook));
+    else if (obj->alloc_type == AllocType::ATTable)
+        this->scan(gcheadptr(obj, Table));
+    else if (obj->alloc_type == AllocType::ATFunction)
+        this->scan(gcheadptr(obj, LuaFunction));
+    else if (obj->alloc_type == AllocType::ATBinary)
+        this->scan(gcheadptr(obj, Lfunction));
 }
 void GarbageCollector::scan(Lfunction *bin)
 {
@@ -54,13 +49,12 @@ void GarbageCollector::scan(Table *table)
 void GarbageCollector::scan(Hook *hook)
 {
     if (hook->is_detached)
-        this->value(*hook->original);
-    else
         this->value(hook->val);
+    else
+        this->value(*hook->original);
 }
-void GarbageCollector::scan(LuaRuntime *rt)
+void GarbageCollector::scan()
 {
-    this->rt = rt;
     Frame *frame = rt->topframe();
     while (frame)
     {
@@ -74,11 +68,24 @@ void GarbageCollector::scan(LuaRuntime *rt)
         frame = frame->prev;
     }
     this->value(rt->table_global());
+}
+void GarbageCollector::mark(LuaRuntime *rt)
+{
+    this->rt = rt;
+    this->scan();
+    while (this->scanlifo->alloc_type != AllocType::ATDummy)
+    {
+        gc_header *obj = this->scanlifo;
+        this->scanlifo = obj->scan;
+        this->scan(obj);
+    }
     this->rt = nullptr;
 }
 void GarbageCollector::value(LuaValue val)
 {
-    if (val.kind >= 3)
+    if (val.kind == LuaType::LVString)
+        this->reference(((lstr_p)val.data.ptr) - 1);
+    else if (is_obj(val))
     {
         this->reference(val.data.ptr);
     }
@@ -86,6 +93,9 @@ void GarbageCollector::value(LuaValue val)
 void GarbageCollector::reference(void *ptr)
 {
     gc_header *header = ((gc_header *)ptr) - 1;
+    if (header->marked)
+        return;
+    header->marked = true;
     header->scan = this->scanlifo;
     this->scanlifo = header;
 }
@@ -97,6 +107,10 @@ GarbageCollector::GarbageCollector()
             this->dummy.prev = nullptr;
 
     this->dummy.marked = true;
-    this->dummy.scan = nullptr;
     this->dummy.alloc_type = AllocType::ATDummy;
+    this->scanlifo = &this->dummy;
+}
+void GarbageCollector::sweep(LuaRuntime *rt)
+{
+    this->rt = rt;
 }

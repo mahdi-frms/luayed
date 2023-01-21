@@ -176,7 +176,7 @@ public:
         do
         {
             idx++;
-            if (idx == (int)this->cap)
+            if (idx >= (int)this->cap)
                 return nullptr;
         } while (this->buffer[idx].flag != SET_FLAG_FULL);
         return &this->buffer[idx].val;

@@ -17,10 +17,12 @@ class GarbageCollector : public IGarbageCollector
     void scan(LuaFunction *fn);
     void scan(Lfunction *fn);
     void reference(void *ptr);
+    void scan();
 
 public:
     GarbageCollector();
-    void scan(LuaRuntime *rt);
+    void mark(LuaRuntime *rt);
+    void sweep(LuaRuntime *rt);
 };
 
 #endif

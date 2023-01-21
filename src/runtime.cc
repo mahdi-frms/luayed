@@ -2,6 +2,7 @@
 #include "table.h"
 #include <cstdlib>
 #include <cstring>
+#include "gc.h"
 
 #define LV_AS_FUNC(V) ((LuaFunction *)((V)->data.ptr))
 
@@ -309,6 +310,8 @@ LuaRuntime::LuaRuntime(IInterpreter *interpreter) : interpreter(interpreter)
 }
 LuaRuntime::~LuaRuntime()
 {
+    GarbageCollector gc;
+    gc.mark(this);
     this->deallocate(this->stack_buffer);
     this->deallocate(this->functable);
 }
