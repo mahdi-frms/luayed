@@ -188,6 +188,8 @@ public:
     size_t argcount();
     size_t extras();
     void extras(size_t count);
+
+    Frame *topframe();
 };
 
 struct LuaFunction

@@ -451,6 +451,10 @@ bool LuaRuntime::error_raised()
 {
     return this->frame->has_error;
 }
+Frame *LuaRuntime::topframe()
+{
+    return this->frame;
+}
 
 void LuaRuntime::fnret(size_t count)
 {

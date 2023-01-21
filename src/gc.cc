@@ -59,6 +59,18 @@ void GarbageCollector::scan(Hook *hook)
 }
 void GarbageCollector::scan(LuaRuntime *rt)
 {
+    Frame *frame = rt->topframe();
+    while (frame)
+    {
+        if (frame->has_error)
+            this->scan(&frame->error);
+        this->scan(&frame->fn);
+        for (size_t i = 0; i < frame->hookptr; i++)
+            this->scan(frame->hooktable()[i]);
+        for (size_t i = 0; i < frame->sp; i++)
+            this->scan(frame->stack() + i);
+        frame = frame->prev;
+    }
 }
 void GarbageCollector::scan(LuaValue *val)
 {
