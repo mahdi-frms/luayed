@@ -15,11 +15,11 @@ class GarbageCollector : public IGarbageCollector
     void scan(LuaValue *val);
     void scan(LuaFunction *fn);
     void scan(Lfunction *fn);
+    void reference(void *ptr);
 
 public:
     GarbageCollector();
     void scan(LuaRuntime *rt);
-    void reference(void *ptr);
 };
 
 #endif
