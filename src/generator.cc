@@ -8,6 +8,8 @@ fidx_t LuaGenerator::pushf()
 {
     fidx_t fidx = this->rt->gen_fidx();
     GenFunction *gfn = new GenFunction();
+    if (this->gfn)
+        this->gfn->innerfns.push_back(fidx);
     gfn->fidx = fidx;
     gfn->prev = this->gfn;
     this->gfn = gfn;
