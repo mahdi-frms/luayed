@@ -1,7 +1,33 @@
 #include "gc.h"
+#include "table.h"
 
-void GarbageCollector::collect(LuaRuntime *rt)
+#define gcheadptr(GCH, T) ((T *)(GCH + 1))
+#define gcptrhead(PTR) (((gc_header *)PTR) - 1)
+
+void GarbageCollector::scan(gc_header *obj)
 {
+    obj->marked = true;
+    if (obj->alloc_type == AllocType::ATHook)
+        this->scan(gcheadptr(obj, Hook));
+    // if (obj->alloc_type == AllocType::ATTable)
+    //     this->scan(gcheadptr(obj, Table));
+}
+void GarbageCollector::scan(Hook *hook)
+{
+    if (hook->is_detached)
+        this->scan(hook->original);
+    else
+        this->scan(&hook->val);
+}
+void GarbageCollector::scan(LuaRuntime *rt)
+{
+}
+void GarbageCollector::scan(LuaValue *val)
+{
+    if (val->kind >= 3)
+    {
+        this->reference(gcptrhead(val->data.ptr));
+    }
 }
 void GarbageCollector::reference(void *ptr)
 {

@@ -441,7 +441,7 @@ void lua_tests()
         "    end\n"
         "end\n"
         "\n"
-        "function collect(iter)\n"
+        "function scan(iter)\n"
         "    local list = {}\n"
         "    local idx = 0\n"
         "    for i in iter do\n"
@@ -463,7 +463,7 @@ void lua_tests()
         "    return false\n"
         "end\n"
         "\n"
-        "return compare(collect(range(0, 50, 10)), { 0, 10, 20, 30, 40, 50 })\n"
+        "return compare(scan(range(0, 50, 10)), { 0, 10, 20, 30, 40, 50 })\n"
         "\n",
         {
             lvbool(true),

@@ -8,9 +8,14 @@ class GarbageCollector : public IGarbageCollector
     gc_header *scanlifo;
     gc_header dummy;
 
+    void scan(gc_header *obj);
+    void scan(Hook *hook);
+    // void scan(Table *table);
+    void scan(LuaValue *val);
+
 public:
     GarbageCollector();
-    void collect(LuaRuntime *rt);
+    void scan(LuaRuntime *rt);
     void reference(void *ptr);
 };
 
