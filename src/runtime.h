@@ -113,7 +113,7 @@ private:
     Lfunction *bin();
     LuaValue error_to_string(Lerror error);
 
-    void *allocate(size_t size);
+    void *allocate_raw(size_t size);
     void deallocate(void *ptr);
 
 public:

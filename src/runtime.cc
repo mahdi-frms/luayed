@@ -68,7 +68,7 @@ LuaValue LuaRuntime::create_string(const char *s1, const char *s2)
     size_t slen1 = strlen(s1);
     size_t slen2 = strlen(s2);
     size_t strsize = sizeof(lstr_t) + slen1 + slen2 + 1;
-    lstr_p str = (lstr_p)this->allocate(strsize);
+    lstr_p str = (lstr_p)this->allocate_raw(strsize);
     strcpy((char *)str->cstr(), s1);
     strcpy((char *)(str->cstr() + slen1), s2);
     *(char *)(str->cstr() + slen1 + slen2) = '\0';
@@ -91,7 +91,7 @@ LuaValue LuaRuntime::create_table()
 {
     LuaValue val;
     val.kind = LuaType::LVTable;
-    Table *tp = (Table *)this->allocate(sizeof(Table));
+    Table *tp = (Table *)this->allocate_raw(sizeof(Table));
     tp->init(this);
     val.data.ptr = tp;
     return val;
@@ -148,7 +148,7 @@ LuaValue LuaRuntime::create_number(lnumber n)
 LuaValue LuaRuntime::create_luafn(fidx_t fidx)
 {
     Lfunction *lbin = this->bin(fidx);
-    LuaFunction *fobj = (LuaFunction *)this->allocate(sizeof(LuaFunction) + sizeof(Hook *) * lbin->uplen);
+    LuaFunction *fobj = (LuaFunction *)this->allocate_raw(sizeof(LuaFunction) + sizeof(Hook *) * lbin->uplen);
     fobj->is_lua = true;
     fobj->fn = (void *)lbin;
 
@@ -167,7 +167,7 @@ LuaValue LuaRuntime::create_luafn(fidx_t fidx)
                     Hook **hook = this->frame->hooktable() + child_upvalue.hidx;
                     if (*hook == nullptr)
                     {
-                        *hook = (Hook *)this->allocate(sizeof(Hook));
+                        *hook = (Hook *)this->allocate_raw(sizeof(Hook));
                         (*hook)->is_detached = false;
                         (*hook)->original = &this->frame->stack()[this->frame->stack_address(child_upvalue.offset)];
                     }
@@ -198,7 +198,7 @@ LuaValue LuaRuntime::create_cppfn(LuaRTCppFunction fn)
 {
     LuaValue val;
     val.kind = LuaType::LVFunction;
-    LuaFunction *fobj = (LuaFunction *)this->allocate(sizeof(LuaFunction));
+    LuaFunction *fobj = (LuaFunction *)this->allocate_raw(sizeof(LuaFunction));
     fobj->is_lua = false;
     fobj->fn = (void *)fn;
     val.data.ptr = (void *)fobj;
@@ -207,7 +207,7 @@ LuaValue LuaRuntime::create_cppfn(LuaRTCppFunction fn)
 
 Lfunction *LuaRuntime::create_binary(GenFunction *gfn)
 {
-    Lfunction *fn = (Lfunction *)this->allocate(
+    Lfunction *fn = (Lfunction *)this->allocate_raw(
         sizeof(Lfunction) +
         gfn->text.size() * sizeof(lbyte) +
         gfn->rodata.size() * sizeof(LuaValue) +
@@ -231,7 +231,7 @@ Lfunction *LuaRuntime::create_binary(GenFunction *gfn)
     return fn;
 }
 
-void *LuaRuntime::allocate(size_t size)
+void *LuaRuntime::allocate_raw(size_t size)
 {
     return malloc(size);
 }
@@ -262,9 +262,9 @@ void LuaRuntime::new_frame()
 LuaRuntime::LuaRuntime(IInterpreter *interpreter) : interpreter(interpreter)
 {
     this->frame = nullptr;
-    this->stack_buffer = this->allocate(STACK_BUFFER_SIZE);
+    this->stack_buffer = this->allocate_raw(STACK_BUFFER_SIZE);
     this->lstrset.init(lstr_compare, lstr_hash, this);
-    this->functable = (Lfunction **)this->allocate(sizeof(Lfunction *) * 256 * 256);
+    this->functable = (Lfunction **)this->allocate_raw(sizeof(Lfunction *) * 256 * 256);
     this->func_count = 0;
     this->new_frame();
     this->global = this->create_table();

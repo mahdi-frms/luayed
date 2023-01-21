@@ -87,7 +87,7 @@ private:
     }
     Bucket<T> *allocate(size_t size)
     {
-        Bucket<T> *buf = (Bucket<T> *)this->allocator->allocate(sizeof(Bucket<T>) * size);
+        Bucket<T> *buf = (Bucket<T> *)this->allocator->allocate_raw(sizeof(Bucket<T>) * size);
         for (size_t i = 0; i < size; i++)
             buf[i].flag = SET_FLAG_EMPTY;
         return buf;
