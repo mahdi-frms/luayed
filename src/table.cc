@@ -72,9 +72,10 @@ TableElement *Table::next(int &idx) const
 TableIterator::TableIterator(const Table *table) : table(table)
 {
 }
-void TableIterator::next()
+bool TableIterator::next()
 {
     this->el = this->table->next(this->idx);
+    return this->el != nullptr;
 }
 LuaValue TableIterator::key() const
 {

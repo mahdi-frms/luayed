@@ -42,7 +42,7 @@ private:
 
 public:
     TableIterator(const Table *table);
-    void next();
+    bool next();
     LuaValue key() const;
     LuaValue value() const;
 };
