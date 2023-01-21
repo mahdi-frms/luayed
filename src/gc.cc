@@ -20,12 +20,13 @@ void GarbageCollector::scan(gc_header *obj)
 }
 void GarbageCollector::scan(Lfunction *bin)
 {
-    // todo : reference binaries
-    for (size_t i = 0; i < bin->rolen; i++)
+    for (size_t i = 0; i < bin->inlen; i++)
     {
-        LuaValue val = bin->rodata()[i];
-        this->reference(&val);
+        size_t fidx = bin->innerfns()[i];
+        this->reference(this->rt->bin(fidx));
     }
+    for (size_t i = 0; i < bin->rolen; i++)
+        this->value(bin->rodata()[i]);
 }
 void GarbageCollector::scan(LuaFunction *fn)
 {
@@ -46,37 +47,39 @@ void GarbageCollector::scan(Table *table)
     {
         LuaValue key = it.key();
         LuaValue value = it.value();
-        this->scan(&key);
-        this->scan(&value);
+        this->value(key);
+        this->value(value);
     }
 }
 void GarbageCollector::scan(Hook *hook)
 {
     if (hook->is_detached)
-        this->scan(hook->original);
+        this->value(*hook->original);
     else
-        this->scan(&hook->val);
+        this->value(hook->val);
 }
 void GarbageCollector::scan(LuaRuntime *rt)
 {
+    this->rt = rt;
     Frame *frame = rt->topframe();
     while (frame)
     {
         if (frame->has_error)
-            this->scan(&frame->error);
-        this->scan(&frame->fn);
+            this->value(frame->error);
+        this->value(frame->fn);
         for (size_t i = 0; i < frame->hookptr; i++)
-            this->scan(frame->hooktable()[i]);
+            this->reference(frame->hooktable()[i]);
         for (size_t i = 0; i < frame->sp; i++)
-            this->scan(frame->stack() + i);
+            this->value(frame->stack()[i]);
         frame = frame->prev;
     }
+    this->rt = nullptr;
 }
-void GarbageCollector::scan(LuaValue *val)
+void GarbageCollector::value(LuaValue val)
 {
-    if (val->kind >= 3)
+    if (val.kind >= 3)
     {
-        this->reference(val->data.ptr);
+        this->reference(val.data.ptr);
     }
 }
 void GarbageCollector::reference(void *ptr)
@@ -87,6 +90,7 @@ void GarbageCollector::reference(void *ptr)
 }
 GarbageCollector::GarbageCollector()
 {
+    this->rt = nullptr;
     this->dummy.scan =
         this->dummy.next =
             this->dummy.prev = nullptr;
