@@ -73,6 +73,7 @@ void GarbageCollector::scan(LuaRuntime *rt)
             this->value(frame->stack()[i]);
         frame = frame->prev;
     }
+    this->value(rt->table_global());
     this->rt = nullptr;
 }
 void GarbageCollector::value(LuaValue val)
