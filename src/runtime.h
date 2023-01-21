@@ -30,7 +30,7 @@ struct gc_header
     gc_header *next;
     gc_header *prev;
     gc_header *scan;
-    gc_header *free;
+    bool marked;
     AllocType alloc_type;
 };
 
