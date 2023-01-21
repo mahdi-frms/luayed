@@ -230,21 +230,30 @@ Lfunction *LuaRuntime::create_binary(GenFunction *gfn)
     this->functable[gfn->fidx] = fn;
     return fn;
 }
-
+void LuaRuntime::heap_init()
+{
+    heap_header *head = (heap_header *)this->allocate_raw(sizeof(heap_header));
+    heap_header *tail = (heap_header *)this->allocate_raw(sizeof(heap_header));
+    head->free = tail->free = nullptr;
+    head->scan = tail->scan = nullptr;
+    head->next = tail->prev = nullptr;
+    head->alloc_type = tail->alloc_type = AllocType::ATDummy;
+    head->prev = tail;
+    tail->next = head;
+    this->heap_head = head;
+    this->heap_tail = tail;
+}
 void *LuaRuntime::allocate_raw(size_t size)
 {
     return malloc(size);
 }
-void *LuaRuntime::allocate(size_t size)
+void *LuaRuntime::allocate(size_t size, AllocType at)
 {
-    // heap_header *obj = (heap_header *)this->allocate_raw(size + sizeof(heap_header));
-    // obj->free = nullptr;
-    // obj->scan = nullptr;
-    // obj->prev = nullptr;
-    // obj->next = ;
-    //
-    //
-    // obj->scan = nullptr;
+    heap_header *obj = (heap_header *)this->allocate_raw(size + sizeof(heap_header));
+    obj->free = nullptr;
+    obj->scan = nullptr;
+    // todo : insert node
+    obj->scan = nullptr;
     return nullptr;
 }
 void LuaRuntime::deallocate(void *ptr)
@@ -275,6 +284,7 @@ LuaRuntime::LuaRuntime(IInterpreter *interpreter) : interpreter(interpreter)
 {
     this->frame = nullptr;
     this->stack_buffer = this->allocate_raw(STACK_BUFFER_SIZE);
+    this->heap_init();
     this->lstrset.init(lstr_compare, lstr_hash, this);
     this->functable = (Lfunction **)this->allocate_raw(sizeof(Lfunction *) * 256 * 256);
     this->func_count = 0;

@@ -22,6 +22,7 @@ enum AllocType
     ATTable,
     ATFunction,
     ATBinary,
+    ATDummy,
 };
 
 struct heap_header
@@ -118,6 +119,8 @@ private:
     void *lua_interface = nullptr;
     LuaValue global;
     bool test_mode = false;
+    heap_header *heap_head;
+    heap_header *heap_tail;
 
     void new_frame();
     void copy_values(Frame *fsrc, Frame *fdest, size_t count);
@@ -133,8 +136,9 @@ private:
     LuaValue error_to_string(Lerror error);
 
     void *allocate_raw(size_t size);
-    void *allocate(size_t size);
+    void *allocate(size_t size, AllocType at);
     void deallocate(void *ptr);
+    void heap_init();
 
 public:
     LuaRuntime(IInterpreter *interpreter);
