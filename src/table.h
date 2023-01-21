@@ -6,6 +6,7 @@
 #include "hash.h"
 
 class Table;
+class TableIterator;
 
 struct TableElement
 {
@@ -28,6 +29,22 @@ public:
 
     void set(LuaValue key, LuaValue value);
     LuaValue get(LuaValue key) const;
+    TableElement *next(int &idx) const;
+    TableIterator iter() const;
+};
+
+class TableIterator
+{
+private:
+    const Table *table = nullptr;
+    int idx = -1;
+    TableElement *el = nullptr;
+
+public:
+    TableIterator(const Table *table);
+    void next();
+    LuaValue key() const;
+    LuaValue value() const;
 };
 
 #endif

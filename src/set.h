@@ -171,6 +171,16 @@ public:
     {
         return this->search(ele)->val;
     }
+    T *iter(int &idx) const
+    {
+        do
+        {
+            idx++;
+            if (idx == (int)this->cap)
+                return nullptr;
+        } while (this->buffer[idx].flag != SET_FLAG_FULL);
+        return &this->buffer[idx].val;
+    }
 };
 
 #endif

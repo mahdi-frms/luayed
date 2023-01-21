@@ -41,6 +41,10 @@ void Table::destroy()
 {
     this->vset.destroy();
 }
+TableIterator Table::iter() const
+{
+    return TableIterator(this);
+}
 
 void Table::set(LuaValue key, LuaValue value)
 {
@@ -60,4 +64,23 @@ LuaValue Table::get(LuaValue key) const
         return ep->value;
     else
         return nil;
+}
+TableElement *Table::next(int &idx) const
+{
+    return this->vset.iter(idx);
+}
+TableIterator::TableIterator(const Table *table) : table(table)
+{
+}
+void TableIterator::next()
+{
+    this->el = this->table->next(this->idx);
+}
+LuaValue TableIterator::key() const
+{
+    return this->el->key;
+}
+LuaValue TableIterator::value() const
+{
+    return this->el->value;
 }
