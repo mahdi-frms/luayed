@@ -414,8 +414,7 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
         LuaRTCppFunction cppfn = fn->as<LuaFunction *>()->native();
         return_count = cppfn(this->lua_interface);
     }
-    if (!this->frame->has_error)
-        this->fnret(return_count);
+    this->fnret(this->frame->has_error ? 0 : return_count);
 }
 bool LuaRuntime::error_raised()
 {

@@ -11,7 +11,7 @@ string luastd::luavalue_to_string(Lua *lua)
     else if (k == LUA_TYPE_BOOLEAN)
     {
         poped = true;
-        str = std::to_string(lua->pop_boolean());
+        str = lua->pop_boolean() ? "true" : "false";
     }
     else if (k == LUA_TYPE_NUMBER)
     {
