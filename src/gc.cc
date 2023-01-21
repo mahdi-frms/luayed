@@ -5,13 +5,27 @@
 
 void GarbageCollector::scan(gc_header *obj)
 {
-    obj->marked = true;
-    if (obj->alloc_type == AllocType::ATHook)
-        this->scan(gcheadptr(obj, Hook));
-    if (obj->alloc_type == AllocType::ATTable)
-        this->scan(gcheadptr(obj, Table));
-    if (obj->alloc_type == AllocType::ATFunction)
-        this->scan(gcheadptr(obj, LuaFunction));
+    if (!obj->marked)
+    {
+        obj->marked = true;
+        if (obj->alloc_type == AllocType::ATHook)
+            this->scan(gcheadptr(obj, Hook));
+        if (obj->alloc_type == AllocType::ATTable)
+            this->scan(gcheadptr(obj, Table));
+        if (obj->alloc_type == AllocType::ATFunction)
+            this->scan(gcheadptr(obj, LuaFunction));
+        if (obj->alloc_type == AllocType::ATBinary)
+            this->scan(gcheadptr(obj, Lfunction));
+    }
+}
+void GarbageCollector::scan(Lfunction *bin)
+{
+    // todo : reference binaries
+    for (size_t i = 0; i < bin->rolen; i++)
+    {
+        LuaValue val = bin->rodata()[i];
+        this->reference(&val);
+    }
 }
 void GarbageCollector::scan(LuaFunction *fn)
 {

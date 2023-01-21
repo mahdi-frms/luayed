@@ -14,6 +14,7 @@ class GarbageCollector : public IGarbageCollector
     void scan(Table *table);
     void scan(LuaValue *val);
     void scan(LuaFunction *fn);
+    void scan(Lfunction *fn);
 
 public:
     GarbageCollector();
