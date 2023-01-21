@@ -139,6 +139,7 @@ private:
     void *allocate(size_t size, AllocType at);
     void deallocate(void *ptr);
     void heap_init();
+    void heap_insert(heap_header *node, heap_header *prev, heap_header *next);
 
 public:
     LuaRuntime(IInterpreter *interpreter);

@@ -247,13 +247,19 @@ void *LuaRuntime::allocate_raw(size_t size)
 {
     return malloc(size);
 }
+void LuaRuntime::heap_insert(heap_header *node, heap_header *prev, heap_header *next)
+{
+    prev->next = node;
+    next->prev = node;
+    node->prev = prev;
+    node->next = next;
+}
 void *LuaRuntime::allocate(size_t size, AllocType at)
 {
     heap_header *obj = (heap_header *)this->allocate_raw(size + sizeof(heap_header));
     obj->free = nullptr;
     obj->scan = nullptr;
-    // todo : insert node
-    obj->scan = nullptr;
+    this->heap_insert(obj, this->heap_tail, this->heap_tail->next);
     return nullptr;
 }
 void LuaRuntime::deallocate(void *ptr)
