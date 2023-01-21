@@ -235,6 +235,18 @@ void *LuaRuntime::allocate_raw(size_t size)
 {
     return malloc(size);
 }
+void *LuaRuntime::allocate(size_t size)
+{
+    // heap_header *obj = (heap_header *)this->allocate_raw(size + sizeof(heap_header));
+    // obj->free = nullptr;
+    // obj->scan = nullptr;
+    // obj->prev = nullptr;
+    // obj->next = ;
+    //
+    //
+    // obj->scan = nullptr;
+    return nullptr;
+}
 void LuaRuntime::deallocate(void *ptr)
 {
     free(ptr);

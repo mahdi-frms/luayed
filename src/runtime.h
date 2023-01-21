@@ -13,6 +13,25 @@ class Frame;
 class GenFunction;
 typedef size_t (*LuaRTCppFunction)(void *);
 struct LuaFunction;
+struct heap_header;
+
+enum AllocType
+{
+    ATHook,
+    ATString,
+    ATTable,
+    ATFunction,
+    ATBinary,
+};
+
+struct heap_header
+{
+    heap_header *next;
+    heap_header *prev;
+    heap_header *scan;
+    heap_header *free;
+    AllocType alloc_type;
+};
 
 class Lfunction
 {
@@ -114,6 +133,7 @@ private:
     LuaValue error_to_string(Lerror error);
 
     void *allocate_raw(size_t size);
+    void *allocate(size_t size);
     void deallocate(void *ptr);
 
 public:
