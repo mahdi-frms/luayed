@@ -13,6 +13,7 @@ class GarbageCollector : public IGarbageCollector
     void scan(Hook *hook);
     void scan(Table *table);
     void scan(LuaValue *val);
+    void scan(LuaFunction *fn);
 
 public:
     GarbageCollector();

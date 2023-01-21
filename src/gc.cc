@@ -10,6 +10,20 @@ void GarbageCollector::scan(gc_header *obj)
         this->scan(gcheadptr(obj, Hook));
     if (obj->alloc_type == AllocType::ATTable)
         this->scan(gcheadptr(obj, Table));
+    if (obj->alloc_type == AllocType::ATFunction)
+        this->scan(gcheadptr(obj, LuaFunction));
+}
+void GarbageCollector::scan(LuaFunction *fn)
+{
+    if (fn->is_lua)
+    {
+        this->reference(fn->fn);
+        Lfunction *bin = fn->binary();
+        Hook **hooks = (Hook **)(fn + 1);
+        size_t uplen = bin->uplen;
+        for (size_t i = 0; i < uplen; i++)
+            this->reference(hooks[i]);
+    }
 }
 void GarbageCollector::scan(Table *table)
 {
@@ -36,7 +50,7 @@ void GarbageCollector::scan(LuaValue *val)
 {
     if (val->kind >= 3)
     {
-        this->reference(gcptrhead(val->data.ptr));
+        this->reference(val->data.ptr);
     }
 }
 void GarbageCollector::reference(void *ptr)
