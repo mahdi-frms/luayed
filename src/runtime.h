@@ -143,11 +143,13 @@ private:
     void deallocate(void *ptr);
     void heap_init();
     void heap_insert(gc_header *node, gc_header *prev, gc_header *next);
+    void heap_remove(gc_header *node);
 
 public:
     LuaRuntime(IInterpreter *interpreter);
     ~LuaRuntime();
     void set_lua_interface(void *lua_interface);
+    void deallocate_obj(gc_header *hdr);
 
     LuaValue create_nil();
     LuaValue create_boolean(bool b);
@@ -193,6 +195,7 @@ public:
     void extras(size_t count);
 
     Frame *topframe();
+    gc_header *headers();
 };
 
 struct LuaFunction
