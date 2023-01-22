@@ -60,7 +60,9 @@ LuaValue lvtable()
 {
     LuaValue v;
     v.kind = LuaType::LVTable;
-    v.data.ptr = new vector<LuaValue>;
+    vector<LuaValue> *obj = new vector<LuaValue>;
+    v.data.ptr = obj;
+    tabset.push_back(obj);
     return v;
 }
 
