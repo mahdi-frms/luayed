@@ -7,10 +7,10 @@
 class GarbageCollector : public IGarbageCollector
 {
     LuaRuntime *rt;
-    gc_header *scanlifo;
-    gc_header dummy;
+    gc_header_t *scanlifo;
+    gc_header_t dummy;
 
-    void scan(gc_header *obj);
+    void scan(gc_header_t *obj);
     void scan(Hook *hook);
     void scan(Table *table);
     void value(LuaValue val);

@@ -242,8 +242,8 @@ Lfunction *LuaRuntime::create_binary(GenFunction *gfn)
 }
 void LuaRuntime::heap_init()
 {
-    gc_header *head = (gc_header *)this->allocate_raw(sizeof(gc_header));
-    gc_header *tail = (gc_header *)this->allocate_raw(sizeof(gc_header));
+    gc_header_t *head = (gc_header_t *)this->allocate_raw(sizeof(gc_header_t));
+    gc_header_t *tail = (gc_header_t *)this->allocate_raw(sizeof(gc_header_t));
     head->marked = tail->marked = true;
     head->scan = tail->scan = nullptr;
     head->next = tail->prev = nullptr;
@@ -257,30 +257,30 @@ void *LuaRuntime::allocate_raw(size_t size)
 {
     return malloc(size);
 }
-void LuaRuntime::heap_insert(gc_header *node, gc_header *prev, gc_header *next)
+void LuaRuntime::heap_insert(gc_header_t *node, gc_header_t *prev, gc_header_t *next)
 {
     prev->next = node;
     next->prev = node;
     node->prev = prev;
     node->next = next;
 }
-void LuaRuntime::heap_remove(gc_header *node)
+void LuaRuntime::heap_remove(gc_header_t *node)
 {
-    gc_header *prev = node->prev;
-    gc_header *next = node->next;
+    gc_header_t *prev = node->prev;
+    gc_header_t *next = node->next;
     next->prev = prev;
     prev->next = next;
 }
 void *LuaRuntime::allocate(size_t size, AllocType at)
 {
-    gc_header *obj = (gc_header *)this->allocate_raw(size + sizeof(gc_header));
+    gc_header_t *obj = (gc_header_t *)this->allocate_raw(size + sizeof(gc_header_t));
     obj->marked = false;
     obj->scan = nullptr;
     obj->alloc_type = at;
     this->heap_insert(obj, this->heap_tail, this->heap_tail->next);
     return obj + 1;
 }
-void LuaRuntime::deallocate(void *ptr)
+void LuaRuntime::deallocate_raw(void *ptr)
 {
     free(ptr);
 }
@@ -320,21 +320,21 @@ LuaRuntime::~LuaRuntime()
     GarbageCollector gc;
     gc.mark(this);
     gc.sweep(this);
-    this->deallocate(this->stack_buffer);
-    this->deallocate(this->functable);
+    this->deallocate_raw(this->stack_buffer);
+    this->deallocate_raw(this->functable);
 }
-gc_header *LuaRuntime::headers()
+gc_header_t *LuaRuntime::gc_headers()
 {
     return this->heap_tail;
 }
-void LuaRuntime::deallocate_obj(gc_header *hdr)
+void LuaRuntime::deallocate(gc_header_t *hdr)
 {
     this->heap_remove(hdr);
     if (hdr->alloc_type == AllocType::ATTable)
     {
         ((Table *)(hdr + 1))->destroy();
     }
-    this->deallocate(hdr);
+    this->deallocate_raw(hdr);
 }
 
 void LuaRuntime::copy_values(

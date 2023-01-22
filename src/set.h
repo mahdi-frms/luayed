@@ -94,7 +94,7 @@ private:
     }
     void free(Bucket<T> *buffer)
     {
-        this->allocator->deallocate(buffer);
+        this->allocator->deallocate_raw(buffer);
     }
     void grow()
     {

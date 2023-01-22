@@ -13,7 +13,7 @@ class Frame;
 class GenFunction;
 typedef size_t (*LuaRTCppFunction)(void *);
 struct LuaFunction;
-struct gc_header;
+struct gc_header_t;
 
 enum AllocType
 {
@@ -25,11 +25,11 @@ enum AllocType
     ATDummy,
 };
 
-struct gc_header
+struct gc_header_t
 {
-    gc_header *next;
-    gc_header *prev;
-    gc_header *scan;
+    gc_header_t *next;
+    gc_header_t *prev;
+    gc_header_t *scan;
     bool marked;
     AllocType alloc_type;
 };
@@ -122,8 +122,8 @@ private:
     void *lua_interface = nullptr;
     LuaValue global;
     bool test_mode = false;
-    gc_header *heap_head;
-    gc_header *heap_tail;
+    gc_header_t *heap_head;
+    gc_header_t *heap_tail;
 
     void new_frame();
     void copy_values(Frame *fsrc, Frame *fdest, size_t count);
@@ -140,16 +140,16 @@ private:
 
     void *allocate_raw(size_t size);
     void *allocate(size_t size, AllocType at);
-    void deallocate(void *ptr);
+    void deallocate_raw(void *ptr);
     void heap_init();
-    void heap_insert(gc_header *node, gc_header *prev, gc_header *next);
-    void heap_remove(gc_header *node);
+    void heap_insert(gc_header_t *node, gc_header_t *prev, gc_header_t *next);
+    void heap_remove(gc_header_t *node);
 
 public:
     LuaRuntime(IInterpreter *interpreter);
     ~LuaRuntime();
     void set_lua_interface(void *lua_interface);
-    void deallocate_obj(gc_header *hdr);
+    void deallocate(gc_header_t *hdr);
 
     LuaValue create_nil();
     LuaValue create_boolean(bool b);
@@ -195,7 +195,7 @@ public:
     void extras(size_t count);
 
     Frame *topframe();
-    gc_header *headers();
+    gc_header_t *gc_headers();
 };
 
 struct LuaFunction

@@ -81,7 +81,7 @@ class IAllocator
 {
 public:
     virtual void *allocate_raw(size_t size) = 0;
-    virtual void deallocate(void *ptr) = 0;
+    virtual void deallocate_raw(void *ptr) = 0;
 };
 
 class IGarbageCollector

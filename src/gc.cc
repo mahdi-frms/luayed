@@ -2,7 +2,7 @@
 
 #define gcheadptr(GCH, T) ((T *)(GCH + 1))
 
-void GarbageCollector::scan(gc_header *obj)
+void GarbageCollector::scan(gc_header_t *obj)
 {
     if (obj->alloc_type == AllocType::ATHook)
         this->scan(gcheadptr(obj, Hook));
@@ -75,7 +75,7 @@ void GarbageCollector::mark(LuaRuntime *rt)
     this->scan();
     while (this->scanlifo->alloc_type != AllocType::ATDummy)
     {
-        gc_header *obj = this->scanlifo;
+        gc_header_t *obj = this->scanlifo;
         this->scanlifo = obj->scan;
         this->scan(obj);
     }
@@ -92,7 +92,7 @@ void GarbageCollector::value(LuaValue val)
 }
 void GarbageCollector::reference(void *ptr)
 {
-    gc_header *header = ((gc_header *)ptr) - 1;
+    gc_header_t *header = ((gc_header_t *)ptr) - 1;
     if (header->marked)
         return;
     header->marked = true;
@@ -112,17 +112,17 @@ GarbageCollector::GarbageCollector()
 }
 void GarbageCollector::sweep(LuaRuntime *rt)
 {
-    gc_header *hdptr = rt->headers()->next;
+    gc_header_t *hdptr = rt->gc_headers()->next;
     while (hdptr->alloc_type != AllocType::ATDummy)
     {
-        gc_header *next = hdptr->next;
+        gc_header_t *next = hdptr->next;
         if (hdptr->marked)
         {
             hdptr->marked = false;
         }
         else
         {
-            rt->deallocate_obj(hdptr);
+            rt->deallocate(hdptr);
         }
         hdptr = next;
     }
