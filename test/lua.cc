@@ -406,6 +406,21 @@ void lua_tests()
         });
 
     lua_test_case(
+        "recursion",
+
+        "local function fib(n)\n"
+        "    if n > 2 then\n"
+        "        return fib(n - 1) + fib(n - 2)\n"
+        "    end\n"
+        "    return 1\n"
+        "end\n"
+        "\n"
+        "return fib(8)\n",
+        {
+            lvnumber(21),
+        });
+
+    lua_test_case(
         "general case 1",
 
         "function push(arr, val)\n"
@@ -528,17 +543,68 @@ void lua_tests()
         });
 
     lua_test_case(
-        "recursion",
+        "general case 5",
 
-        "local function fib(n)\n"
-        "    if n > 2 then\n"
-        "        return fib(n - 1) + fib(n - 2)\n"
+        "local ll = {}\n"
+        "\n"
+        "function ll.new()\n"
+        "\n"
+        "    local l = {\n"
+        "        head = nil,\n"
+        "        tail = nil,\n"
+        "        len = 0,\n"
+        "    }\n"
+        "\n"
+        "    function l:fpush(v)\n"
+        "        local ele = { value = v, next = nil, prev = nil }\n"
+        "        if self.len == 0\n"
+        "        then\n"
+        "            self.head = ele\n"
+        "            self.tail = ele\n"
+        "        else\n"
+        "            self.head.next = ele\n"
+        "            ele.prev = self.head\n"
+        "            self.head = ele\n"
+        "        end\n"
+        "        self.len = self.len + 1\n"
         "    end\n"
-        "    return 1\n"
+        "\n"
+        "    function l:fpop()\n"
+        "        if self.len == 0\n"
+        "        then\n"
+        "            error('empty linked list')\n"
+        "        end\n"
+        "        local ele = self.head\n"
+        "        if self.len == 1 then\n"
+        "            self.head = nil\n"
+        "            self.tail = nil\n"
+        "        else\n"
+        "            self.head = self.head.prev\n"
+        "        end\n"
+        "        self.len = self.len - 1\n"
+        "        return ele.value\n"
+        "    end\n"
+        "\n"
+        "    return l\n"
+        "\n"
         "end\n"
         "\n"
-        "return fib(8)\n",
+        "local arr = { 3, 11, true, {}, 'lua' }\n"
+        "local list = ll.new()\n"
+        "for i = 1, #arr do\n"
+        "    list:fpush(arr[i])\n"
+        "end\n"
+        "local idx = #arr\n"
+        "while list.len > 0 do\n"
+        "    if arr[idx] ~= list:fpop() then\n"
+        "        return false\n"
+        "    end\n"
+        "    idx = idx - 1\n"
+        "end\n"
+        "\n"
+        "return true\n"
+        "\n",
         {
-            lvnumber(21),
+            lvbool(true),
         });
 }
