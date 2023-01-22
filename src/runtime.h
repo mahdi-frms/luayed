@@ -113,6 +113,9 @@ typedef lstr_t *lstr_p;
 class LuaRuntime : public IRuntime, public IAllocator
 {
 private:
+    size_t allocated = 0;
+    size_t threshold = 1024;
+
     Set<lstr_p> lstrset;
     Frame *frame;
     void *stack_buffer;
@@ -126,6 +129,7 @@ private:
     gc_header_t *heap_tail;
 
     void new_frame();
+    void collect_garbage();
     void copy_values(Frame *fsrc, Frame *fdest, size_t count);
     void push_nils(Frame *fsrc, size_t count);
     LuaValue concat(LuaValue v1, LuaValue v2);

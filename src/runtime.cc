@@ -253,9 +253,27 @@ void LuaRuntime::heap_init()
     this->heap_head = head;
     this->heap_tail = tail;
 }
+void LuaRuntime::collect_garbage()
+{
+    GarbageCollector gc;
+    gc.mark(this);
+    gc.sweep(this);
+}
+
 void *LuaRuntime::allocate_raw(size_t size)
 {
-    return malloc(size);
+    if (this->allocated + size > this->threshold)
+    {
+        this->collect_garbage();
+        while (this->allocated + size > this->threshold)
+            this->threshold *= 2;
+        while (this->allocated + size < this->threshold / 4 && this->threshold > 1024)
+            this->threshold /= 2;
+    }
+    this->allocated += size;
+    size_t *ptr = (size_t *)malloc(size + sizeof(size_t));
+    *ptr = size;
+    return ptr + 1;
 }
 void LuaRuntime::heap_insert(gc_header_t *node, gc_header_t *prev, gc_header_t *next)
 {
@@ -282,7 +300,9 @@ void *LuaRuntime::allocate(size_t size, AllocType at)
 }
 void LuaRuntime::deallocate_raw(void *ptr)
 {
-    free(ptr);
+    size_t *hptr = ((size_t *)ptr) - 1;
+    this->allocated -= *hptr;
+    free(hptr);
 }
 void LuaRuntime::new_frame()
 {
@@ -307,8 +327,8 @@ void LuaRuntime::new_frame()
 LuaRuntime::LuaRuntime(IInterpreter *interpreter) : interpreter(interpreter)
 {
     this->frame = nullptr;
-    this->stack_buffer = this->allocate_raw(STACK_BUFFER_SIZE);
     this->heap_init();
+    this->stack_buffer = this->allocate_raw(STACK_BUFFER_SIZE);
     this->lstrset.init(lstr_compare, lstr_hash, this);
     this->functable = (Lfunction **)this->allocate_raw(sizeof(Lfunction *) * 256 * 256);
     this->func_count = 0;
@@ -317,9 +337,7 @@ LuaRuntime::LuaRuntime(IInterpreter *interpreter) : interpreter(interpreter)
 }
 LuaRuntime::~LuaRuntime()
 {
-    GarbageCollector gc;
-    gc.mark(this);
-    gc.sweep(this);
+    this->collect_garbage();
     this->deallocate_raw(this->stack_buffer);
     this->deallocate_raw(this->functable);
 }
