@@ -195,7 +195,6 @@ GenTest compiler_test_case(const char *message, const char *text)
     analyzer.analyze();
     Compiler compiler(&gentest);
     compiler.compile(ast);
-    ast.destroy();
     return gentest;
 }
 

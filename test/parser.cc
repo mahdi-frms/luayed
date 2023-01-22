@@ -150,8 +150,6 @@ void partest(bool exp, const char *message, ...)
     Ast maker_ast = am.get_tree();
     char *mes = concat("parser : ", message);
     test_assert(cmp_node(parser_ast.root(), maker_ast.root()), mes);
-    parser_ast.destroy();
-    maker_ast.destroy();
     delete[] mes;
 }
 

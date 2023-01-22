@@ -53,8 +53,45 @@ void Ast::destroy_node(Noderef node)
     delete node;
 }
 
-Ast::Ast(Noderef tree) : tree(tree)
+Ast::Ast(Noderef tree) : tree(tree), counter(new size_t(1))
 {
+}
+
+Ast &Ast::operator=(const Ast &other)
+{
+    this->counter = other.counter;
+    (*this->counter)++;
+    this->tree = other.tree;
+    return *this;
+}
+Ast::Ast(const Ast &other)
+{
+    this->counter = other.counter;
+    (*this->counter)++;
+    this->tree = other.tree;
+}
+Ast &Ast::operator=(Ast &&other)
+{
+    this->counter = other.counter;
+    this->tree = other.tree;
+    other.tree = nullptr;
+    other.counter = nullptr;
+    return *this;
+}
+Ast::Ast(Ast &&other)
+{
+    this->counter = other.counter;
+    this->tree = other.tree;
+    other.tree = nullptr;
+    other.counter = nullptr;
+}
+Ast::~Ast()
+{
+    if (this->counter && --(*this->counter) == 0)
+    {
+        this->destroy();
+        delete this->counter;
+    }
 }
 
 Noderef Ast::root()

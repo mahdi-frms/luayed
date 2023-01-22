@@ -136,8 +136,10 @@ namespace ast
     class Ast
     {
     private:
-        Noderef tree;
+        Noderef tree = nullptr;
+        size_t *counter = nullptr;
         void destroy_node(Noderef node);
+        void destroy();
 
     public:
         static Noderef make(NodeKind kind);
@@ -149,9 +151,15 @@ namespace ast
         static Noderef make(Noderef c1, Noderef c2, Noderef c3, Noderef c4, NodeKind kind);
         static Noderef make(Noderef c1, Noderef c2, Noderef c3, Noderef c4, Noderef c5, NodeKind kind);
 
-        void destroy();
+        Ast &operator=(const Ast &other);
+        Ast(const Ast &other);
+
+        Ast &operator=(Ast &&other);
+        Ast(Ast &&other);
+
         Noderef root();
         Ast(Noderef tree);
+        ~Ast();
     };
 }
 
