@@ -112,5 +112,18 @@ GarbageCollector::GarbageCollector()
 }
 void GarbageCollector::sweep(LuaRuntime *rt)
 {
-    this->rt = rt;
+    gc_header *hdptr = rt->headers()->next;
+    while (hdptr->alloc_type != AllocType::ATDummy)
+    {
+        gc_header *next = hdptr->next;
+        if (hdptr->marked)
+        {
+            hdptr->marked = false;
+        }
+        else
+        {
+            rt->deallocate_obj(hdptr);
+        }
+        hdptr = next;
+    }
 }

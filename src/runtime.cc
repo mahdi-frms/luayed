@@ -319,6 +319,7 @@ LuaRuntime::~LuaRuntime()
 {
     GarbageCollector gc;
     gc.mark(this);
+    gc.sweep(this);
     this->deallocate(this->stack_buffer);
     this->deallocate(this->functable);
 }
