@@ -337,6 +337,8 @@ LuaRuntime::LuaRuntime(IInterpreter *interpreter) : interpreter(interpreter)
 }
 LuaRuntime::~LuaRuntime()
 {
+    this->frame = nullptr;
+    this->global = this->create_nil();
     this->collect_garbage();
     this->deallocate_raw(this->stack_buffer);
     this->deallocate_raw(this->functable);
