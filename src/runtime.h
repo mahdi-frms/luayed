@@ -146,6 +146,7 @@ private:
     void *allocate(size_t size, AllocType at);
     void deallocate_raw(void *ptr);
     void heap_init();
+    void heap_destroy();
     void heap_insert(gc_header_t *node, gc_header_t *prev, gc_header_t *next);
     void heap_remove(gc_header_t *node);
 

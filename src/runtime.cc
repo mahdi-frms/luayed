@@ -253,6 +253,11 @@ void LuaRuntime::heap_init()
     this->heap_head = head;
     this->heap_tail = tail;
 }
+void LuaRuntime::heap_destroy()
+{
+    this->deallocate_raw(this->heap_head);
+    this->deallocate_raw(this->heap_tail);
+}
 void LuaRuntime::collect_garbage()
 {
     GarbageCollector gc;
@@ -340,8 +345,10 @@ LuaRuntime::~LuaRuntime()
     this->frame = nullptr;
     this->global = this->create_nil();
     this->collect_garbage();
+    this->heap_destroy();
     this->deallocate_raw(this->stack_buffer);
     this->deallocate_raw(this->functable);
+    this->lstrset.destroy();
 }
 gc_header_t *LuaRuntime::gc_headers()
 {
