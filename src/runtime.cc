@@ -334,6 +334,11 @@ void LuaRuntime::deallocate(gc_header_t *hdr)
     {
         ((Table *)(hdr + 1))->destroy();
     }
+    else if (hdr->alloc_type == AllocType::ATString)
+    {
+        lstr_p str = (lstr_p)(hdr + 1);
+        this->lstrset.remove(str);
+    }
     this->deallocate_raw(hdr);
 }
 
