@@ -508,10 +508,11 @@ bool Compiler::compile_lvalue(Noderef node)
         Noderef lexp = node->child(0);
         Noderef prop = node->child(1);
         this->compile_exp(lexp);
-        const char *prop_str = prop->get_token().text().c_str();
+        Token prop_tkn = prop->get_token();
+        const char *prop_str = prop_tkn.text().c_str();
         size_t idx = this->const_string(prop_str);
         this->emit(Opcode(Instruction::IConst, idx));
-        this->ops_push(Opcode(Instruction::ITSet));
+        this->ops_push(Opcode(Instruction::ITSet), prop_tkn.line);
         this->vstack.push_back(1);
         this->vstack.push_back(1);
         return true;

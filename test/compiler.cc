@@ -2017,4 +2017,24 @@ void compiler_tests()
             iret(0),   // 11
         })
         .test_debug_info(8, 4);
+
+    compiler_test_case(
+        "debug info > table property",
+
+        "  ({})\n"
+        "  .\n"
+        "  Key\n"
+        "  =\n"
+        "  7\n")
+
+        .test_fn(1)
+        .test_opcodes({
+            itnew,     // 0
+            iconst(0), // 1
+            iconst(1), // 3
+            itset,     // 5
+            ipop(1),   // 6
+            iret(0),   // 8
+        })
+        .test_debug_info(5, 3);
 }
