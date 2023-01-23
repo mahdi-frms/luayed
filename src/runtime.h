@@ -41,6 +41,7 @@ public:
     size_t uplen = 0;
     size_t rolen = 0;
     size_t inlen = 0;
+    size_t dblen = 0;
     size_t hookmax = 0;
     size_t parcount = 0;
     fidx_t fidx = 0;
@@ -49,6 +50,7 @@ public:
     Upvalue *ups();
     LuaValue *rodata();
     fidx_t *innerfns();
+    uint16_t *dbs();
 
     ~Lfunction();
     Lfunction &operator=(const Lfunction &other) = delete;
@@ -93,6 +95,7 @@ struct GenFunction
     vector<LuaValue> rodata;
     vector<Upvalue> upvalues;
     vector<fidx_t> innerfns;
+    vector<size_t> dbg_lines;
     fidx_t fidx;
     size_t parcount;
     size_t hookmax;
