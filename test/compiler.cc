@@ -176,8 +176,8 @@ public:
     GenTest &test_debug_info(size_t opidx, size_t line)
     {
         char *mes = compiler_test_message(this->message, "debug info");
-        size_t gline = this->test->debug[opidx];
-        bool rsl = this->test->debug[opidx] == line;
+        size_t gline = this->test->debug.size() > opidx ? this->test->debug[opidx] : 0;
+        bool rsl = gline == line;
         test_case(mes, rsl);
         if (!rsl)
         {
@@ -1939,4 +1939,19 @@ void compiler_tests()
             icall(0, 1),
             iret(0),
         });
+
+    compiler_test_case(
+        "debug info > single line arithmetics ",
+
+        "return 3 + '5'")
+
+        .test_fn(1)
+        .test_opcodes({
+            iconst(0), // 0
+            iconst(1), // 2
+            iadd,      // 4
+            iret(1),   // 5
+            iret(0),   // 7
+        })
+        .test_debug_info(4, 1);
 }
