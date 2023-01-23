@@ -69,7 +69,7 @@ struct Frame
     Frame *prev;
     size_t hookptr;
     bool has_error;
-
+    bool has_error_meta;
     // number of args this frame is supposed to return
     size_t exp_count;
     // number of extra args supplied to this function
@@ -183,6 +183,8 @@ public:
     fidx_t gen_fidx();
     Lfunction *bin(size_t fidx);
     bool error_raised();
+    bool error_metadata();
+    void error_metadata(bool md);
     void set_test_mode(bool mode);
 
     LuaValue stack_pop();

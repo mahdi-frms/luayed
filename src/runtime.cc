@@ -522,6 +522,14 @@ bool LuaRuntime::error_raised()
 {
     return this->frame->has_error;
 }
+bool LuaRuntime::error_metadata()
+{
+    return this->frame->has_error_meta;
+}
+void LuaRuntime::error_metadata(bool md)
+{
+    this->frame->has_error_meta = md;
+}
 Frame *LuaRuntime::topframe()
 {
     return this->frame;
