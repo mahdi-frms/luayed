@@ -20,6 +20,7 @@ public:
 
     size_t const_number(lnumber num);
     size_t const_string(const char *str);
+    void debug_info(size_t line);
 
     fidx_t pushf();
     void popf();

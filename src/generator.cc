@@ -30,7 +30,10 @@ void LuaGenerator::popf()
     }
     delete child;
 }
-
+void LuaGenerator::debug_info(size_t line)
+{
+    // todo
+}
 void LuaGenerator::emit(Opcode opcode)
 {
     for (size_t i = 0; i < opcode.count; i++)

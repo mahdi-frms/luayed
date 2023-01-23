@@ -12,6 +12,7 @@ struct FuncTest
     FuncTest *prev;
     vector<lbyte> text;
     vector<Upvalue> upvalues;
+    vector<size_t> debug;
     size_t ccount;
     size_t hookmax;
     size_t parcount;
@@ -64,6 +65,12 @@ public:
     size_t len()
     {
         return this->current->text.size();
+    }
+    void debug_info(size_t line)
+    {
+        while (this->current->debug.size() < this->current->text.size())
+            this->current->debug.push_back(0);
+        this->current->debug.back() = line;
     }
     void seti(size_t idx, lbyte b)
     {
