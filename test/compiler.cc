@@ -172,6 +172,25 @@ public:
         delete[] mes;
         return *this;
     }
+
+    GenTest &test_debug_info(size_t opidx, size_t line)
+    {
+        char *mes = compiler_test_message(this->message, "debug info");
+        size_t gline = this->test->debug[opidx];
+        bool rsl = this->test->debug[opidx] == line;
+        test_case(mes, rsl);
+        if (!rsl)
+        {
+            std::cerr << "generated and expected debug info do not match!\nin: "
+                      << this->message << "\n"
+                      << "expected line: "
+                      << line
+                      << "\ngenerated binary: "
+                      << gline << "\n";
+        }
+        delete[] mes;
+        return *this;
+    }
     GenTest &test_upvalues(vector<Upvalue> upvalues)
     {
         char *mes = compiler_test_message(this->message, "upvalue table");
