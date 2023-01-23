@@ -83,6 +83,8 @@ public:
     void set_error(LuaValue value);
     LuaValue get_error();
     bool error_raised();
+    bool error_metadata();
+    void error_metadata(bool md);
     size_t extras();
     void extras(size_t count);
     size_t argcount();

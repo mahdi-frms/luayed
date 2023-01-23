@@ -222,6 +222,13 @@ LuaValue MockRuntime::get_error()
 {
     return this->error;
 }
+bool MockRuntime::error_metadata()
+{
+    return true;
+}
+void MockRuntime::error_metadata(bool md)
+{
+}
 bool MockRuntime::error_raised()
 {
     return this->has_error;
