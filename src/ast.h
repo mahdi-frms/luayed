@@ -131,6 +131,7 @@ namespace ast
         Node(Noderef *children, size_t count, NodeKind kind);
         void annotate(MetaNode *md);
         MetaNode *getannot(MetaKind kind);
+        int line();
     };
 
     class Ast
