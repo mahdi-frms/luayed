@@ -65,6 +65,7 @@ private:
     size_t arglist_count(Noderef arglist);
     lbyte translate_token(TokenKind kind, bool bin);
     fidx_t compile(Noderef root);
+    void debug_info(size_t line);
 
 public:
     Compiler(IGenerator *gen);

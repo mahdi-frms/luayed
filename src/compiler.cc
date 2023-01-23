@@ -378,6 +378,10 @@ void Compiler::compile_table(Noderef node)
         this->emit(Instruction::ITSet);
     }
 }
+void Compiler::debug_info(size_t line)
+{
+    this->gen->debug_info(line);
+}
 
 void Compiler::compile_exp_e(Noderef node, size_t expect)
 {
@@ -395,7 +399,9 @@ void Compiler::compile_exp_e(Noderef node, size_t expect)
         {
             this->compile_exp(node->child(0));
             this->compile_exp(node->child(2));
-            this->emit(this->translate_token(node->child(1)->get_token().kind, true));
+            Token op = node->child(1)->get_token();
+            this->emit(this->translate_token(op.kind, true));
+            this->debug_info(op.line);
         }
     }
     else if (node->get_kind() == NodeKind::Unary)

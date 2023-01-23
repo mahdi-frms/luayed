@@ -68,6 +68,7 @@ public:
     }
     void debug_info(size_t line)
     {
+        line++;
         while (this->current->debug.size() < this->current->text.size())
             this->current->debug.push_back(0);
         this->current->debug.back() = line;
