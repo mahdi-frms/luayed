@@ -407,7 +407,9 @@ void Compiler::compile_exp_e(Noderef node, size_t expect)
     else if (node->get_kind() == NodeKind::Unary)
     {
         this->compile_exp(node->child(1));
-        this->emit(this->translate_token(node->child(0)->get_token().kind, false));
+        Token op = node->child(0)->get_token();
+        this->emit(this->translate_token(op.kind, false));
+        this->debug_info(op.line);
     }
     else if (node->get_kind() == NodeKind::Property)
     {

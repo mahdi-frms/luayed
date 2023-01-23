@@ -1973,4 +1973,20 @@ void compiler_tests()
             iret(0),   // 7
         })
         .test_debug_info(4, 3);
+
+    compiler_test_case(
+        "debug info > unary operation ",
+
+        "return\n"
+        "    not\n"
+        "       '5'\n")
+
+        .test_fn(1)
+        .test_opcodes({
+            iconst(0), // 0
+            inot,      // 2
+            iret(1),   // 3
+            iret(0),   // 5
+        })
+        .test_debug_info(2, 2);
 }
