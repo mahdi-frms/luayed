@@ -15,6 +15,7 @@ public:
 
     virtual size_t const_number(lnumber num) = 0;
     virtual size_t const_string(const char *str) = 0;
+    virtual void debug_info(size_t line) = 0;
 
     virtual fidx_t pushf() = 0;
     virtual void popf() = 0;
