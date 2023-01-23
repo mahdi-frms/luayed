@@ -85,15 +85,35 @@ size_t Interpreter::run(IRuntime *rt)
     this->ip = 0;
     while (this->state == InterpreterState::Run)
     {
+        this->pip = this->ip;
         this->ip += this->fetch(this->rt->text() + this->ip);
         this->exec();
+    }
+    if (this->config_error_metadata_v && this->state == InterpreterState::Error)
+    {
+        if (!this->rt->error_metadata())
+        {
+            LuaValue e = this->rt->get_error();
+            if (e.kind == LuaType::LVString)
+            {
+                this->rt->set_error(this->error_add_meta(e));
+                this->rt->error_metadata(true);
+            }
+        }
     }
     size_t retc = this->retc;
     this->retc = 0;
     this->state = InterpreterState::Run;
     return retc;
 }
-
+LuaValue Interpreter::error_add_meta(LuaValue e)
+{
+    LuaValue s1 = this->rt->create_string(this->rt->dbgmd()[this->pip]);
+    LuaValue s2 = this->rt->create_string(": ");
+    s1 = this->concat(s1, s2);
+    s1 = this->concat(s1, e);
+    return s1;
+}
 size_t Interpreter::fetch(lbyte *bin)
 {
     size_t ptr = 0;
@@ -574,4 +594,8 @@ LuaValue Interpreter::lua_type_to_string(LuaType t)
         [LVFunction] = "function",
     };
     return this->rt->create_string(texts[t]);
+}
+void Interpreter::config_error_metadata(bool val)
+{
+    this->config_error_metadata_v = val;
 }

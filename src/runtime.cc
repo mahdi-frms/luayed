@@ -708,6 +708,10 @@ lbyte *LuaRuntime::text()
 {
     return this->bin()->text();
 }
+uint16_t *LuaRuntime::dbgmd()
+{
+    return this->bin()->dbs();
+}
 void LuaRuntime::set_error(LuaValue value)
 {
     this->frame->error = value;

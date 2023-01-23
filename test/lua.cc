@@ -53,6 +53,7 @@ void lua_test_case(
     string mes = "lua : ";
     mes.append(message);
     Interpreter intp;
+    intp.config_error_metadata(false);
     LuaRuntime rt(&intp);
     vector<lbyte> bytecode;
     LuaValue fn = lua_test_compile(code, rt, bytecode);

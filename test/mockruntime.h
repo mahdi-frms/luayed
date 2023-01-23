@@ -88,6 +88,7 @@ public:
     size_t extras();
     void extras(size_t count);
     size_t argcount();
+    uint16_t *dbgmd();
 };
 
 #endif

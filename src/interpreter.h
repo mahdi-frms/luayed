@@ -41,15 +41,19 @@ public:
     size_t run(IRuntime *rt, Opcode op);
     static void optable_init();
     Interpreter();
+    void config_error_metadata(bool val);
 
 private:
     static opimpl optable[256];
     static bool is_initialized;
 
     size_t ip = 0;
+    size_t pip = 0;
     lbyte op;
     size_t arg1;
     size_t arg2;
+
+    bool config_error_metadata_v = true;
 
     size_t retc = 0;
     InterpreterState state = InterpreterState::Run;
@@ -74,6 +78,7 @@ private:
     LuaValue concat(LuaValue s1, LuaValue s2);
     LuaValue error_to_string(Lerror error);
     LuaValue lua_type_to_string(LuaType t);
+    LuaValue error_add_meta(LuaValue e);
 
     void i_add();
     void i_sub();

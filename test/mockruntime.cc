@@ -184,7 +184,10 @@ lbyte *MockRuntime::text()
 {
     return &this->instructions.front();
 }
-
+uint16_t *MockRuntime::dbgmd()
+{
+    return nullptr;
+}
 void MockRuntime::set_stack(vector<LuaValue> stack)
 {
     this->stack = stack;

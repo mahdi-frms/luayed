@@ -199,6 +199,7 @@ public:
     Hook *upvalue(size_t idx);
     LuaValue rodata(size_t idx);
     lbyte *text();
+    uint16_t *dbgmd();
     size_t stack_size();
     size_t argcount();
     size_t extras();
