@@ -2037,4 +2037,31 @@ void compiler_tests()
             iret(0),   // 8
         })
         .test_debug_info(5, 3);
+
+    compiler_test_case(
+        "debug info > table contructor",
+
+        "  return\n"
+        "  {\n"
+        "  [\n"
+        "  'my'\n"
+        "  ..\n"
+        "  'key'\n"
+        "  ]\n"
+        "  =\n"
+        "  7\n"
+        "  }\n")
+
+        .test_fn(1)
+        .test_opcodes({
+            itnew,     // 0
+            iconst(0), // 1
+            iconst(1), // 3
+            iconcat,   // 5
+            iconst(2), // 6
+            itset,     // 8
+            iret(1),   // 9
+            iret(0),   // 11
+        })
+        .test_debug_info(8, 4);
 }

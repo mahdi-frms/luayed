@@ -376,6 +376,8 @@ void Compiler::compile_table(Noderef node)
             this->compile_exp(ch);
         }
         this->emit(Instruction::ITSet);
+        if (ch->get_kind() == NodeKind::ExprField)
+            this->debug_info(ch->child(0)->line());
     }
 }
 void Compiler::debug_info(size_t line)
