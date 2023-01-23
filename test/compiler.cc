@@ -1955,4 +1955,22 @@ void compiler_tests()
             iret(0),   // 7
         })
         .test_debug_info(4, 1);
+
+    compiler_test_case(
+        "debug info > multiline arithmetics ",
+
+        "return\n"
+        "3\n"
+        "    >\n"
+        "       '5'\n")
+
+        .test_fn(1)
+        .test_opcodes({
+            iconst(0), // 0
+            iconst(1), // 2
+            igt,       // 4
+            iret(1),   // 5
+            iret(0),   // 7
+        })
+        .test_debug_info(4, 3);
 }
