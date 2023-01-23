@@ -1989,4 +1989,32 @@ void compiler_tests()
             iret(0),   // 5
         })
         .test_debug_info(2, 2);
+
+    compiler_test_case(
+        "debug info > table index",
+
+        "  ({})\n"
+        "  [\n"
+        "  (\n"
+        "  7\n"
+        "  *\n"
+        "  8\n"
+        "  )\n"
+        "  ]\n"
+        "  =\n"
+        "   \n"
+        "  'str'\n")
+
+        .test_fn(1)
+        .test_opcodes({
+            itnew,     // 0
+            iconst(0), // 1
+            iconst(1), // 3
+            imult,     // 5
+            iconst(2), // 6
+            itset,     // 8
+            ipop(1),   // 9
+            iret(0),   // 11
+        })
+        .test_debug_info(8, 4);
 }

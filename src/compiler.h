@@ -11,6 +11,7 @@ class Compiler
 private:
     IGenerator *gen;
     vector<Opcode> ops;
+    vector<int> lines;
     vector<lbyte> vstack;
     vector<size_t> breaks;
     size_t stack_offset = 0;
@@ -27,6 +28,7 @@ private:
     void seti(size_t idx, lbyte b);
     size_t upval(fidx_t fidx, size_t offset, size_t hidx);
     void ops_push(Opcode op);
+    void ops_push(Opcode op, int line);
     size_t const_number(lnumber n);
     size_t const_string(const char *s);
     size_t vstack_nearest_nil();

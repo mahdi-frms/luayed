@@ -522,7 +522,7 @@ bool Compiler::compile_lvalue(Noderef node)
         Noderef iexp = node->child(1);
         this->compile_exp(lexp);
         this->compile_exp(iexp);
-        this->ops_push(Opcode(Instruction::ITSet));
+        this->ops_push(Opcode(Instruction::ITSet), iexp->line());
         this->vstack.push_back(1);
         this->vstack.push_back(1);
         return true;
@@ -957,13 +957,22 @@ void Compiler::ops_flush()
     while (this->ops.size())
     {
         this->emit(this->ops.back());
+        int line = this->lines.back();
+        if (line != -1)
+            this->debug_info(line);
         this->ops.pop_back();
+        this->lines.pop_back();
     }
 }
 
 void Compiler::ops_push(Opcode op)
 {
+    this->ops_push(op, -1);
+}
+void Compiler::ops_push(Opcode op, int line)
+{
     this->ops.push_back(op);
+    this->lines.push_back(line);
 }
 
 void Compiler::loop_start()

@@ -176,7 +176,7 @@ Noderef Ast::make(Noderef c1, Noderef c2, Noderef c3, Noderef c4, Noderef c5, No
 int Node::line()
 {
     if (this->token.kind != TokenKind::None)
-        return this->token.kind;
+        return this->token.line;
     for (size_t i = 0; i < this->child_count(); i++)
     {
         int line = this->child(i)->line();
