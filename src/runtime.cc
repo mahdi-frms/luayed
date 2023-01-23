@@ -712,6 +712,7 @@ void LuaRuntime::set_error(LuaValue value)
 {
     this->frame->error = value;
     this->frame->has_error = true;
+    this->frame->has_error_meta = false;
 }
 LuaValue LuaRuntime::get_error()
 {
@@ -724,6 +725,7 @@ void LuaRuntime::set_test_mode(bool mode)
 void LuaRuntime::remove_error()
 {
     this->frame->has_error = false;
+    this->frame->has_error_meta = false;
     this->frame->error = this->create_nil();
 }
 size_t LuaRuntime::stack_size()
