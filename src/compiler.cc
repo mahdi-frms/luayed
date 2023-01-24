@@ -252,16 +252,19 @@ void Compiler::edit_jmp(size_t opidx, size_t jmp_idx)
 
 void Compiler::compile_methcall(Noderef node, size_t expect)
 {
+    Noderef object = node->child(0);
+    Token fname = node->child(1)->get_token();
     this->emit(Instruction::INil);
-    this->compile_exp(node->child(0));
+    this->compile_exp(object);
     this->emit(Opcode(Instruction::IBLocal, 1));
-    size_t idx = this->const_string(node->child(1)->get_token().text().c_str());
+    size_t idx = this->const_string(fname.text().c_str());
     this->emit(Opcode(Instruction::IConst, idx));
     this->emit(Opcode(Instruction::ITGet));
     this->emit(Opcode(Instruction::IBLStore, 2));
     Noderef arglist = node->child(2);
     this->compile_explist(arglist, EXPECT_FREE);
     size_t argcount = this->arglist_count(arglist) + 1;
+    this->debug_info(fname.line);
     if (expect == EXPECT_FREE)
         this->emit(Opcode(Instruction::ICall, argcount, 0));
     else
