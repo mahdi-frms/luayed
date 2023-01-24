@@ -375,9 +375,9 @@ void Compiler::compile_table(Noderef node)
             this->emit(Opcode(Instruction::IConst, keyidx));
             this->compile_exp(ch);
         }
-        this->emit(Instruction::ITSet);
         if (ch->get_kind() == NodeKind::ExprField)
             this->debug_info(ch->child(0)->line());
+        this->emit(Instruction::ITSet);
     }
 }
 void Compiler::debug_info(size_t line)
@@ -402,16 +402,16 @@ void Compiler::compile_exp_e(Noderef node, size_t expect)
             this->compile_exp(node->child(0));
             this->compile_exp(node->child(2));
             Token op = node->child(1)->get_token();
-            this->emit(this->translate_token(op.kind, true));
             this->debug_info(op.line);
+            this->emit(this->translate_token(op.kind, true));
         }
     }
     else if (node->get_kind() == NodeKind::Unary)
     {
         this->compile_exp(node->child(1));
         Token op = node->child(0)->get_token();
-        this->emit(this->translate_token(op.kind, false));
         this->debug_info(op.line);
+        this->emit(this->translate_token(op.kind, false));
     }
     else if (node->get_kind() == NodeKind::Property)
     {
@@ -959,10 +959,10 @@ void Compiler::ops_flush()
 {
     while (this->ops.size())
     {
-        this->emit(this->ops.back());
         int line = this->lines.back();
         if (line != -1)
             this->debug_info(line);
+        this->emit(this->ops.back());
         this->ops.pop_back();
         this->lines.pop_back();
     }
