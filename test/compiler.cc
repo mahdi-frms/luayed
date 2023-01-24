@@ -2064,4 +2064,23 @@ void compiler_tests()
             iret(0),   // 11
         })
         .test_debug_info(8, 4);
+
+    compiler_test_case(
+        "debug info > call",
+
+        "A\n"
+        "(B,C)")
+
+        .test_fn(1)
+        .test_opcodes({
+            iconst(0),   // 0
+            igget,       // 2
+            iconst(1),   // 3
+            igget,       // 5
+            iconst(2),   // 6
+            igget,       // 8
+            icall(2, 1), // 9
+            iret(0),     // 12
+        })
+        .test_debug_info(9, 1);
 }

@@ -269,10 +269,12 @@ void Compiler::compile_methcall(Noderef node, size_t expect)
 }
 void Compiler::compile_call(Noderef node, size_t expect)
 {
-    this->compile_exp(node->child(0));
+    Noderef fn = node->child(0);
     Noderef arglist = node->child(1);
+    this->compile_exp(fn);
     size_t argcount = this->arglist_count(arglist);
     this->compile_explist(arglist, EXPECT_FREE);
+    this->debug_info(fn->line());
     if (expect == EXPECT_FREE)
         this->emit(Opcode(Instruction::ICall, argcount, 0));
     else
