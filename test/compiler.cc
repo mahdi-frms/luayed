@@ -2083,4 +2083,30 @@ void compiler_tests()
             iret(0),     // 12
         })
         .test_debug_info(9, 1);
+
+    compiler_test_case(
+        "debug info > method call",
+
+        "A\n"
+        ":\n"
+        "f\n"
+        "(B,C)")
+
+        .test_fn(1)
+        .test_opcodes({
+            inil,
+            iconst(0), // 0
+            igget,     // 2
+            iblocal(1),
+            iconst(1), // 3
+            itget,     // 5
+            iblstore(2),
+            iconst(2),   // 6
+            igget,       // 8
+            iconst(3),   // 6
+            igget,       // 8
+            icall(3, 1), // 9
+            iret(0),     // 12
+        })
+        .test_debug_info(9, 1);
 }
