@@ -2094,19 +2094,19 @@ void compiler_tests()
 
         .test_fn(1)
         .test_opcodes({
-            inil,
-            iconst(0), // 0
-            igget,     // 2
-            iblocal(1),
-            iconst(1), // 3
-            itget,     // 5
-            iblstore(2),
-            iconst(2),   // 6
-            igget,       // 8
-            iconst(3),   // 6
-            igget,       // 8
-            icall(3, 1), // 9
-            iret(0),     // 12
+            inil,        // 0
+            iconst(0),   // 1
+            igget,       // 3
+            iblocal(1),  // 4
+            iconst(1),   // 6
+            itget,       // 8
+            iblstore(2), // 9
+            iconst(2),   // 11
+            igget,       // 13
+            iconst(3),   // 14
+            igget,       // 16
+            icall(3, 1), // 17
+            iret(0),     // 20
         })
-        .test_debug_info(9, 1);
+        .test_debug_info(17, 3);
 }
