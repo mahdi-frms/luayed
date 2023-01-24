@@ -32,7 +32,7 @@ void LuaGenerator::popf()
 }
 void LuaGenerator::debug_info(size_t line)
 {
-    while (this->gfn->dbg_lines.size() < this->gfn->text.size())
+    while (this->gfn->dbg_lines.size() <= this->gfn->text.size())
         this->gfn->dbg_lines.push_back(0);
     this->gfn->dbg_lines.push_back(line);
 }
