@@ -11,8 +11,7 @@ Lua::Lua() : runtime(&this->interpreter)
     this->runtime.set_lua_interface(this);
     luastd::libinit(this);
 }
-
-int Lua::compile(const char *lua_code, string &errors)
+int Lua::compile(const char *lua_code, string &errors, const char *chunckname)
 {
     Lexer lexer(lua_code);
     Parser parser(&lexer);

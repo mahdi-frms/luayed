@@ -26,7 +26,7 @@ private:
 
 public:
     Lua();
-    int compile(const char *lua_code, string &errors);
+    int compile(const char *lua_code, string &errors, const char *chunkname = nullptr);
     void push_cppfn(LuaCppFunction cppfn);
     void push_string(const char *str);
     void push_nil();
