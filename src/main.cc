@@ -27,7 +27,7 @@ bool runfile(const char *path)
     Lua lua;
     string text = readfile(path);
     string errors;
-    if (lua.compile(text.c_str(), errors) == LUA_COMPILE_RESULT_OK)
+    if (lua.compile(text.c_str(), errors, path) == LUA_COMPILE_RESULT_OK)
     {
         lua.call(0, 1);
         if (lua.has_error())
