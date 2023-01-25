@@ -233,8 +233,7 @@ Lfunction *LuaRuntime::create_binary(GenFunction *gfn)
     fn->uplen = gfn->upvalues.size();
     fn->inlen = gfn->innerfns.size();
     fn->dblen = gfn->dbg_lines.size();
-    if (gfn->chunckname)
-        fn->chunckname = this->create_string(gfn->chunckname);
+    fn->chunckname = gfn->chunckname ? this->create_string(gfn->chunckname) : this->create_nil();
 
     for (size_t i = 0; i < gfn->text.size(); i++)
         fn->text()[i] = gfn->text[i];

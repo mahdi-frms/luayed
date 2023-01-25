@@ -22,6 +22,7 @@ void GarbageCollector::scan(Lfunction *bin)
     }
     for (size_t i = 0; i < bin->rolen; i++)
         this->value(bin->rodata()[i]);
+    this->value(bin->chunckname);
 }
 void GarbageCollector::scan(LuaFunction *fn)
 {
