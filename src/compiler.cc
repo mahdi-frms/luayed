@@ -690,6 +690,7 @@ void Compiler::compile_generic_for(Noderef node)
     this->emit(Opcode(Instruction::IBLocal, 1));                           // iterator
     this->emit(Opcode(Instruction::IBLocal, 3));                           // state
     this->emit(Opcode(Instruction::ILocal, this->varmem(lvalue)->offset)); // prev
+    this->debug_info(arglist->line());
     this->emit(Opcode(Instruction::ICall, 2, varcount + 1));
     for (size_t i = 0; i < varcount; i++)
         this->emit(Opcode(Instruction::IBLStore, varcount + 2));
