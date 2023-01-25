@@ -81,4 +81,5 @@ void LuaGenerator::meta_hookmax(size_t hookmax)
 }
 void LuaGenerator::meta_chunkname(const char *chunkname)
 {
+    this->gfn->chunckname = chunkname;
 }

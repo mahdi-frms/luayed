@@ -90,6 +90,7 @@ struct Frame
 };
 struct GenFunction
 {
+    const char *chunckname = nullptr;
     GenFunction *prev;
     vector<lbyte> text;
     vector<LuaValue> rodata;
