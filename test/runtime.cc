@@ -88,10 +88,10 @@ void test_cxx_calls_cxx_extra()
     rt_assert(rt.stack_size() == 4, mes, 1);
     vector<LuaValue> stack = drain(&rt);
     vector<LuaValue> expected = {
+        rt.create_number(-42),
         rt.create_number(2),
         rt.create_number(602),
         rt.create_boolean(true),
-        rt.create_boolean(false),
     };
     bool rsl = stack == expected;
     rt_assert(rsl, mes, 2);

@@ -135,7 +135,7 @@ private:
 
     void new_frame();
     void collect_garbage();
-    void copy_values(Frame *fsrc, Frame *fdest, size_t count);
+    void copy_values(Frame *fsrc, Frame *fdest, size_t count, size_t offset);
     void push_nils(Frame *fsrc, size_t count);
     LuaValue concat(LuaValue v1, LuaValue v2);
     LuaValue lua_type_to_string(LuaType t);

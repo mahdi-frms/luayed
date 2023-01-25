@@ -385,9 +385,11 @@ void LuaRuntime::deallocate(gc_header_t *hdr)
 void LuaRuntime::copy_values(
     Frame *fsrc,
     Frame *fdest,
-    size_t count)
+    size_t count,
+    size_t offset = 0)
 {
-    size_t src_idx = fsrc->sp - count;
+    offset = offset < count ? count : offset;
+    size_t src_idx = fsrc->sp - offset;
     size_t dest_idx = fdest->sp;
     LuaValue *sstack = fsrc->stack();
     LuaValue *dstack = fdest->stack();
@@ -572,7 +574,7 @@ void LuaRuntime::fnret(size_t count)
     }
     else
     {
-        this->copy_values(frame, prev, exp);
+        this->copy_values(frame, prev, exp, total_count);
         prev->sp += exp;
     }
     this->frame = prev;
