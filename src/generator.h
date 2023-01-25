@@ -29,6 +29,7 @@ public:
 
     void meta_parcount(size_t parcount);
     void meta_hookmax(size_t hookmax);
+    void meta_chunkname(const char *chunkname);
 };
 
 #endif

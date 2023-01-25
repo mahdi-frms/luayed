@@ -24,6 +24,7 @@ public:
 
     virtual void meta_parcount(size_t parcount) = 0;
     virtual void meta_hookmax(size_t hookmax) = 0;
+    virtual void meta_chunkname(const char *chunkname) = 0;
 };
 
 class ILexer

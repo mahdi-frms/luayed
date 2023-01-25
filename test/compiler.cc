@@ -118,6 +118,10 @@ public:
         this->current->hookmax = hookmax;
     }
 
+    void meta_chunkname(const char *chunkname)
+    {
+    }
+
     GenTest &test_fn(size_t fidx)
     {
         this->test = this->funcs[fidx];
