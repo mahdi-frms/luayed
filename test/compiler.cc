@@ -2109,4 +2109,45 @@ void compiler_tests()
             iret(0),     // 20
         })
         .test_debug_info(17, 3);
+
+    compiler_test_case(
+        "debug info > iterator call",
+
+        "for\n i\n ,\nv\n in\n iter\n(\na\n)\n do\n end\n")
+
+        .test_fn(1)
+        .test_opcodes({
+            iconst(0),   // 0
+            igget,       // 2
+            iconst(1),   // 3
+            igget,       // 5
+            icall(1, 4), // 6
+            inil,        // 9
+            iblocal(2),  // 10
+            iblocal(5),  // 12
+            iblstore(3), // 14
+            iblstore(4), // 16
+            iblocal(2),  // 18
+            iblocal(2),  // 20
+            iblstore(3), // 22
+            iblstore(1), // 24
+            iblocal(2),  // 26
+            iblocal(4),  // 28
+            iblstore(3), // 30
+            iblstore(3), // 32
+            iblocal(1),  // 34
+            iblocal(3),  // 36
+            ilocal(0),   // 38
+            icall(2, 3), // 40
+            iblstore(4), // 43
+            iblstore(4), // 45
+            ilocal(0),   // 47
+            inil,        // 49
+            ieq,         // 50
+            icjmp(57),   // 51
+            ijmp(34),    // 54
+            ipop(4),     // 57
+            iret(0),     // 59
+        })
+        .test_debug_info(40, 6);
 }
