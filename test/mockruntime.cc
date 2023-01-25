@@ -184,6 +184,10 @@ lbyte *MockRuntime::text()
 {
     return &this->instructions.front();
 }
+LuaValue MockRuntime::chunckname()
+{
+    return this->create_nil();
+}
 uint16_t *MockRuntime::dbgmd()
 {
     return nullptr;

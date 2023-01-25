@@ -73,6 +73,7 @@ public:
     virtual LuaValue rodata(size_t idx) = 0;
     virtual lbyte *text() = 0;
     virtual uint16_t *dbgmd() = 0;
+    virtual LuaValue chunckname() = 0;
 };
 
 class IInterpreter

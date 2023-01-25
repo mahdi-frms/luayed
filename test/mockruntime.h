@@ -89,6 +89,7 @@ public:
     void extras(size_t count);
     size_t argcount();
     uint16_t *dbgmd();
+    LuaValue chunckname();
 };
 
 #endif

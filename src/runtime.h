@@ -206,6 +206,7 @@ public:
     size_t argcount();
     size_t extras();
     void extras(size_t count);
+    LuaValue chunkname();
 
     Frame *topframe();
     gc_header_t *gc_headers();

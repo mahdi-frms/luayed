@@ -213,6 +213,10 @@ LuaValue LuaRuntime::create_cppfn(LuaRTCppFunction fn)
     val.data.ptr = (void *)fobj;
     return val;
 }
+LuaValue LuaRuntime::chunkname()
+{
+    return this->bin()->chunckname;
+}
 
 Lfunction *LuaRuntime::create_binary(GenFunction *gfn)
 {
