@@ -105,9 +105,17 @@ size_t Interpreter::run(IRuntime *rt)
 }
 LuaValue Interpreter::error_add_meta(LuaValue e)
 {
-    LuaValue s1 = this->rt->create_string(this->rt->dbgmd()[this->pip]);
-    LuaValue s2 = this->rt->create_string(": ");
+    LuaValue s1 = this->rt->chunkname();
+    if (s1.kind == LuaType::LVNil)
+    {
+        s1 = this->rt->create_string("[?]");
+    }
+    LuaValue s2 = this->rt->create_string(":");
+    LuaValue s3 = this->rt->create_string(this->rt->dbgmd()[this->pip]);
+    LuaValue s4 = this->rt->create_string(": ");
     s1 = this->concat(s1, s2);
+    s1 = this->concat(s1, s3);
+    s1 = this->concat(s1, s4);
     s1 = this->concat(s1, e);
     return s1;
 }

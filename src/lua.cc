@@ -11,7 +11,7 @@ Lua::Lua() : runtime(&this->interpreter)
     this->runtime.set_lua_interface(this);
     luastd::libinit(this);
 }
-int Lua::compile(const char *lua_code, string &errors, const char *chunckname)
+int Lua::compile(const char *lua_code, string &errors, const char *chunkname)
 {
     Lexer lexer(lua_code);
     Parser parser(&lexer);
@@ -34,8 +34,8 @@ int Lua::compile(const char *lua_code, string &errors, const char *chunckname)
         return LUA_COMPILE_RESULT_FAILED;
     }
     LuaGenerator gen(&this->runtime);
-    if (chunckname)
-        gen.meta_chunkname(chunckname);
+    if (chunkname)
+        gen.meta_chunkname(chunkname);
     Compiler compiler(&gen);
     fidx_t fidx = compiler.compile(ast);
     LuaValue fn = this->runtime.create_luafn(fidx);

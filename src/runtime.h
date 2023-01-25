@@ -45,7 +45,7 @@ public:
     size_t hookmax = 0;
     size_t parcount = 0;
     fidx_t fidx = 0;
-    LuaValue chunckname;
+    LuaValue chunkname;
 
     lbyte *text();
     Upvalue *ups();
@@ -91,7 +91,7 @@ struct Frame
 };
 struct GenFunction
 {
-    const char *chunckname = nullptr;
+    const char *chunkname = nullptr;
     GenFunction *prev;
     vector<lbyte> text;
     vector<LuaValue> rodata;

@@ -184,7 +184,7 @@ lbyte *MockRuntime::text()
 {
     return &this->instructions.front();
 }
-LuaValue MockRuntime::chunckname()
+LuaValue MockRuntime::chunkname()
 {
     return this->create_nil();
 }

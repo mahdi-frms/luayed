@@ -215,7 +215,7 @@ LuaValue LuaRuntime::create_cppfn(LuaRTCppFunction fn)
 }
 LuaValue LuaRuntime::chunkname()
 {
-    return this->bin()->chunckname;
+    return this->bin()->chunkname;
 }
 
 Lfunction *LuaRuntime::create_binary(GenFunction *gfn)
@@ -237,7 +237,7 @@ Lfunction *LuaRuntime::create_binary(GenFunction *gfn)
     fn->uplen = gfn->upvalues.size();
     fn->inlen = gfn->innerfns.size();
     fn->dblen = gfn->dbg_lines.size();
-    fn->chunckname = gfn->chunckname ? this->create_string(gfn->chunckname) : this->create_nil();
+    fn->chunkname = gfn->chunkname ? this->create_string(gfn->chunkname) : this->create_nil();
 
     for (size_t i = 0; i < gfn->text.size(); i++)
         fn->text()[i] = gfn->text[i];
