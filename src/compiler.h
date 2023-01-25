@@ -9,6 +9,7 @@ using namespace ast;
 class Compiler
 {
 private:
+    const char *chunckname = nullptr;
     IGenerator *gen;
     vector<Opcode> ops;
     vector<int> lines;
@@ -66,12 +67,12 @@ private:
     void loop_end();
     size_t arglist_count(Noderef arglist);
     lbyte translate_token(TokenKind kind, bool bin);
-    fidx_t compile(Noderef root);
+    fidx_t compile(Noderef root, const char *chunckname = nullptr);
     void debug_info(size_t line);
 
 public:
     Compiler(IGenerator *gen);
-    fidx_t compile(Ast ast);
+    fidx_t compile(Ast ast, const char *chunckname = nullptr);
 };
 
 #endif

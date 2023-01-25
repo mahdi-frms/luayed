@@ -34,10 +34,8 @@ int Lua::compile(const char *lua_code, string &errors, const char *chunkname)
         return LUA_COMPILE_RESULT_FAILED;
     }
     LuaGenerator gen(&this->runtime);
-    if (chunkname)
-        gen.meta_chunkname(chunkname);
     Compiler compiler(&gen);
-    fidx_t fidx = compiler.compile(ast);
+    fidx_t fidx = compiler.compile(ast, chunkname);
     LuaValue fn = this->runtime.create_luafn(fidx);
     this->runtime.stack_push(fn);
     return LUA_COMPILE_RESULT_OK;

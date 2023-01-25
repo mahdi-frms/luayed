@@ -110,8 +110,9 @@ lnumber token_number(Token t)
     return num;
 }
 
-fidx_t Compiler::compile(Noderef root)
+fidx_t Compiler::compile(Noderef root, const char *chunckname)
 {
+    this->chunckname = chunckname;
     MetaScope *fnscp = (MetaScope *)root->getannot(MetaKind::MScope);
     fnscp->fidx = this->gen->pushf();
     if (root->get_kind() == NodeKind::Block)
@@ -147,14 +148,15 @@ fidx_t Compiler::compile(Noderef root)
         this->gen->meta_parcount(parcount);
     }
     this->gen->meta_hookmax(this->hookmax);
+    this->gen->meta_chunkname(chunckname);
     this->emit(Opcode(Instruction::IRet, 0));
     this->gen->popf();
     return fnscp->fidx;
 }
 
-fidx_t Compiler::compile(Ast ast)
+fidx_t Compiler::compile(Ast ast, const char *chunckname)
 {
-    return this->compile(ast.root());
+    return this->compile(ast.root(), chunckname);
 }
 
 lbyte tkn_binops[] = {
@@ -455,7 +457,7 @@ void Compiler::compile_function(Noderef node)
     MetaScope *fnscp = (MetaScope *)node->getannot(MetaKind::MScope);
     Compiler compiler(this->gen);
     compiler.stack_offset = node->get_kind() == NodeKind::MethodBody ? 1 : 0;
-    compiler.compile(node);
+    compiler.compile(node, this->chunckname);
     compiler.emit(Opcode(Instruction::IFConst, fnscp->fidx));
 }
 
