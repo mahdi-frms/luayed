@@ -145,9 +145,22 @@ size_t luastd::load(Lua *lua)
         lua->fetch_local(0);
         if (lua->kind() == LUA_TYPE_STRING)
         {
+            const char *chunckname = nullptr;
+            if (lua->top() >= 2)
+            {
+                lua->fetch_local(1);
+                if (lua->kind() != LUA_TYPE_STRING)
+                {
+                    lua->push_string(arg_error);
+                    lua->pop_error();
+                    return 0;
+                }
+                chunckname = lua->peek_string();
+                lua->pop();
+            }
             const char *src = lua->peek_string();
             string compile_errors;
-            int rsl = lua->compile(src, compile_errors);
+            int rsl = lua->compile(src, compile_errors, chunckname);
             if (rsl == 0)
             {
                 lua->store_local(0);
