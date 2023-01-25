@@ -544,6 +544,7 @@ void LuaRuntime::fnret(size_t count)
     Frame *prev = this->frame->prev;
     prev->error = frame->error;
     prev->has_error = frame->has_error;
+    prev->has_error_meta = frame->has_error_meta;
     if (frame->sp < total_count)
     {
         Lerror err = error_not_enough_args(frame->sp - frame->ret_count, count);

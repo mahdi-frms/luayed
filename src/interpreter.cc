@@ -89,16 +89,13 @@ size_t Interpreter::run(IRuntime *rt)
         this->ip += this->fetch(this->rt->text() + this->ip);
         this->exec();
     }
-    if (this->config_error_metadata_v && this->state == InterpreterState::Error)
+    if (this->config_error_metadata_v && this->state == InterpreterState::Error && !this->rt->error_metadata())
     {
-        if (!this->rt->error_metadata())
+        LuaValue e = this->rt->get_error();
+        if (e.kind == LuaType::LVString)
         {
-            LuaValue e = this->rt->get_error();
-            if (e.kind == LuaType::LVString)
-            {
-                this->rt->set_error(this->error_add_meta(e));
-                this->rt->error_metadata(true);
-            }
+            this->rt->set_error(this->error_add_meta(e));
+            this->rt->error_metadata(true);
         }
     }
     size_t retc = this->retc;
@@ -553,8 +550,12 @@ void Interpreter::i_pop()
 void Interpreter::generate_error(Lerror error)
 {
     LuaValue errval = this->error_to_string(error);
+    if (this->config_error_metadata_v)
+        errval = this->error_add_meta(errval);
     this->state = InterpreterState::Error;
     this->rt->set_error(errval);
+    if (this->config_error_metadata_v)
+        this->rt->error_metadata(true);
 }
 LuaValue Interpreter::error_to_string(Lerror error)
 {
