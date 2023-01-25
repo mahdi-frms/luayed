@@ -45,6 +45,7 @@ public:
     size_t hookmax = 0;
     size_t parcount = 0;
     fidx_t fidx = 0;
+    LuaValue chunckname;
 
     lbyte *text();
     Upvalue *ups();
