@@ -113,6 +113,7 @@ public:
     {
         const char *suffix = "(execution)";
         Interpreter intp;
+        intp.config_error_metadata(false);
         try
         {
             for (size_t i = 0; i < opcodes.size(); i++)
