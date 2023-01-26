@@ -63,7 +63,7 @@ void repl()
         std::cout << "> ";
         std::flush(std::cout);
         if (!std::getline(std::cin, input))
-            return;
+            break;
         if (input.length() == 0)
             continue;
         string exp = string("print(") + input + string(")");
@@ -82,6 +82,7 @@ void repl()
             execute(&lua);
         }
     }
+    std::cout << "\n";
 }
 
 int main(int argc, char **argv)
