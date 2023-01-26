@@ -22,9 +22,9 @@ string readfile(const char *path)
     return str;
 }
 
-bool execute(Lua *lua)
+bool execute(Lua *lua, size_t argc = 0)
 {
-    lua->call(0, 1);
+    lua->call(argc, 1);
     if (lua->has_error())
     {
         lua->push_error();
@@ -37,14 +37,17 @@ bool execute(Lua *lua)
     }
 }
 
-bool runfile(const char *path)
+bool runfile(int argc, char **argv)
 {
+    const char *script = argv[1];
     Lua lua;
-    string text = readfile(path);
+    string text = readfile(script);
     string errors;
-    if (lua.compile(text.c_str(), errors, path) == LUA_COMPILE_RESULT_OK)
+    if (lua.compile(text.c_str(), errors, script) == LUA_COMPILE_RESULT_OK)
     {
-        return execute(&lua);
+        for (int i = 2; i < argc; i++)
+            lua.push_string(argv[i]);
+        return execute(&lua, argc - 2);
     }
     else
     {
@@ -93,8 +96,7 @@ int main(int argc, char **argv)
     }
     else
     {
-        for (int i = 1; i < argc; i++)
-            runfile(argv[i]);
+        runfile(argc, argv);
     }
     return 0;
 }
