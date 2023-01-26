@@ -28,6 +28,6 @@ LuaValue::LuaValue()
 
 void crash(string message)
 {
-    std::cerr << message << "\n";
+    std::cerr << "LUAYED CRASH: " << message << "\n";
     exit(1);
 }

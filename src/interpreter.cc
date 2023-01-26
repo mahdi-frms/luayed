@@ -257,21 +257,27 @@ void Interpreter::i_neg()
 
 void Interpreter::i_bor()
 {
+    crash("binary or not implemented yet!");
 }
 void Interpreter::i_band()
 {
+    crash("binary and not implemented yet!");
 }
 void Interpreter::i_bxor()
 {
+    crash("binary xor not implemented yet!");
 }
 void Interpreter::i_bnot()
 {
+    crash("binary not not implemented yet!");
 }
 void Interpreter::i_shr()
 {
+    crash("binary right-shift not implemented yet!");
 }
 void Interpreter::i_shl()
 {
+    crash("binary left-shift not implemented yet!");
 }
 
 void Interpreter::i_not()
