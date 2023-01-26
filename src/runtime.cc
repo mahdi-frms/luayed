@@ -104,14 +104,14 @@ LuaValue LuaRuntime::create_table()
     val.data.ptr = tp;
     return val;
 }
-bool LuaRuntime::table_check(LuaValue t, LuaValue k)
+bool LuaRuntime::table_check(LuaValue t, LuaValue k, bool is_set)
 {
     if (t.kind != LuaType::LVTable)
     {
         this->set_error(this->error_to_string(error_illegal_index(t.kind)));
         return false;
     }
-    if (k.kind == LuaType::LVNil)
+    if (is_set && k.kind == LuaType::LVNil)
     {
         this->set_error(this->error_to_string(error_nil_index()));
         return false;
@@ -120,14 +120,16 @@ bool LuaRuntime::table_check(LuaValue t, LuaValue k)
 }
 void LuaRuntime::table_set(LuaValue t, LuaValue k, LuaValue v)
 {
-    if (!this->table_check(t, k))
+    if (!this->table_check(t, k, true))
         return;
     Table *tp = t.as<Table *>();
     tp->set(k, v);
 }
 LuaValue LuaRuntime::table_get(LuaValue t, LuaValue k)
 {
-    if (!this->table_check(t, k))
+    if (!this->table_check(t, k, false))
+        return this->create_nil();
+    if (k.kind == LuaType::LVNil)
         return this->create_nil();
     const Table *tp = t.as<const Table *>();
     LuaValue v = tp->get(k);

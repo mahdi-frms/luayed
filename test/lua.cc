@@ -360,8 +360,8 @@ void lua_tests()
 
     lua_test_case_error(
         "error: nil index",
-        "local t = {}"
-        "return t[nil]",
+        "local t = { [nil] = 8 }"
+        "return",
 
         to_string(error_nil_index(), true));
 
