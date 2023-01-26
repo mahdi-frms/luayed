@@ -365,6 +365,15 @@ void lua_tests()
 
         to_string(error_nil_index(), true));
 
+    lua_test_case(
+        "error: nil index",
+        "local t = {}"
+        "return t[nil]",
+
+        {
+            lvnil(),
+        });
+
     lua_test_case_error(
         "error: illegal indexing",
         "return (4)['key']",
