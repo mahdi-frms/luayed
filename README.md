@@ -43,6 +43,7 @@ $ ./build/luaytest
 
 Luayed is still under development, and currently misses the following features:
 
++ Binary operators
 + Goto-lables
 + Variable attributes
 + Standard library
