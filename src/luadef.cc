@@ -25,3 +25,9 @@ LuaValue::LuaValue()
 {
     this->kind = LuaType::LVNil;
 }
+
+void crash(string message)
+{
+    std::cerr << message << "\n";
+    exit(1);
+}

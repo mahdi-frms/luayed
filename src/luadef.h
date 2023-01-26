@@ -63,4 +63,6 @@ struct Hook
 bool operator==(const LuaValue &v1, const LuaValue &v2);
 bool operator!=(const LuaValue &v1, const LuaValue &v2);
 
+void crash(string message);
+
 #endif
