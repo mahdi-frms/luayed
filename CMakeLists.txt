@@ -4,8 +4,8 @@ project(luayed VERSION 0.1.0)
 
 add_custom_command(
     OUTPUT liblua.cc
-    COMMAND lua ../loadlib.lua
-    DEPENDS loadlib.lua
+    COMMAND lua ../scripts/loadlib.lua
+    DEPENDS scripts/loadlib.lua
 )
 
 add_library(luacomp
