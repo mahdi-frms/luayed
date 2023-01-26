@@ -13,6 +13,7 @@ Lua::Lua() : runtime(&this->interpreter)
 }
 int Lua::compile(const char *lua_code, string &errors, const char *chunkname)
 {
+    errors.clear();
     Lexer lexer(lua_code);
     Parser parser(&lexer);
     Ast ast = parser.parse();

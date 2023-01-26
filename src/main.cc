@@ -22,6 +22,21 @@ string readfile(const char *path)
     return str;
 }
 
+bool execute(Lua *lua)
+{
+    lua->call(0, 1);
+    if (lua->has_error())
+    {
+        lua->push_error();
+        std::cerr << "lua: " << luastd::luavalue_to_string(lua) << "\n";
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
 bool runfile(const char *path)
 {
     Lua lua;
@@ -29,17 +44,7 @@ bool runfile(const char *path)
     string errors;
     if (lua.compile(text.c_str(), errors, path) == LUA_COMPILE_RESULT_OK)
     {
-        lua.call(0, 1);
-        if (lua.has_error())
-        {
-            lua.push_error();
-            std::cerr << "lua: " << luastd::luavalue_to_string(&lua) << "\n";
-            return false;
-        }
-        else
-        {
-            return true;
-        }
+        return execute(&lua);
     }
     else
     {
@@ -48,10 +53,47 @@ bool runfile(const char *path)
     }
 }
 
+void repl()
+{
+    const char *chunkname = "[line]";
+    Lua lua;
+    while (1)
+    {
+        string input;
+        std::cout << "> ";
+        std::flush(std::cout);
+        if (!std::getline(std::cin, input))
+            return;
+        if (input.length() == 0)
+            continue;
+        string exp = string("print(") + input + string(")");
+        string errors;
+        int rsl = lua.compile(exp.c_str(), errors, chunkname);
+        if (rsl == LUA_COMPILE_RESULT_FAILED)
+        {
+            rsl = lua.compile(input.c_str(), errors, chunkname);
+        }
+        if (rsl == LUA_COMPILE_RESULT_FAILED)
+        {
+            std::cerr << errors << "\n";
+        }
+        else
+        {
+            execute(&lua);
+        }
+    }
+}
+
 int main(int argc, char **argv)
 {
     if (argc == 1)
-        return 1;
-    runfile(argv[1]);
+    {
+        repl();
+    }
+    else
+    {
+        for (int i = 1; i < argc; i++)
+            runfile(argv[i]);
+    }
     return 0;
 }
