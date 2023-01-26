@@ -168,7 +168,7 @@ bool is_loop(NodeKind kind)
 void Resolver::analyze_break(Noderef node)
 {
     Noderef it = this->current;
-    while (!is_loop(it->get_kind()))
+    while (it && !is_loop(it->get_kind()))
         it = scope(it)->parent;
     if (!it)
     {
