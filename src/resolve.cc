@@ -1,6 +1,8 @@
 #include "resolve.h"
 
 #define scope(N) ((MetaScope *)N->getannot(MetaKind::MScope))
+#define mdgoto(N) ((MetaGoto *)N->getannot(MetaKind::MGoto))
+#define mdlabel(N) ((MetaLabel *)N->getannot(MetaKind::MLabel))
 #define map(N) (*((Varmap *)(scope(N)->map)))
 #define mem(N) ((MetaMemory *)N->getannot(MetaKind::MMemory))
 #define is_meth(N) (N->get_kind() == NodeKind::MethodBody)
@@ -9,7 +11,6 @@ vector<Lerror> Resolver::analyze()
 {
     this->current = nullptr;
     this->analyze_node(ast.root());
-    this->finalize();
     return std::move(this->errors);
 }
 void Resolver::analyze_var_decl(Noderef node)
@@ -152,6 +153,7 @@ void Resolver::analyze_etc(Noderef node)
     }
     if (new_scope)
     {
+        this->link_labels();
         MetaScope *sc = this->curscope();
         delete (Varmap *)sc->map;
         delete (Varmap *)sc->lmap;
@@ -251,27 +253,31 @@ void Resolver::analyze_declaration(Noderef node)
     }
 }
 
-void Resolver::finalize()
+void Resolver::link_labels()
 {
-    while (gotolist.size())
+    MetaScope *sc = this->curscope();
+    Varmap *labels = (Varmap *)sc->lmap;
+    Noderef gotolist = sc->gotolist;
+    while (gotolist)
     {
-        Noderef node = gotolist.back();
-        string name = node->child(0)->get_token().text();
-        if (this->labels.find(name) != this->labels.cend())
+        Noderef node = gotolist;
+        string name = node->get_token().text();
+        auto lptr = labels->find(name);
+        if (lptr != labels->cend())
         {
-            MetaLabel *label = new MetaLabel;
-            label->header.next = nullptr;
-            label->header.kind = MetaKind::MLabel;
-            label->label_node = node;
-            node->annotate(&label->header);
+            Noderef lnode = lptr->second;
+            MetaLabel *lmd = mdlabel(lnode);
+            MetaGoto *gmd = mdgoto(node);
+            gmd->label = lnode;
+            gmd->next = lmd->go_to;
+            lmd->go_to = node;
         }
         else
         {
             // todo: generate error
         }
-        gotolist.pop_back();
+        gotolist = mdgoto(gotolist)->next;
     }
-    this->labels.clear();
 }
 
 Resolver::Resolver(Ast ast) : ast(ast)

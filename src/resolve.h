@@ -24,7 +24,7 @@ private:
     void analyze_declaration(Noderef node);
     void reference(Noderef node, Noderef dec, bool func_past);
     void self_ref(Noderef node);
-    void finalize();
+    void link_labels();
     MetaScope *curscope();
     Varmap &curmap();
 
