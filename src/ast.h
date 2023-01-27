@@ -10,6 +10,12 @@ extern const char *node_names[34];
 #define is_call(N) ((N)->get_kind() == NodeKind::Call || (N)->get_kind() == NodeKind::MethodCall)
 #define is_vargs(N) ((N)->get_kind() == NodeKind::Primary && (N)->get_token().kind == TokenKind::DotDotDot)
 
+#define scope(N) ((MetaScope *)N->getannot(MetaKind::MScope))
+#define mdgoto(N) ((MetaGoto *)N->getannot(MetaKind::MGoto))
+#define mdlabel(N) ((MetaLabel *)N->getannot(MetaKind::MLabel))
+#define mem(N) ((MetaMemory *)N->getannot(MetaKind::MMemory))
+#define is_meth(N) (N->get_kind() == NodeKind::MethodBody)
+
 namespace ast
 {
     enum NodeKind

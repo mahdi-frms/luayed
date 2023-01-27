@@ -920,6 +920,30 @@ void Compiler::compile_break()
     this->emit(Opcode(Instruction::IJmp, 0));
 }
 
+void Compiler::compile_goto(Noderef node)
+{
+    MetaGoto *gtmd = mdgoto(node);
+    Noderef label = gtmd->label;
+    MetaLabel *lmd = mdlabel(label);
+    gtmd->is_compiled = true;
+    gtmd->address = this->len();
+    this->emit(Opcode(Instruction::IJmp, lmd->is_compiled ? lmd->address : 0));
+}
+void Compiler::compile_label(Noderef node)
+{
+    MetaLabel *lmd = mdlabel(node);
+    lmd->is_compiled = true;
+    lmd->address = this->len();
+    Noderef go_to = lmd->go_to;
+    while (go_to)
+    {
+        MetaGoto *gtmd = mdgoto(go_to);
+        if (gtmd->is_compiled)
+            this->edit_jmp(gtmd->address, lmd->address);
+        go_to = gtmd->next;
+    }
+}
+
 void Compiler::compile_node(Noderef node)
 {
     if (node->get_kind() == NodeKind::AssignStmt)
@@ -944,8 +968,12 @@ void Compiler::compile_node(Noderef node)
         this->compile_generic_for(node);
     else if (node->get_kind() == NodeKind::BreakStmt)
         this->compile_break();
+    else if (node->get_kind() == NodeKind::GotoStmt)
+        this->compile_goto(node);
+    else if (node->get_kind() == NodeKind::LabelStmt)
+        this->compile_label(node);
     else
-        exit(4);
+        crash("can't compile node");
 }
 
 size_t Compiler::const_number(lnumber n)

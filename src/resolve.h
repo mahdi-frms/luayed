@@ -8,6 +8,8 @@ using namespace ast;
 
 typedef std::map<std::string, Noderef> Varmap;
 
+#define map(N) (*((Varmap *)(scope(N)->map)))
+
 class Resolver
 {
 private:

@@ -1,12 +1,5 @@
 #include "resolve.h"
 
-#define scope(N) ((MetaScope *)N->getannot(MetaKind::MScope))
-#define mdgoto(N) ((MetaGoto *)N->getannot(MetaKind::MGoto))
-#define mdlabel(N) ((MetaLabel *)N->getannot(MetaKind::MLabel))
-#define map(N) (*((Varmap *)(scope(N)->map)))
-#define mem(N) ((MetaMemory *)N->getannot(MetaKind::MMemory))
-#define is_meth(N) (N->get_kind() == NodeKind::MethodBody)
-
 vector<Lerror> Resolver::analyze()
 {
     this->current = nullptr;
