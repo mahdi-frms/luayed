@@ -193,6 +193,13 @@ void Resolver::analyze_label(Noderef node)
     else
     {
         (*labels)[name] = node;
+        MetaLabel *lmd = new MetaLabel;
+        lmd->header.kind = MetaKind::MLabel;
+        lmd->header.next = nullptr;
+        lmd->is_compiled = false;
+        lmd->go_to = nullptr;
+        lmd->address = 0;
+        node->annotate(&lmd->header);
     }
 }
 
