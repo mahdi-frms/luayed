@@ -173,9 +173,9 @@ void Resolver::analyze_break(Noderef node)
     if (!it)
     {
         Lerror err = error_breake_outside_loop();
-        // todo : BreakStmt node must include the token
-        err.line = 0;
-        err.offset = 0;
+        Token tkn = node->get_token();
+        err.line = tkn.line;
+        err.offset = tkn.offset;
         this->errors.push_back(err);
     }
 }

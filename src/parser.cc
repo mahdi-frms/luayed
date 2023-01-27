@@ -330,8 +330,8 @@ Noderef Parser::statement()
     }
     if (this->peek().kind == TokenKind::Break)
     {
-        this->pop();
-        return Ast::make(NodeKind::BreakStmt);
+        Token tkn = this->pop();
+        return Ast::make(tkn, NodeKind::BreakStmt);
     }
     if (this->peek().kind == TokenKind::Goto)
     {
