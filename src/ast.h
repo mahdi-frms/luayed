@@ -85,7 +85,18 @@ namespace ast
     struct MetaLabel
     {
         MetaNode header;
-        Noderef label_node;
+        Noderef go_to;
+        size_t address;
+        bool is_compiled;
+    };
+
+    struct MetaGoto
+    {
+        MetaNode header;
+        size_t address;
+        bool is_compiled;
+        Noderef label;
+        Noderef next;
     };
 
     struct MetaMemory
