@@ -143,6 +143,7 @@ void Resolver::analyze_etc(Noderef node)
         sc->stack_size = is_meth(node) ? 1 : 0;
         sc->fidx = 0;
         sc->upvalue_size = 0;
+        sc->gotolist = nullptr;
 
         this->current = node;
     }
@@ -261,22 +262,24 @@ void Resolver::link_labels()
     while (gotolist)
     {
         Noderef node = gotolist;
+        MetaGoto *gmd = mdgoto(node);
+        Noderef next = gmd->next;
         string name = node->get_token().text();
         auto lptr = labels->find(name);
         if (lptr != labels->cend())
         {
             Noderef lnode = lptr->second;
             MetaLabel *lmd = mdlabel(lnode);
-            MetaGoto *gmd = mdgoto(node);
             gmd->label = lnode;
             gmd->next = lmd->go_to;
             lmd->go_to = node;
         }
         else
         {
+            gmd->next = nullptr;
             // todo: generate error
         }
-        gotolist = mdgoto(gotolist)->next;
+        gotolist = next;
     }
 }
 
