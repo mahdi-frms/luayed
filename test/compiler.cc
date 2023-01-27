@@ -2154,4 +2154,30 @@ void compiler_tests()
             iret(0),     // 59
         })
         .test_debug_info(40, 6);
+
+    compiler_test_case(
+        "goto & label",
+
+        "::L::\n"
+        "goto L")
+
+        .test_fn(1)
+        .test_opcodes({
+            ijmp(0),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "goto before label",
+
+        "goto L"
+        "::L::\n"
+        "goto L")
+
+        .test_fn(1)
+        .test_opcodes({
+            ijmp(3),
+            ijmp(3),
+            iret(0),
+        });
 }
