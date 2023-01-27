@@ -59,6 +59,7 @@ enum TokenKind
     RightBracket = 0x0003,
     RightParen = 0x0004,
     RightBrace = 0x0005,
+    Then = 0x0006,
     // keyword
     ColonColon = 0x2000,
     Semicolon = 0x2001,
@@ -72,12 +73,11 @@ enum TokenKind
     If = 0x2009,
     Else = 0x200a,
     ElseIf = 0x200b,
-    Then = 0x200c,
-    For = 0x200d,
-    In = 0x200e,
-    Function = 0x200f,
-    Local = 0x2010,
-    Return = 0x2011,
+    For = 0x200c,
+    In = 0x200d,
+    Function = 0x200e,
+    Local = 0x200f,
+    Return = 0x2010,
 
     Eof = 0x1000,
 
