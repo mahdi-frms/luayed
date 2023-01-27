@@ -11,8 +11,6 @@ typedef std::map<std::string, Noderef> Varmap;
 class Resolver
 {
 private:
-    Varmap labels;
-    vector<Noderef> gotolist;
     vector<Lerror> errors;
     Ast ast;
     Noderef current;

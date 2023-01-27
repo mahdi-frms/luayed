@@ -62,6 +62,7 @@ namespace ast
         MLabel = 2,
         MScope = 3,
         MSelf = 4,
+        MGoto = 5,
     };
 
     struct MetaNode
@@ -117,6 +118,8 @@ namespace ast
         size_t upvalue_size;
         bool variadic;
         void *map;
+        void *lmap;
+        Noderef gotolist;
         fidx_t fidx;
     };
 

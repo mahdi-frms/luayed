@@ -136,6 +136,7 @@ void Resolver::analyze_etc(Noderef node)
             sc->func = node;
 
         sc->map = new Varmap();
+        sc->lmap = new Varmap();
         sc->variadic = node == this->ast.root();
         sc->parent = this->current;
         sc->stack_size = is_meth(node) ? 1 : 0;
@@ -153,6 +154,7 @@ void Resolver::analyze_etc(Noderef node)
     {
         MetaScope *sc = this->curscope();
         delete (Varmap *)sc->map;
+        delete (Varmap *)sc->lmap;
         this->current = sc->parent;
     }
 }
@@ -182,14 +184,15 @@ void Resolver::analyze_break(Noderef node)
 
 void Resolver::analyze_label(Noderef node)
 {
-    string name = node->child(0)->get_token().text();
-    if (this->labels.find(name) != this->labels.cend())
+    string name = node->get_token().text();
+    Varmap *labels = (Varmap *)this->curscope()->lmap;
+    if (labels->find(name) != labels->cend())
     {
         // todo: generate error
     }
     else
     {
-        this->labels[name] = node;
+        (*labels)[name] = node;
     }
 }
 
@@ -198,7 +201,19 @@ void Resolver::analyze_node(Noderef node)
     if (node->get_kind() == NodeKind::LabelStmt)
         this->analyze_label(node);
     else if (node->get_kind() == NodeKind::GotoStmt)
-        gotolist.push_back(node);
+    {
+        MetaScope *fnmd = scope(this->curscope()->func);
+        Noderef gotolist = fnmd->gotolist;
+        MetaGoto *gtmd = new MetaGoto;
+        gtmd->header.kind = MetaKind::MGoto;
+        gtmd->header.next = nullptr;
+        gtmd->address = 0;
+        gtmd->is_compiled = false;
+        gtmd->label = nullptr;
+        gtmd->next = gotolist;
+        fnmd->gotolist = node;
+        node->annotate(&gtmd->header);
+    }
     else if (node->get_kind() == NodeKind::VarDecl)
         this->analyze_var_decl(node);
     else if (node->get_kind() == NodeKind::Declaration)
