@@ -5,7 +5,16 @@ project(luayed VERSION 0.1.0)
 add_custom_command(
     OUTPUT liblua.cc
     COMMAND lua ../scripts/loadlib.lua
-    DEPENDS scripts/loadlib.lua
+    DEPENDS scripts/loadlib.lua lib/luastd.cc
+)
+
+add_library(luaystd
+    lib/luastd.cc
+    build/liblua.cc    
+)
+
+add_library(luaydbg
+    debug/gc-inspector.cc
 )
 
 add_library(luayed
@@ -27,16 +36,13 @@ add_library(luayed
     src/table.cc
     src/hash.cc
     src/lua.cc
-    lib/luastd.cc
-    build/liblua.cc    
-    debug/gc-inspector.cc
 )
     
-add_executable(luayed-bin
+add_executable(luaycli
     bin/main.cc
 )
 
-set_target_properties(luayed-bin
+set_target_properties(luaycli
         PROPERTIES OUTPUT_NAME luayed)
     
 add_executable(luaytest
@@ -52,7 +58,9 @@ add_executable(luaytest
     dep/tap/tap.c
 )
 
-target_link_libraries(luayed-bin luayed)
+target_link_libraries(luayed luaystd)
+target_link_libraries(luayed luaydbg)
+target_link_libraries(luaycli luayed)
 target_link_libraries(luaytest luayed)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall")
