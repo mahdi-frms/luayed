@@ -4,6 +4,9 @@
 #include <cmath>
 #include "lexer.h"
 
+#define LUA_MAX_INTEGER 9223372036854775807
+#define LUA_MIN_INTEGER -9223372036854775807
+
 opimpl Interpreter::optable[256] = {};
 bool Interpreter::is_initialized = false;
 
@@ -255,10 +258,15 @@ void Interpreter::i_neg()
     LuaValue num = this->rt->create_number(-a.data.n);
     this->rt->stack_push(num);
 }
-lnumber Interpreter::bin_calc(Calculation bin, lnumber a, lnumber b)
+uint64_t Interpreter::bin_calc(Calculation bin, uint64_t a, uint64_t b)
 {
     return 0;
 }
+bool Interpreter::check_whole(lnumber num)
+{
+    return floor(num) == num && num <= LUA_MAX_INTEGER && num >= LUA_MAX_INTEGER;
+}
+
 void Interpreter::binary(Calculation bin)
 {
     LuaValue b = this->rt->stack_pop();
@@ -267,7 +275,11 @@ void Interpreter::binary(Calculation bin)
         this->generate_error(error_invalid_operand(a.kind));
     if (b.kind != LuaType::LVNumber)
         this->generate_error(error_invalid_operand(b.kind));
-    lnumber n = this->bin_calc(bin, a.data.n, b.data.n);
+    if (!this->check_whole(a.data.n))
+        this->generate_error(error_ok()); // todo
+    if (!this->check_whole(b.data.n))
+        this->generate_error(error_ok()); // todo
+    lnumber n = this->bin_calc(bin, (uint64_t)a.data.n, (uint64_t)b.data.n);
     LuaValue v = this->rt->create_number(n);
     this->rt->stack_push(v);
 }
