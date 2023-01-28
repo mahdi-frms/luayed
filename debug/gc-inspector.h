@@ -2,19 +2,19 @@
 #define GC_INSPECTOR_H
 
 #include "../src/runtime.h"
+#include <map>
 
 class GCInspector
 {
 private:
-    int depth = 0;
     string cur_label = "";
-    string indent(int indent_diff = 0);
+    std::map<void *, int> refmap;
+    int id = 1;
 
 public:
-    void obj(void *ptr, AllocType ty, bool is_new);
-    void obj();
+    void child(void *ptr, AllocType ty, bool is_new);
+    void obj(void *ptr);
     void label(const char *label);
-    void end_of_obj();
 };
 
 #endif

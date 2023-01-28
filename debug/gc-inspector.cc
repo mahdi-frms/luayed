@@ -3,8 +3,18 @@
 
 std::ostream &gc_dbg_output = std::cout;
 
-void GCInspector::obj(void *ptr, AllocType ty, bool is_new)
+void GCInspector::child(void *ptr, AllocType ty, bool is_new)
 {
+    int id = 0;
+    if (this->refmap.find(ptr) != this->refmap.cend())
+    {
+        id = this->refmap[ptr];
+    }
+    else
+    {
+        id = this->id++;
+        this->refmap[ptr] = id;
+    }
     const char *tynames[] = {
         [AllocType::ATHook] = "hook",
         [AllocType::ATString] = "string",
@@ -12,27 +22,17 @@ void GCInspector::obj(void *ptr, AllocType ty, bool is_new)
         [AllocType::ATFunction] = "function",
         [AllocType::ATBinary] = "binary",
     };
-    gc_dbg_output << this->indent(-1) << this->cur_label << ":\n";
-    gc_dbg_output << this->indent() << tynames[ty] << " (" << ptr << ")";
+    gc_dbg_output << this->cur_label << ":\n";
+    gc_dbg_output << "\t" << tynames[ty] << " (" << id << ")";
     if (!is_new)
         gc_dbg_output << " -- already visited";
     gc_dbg_output << "\n";
-    this->depth++;
 }
-void GCInspector::obj()
+void GCInspector::obj(void *ptr)
 {
-    gc_dbg_output << "Runtime:\n";
-    this->depth++;
+    gc_dbg_output << "obj(  " << this->refmap[ptr] << " )";
 }
 void GCInspector::label(const char *label)
 {
     this->cur_label = string(label);
-}
-void GCInspector::end_of_obj()
-{
-    this->depth--;
-}
-string GCInspector::indent(int indent_diff)
-{
-    return string(4 * this->depth - indent_diff, ' ');
 }
