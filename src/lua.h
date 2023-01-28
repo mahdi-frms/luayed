@@ -14,6 +14,11 @@
 #define LUA_TYPE_TABLE 4
 #define LUA_TYPE_FUNCTION 5
 
+struct LuaConfig
+{
+    bool load_stdlib = true;
+};
+
 class Lua;
 
 typedef size_t (*LuaCppFunction)(Lua *);
@@ -25,7 +30,7 @@ private:
     Interpreter interpreter;
 
 public:
-    Lua();
+    Lua(LuaConfig conf = LuaConfig());
     int compile(const char *lua_code, string &errors, const char *chunkname = nullptr);
     void push_cppfn(LuaCppFunction cppfn);
     void push_string(const char *str);

@@ -6,10 +6,11 @@
 #include "lstrep.h"
 #include "luastd.h"
 
-Lua::Lua() : runtime(&this->interpreter)
+Lua::Lua(LuaConfig conf) : runtime(&this->interpreter)
 {
     this->runtime.set_lua_interface(this);
-    luastd::libinit(this);
+    if (conf.load_stdlib)
+        luastd::libinit(this);
 }
 int Lua::compile(const char *lua_code, string &errors, const char *chunkname)
 {
