@@ -8,7 +8,7 @@ add_custom_command(
     DEPENDS scripts/loadlib.lua
 )
 
-add_library(luacomp
+add_library(luayed
     src/lexer.cc
     src/ast.cc
     src/parser.cc
@@ -29,12 +29,15 @@ add_library(luacomp
     debug/gc-inspector.cc
 )
     
-add_executable(luayed
+add_executable(luayed-bin
     build/liblua.cc    
     src/main.cc
     src/luastd.cc
     src/lua.cc
 )
+
+set_target_properties(luayed-bin
+        PROPERTIES OUTPUT_NAME luayed)
     
 add_executable(luaytest
     test/lexer.cc
@@ -49,8 +52,8 @@ add_executable(luaytest
     dep/tap/tap.c
 )
 
-target_link_libraries(luayed luacomp)
-target_link_libraries(luaytest luacomp)
+target_link_libraries(luayed-bin luayed)
+target_link_libraries(luaytest luayed)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall")
 
