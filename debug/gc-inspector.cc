@@ -46,7 +46,6 @@ void GCInspector::child(void *ptr, AllocType ty, bool is_new)
 }
 void GCInspector::obj(void *ptr)
 {
-    gc_dbg_output << inspect_linebeg << "\n";
     gc_dbg_output << inspect_linebeg << "expanding (" << this->refmap[ptr] << ")\n";
 }
 void GCInspector::label(const char *label)
@@ -75,5 +74,5 @@ void GCInspector::dealloc(void *ptr, AllocType ty)
 void GCInspector::keep(void *ptr)
 {
     gc_dbg_output << inspect_linebeg;
-    gc_dbg_output << " keeping (" << this->refmap[ptr] << ")\n";
+    gc_dbg_output << "keeping (" << this->refmap[ptr] << ")\n";
 }
