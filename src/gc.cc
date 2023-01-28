@@ -12,7 +12,7 @@ GCInspector inspector;
 void GarbageCollector::scan(gc_header_t *obj)
 {
 #ifdef GC_DEBUG
-    inspector.obj(gcheadptr(obj, void));
+    inspector.obj(obj + 1);
 #endif
     if (obj->alloc_type == AllocType::ATHook)
         this->scan(gcheadptr(obj, Hook));
@@ -199,10 +199,17 @@ void GarbageCollector::sweep(LuaRuntime *rt)
         gc_header_t *next = hdptr->next;
         if (hdptr->marked)
         {
+
+#ifdef GC_DEBUG
+            inspector.keep(hdptr + 1);
+#endif
             hdptr->marked = false;
         }
         else
         {
+#ifdef GC_DEBUG
+            inspector.dealloc(hdptr + 1, hdptr->alloc_type);
+#endif
             rt->deallocate(hdptr);
         }
         hdptr = next;

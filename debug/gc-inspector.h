@@ -17,6 +17,9 @@ public:
     void obj(void *ptr);
     void label(const char *label);
 
+    void keep(void *ptr);
+    void dealloc(void *ptr, AllocType ty);
+
     void init();
 };
 
