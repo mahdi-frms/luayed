@@ -1,8 +1,8 @@
 #include <iostream>
 #include <cstring>
-#include "lua.h"
-#include "lstrep.h"
-#include "luastd.h"
+#include <lua.h>
+#include <lstrep.h>
+#include <luastd.h>
 
 string readfile(const char *path)
 {

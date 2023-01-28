@@ -33,7 +33,7 @@ add_library(luayed
 )
     
 add_executable(luayed-bin
-    src/main.cc
+    bin/main.cc
 )
 
 set_target_properties(luayed-bin
