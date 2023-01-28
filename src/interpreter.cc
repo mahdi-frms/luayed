@@ -258,7 +258,7 @@ void Interpreter::i_neg()
     LuaValue num = this->rt->create_number(-a.data.n);
     this->rt->stack_push(num);
 }
-uint64_t Interpreter::bin_calc(Calculation bin, uint64_t a, uint64_t b)
+int64_t Interpreter::bin_calc(Calculation bin, int64_t a, int64_t b)
 {
     if (bin == Calculation::CalcAnd)
         return a & b;
@@ -276,7 +276,7 @@ uint64_t Interpreter::bin_calc(Calculation bin, uint64_t a, uint64_t b)
 }
 bool Interpreter::check_whole(lnumber num)
 {
-    return floor(num) == num && num <= LUA_MAX_INTEGER && num >= LUA_MAX_INTEGER;
+    return floor(num) == num && num <= LUA_MAX_INTEGER && num >= LUA_MIN_INTEGER;
 }
 
 void Interpreter::binary(Calculation bin)
@@ -299,7 +299,7 @@ void Interpreter::binary(Calculation bin)
             return this->generate_error(error_integer_representation());
     }
 
-    lnumber n = (lnumber)this->bin_calc(bin, (uint64_t)a.data.n, (uint64_t)b.data.n);
+    lnumber n = (lnumber)this->bin_calc(bin, (int64_t)a.data.n, (int64_t)b.data.n);
     LuaValue v = this->rt->create_number(n);
     this->rt->stack_push(v);
 }

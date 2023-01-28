@@ -84,7 +84,7 @@ private:
     void arith(Calculation ar);
     void binary(Calculation bin);
     lnumber arith_calc(Calculation ar, lnumber a, lnumber b);
-    uint64_t bin_calc(Calculation bin, uint64_t a, uint64_t b);
+    int64_t bin_calc(Calculation bin, int64_t a, int64_t b);
     LuaValue parse_number(const char *str);
     LuaValue concat(LuaValue s1, LuaValue s2);
     LuaValue error_to_string(Lerror error);
