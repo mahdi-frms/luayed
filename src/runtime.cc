@@ -76,7 +76,7 @@ LuaValue LuaRuntime::create_string(const char *s1, const char *s2)
     size_t slen1 = strlen(s1);
     size_t slen2 = strlen(s2);
     size_t strsize = sizeof(lstr_t) + slen1 + slen2 + 1;
-    lstr_p str = (lstr_p)this->allocate(strsize, AllocType::ATString);
+    lstr_p str = (lstr_p)this->allocate_raw(strsize);
     strcpy((char *)str->cstr(), s1);
     strcpy((char *)(str->cstr() + slen1), s2);
     *(char *)(str->cstr() + slen1 + slen2) = '\0';
@@ -85,10 +85,15 @@ LuaValue LuaRuntime::create_string(const char *s1, const char *s2)
     lstr_p *p = this->lstrset.get(str);
     if (p)
     {
+        this->deallocate_raw(str);
         str = *p;
     }
     else
     {
+        lstr_p astr = (lstr_p)this->allocate(strsize, AllocType::ATString);
+        memcpy(astr, str, strsize);
+        this->deallocate_raw(str);
+        str = astr;
         this->lstrset.insert(str);
     }
     val.data.ptr = (void *)str->cstr();
