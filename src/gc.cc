@@ -1,11 +1,9 @@
 #include "gc.h"
-#include "../debug/gc-inspector.h"
 
 #define gcheadptr(GCH, T) ((T *)(GCH + 1))
 
-#define GC_DEBUG
-
 #ifdef GC_DEBUG
+#include "../debug/gc-inspector.h"
 GCInspector inspector;
 #endif
 
