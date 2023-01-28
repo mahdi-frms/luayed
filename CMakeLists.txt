@@ -26,6 +26,7 @@ add_library(luacomp
     src/generator.cc
     src/table.cc
     src/hash.cc
+    debug/gc-inspector.cc
 )
     
 add_executable(luayed
