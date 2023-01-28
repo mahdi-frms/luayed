@@ -63,7 +63,11 @@ void GarbageCollector::scan()
             this->value(frame->error);
         this->value(frame->fn);
         for (size_t i = 0; i < frame->hookptr; i++)
-            this->reference(frame->hooktable()[i]);
+        {
+            Hook *hook = frame->hooktable()[i];
+            if (hook)
+                this->reference(hook);
+        }
         for (size_t i = 0; i < frame->sp; i++)
             this->value(frame->stack()[i]);
         frame = frame->prev;
