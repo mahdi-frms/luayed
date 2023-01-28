@@ -23,15 +23,23 @@ enum class Comparison
     LE
 };
 
-enum class Arithmetic
+enum class Calculation
 {
-    ArAdd,
-    ArSub,
-    ArMult,
-    ArFlrDiv,
-    ArFltDiv,
-    ArMod,
-    ArPow,
+    // Arithmetic
+    CalcAdd,
+    CalcSub,
+    CalcMult,
+    CalcFlrDiv,
+    CalcFltDiv,
+    CalcMod,
+    CalcPow,
+    // Binary
+    CalcOr,
+    CalcAnd,
+    CalcXor,
+    CalcNot,
+    CalcSHR,
+    CalcSHL,
 };
 
 class Interpreter : public IInterpreter
@@ -72,8 +80,10 @@ private:
     bool compare_string(LuaValue &a, LuaValue &b, Comparison cmp);
     LuaValue hookread(Hook *hook);
     void hookwrite(Hook *hook, LuaValue value);
-    void arith(Arithmetic ar);
-    lnumber arith_calc(Arithmetic ar, lnumber a, lnumber b);
+    void arith(Calculation ar);
+    void binary(Calculation bin);
+    lnumber arith_calc(Calculation ar, lnumber a, lnumber b);
+    lnumber bin_calc(Calculation bin, lnumber a, lnumber b);
     LuaValue parse_number(const char *str);
     LuaValue concat(LuaValue s1, LuaValue s2);
     LuaValue error_to_string(Lerror error);

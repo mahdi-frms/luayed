@@ -157,21 +157,21 @@ void Interpreter::push_bool(bool b)
     this->rt->stack_push(this->rt->create_boolean(b));
 }
 
-lnumber Interpreter::arith_calc(Arithmetic ar, lnumber a, lnumber b)
+lnumber Interpreter::arith_calc(Calculation ar, lnumber a, lnumber b)
 {
-    if (ar == Arithmetic::ArAdd)
+    if (ar == Calculation::CalcAdd)
         return a + b;
-    if (ar == Arithmetic::ArSub)
+    if (ar == Calculation::CalcSub)
         return a - b;
-    if (ar == Arithmetic::ArMult)
+    if (ar == Calculation::CalcMult)
         return a * b;
-    if (ar == Arithmetic::ArFltDiv)
+    if (ar == Calculation::CalcFltDiv)
         return a / b;
-    if (ar == Arithmetic::ArFlrDiv)
+    if (ar == Calculation::CalcFlrDiv)
         return floor(a / b);
-    if (ar == Arithmetic::ArMod)
+    if (ar == Calculation::CalcMod)
         return fmod(a, b);
-    if (ar == Arithmetic::ArPow)
+    if (ar == Calculation::CalcPow)
         return pow(a, b);
     return 0;
 }
@@ -186,7 +186,7 @@ LuaValue Interpreter::parse_number(const char *str)
     return this->rt->create_number(atof(str));
 }
 
-void Interpreter::arith(Arithmetic ar)
+void Interpreter::arith(Calculation ar)
 {
     LuaValue b = this->rt->stack_pop();
     LuaValue a = this->rt->stack_pop();
@@ -214,31 +214,31 @@ void Interpreter::arith(Arithmetic ar)
 
 void Interpreter::i_add()
 {
-    this->arith(Arithmetic::ArAdd);
+    this->arith(Calculation::CalcAdd);
 }
 void Interpreter::i_sub()
 {
-    this->arith(Arithmetic::ArSub);
+    this->arith(Calculation::CalcSub);
 }
 void Interpreter::i_mult()
 {
-    this->arith(Arithmetic::ArMult);
+    this->arith(Calculation::CalcMult);
 }
 void Interpreter::i_flrdiv()
 {
-    this->arith(Arithmetic::ArFlrDiv);
+    this->arith(Calculation::CalcFlrDiv);
 }
 void Interpreter::i_fltdiv()
 {
-    this->arith(Arithmetic::ArFltDiv);
+    this->arith(Calculation::CalcFltDiv);
 }
 void Interpreter::i_mod()
 {
-    this->arith(Arithmetic::ArMod);
+    this->arith(Calculation::CalcMod);
 }
 void Interpreter::i_pow()
 {
-    this->arith(Arithmetic::ArPow);
+    this->arith(Calculation::CalcPow);
 }
 void Interpreter::i_neg()
 {
@@ -255,30 +255,45 @@ void Interpreter::i_neg()
     LuaValue num = this->rt->create_number(-a.data.n);
     this->rt->stack_push(num);
 }
-
+lnumber Interpreter::bin_calc(Calculation bin, lnumber a, lnumber b)
+{
+    return 0;
+}
+void Interpreter::binary(Calculation bin)
+{
+    LuaValue b = this->rt->stack_pop();
+    LuaValue a = this->rt->stack_pop();
+    if (a.kind != LuaType::LVNumber)
+        this->generate_error(error_invalid_operand(a.kind));
+    if (b.kind != LuaType::LVNumber)
+        this->generate_error(error_invalid_operand(b.kind));
+    lnumber n = this->bin_calc(bin, a.data.n, b.data.n);
+    LuaValue v = this->rt->create_number(n);
+    this->rt->stack_push(v);
+}
 void Interpreter::i_bor()
 {
-    crash("binary or not implemented yet!");
+    return this->binary(Calculation::CalcOr);
 }
 void Interpreter::i_band()
 {
-    crash("binary and not implemented yet!");
+    return this->binary(Calculation::CalcAnd);
 }
 void Interpreter::i_bxor()
 {
-    crash("binary xor not implemented yet!");
+    return this->binary(Calculation::CalcXor);
 }
 void Interpreter::i_bnot()
 {
-    crash("binary not not implemented yet!");
+    return this->binary(Calculation::CalcNot);
 }
 void Interpreter::i_shr()
 {
-    crash("binary right-shift not implemented yet!");
+    return this->binary(Calculation::CalcSHR);
 }
 void Interpreter::i_shl()
 {
-    crash("binary left-shift not implemented yet!");
+    return this->binary(Calculation::CalcSHL);
 }
 
 void Interpreter::i_not()
