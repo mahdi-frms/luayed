@@ -260,6 +260,18 @@ void Interpreter::i_neg()
 }
 uint64_t Interpreter::bin_calc(Calculation bin, uint64_t a, uint64_t b)
 {
+    if (bin == Calculation::CalcAnd)
+        return a & b;
+    else if (bin == Calculation::CalcOr)
+        return a | b;
+    else if (bin == Calculation::CalcXor)
+        return a ^ b;
+    else if (bin == Calculation::CalcNot)
+        return ~a;
+    else if (bin == Calculation::CalcSHR)
+        return a >> b;
+    else if (bin == Calculation::CalcSHL)
+        return a << b;
     return 0;
 }
 bool Interpreter::check_whole(lnumber num)
@@ -269,17 +281,25 @@ bool Interpreter::check_whole(lnumber num)
 
 void Interpreter::binary(Calculation bin)
 {
-    LuaValue b = this->rt->stack_pop();
+    LuaValue b = this->rt->create_number(0);
+    if (bin != Calculation::CalcNot)
+        b = this->rt->stack_pop();
     LuaValue a = this->rt->stack_pop();
+
     if (a.kind != LuaType::LVNumber)
         this->generate_error(error_invalid_operand(a.kind));
-    if (b.kind != LuaType::LVNumber)
-        this->generate_error(error_invalid_operand(b.kind));
     if (!this->check_whole(a.data.n))
         this->generate_error(error_ok()); // todo
-    if (!this->check_whole(b.data.n))
-        this->generate_error(error_ok()); // todo
-    lnumber n = this->bin_calc(bin, (uint64_t)a.data.n, (uint64_t)b.data.n);
+
+    if (bin != Calculation::CalcNot)
+    {
+        if (b.kind != LuaType::LVNumber)
+            this->generate_error(error_invalid_operand(b.kind));
+        if (!this->check_whole(b.data.n))
+            this->generate_error(error_ok()); // todo
+    }
+
+    lnumber n = (lnumber)this->bin_calc(bin, (uint64_t)a.data.n, (uint64_t)b.data.n);
     LuaValue v = this->rt->create_number(n);
     this->rt->stack_push(v);
 }
