@@ -1,9 +1,19 @@
 #include "gc.h"
+#include "../debug/gc-inspector.h"
 
 #define gcheadptr(GCH, T) ((T *)(GCH + 1))
 
+#define GC_DEBUG
+
+#ifdef GC_DEBUG
+GCInspector inspector;
+#endif
+
 void GarbageCollector::scan(gc_header_t *obj)
 {
+#ifdef GC_DEBUG
+    inspector.obj(gcheadptr(obj, void));
+#endif
     if (obj->alloc_type == AllocType::ATHook)
         this->scan(gcheadptr(obj, Hook));
     else if (obj->alloc_type == AllocType::ATTable)
@@ -18,22 +28,43 @@ void GarbageCollector::scan(Lfunction *bin)
     for (size_t i = 0; i < bin->inlen; i++)
     {
         size_t fidx = bin->innerfns()[i];
+
+#ifdef GC_DEBUG
+        inspector.label("included binary");
+#endif
         this->reference(this->rt->bin(fidx));
     }
     for (size_t i = 0; i < bin->rolen; i++)
+    {
+#ifdef GC_DEBUG
+        inspector.label("constant");
+#endif
         this->value(bin->rodata()[i]);
+    }
+#ifdef GC_DEBUG
+    inspector.label("chunck name");
+#endif
     this->value(bin->chunkname);
 }
 void GarbageCollector::scan(LuaFunction *fn)
 {
     if (fn->is_lua)
     {
+
+#ifdef GC_DEBUG
+        inspector.label("function binary");
+#endif
         this->reference(fn->fn);
         Lfunction *bin = fn->binary();
         Hook **hooks = (Hook **)(fn + 1);
         size_t uplen = bin->uplen;
         for (size_t i = 0; i < uplen; i++)
+        {
+#ifdef GC_DEBUG
+            inspector.label("function hooks");
+#endif
             this->reference(hooks[i]);
+        }
     }
 }
 void GarbageCollector::scan(Table *table)
@@ -43,16 +74,33 @@ void GarbageCollector::scan(Table *table)
     {
         LuaValue key = it.key();
         LuaValue value = it.value();
+
+#ifdef GC_DEBUG
+        inspector.label("table key");
+#endif
         this->value(key);
+#ifdef GC_DEBUG
+        inspector.label("table value");
+#endif
         this->value(value);
     }
 }
 void GarbageCollector::scan(Hook *hook)
 {
     if (hook->is_detached)
+    {
+#ifdef GC_DEBUG
+        inspector.label("detached hook value");
+#endif
         this->value(hook->val);
+    }
     else
+    {
+#ifdef GC_DEBUG
+        inspector.label("pointed hook value");
+#endif
         this->value(*hook->original);
+    }
 }
 void GarbageCollector::scan()
 {
@@ -98,6 +146,9 @@ void GarbageCollector::value(LuaValue val)
 void GarbageCollector::reference(void *ptr)
 {
     gc_header_t *header = ((gc_header_t *)ptr) - 1;
+#ifndef GC_DEBUG
+    inspector.child(ptr, header->alloc_type, !header->marked);
+#endif
     if (header->marked)
         return;
     header->marked = true;
