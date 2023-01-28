@@ -35,6 +35,7 @@ struct Lerror
         // Interpretor
         LE_InvalidOperand,
         LE_InvalidComparison,
+        LE_IntegerRepresentation,
     } kind;
     union
     {
@@ -132,6 +133,10 @@ struct Lerror
             LuaType t;
         } illegal_index;
 
+        struct
+        {
+        } integer_representation;
+
     } as;
 };
 
@@ -157,5 +162,6 @@ Lerror error_call_non_function(LuaType t);
 Lerror error_not_enough_args(size_t available, size_t expected);
 Lerror error_nil_index();
 Lerror error_illegal_index(LuaType t);
+Lerror error_integer_representation();
 
 #endif

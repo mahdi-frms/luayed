@@ -467,6 +467,10 @@ string to_string(const Lerror &err, bool pure)
         LuaType t = err.as.illegal_index.t;
         os << "attemp to index a " << t << " value";
     }
+    else if (err.kind == Lerror::LE_IntegerRepresentation)
+    {
+        os << "number has no integer representation";
+    }
     else
     {
         os << "FAULT: THIS ERROR CAN'T BE DISPLAYED";

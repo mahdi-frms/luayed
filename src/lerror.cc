@@ -137,3 +137,9 @@ Lerror error_nil_index()
     err.kind = Lerror::LE_NilIndex;
     return err;
 }
+Lerror error_integer_representation()
+{
+    Lerror err;
+    err.kind = Lerror::LE_IntegerRepresentation;
+    return err;
+}

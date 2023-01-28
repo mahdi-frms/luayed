@@ -287,16 +287,16 @@ void Interpreter::binary(Calculation bin)
     LuaValue a = this->rt->stack_pop();
 
     if (a.kind != LuaType::LVNumber)
-        this->generate_error(error_invalid_operand(a.kind));
+        return this->generate_error(error_invalid_operand(a.kind));
     if (!this->check_whole(a.data.n))
-        this->generate_error(error_ok()); // todo
+        return this->generate_error(error_integer_representation());
 
     if (bin != Calculation::CalcNot)
     {
         if (b.kind != LuaType::LVNumber)
-            this->generate_error(error_invalid_operand(b.kind));
+            return this->generate_error(error_invalid_operand(b.kind));
         if (!this->check_whole(b.data.n))
-            this->generate_error(error_ok()); // todo
+            return this->generate_error(error_integer_representation());
     }
 
     lnumber n = (lnumber)this->bin_calc(bin, (uint64_t)a.data.n, (uint64_t)b.data.n);
@@ -635,6 +635,10 @@ LuaValue Interpreter::error_to_string(Lerror error)
         LuaValue s3 = this->rt->create_string(" with ");
         LuaValue s4 = this->lua_type_to_string(error.as.invalid_comparison.t2);
         return this->concat(s1, this->concat(s2, this->concat(s3, s4)));
+    }
+    else if (error.kind == Lerror::LE_IntegerRepresentation)
+    {
+        return this->rt->create_string("number has no integer representation");
     }
     else
     {
