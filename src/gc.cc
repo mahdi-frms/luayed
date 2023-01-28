@@ -108,23 +108,48 @@ void GarbageCollector::scan()
     while (frame)
     {
         if (frame->has_error)
+        {
+#ifdef GC_DEBUG
+            inspector.label("frame error");
+#endif
             this->value(frame->error);
+        }
+#ifdef GC_DEBUG
+        inspector.label("frame function");
+#endif
         this->value(frame->fn);
         for (size_t i = 0; i < frame->hookptr; i++)
         {
             Hook *hook = frame->hooktable()[i];
             if (hook)
+            {
+#ifdef GC_DEBUG
+                inspector.label("hook lifo");
+#endif
                 this->reference(hook);
+            }
         }
         for (size_t i = 0; i < frame->sp; i++)
+        {
+#ifdef GC_DEBUG
+            inspector.label("stack value");
+#endif
             this->value(frame->stack()[i]);
+        }
         frame = frame->prev;
     }
+
+#ifdef GC_DEBUG
+    inspector.label("gobal table");
+#endif
     this->value(rt->table_global());
 }
 void GarbageCollector::mark(LuaRuntime *rt)
 {
     this->rt = rt;
+#ifdef GC_DEBUG
+    inspector.init();
+#endif
     this->scan();
     while (this->scanlifo->alloc_type != AllocType::ATDummy)
     {
@@ -146,7 +171,7 @@ void GarbageCollector::value(LuaValue val)
 void GarbageCollector::reference(void *ptr)
 {
     gc_header_t *header = ((gc_header_t *)ptr) - 1;
-#ifndef GC_DEBUG
+#ifdef GC_DEBUG
     inspector.child(ptr, header->alloc_type, !header->marked);
 #endif
     if (header->marked)
