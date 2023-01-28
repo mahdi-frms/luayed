@@ -188,6 +188,9 @@ LuaValue MockRuntime::chunkname()
 {
     return this->create_nil();
 }
+void MockRuntime::check_garbage_collection()
+{
+}
 uint16_t *MockRuntime::dbgmd()
 {
     return nullptr;

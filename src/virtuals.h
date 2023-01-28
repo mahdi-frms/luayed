@@ -74,6 +74,7 @@ public:
     virtual lbyte *text() = 0;
     virtual uint16_t *dbgmd() = 0;
     virtual LuaValue chunkname() = 0;
+    virtual void check_garbage_collection() = 0;
 };
 
 class IInterpreter

@@ -207,6 +207,7 @@ public:
     size_t extras();
     void extras(size_t count);
     LuaValue chunkname();
+    void check_garbage_collection();
 
     Frame *topframe();
     gc_header_t *gc_headers();

@@ -88,6 +88,7 @@ size_t Interpreter::run(IRuntime *rt)
         this->pip = this->ip;
         this->ip += this->fetch(this->rt->text() + this->ip);
         this->exec();
+        this->rt->check_garbage_collection();
     }
     if (this->config_error_metadata_v && this->state == InterpreterState::Error && !this->rt->error_metadata())
     {

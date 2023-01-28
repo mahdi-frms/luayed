@@ -90,6 +90,7 @@ public:
     size_t argcount();
     uint16_t *dbgmd();
     LuaValue chunkname();
+    void check_garbage_collection();
 };
 
 #endif

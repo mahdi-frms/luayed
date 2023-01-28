@@ -279,17 +279,19 @@ void LuaRuntime::collect_garbage()
     gc.mark(this);
     gc.sweep(this);
 }
-
-void *LuaRuntime::allocate_raw(size_t size)
+void LuaRuntime::check_garbage_collection()
 {
-    if (this->allocated + size > this->threshold)
+    if (this->allocated > this->threshold)
     {
         this->collect_garbage();
-        while (this->allocated + size > this->threshold)
+        while (this->allocated > this->threshold)
             this->threshold *= 2;
-        while (this->allocated + size < this->threshold / 4 && this->threshold > 1024)
+        while (this->allocated < this->threshold / 4 && this->threshold > 1024)
             this->threshold /= 2;
     }
+}
+void *LuaRuntime::allocate_raw(size_t size)
+{
     this->allocated += size;
     size_t *ptr = (size_t *)malloc(size + sizeof(size_t));
     *ptr = size;
