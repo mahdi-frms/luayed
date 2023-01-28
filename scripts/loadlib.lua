@@ -1,4 +1,4 @@
-local libfile = io.open('../src/liblua.lua', 'r')
+local libfile = io.open('../lib/liblua.lua', 'r')
 if libfile == nil then
     return 1
 end

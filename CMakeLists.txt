@@ -26,14 +26,14 @@ add_library(luayed
     src/generator.cc
     src/table.cc
     src/hash.cc
+    src/lua.cc
+    lib/luastd.cc
+    build/liblua.cc    
     debug/gc-inspector.cc
 )
     
 add_executable(luayed-bin
-    build/liblua.cc    
     src/main.cc
-    src/luastd.cc
-    src/lua.cc
 )
 
 set_target_properties(luayed-bin
@@ -60,7 +60,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall")
 enable_testing()
 add_test(NAME "luayedtests" COMMAND luaytest)
 
-target_include_directories(luaytest PRIVATE dep)
-target_include_directories(luaytest PRIVATE src)
+include_directories(dep)
+include_directories(src)
 
 set_property(TARGET luayed PROPERTY CXX_STANDARD 17)
