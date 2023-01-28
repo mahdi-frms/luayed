@@ -1,0 +1,7 @@
+{
+    "C_Cpp.default.cppStandard": "gnu++17",
+    "C_Cpp.default.includePath": [
+        "dep",
+        "src",
+    ]
+}
