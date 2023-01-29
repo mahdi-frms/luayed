@@ -1,8 +1,10 @@
-#include "lua.h"
 #include "parser.h"
 #include "resolve.h"
 #include "generator.h"
 #include "compiler.h"
+#include "runtime.h"
+#include "interpreter.h"
+#include "lua.h"
 #include "lstrep.h"
 #include "luastd.h"
 

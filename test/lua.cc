@@ -5,6 +5,7 @@
 #include <resolve.h>
 #include <generator.h>
 #include <compiler.h>
+#include <interpreter.h>
 #include <lstrep.h>
 
 LuaValue lua_test_compile(const char *code, LuaRuntime &rt, vector<lbyte> &bin)

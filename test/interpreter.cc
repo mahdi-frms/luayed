@@ -1,5 +1,5 @@
 #include <iostream>
-#include <luadef.h>
+#include <lyddef.h>
 #include <luabin.h>
 #include <interpreter.h>
 #include <generator.h>

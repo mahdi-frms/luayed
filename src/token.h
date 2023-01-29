@@ -1,7 +1,7 @@
 #ifndef TOKEN_h
 #define TOKEN_h
 
-#include "luadef.h"
+#include "lyddef.h"
 
 #define TOKEN_IS_PRIMARY(K) (K & 0x0100)
 #define TOKEN_IS_POSTFIX(K) (K & 0x0200)

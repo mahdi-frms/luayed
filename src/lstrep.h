@@ -1,7 +1,7 @@
 #ifndef LSTREP_H
 #define LSTREP_H
 
-#include "luadef.h"
+#include "lyddef.h"
 #include "token.h"
 #include "ast.h"
 

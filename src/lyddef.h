@@ -1,20 +1,16 @@
-#ifndef LUADEF_h
-#define LUADEF_h
+#ifndef LYDDEF_h
+#define LYDDEF_h
 
 #include <vector>
 #include <string>
 #include <iostream>
+#include "luadef.h"
 
 template <typename T>
 using vector = std::vector<T>;
 
-typedef std::string string;
-
 typedef unsigned char lbyte;
-typedef double lnumber;
-
 extern std::ostream &dbg;
-
 typedef size_t fidx_t;
 
 enum LuaType

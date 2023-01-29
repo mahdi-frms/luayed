@@ -1,4 +1,4 @@
-#include <luastd.h>
+#include "luastd.h"
 #include <lstrep.h>
 
 string luastd::luavalue_to_string(Lua *lua)

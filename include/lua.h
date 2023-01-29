@@ -1,9 +1,6 @@
 #ifndef LUA_H
 #define LUA_H
 
-#include "runtime.h"
-#include "interpreter.h"
-
 #define LUA_COMPILE_RESULT_OK 0
 #define LUA_COMPILE_RESULT_FAILED 1
 
@@ -14,14 +11,20 @@
 #define LUA_TYPE_TABLE 4
 #define LUA_TYPE_FUNCTION 5
 
+#include "luadef.h"
+#include "interpreter.h"
+#include "runtime.h"
+
 struct LuaConfig
 {
     bool load_stdlib = true;
 };
 
 class Lua;
-
 typedef size_t (*LuaCppFunction)(Lua *);
+
+class LuaRuntime;
+class Interpreter;
 
 class Lua
 {

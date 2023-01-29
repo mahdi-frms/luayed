@@ -70,5 +70,7 @@ add_test(NAME "luayedtests" COMMAND luaytest)
 
 include_directories(dep)
 include_directories(src)
+include_directories(include)
+include_directories(lib)
 
 set_property(TARGET luayed PROPERTY CXX_STANDARD 17)

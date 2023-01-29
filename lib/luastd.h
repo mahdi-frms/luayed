@@ -1,6 +1,8 @@
 #ifndef LUASTD_H
 #define LUASTD_H
 
+#include "runtime.h"
+#include "interpreter.h"
 #include "lua.h"
 
 extern const char liblua_code[];
