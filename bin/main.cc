@@ -1,8 +1,6 @@
 #include <iostream>
 #include <cstring>
 #include <lua.h>
-#include <lstrep.h>
-#include <luastd.h>
 
 string readfile(const char *path)
 {
@@ -28,7 +26,8 @@ bool execute(Lua *lua, size_t argc = 0)
     if (lua->has_error())
     {
         lua->push_error();
-        std::cerr << "lua: " << luastd::luavalue_to_string(lua) << "\n";
+        std::cerr << "lua: " << lua->peek_string();
+        lua->pop();
         return false;
     }
     else
