@@ -39,14 +39,14 @@ bool execute(Lua *lua, size_t argc = 0)
 bool runfile(int argc, char **argv)
 {
     const char *script = argv[1];
-    Lua lua;
+    Lua *lua = Lua::create();
     string text = readfile(script);
     string errors;
-    if (lua.compile(text.c_str(), errors, script) == LUA_COMPILE_RESULT_OK)
+    if (lua->compile(text.c_str(), errors, script) == LUA_COMPILE_RESULT_OK)
     {
         for (int i = 2; i < argc; i++)
-            lua.push_string(argv[i]);
-        return execute(&lua, argc - 2);
+            lua->push_string(argv[i]);
+        return execute(lua, argc - 2);
     }
     else
     {
@@ -58,7 +58,7 @@ bool runfile(int argc, char **argv)
 void repl()
 {
     const char *chunkname = "[line]";
-    Lua lua;
+    Lua *lua = Lua::create();
     while (1)
     {
         string input;
@@ -70,10 +70,10 @@ void repl()
             continue;
         string exp = string("print(") + input + string(")");
         string errors;
-        int rsl = lua.compile(exp.c_str(), errors, chunkname);
+        int rsl = lua->compile(exp.c_str(), errors, chunkname);
         if (rsl == LUA_COMPILE_RESULT_FAILED)
         {
-            rsl = lua.compile(input.c_str(), errors, chunkname);
+            rsl = lua->compile(input.c_str(), errors, chunkname);
         }
         if (rsl == LUA_COMPILE_RESULT_FAILED)
         {
@@ -81,7 +81,7 @@ void repl()
         }
         else
         {
-            execute(&lua);
+            execute(lua);
         }
     }
     std::cout << "\n";
