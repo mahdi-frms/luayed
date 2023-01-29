@@ -59,7 +59,7 @@ add_executable(luaytest
 )
 
 target_link_libraries(luayed luaystd)
-target_link_libraries(luayed luaydbg)
+target_link_libraries(luayed debug luaydbg)
 target_link_libraries(luaycli luayed)
 target_link_libraries(luaytest luayed)
 
