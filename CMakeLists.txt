@@ -8,16 +8,12 @@ add_custom_command(
     DEPENDS scripts/loadlib.lua lib/luastd.cc
 )
 
-add_library(luaystd
-    lib/luastd.cc
-    build/liblua.cc    
-)
-
 add_library(luaydbg
     debug/gc-inspector.cc
 )
 
 add_library(luayed
+    # interpreter
     src/lexer.cc
     src/ast.cc
     src/parser.cc
@@ -37,6 +33,9 @@ add_library(luayed
     src/hash.cc
     src/luastate.cc
     src/lua.cc
+    # stdlib
+    lib/luastd.cc
+    build/liblua.cc
 )
     
 add_executable(luaycli
@@ -56,10 +55,10 @@ add_executable(luaytest
     test/parser.cc
     test/lua.cc
     test/values.cc
+    # testing lib
     dep/tap/tap.c
 )
 
-target_link_libraries(luayed luaystd)
 target_link_libraries(luayed debug luaydbg)
 target_link_libraries(luaycli luayed)
 target_link_libraries(luaytest luayed)
