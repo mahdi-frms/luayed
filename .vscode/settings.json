@@ -10,6 +10,10 @@
     "files.associations": {
         "*.js": "javascript",
         "vector": "cpp",
-        "string_view": "cpp"
+        "string_view": "cpp",
+        "*.tcc": "cpp",
+        "memory_resource": "cpp",
+        "fstream": "cpp",
+        "memory": "cpp"
     }
 }
