@@ -42,8 +42,15 @@ add_executable(luaycli
     bin/luayed/main.cc
 )
 
+add_executable(luaysis
+    bin/analysis/main.cc
+)
+
 set_target_properties(luaycli
         PROPERTIES OUTPUT_NAME luayed)
+
+set_target_properties(luaysis
+        PROPERTIES OUTPUT_NAME luayed-analysis)
     
 add_executable(luaytest
     test/lexer.cc
@@ -61,6 +68,7 @@ add_executable(luaytest
 
 target_link_libraries(luayed debug luaydbg)
 target_link_libraries(luaycli luayed)
+target_link_libraries(luaysis luayed)
 target_link_libraries(luaytest luayed)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall")
