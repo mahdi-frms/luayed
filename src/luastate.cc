@@ -129,12 +129,12 @@ void LuaState::push_string(const char *str)
     LuaValue s = this->runtime.create_string(str);
     this->runtime.stack_push(s);
 }
-void LuaState::set_global()
+void LuaState::set_global(const char *key)
 {
     // todo : handle error
     LuaValue value = this->runtime.stack_pop();
-    LuaValue key = this->runtime.stack_pop();
-    this->runtime.table_set(this->runtime.table_global(), key, value);
+    LuaValue gkey = this->runtime.create_string(key);
+    this->runtime.table_set(this->runtime.table_global(), gkey, value);
 }
 size_t LuaState::top()
 {

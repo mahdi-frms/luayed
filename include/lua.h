@@ -35,7 +35,7 @@ public:
     virtual void insert(size_t index) = 0;
     virtual void call(size_t arg_count, size_t return_count) = 0;
     virtual int kind() = 0;
-    virtual void set_global() = 0;
+    virtual void set_global(const char *key) = 0;
     virtual void set_table() = 0;
     virtual void get_table() = 0;
     virtual void pop() = 0;

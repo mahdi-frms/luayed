@@ -20,7 +20,7 @@ public:
     void call(size_t arg_count, size_t return_count);
     int kind();
 
-    void set_global();
+    void set_global(const char *key);
 
     void set_table();
     void get_table();

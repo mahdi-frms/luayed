@@ -198,33 +198,26 @@ void luastd::libinit(Lua *lua)
 }
 void luastd::libcpp_init(Lua *lua)
 {
-    lua->push_string("print");
     lua->push_cppfn(luastd::print);
-    lua->set_global();
+    lua->set_global("print");
 
-    lua->push_string("tostring");
     lua->push_cppfn(luastd::tostring);
-    lua->set_global();
+    lua->set_global("tostring");
 
-    lua->push_string("unpack");
     lua->push_cppfn(luastd::unpack);
-    lua->set_global();
+    lua->set_global("unpack");
 
-    lua->push_string("load");
     lua->push_cppfn(luastd::load);
-    lua->set_global();
+    lua->set_global("load");
 
-    lua->push_string("type");
     lua->push_cppfn(luastd::type);
-    lua->set_global();
+    lua->set_global("type");
 
-    lua->push_string("error");
     lua->push_cppfn(luastd::error);
-    lua->set_global();
+    lua->set_global("error");
 
-    lua->push_string("pcall");
     lua->push_cppfn(luastd::pcall);
-    lua->set_global();
+    lua->set_global("pcall");
 }
 void luastd::liblua_init(Lua *lua)
 {
