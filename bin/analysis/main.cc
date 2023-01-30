@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <lexer.h>
+#include <parser.h>
 #include <lstrep.h>
 
 namespace cli
@@ -99,6 +100,14 @@ void command_lex_file(string path)
 
 void cammand_parse_file(string path)
 {
+    string code = read_file(path);
+    Lexer lexer(code.c_str());
+    Parser parser(&lexer);
+    ast::Ast tree = parser.parse();
+    if (tree.root())
+        std::cout << tree.root();
+    else
+        std::cerr << parser.get_error() << "\n";
 }
 
 void cammand_compile_file(string path)
