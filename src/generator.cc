@@ -1,5 +1,80 @@
 #include "generator.h"
 
+BaseGenerator::BaseGenerator(const char *message) : current(nullptr), message(message), test(nullptr)
+{
+}
+void BaseGenerator::emit(Opcode opcode)
+{
+    for (size_t i = 0; i < opcode.count; i++)
+        this->current->text.push_back(opcode.bytes[i]);
+}
+size_t BaseGenerator::len()
+{
+    return this->current->text.size();
+}
+void BaseGenerator::debug_info(size_t line)
+{
+    line++;
+    while (this->current->debug.size() <= this->current->text.size())
+        this->current->debug.push_back(0);
+    this->current->debug.back() = line;
+}
+void BaseGenerator::seti(size_t idx, lbyte b)
+{
+    this->current->text[idx] = b;
+}
+size_t BaseGenerator::const_number(lnumber num)
+{
+    return this->current->ccount++;
+}
+size_t BaseGenerator::const_string(const char *str)
+{
+    return this->current->ccount++;
+}
+fidx_t BaseGenerator::pushf()
+{
+    FuncTest *fnt = new FuncTest();
+    fidx_t fidx = this->fidx_counter++;
+    fnt->ccount = 0;
+    fnt->prev = nullptr;
+    fnt->hookmax = 0;
+    fnt->parcount = 0;
+    fnt->prev = this->current;
+    fnt->fidx = fidx;
+    this->current = fnt;
+    return fidx;
+}
+void BaseGenerator::popf()
+{
+    while (this->funcs.size() <= this->current->fidx)
+        this->funcs.push_back(nullptr);
+    this->funcs[this->current->fidx] = this->current;
+    this->current = this->current->prev;
+}
+size_t BaseGenerator::upval(fidx_t fidx, size_t offset, size_t hidx)
+{
+    size_t idx = this->current->upvalues.size();
+    this->current->upvalues.push_back(Upvalue(fidx, offset, hidx));
+    return idx;
+}
+void BaseGenerator::meta_parcount(size_t parcount)
+{
+    this->current->parcount = parcount;
+}
+void BaseGenerator::meta_hookmax(size_t hookmax)
+{
+    this->current->hookmax = hookmax;
+}
+
+void BaseGenerator::meta_chunkname(const char *chunkname)
+{
+}
+BaseGenerator::~BaseGenerator()
+{
+    for (auto it = this->funcs.begin(); it != this->funcs.end(); it++)
+        delete *it;
+}
+
 LuaGenerator::LuaGenerator(LuaRuntime *rt) : rt(rt), gfn(nullptr)
 {
 }
