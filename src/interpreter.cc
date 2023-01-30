@@ -125,29 +125,12 @@ LuaValue Interpreter::error_add_meta(LuaValue e)
 }
 size_t Interpreter::fetch(lbyte *bin)
 {
-    size_t ptr = 0;
-    lbyte op = bin[ptr++];
-    if (op & 0x80)
-    {
-        this->arg1 = bin[ptr++];
-        if (op & 0x01)
-        {
-            op &= 0b11111110;
-            this->arg1 += bin[ptr++] << 8;
-        }
-
-        if (op == Opcode::ICall)
-        {
-            this->arg2 = bin[ptr++];
-            if (op & 0x02)
-            {
-                op &= 0b11111101;
-                this->arg2 += bin[ptr++] << 8;
-            }
-        }
-    }
-    this->op = op;
-    return ptr;
+    size_t rc;
+    Instruction ins = Instruction::decode(bin, &rc);
+    this->op = ins.op;
+    this->arg1 = ins.oprnd1;
+    this->arg2 = ins.oprnd2;
+    return rc;
 }
 
 void Interpreter::exec()
