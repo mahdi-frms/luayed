@@ -44,7 +44,7 @@ public:
         this->rt.set_args(args);
         return *this;
     }
-    InterpreterTestCase &set_text(vector<Instruction> text)
+    InterpreterTestCase &set_text(vector<Bytecode> text)
     {
         if (!text.size() || (text.back().bytes[0] & 0b11111110) != Opcode::IRet)
         {
@@ -109,7 +109,7 @@ public:
         }
         return *this;
     }
-    InterpreterTestCase &execute(vector<Instruction> opcodes)
+    InterpreterTestCase &execute(vector<Bytecode> opcodes)
     {
         const char *suffix = "(execution)";
         Interpreter intp;

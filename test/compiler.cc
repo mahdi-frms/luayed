@@ -66,7 +66,7 @@ public:
         delete[] mes;
         return *this;
     }
-    vector<lbyte> assemble(vector<Instruction> &opcodes)
+    vector<lbyte> assemble(vector<Bytecode> &opcodes)
     {
         vector<lbyte> bin;
         for (size_t i = 0; i < opcodes.size(); i++)
@@ -76,7 +76,7 @@ public:
         }
         return bin;
     }
-    GenTest &test_opcodes(vector<Instruction> opcodes)
+    GenTest &test_opcodes(vector<Bytecode> opcodes)
     {
         vector<lbyte> bin = this->assemble(opcodes);
         char *mes = compiler_test_message(this->message, "text");

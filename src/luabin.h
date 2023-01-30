@@ -74,14 +74,14 @@ struct Upvalue
     friend bool operator==(const Upvalue &l, const Upvalue &r);
 };
 
-struct Instruction
+struct Bytecode
 {
     lbyte count;
     lbyte bytes[5];
 
-    Instruction(lbyte op, size_t idx);
-    Instruction(lbyte op, size_t idx1, size_t idx2);
-    Instruction(lbyte op);
+    Bytecode(lbyte op, size_t idx);
+    Bytecode(lbyte op, size_t idx1, size_t idx2);
+    Bytecode(lbyte op);
 };
 
 #define iadd IAdd
@@ -117,20 +117,20 @@ struct Instruction
 #define ifalse IFalse
 #define iupush IUPush
 #define iupop IUPop
-#define itlist(A) Instruction(ITList, A)
-#define iret(A) Instruction(IRet, A)
-#define icall(A, B) Instruction(ICall, A, B)
-#define ivargs(A) Instruction(IVargs, A)
-#define ijmp(A) Instruction(IJmp, A)
-#define icjmp(A) Instruction(ICjmp, A)
-#define iconst(A) Instruction(IConst, A)
-#define ifconst(A) Instruction(IFConst, A)
-#define ilocal(A) Instruction(ILocal, A)
-#define ilstore(A) Instruction(ILStore, A)
-#define iblocal(A) Instruction(IBLocal, A)
-#define iblstore(A) Instruction(IBLStore, A)
-#define iupvalue(A) Instruction(IUpvalue, A)
-#define iustore(A) Instruction(IUStore, A)
-#define ipop(A) Instruction(IPop, A)
+#define itlist(A) Bytecode(ITList, A)
+#define iret(A) Bytecode(IRet, A)
+#define icall(A, B) Bytecode(ICall, A, B)
+#define ivargs(A) Bytecode(IVargs, A)
+#define ijmp(A) Bytecode(IJmp, A)
+#define icjmp(A) Bytecode(ICjmp, A)
+#define iconst(A) Bytecode(IConst, A)
+#define ifconst(A) Bytecode(IFConst, A)
+#define ilocal(A) Bytecode(ILocal, A)
+#define ilstore(A) Bytecode(ILStore, A)
+#define iblocal(A) Bytecode(IBLocal, A)
+#define iblstore(A) Bytecode(IBLStore, A)
+#define iupvalue(A) Bytecode(IUpvalue, A)
+#define iustore(A) Bytecode(IUStore, A)
+#define ipop(A) Bytecode(IPop, A)
 
 #endif

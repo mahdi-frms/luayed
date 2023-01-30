@@ -1,6 +1,6 @@
 #include "luabin.h"
 
-Instruction::Instruction(lbyte op, size_t idx1, size_t idx2)
+Bytecode::Bytecode(lbyte op, size_t idx1, size_t idx2)
 {
     this->count = 1;
     if (idx1 >= 256)
@@ -25,7 +25,7 @@ Instruction::Instruction(lbyte op, size_t idx1, size_t idx2)
     }
     this->bytes[0] = op;
 }
-Instruction::Instruction(lbyte op, size_t idx)
+Bytecode::Bytecode(lbyte op, size_t idx)
 {
     if (idx >= 256 || op == Opcode::IJmp || op == Opcode::ICjmp)
     {
@@ -41,7 +41,7 @@ Instruction::Instruction(lbyte op, size_t idx)
         this->bytes[1] = idx;
     }
 }
-Instruction::Instruction(lbyte op)
+Bytecode::Bytecode(lbyte op)
 {
     this->bytes[0] = op;
     this->count = 1;

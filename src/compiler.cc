@@ -149,7 +149,7 @@ fidx_t Compiler::compile(Noderef root, const char *chunckname)
     }
     this->gen->meta_hookmax(this->hookmax);
     this->gen->meta_chunkname(chunckname);
-    this->emit(Instruction(Opcode::IRet, 0));
+    this->emit(Bytecode(Opcode::IRet, 0));
     this->gen->popf();
     return fnscp->fidx;
 }
@@ -231,10 +231,10 @@ void Compiler::compile_if(Noderef node)
             this->compile_exp(cls->child(0));
             this->emit(Opcode::INot);
             cjmp = this->len();
-            this->emit(Instruction(Opcode::ICjmp, 0));
+            this->emit(Bytecode(Opcode::ICjmp, 0));
             this->compile_block(cls->child(1));
             jmps.push_back(this->len());
-            this->emit(Instruction(Opcode::IJmp, 0));
+            this->emit(Bytecode(Opcode::IJmp, 0));
             size_t cjmp_idx = this->len();
             this->edit_jmp(cjmp, cjmp_idx);
         }
@@ -258,19 +258,19 @@ void Compiler::compile_methcall(Noderef node, size_t expect)
     Token fname = node->child(1)->get_token();
     this->emit(Opcode::INil);
     this->compile_exp(object);
-    this->emit(Instruction(Opcode::IBLocal, 1));
+    this->emit(Bytecode(Opcode::IBLocal, 1));
     size_t idx = this->const_string(fname.text().c_str());
-    this->emit(Instruction(Opcode::IConst, idx));
-    this->emit(Instruction(Opcode::ITGet));
-    this->emit(Instruction(Opcode::IBLStore, 2));
+    this->emit(Bytecode(Opcode::IConst, idx));
+    this->emit(Bytecode(Opcode::ITGet));
+    this->emit(Bytecode(Opcode::IBLStore, 2));
     Noderef arglist = node->child(2);
     this->compile_explist(arglist, EXPECT_FREE);
     size_t argcount = this->arglist_count(arglist) + 1;
     this->debug_info(fname.line);
     if (expect == EXPECT_FREE)
-        this->emit(Instruction(Opcode::ICall, argcount, 0));
+        this->emit(Bytecode(Opcode::ICall, argcount, 0));
     else
-        this->emit(Instruction(Opcode::ICall, argcount, expect + 1));
+        this->emit(Bytecode(Opcode::ICall, argcount, expect + 1));
 }
 void Compiler::compile_call(Noderef node, size_t expect)
 {
@@ -281,9 +281,9 @@ void Compiler::compile_call(Noderef node, size_t expect)
     this->compile_explist(arglist, EXPECT_FREE);
     this->debug_info(fn->line());
     if (expect == EXPECT_FREE)
-        this->emit(Instruction(Opcode::ICall, argcount, 0));
+        this->emit(Bytecode(Opcode::ICall, argcount, 0));
     else
-        this->emit(Instruction(Opcode::ICall, argcount, expect + 1));
+        this->emit(Bytecode(Opcode::ICall, argcount, expect + 1));
 }
 void Compiler::compile_identifier(Noderef node)
 {
@@ -296,21 +296,21 @@ void Compiler::compile_identifier(Noderef node)
         {
             MetaScope *sc = (MetaScope *)mm->scope->getannot(MetaKind::MScope);
             MetaScope *fnsc = (MetaScope *)sc->func->getannot(MetaKind::MScope);
-            this->emit(Instruction(Opcode::IUpvalue, this->upval(fnsc->fidx, mm->offset, mm->upoffset)));
+            this->emit(Bytecode(Opcode::IUpvalue, this->upval(fnsc->fidx, mm->offset, mm->upoffset)));
         }
         else
         {
-            this->emit(Instruction(Opcode::ILocal, mm->offset));
+            this->emit(Bytecode(Opcode::ILocal, mm->offset));
         }
     }
     else if (node->getannot(MetaKind::MSelf))
     {
-        this->emit(Instruction(Opcode::ILocal, 0));
+        this->emit(Bytecode(Opcode::ILocal, 0));
     }
     else
     {
         size_t idx = this->const_string(node->get_token().text().c_str());
-        this->emit(Instruction(Opcode::IConst, idx));
+        this->emit(Bytecode(Opcode::IConst, idx));
         this->emit(Opcode::IGGet);
     }
 }
@@ -322,7 +322,7 @@ void Compiler::compile_primary(Noderef node, size_t expect)
         this->emit(Opcode::ITrue);
     else if (tkn.kind == TokenKind::DotDotDot)
     {
-        this->emit(Instruction(Opcode::IVargs, expect == EXPECT_FREE ? 0 : expect + 1));
+        this->emit(Bytecode(Opcode::IVargs, expect == EXPECT_FREE ? 0 : expect + 1));
     }
     else if (tkn.kind == TokenKind::False)
         this->emit(Opcode::IFalse);
@@ -331,12 +331,12 @@ void Compiler::compile_primary(Noderef node, size_t expect)
     else if (tkn.kind == TokenKind::Number)
     {
         size_t idx = this->const_number(token_number(tkn));
-        this->emit(Instruction(Opcode::IConst, idx));
+        this->emit(Bytecode(Opcode::IConst, idx));
     }
     else if (tkn.kind == TokenKind::Literal)
     {
         size_t idx = this->const_string(scan_lua_string(tkn).c_str());
-        this->emit(Instruction(Opcode::IConst, idx));
+        this->emit(Bytecode(Opcode::IConst, idx));
     }
     else if (tkn.kind == TokenKind::Identifier)
     {
@@ -347,12 +347,12 @@ void Compiler::compile_name(Noderef node)
 {
     Token tkn = node->get_token();
     size_t idx = this->const_string(tkn.text().c_str());
-    this->emit(Instruction(Opcode::IConst, idx));
+    this->emit(Bytecode(Opcode::IConst, idx));
 }
 
 void Compiler::compile_table(Noderef node)
 {
-    this->emit(Instruction(Opcode::ITNew));
+    this->emit(Bytecode(Opcode::ITNew));
     size_t list_len = 0;
     if (!node->child_count())
         return;
@@ -372,14 +372,14 @@ void Compiler::compile_table(Noderef node)
         else if (i == node->child_count() - 1 && (is_call(ch) || is_vargs(ch)))
         {
             this->compile_exp_e(ch, EXPECT_FREE);
-            this->emit(Instruction(Opcode::ITList, list_len));
+            this->emit(Bytecode(Opcode::ITList, list_len));
             break;
         }
         else
         {
             size_t key = (list_len++) + 1;
             size_t keyidx = this->const_number(key);
-            this->emit(Instruction(Opcode::IConst, keyidx));
+            this->emit(Bytecode(Opcode::IConst, keyidx));
             this->compile_exp(ch);
         }
         if (ch->get_kind() == NodeKind::ExprField)
@@ -424,7 +424,7 @@ void Compiler::compile_exp_e(Noderef node, size_t expect)
     {
         this->compile_exp(node->child(0));
         size_t idx = this->const_string(node->child(1)->get_token().text().c_str());
-        this->emit(Instruction(IConst, idx));
+        this->emit(Bytecode(IConst, idx));
         this->emit(ITGet);
     }
     else if (node->get_kind() == NodeKind::Index)
@@ -445,7 +445,7 @@ void Compiler::compile_exp_e(Noderef node, size_t expect)
         this->compile_methcall(node, expect);
     if (!is_fncall && !is_vargs && expect != EXPECT_FREE)
         while (--expect)
-            this->emit(Instruction(Opcode::INil));
+            this->emit(Bytecode(Opcode::INil));
 }
 
 Compiler::Compiler(IGenerator *gen) : gen(gen)
@@ -458,7 +458,7 @@ void Compiler::compile_function(Noderef node)
     Compiler compiler(this->gen);
     compiler.stack_offset = node->get_kind() == NodeKind::MethodBody ? 1 : 0;
     compiler.compile(node, this->chunckname);
-    compiler.emit(Instruction(Opcode::IFConst, fnscp->fidx));
+    compiler.emit(Bytecode(Opcode::IFConst, fnscp->fidx));
 }
 
 void Compiler::compile_exp(Noderef node)
@@ -484,22 +484,22 @@ void Compiler::compile_lvalue_primary(Noderef node)
         {
             MetaScope *sc = (MetaScope *)mm->scope->getannot(MetaKind::MScope);
             MetaScope *fnsc = (MetaScope *)sc->func->getannot(MetaKind::MScope);
-            this->ops_push(Instruction(Opcode::IUStore, this->upval(fnsc->fidx, mm->offset, mm->upoffset)));
+            this->ops_push(Bytecode(Opcode::IUStore, this->upval(fnsc->fidx, mm->offset, mm->upoffset)));
         }
         else
         {
-            this->ops_push(Instruction(Opcode::ILStore, mm->offset));
+            this->ops_push(Bytecode(Opcode::ILStore, mm->offset));
         }
     }
     else if (node->getannot(MetaKind::MSelf))
     {
-        this->ops_push(Instruction(Opcode::ILStore, 0));
+        this->ops_push(Bytecode(Opcode::ILStore, 0));
     }
     else
     {
         const char *str = node->get_token().text().c_str();
         size_t idx = this->const_string(str);
-        this->emit(Instruction(Opcode::IConst, idx));
+        this->emit(Bytecode(Opcode::IConst, idx));
         this->ops_push(Opcode::IGSet);
         this->vstack.push_back(1);
     }
@@ -520,8 +520,8 @@ bool Compiler::compile_lvalue(Noderef node)
         Token prop_tkn = prop->get_token();
         const char *prop_str = prop_tkn.text().c_str();
         size_t idx = this->const_string(prop_str);
-        this->emit(Instruction(Opcode::IConst, idx));
-        this->ops_push(Instruction(Opcode::ITSet), prop_tkn.line);
+        this->emit(Bytecode(Opcode::IConst, idx));
+        this->ops_push(Bytecode(Opcode::ITSet), prop_tkn.line);
         this->vstack.push_back(1);
         this->vstack.push_back(1);
         return true;
@@ -532,7 +532,7 @@ bool Compiler::compile_lvalue(Noderef node)
         Noderef iexp = node->child(1);
         this->compile_exp(lexp);
         this->compile_exp(iexp);
-        this->ops_push(Instruction(Opcode::ITSet), iexp->line());
+        this->ops_push(Bytecode(Opcode::ITSet), iexp->line());
         this->vstack.push_back(1);
         this->vstack.push_back(1);
         return true;
@@ -557,7 +557,7 @@ void Compiler::compile_explist(Noderef node, size_t vcount)
         if (!node || node->child_count() == 0)
         {
             while (vcount--)
-                this->emit(Instruction(Opcode::INil));
+                this->emit(Bytecode(Opcode::INil));
         }
         else
         {
@@ -584,7 +584,7 @@ size_t Compiler::compile_varlist(Noderef node)
         for (size_t i = 0; i < node->child_count(); i++)
         {
             varlc += this->compile_lvalue(node->child(i)) ? 1 : 0;
-            this->emit(Instruction(Opcode::INil));
+            this->emit(Bytecode(Opcode::INil));
             this->vstack.push_back(0);
         }
         return varlc;
@@ -602,10 +602,10 @@ size_t Compiler::vstack_nearest_nil()
 
 void Compiler::compile_generic_for_swap_pair(size_t back_offset1, size_t back_offset2)
 {
-    this->emit(Instruction(Opcode::IBLocal, back_offset1));
-    this->emit(Instruction(Opcode::IBLocal, back_offset2 + 1));
-    this->emit(Instruction(Opcode::IBLStore, back_offset1 + 1));
-    this->emit(Instruction(Opcode::IBLStore, back_offset2));
+    this->emit(Bytecode(Opcode::IBLocal, back_offset1));
+    this->emit(Bytecode(Opcode::IBLocal, back_offset2 + 1));
+    this->emit(Bytecode(Opcode::IBLStore, back_offset1 + 1));
+    this->emit(Bytecode(Opcode::IBLStore, back_offset2));
 }
 
 void Compiler::compile_generic_for_swap(size_t varcount)
@@ -689,27 +689,27 @@ void Compiler::compile_generic_for(Noderef node)
     this->compile_generic_for_swap(varcount);
     //-- loop start
     size_t loop_beg = this->len();
-    this->emit(Instruction(Opcode::IBLocal, 1));                           // iterator
-    this->emit(Instruction(Opcode::IBLocal, 3));                           // state
-    this->emit(Instruction(Opcode::ILocal, this->varmem(lvalue)->offset)); // prev
+    this->emit(Bytecode(Opcode::IBLocal, 1));                           // iterator
+    this->emit(Bytecode(Opcode::IBLocal, 3));                           // state
+    this->emit(Bytecode(Opcode::ILocal, this->varmem(lvalue)->offset)); // prev
     this->debug_info(arglist->line());
-    this->emit(Instruction(Opcode::ICall, 2, varcount + 1));
+    this->emit(Bytecode(Opcode::ICall, 2, varcount + 1));
     for (size_t i = 0; i < varcount; i++)
-        this->emit(Instruction(Opcode::IBLStore, varcount + 2));
+        this->emit(Bytecode(Opcode::IBLStore, varcount + 2));
     //-- loop check
-    this->emit(Instruction(Opcode::ILocal, this->varmem(lvalue)->offset));
+    this->emit(Bytecode(Opcode::ILocal, this->varmem(lvalue)->offset));
     this->emit(Opcode::INil);
     this->emit(Opcode::IEq);
     size_t cjmp = this->len();
-    this->emit(Instruction(Opcode::ICjmp, 0x00)); // cjmp to loop end
+    this->emit(Bytecode(Opcode::ICjmp, 0x00)); // cjmp to loop end
     //-- block
     this->loop_start();
     this->compile_node(node->child(2));
-    this->emit(Instruction(Opcode::IJmp, loop_beg));
+    this->emit(Bytecode(Opcode::IJmp, loop_beg));
     this->loop_end();
     size_t loop_end = this->len();
     //-- loop end
-    this->emit(Instruction(Opcode::IPop, varcount + 2));
+    this->emit(Bytecode(Opcode::IPop, varcount + 2));
     this->stack_offset -= (varcount + 2);
     this->edit_jmp(cjmp, loop_end);
     for (size_t i = 0; i < upcount; i++)
@@ -749,24 +749,24 @@ void Compiler::compile_numeric_for(Noderef node)
         this->compile_exp(node->child(3));
     }
     else
-        this->emit(Instruction(Opcode::IConst, this->const_number(1)));
+        this->emit(Bytecode(Opcode::IConst, this->const_number(1)));
     size_t loop_start = this->len();
     this->loop_start();
     // condition
-    this->emit(Instruction(Opcode::IBLocal, 3)); // index
-    this->emit(Instruction(Opcode::IBLocal, 3)); // limit
+    this->emit(Bytecode(Opcode::IBLocal, 3)); // index
+    this->emit(Bytecode(Opcode::IBLocal, 3)); // limit
     this->emit(Opcode::IGt);
     // jmp to end
     size_t jmp = this->len();
-    this->emit(Instruction(Opcode::ICjmp, 0));
+    this->emit(Bytecode(Opcode::ICjmp, 0));
     // block
     this->compile_block(node->child(blk_idx));
     // increment
-    this->emit(Instruction(Opcode::IBLocal, 3)); // index
-    this->emit(Instruction(Opcode::IBLocal, 2)); // step
+    this->emit(Bytecode(Opcode::IBLocal, 3)); // index
+    this->emit(Bytecode(Opcode::IBLocal, 2)); // step
     this->emit(Opcode::IAdd);
-    this->emit(Instruction(Opcode::IBLStore, 3));
-    this->emit(Instruction(Opcode::IJmp, loop_start));
+    this->emit(Bytecode(Opcode::IBLStore, 3));
+    this->emit(Bytecode(Opcode::IJmp, loop_start));
     this->loop_end();
     this->edit_jmp(jmp, this->len());
     if (md->is_upvalue)
@@ -774,7 +774,7 @@ void Compiler::compile_numeric_for(Noderef node)
         this->hookpop();
         this->emit(Opcode::IUPop);
     }
-    this->emit(Instruction(Opcode::IPop, 3));
+    this->emit(Bytecode(Opcode::IPop, 3));
     this->stack_offset -= 3;
 }
 
@@ -789,25 +789,25 @@ void Compiler::compile_assignment(Noderef node)
         size_t v = vcount;
         while (v)
         {
-            this->emit(Instruction(Opcode::IBLStore, v + this->vstack_nearest_nil()));
+            this->emit(Bytecode(Opcode::IBLStore, v + this->vstack_nearest_nil()));
             v--;
         }
     }
     this->vstack.clear();
     this->ops_flush();
     if (varlc)
-        this->emit(Instruction(Opcode::IPop, varlc));
+        this->emit(Bytecode(Opcode::IPop, varlc));
 }
 
 void Compiler::compile_logic(Noderef node)
 {
     this->compile_exp(node->child(0));
-    this->emit(Instruction(Opcode::IBLocal, 1));
+    this->emit(Bytecode(Opcode::IBLocal, 1));
     if (node->child(1)->get_token().kind == TokenKind::And)
         this->emit(Opcode::INot);
     size_t cjmp = this->len();
-    this->emit(Instruction(Opcode::ICjmp, 0));
-    this->emit(Instruction(Opcode::IPop, 1));
+    this->emit(Bytecode(Opcode::ICjmp, 0));
+    this->emit(Bytecode(Opcode::IPop, 1));
     this->compile_exp(node->child(2));
     this->edit_jmp(cjmp, this->len());
 }
@@ -824,7 +824,7 @@ void Compiler::compile_block(Noderef node)
     }
     if (md->stack_size)
     {
-        this->emit(Instruction(Opcode::IPop, md->stack_size));
+        this->emit(Bytecode(Opcode::IPop, md->stack_size));
         this->stack_offset -= md->stack_size;
     }
 }
@@ -848,7 +848,7 @@ void Compiler::compile_decl_var(Noderef node)
         this->compile_explist(node->child(1), varlist->child_count());
     else
         for (size_t i = 0; i < varlist->child_count(); i++)
-            this->emit(Instruction(Opcode::INil));
+            this->emit(Bytecode(Opcode::INil));
     while (upcount--)
     {
         this->emit(Opcode::IUPush);
@@ -881,11 +881,11 @@ void Compiler::compile_ret(Noderef node)
     {
         Noderef vals = node->child(0);
         this->compile_explist(vals, EXPECT_FREE);
-        this->emit(Instruction(Opcode::IRet, this->arglist_count(vals)));
+        this->emit(Bytecode(Opcode::IRet, this->arglist_count(vals)));
     }
     else
     {
-        this->emit(Instruction(Opcode::IRet, 0));
+        this->emit(Bytecode(Opcode::IRet, 0));
     }
 }
 
@@ -895,10 +895,10 @@ void Compiler::compile_while(Noderef node)
     this->compile_exp(node->child(0));
     this->emit(Opcode::INot);
     size_t cjmp = this->len();
-    this->emit(Instruction(Opcode::ICjmp, 0));
+    this->emit(Bytecode(Opcode::ICjmp, 0));
     this->loop_start();
     this->compile_block(node->child(1));
-    this->emit(Instruction(Opcode::IJmp, jmp_idx));
+    this->emit(Bytecode(Opcode::IJmp, jmp_idx));
     this->loop_end();
     this->edit_jmp(cjmp, this->len());
 }
@@ -910,14 +910,14 @@ void Compiler::compile_repeat(Noderef node)
     this->compile_block(node->child(0));
     this->compile_exp(node->child(1));
     this->emit(Opcode::INot);
-    this->emit(Instruction(Opcode::ICjmp, cjmp_idx));
+    this->emit(Bytecode(Opcode::ICjmp, cjmp_idx));
     this->loop_end();
 }
 
 void Compiler::compile_break()
 {
     this->breaks.push_back(this->len());
-    this->emit(Instruction(Opcode::IJmp, 0));
+    this->emit(Bytecode(Opcode::IJmp, 0));
 }
 
 void Compiler::compile_goto(Noderef node)
@@ -927,7 +927,7 @@ void Compiler::compile_goto(Noderef node)
     MetaLabel *lmd = mdlabel(label);
     gtmd->is_compiled = true;
     gtmd->address = this->len();
-    this->emit(Instruction(Opcode::IJmp, lmd->is_compiled ? lmd->address : 0));
+    this->emit(Bytecode(Opcode::IJmp, lmd->is_compiled ? lmd->address : 0));
 }
 void Compiler::compile_label(Noderef node)
 {
@@ -986,7 +986,7 @@ size_t Compiler::const_string(const char *s)
     return this->gen->const_string(s);
 }
 
-void Compiler::emit(Instruction op)
+void Compiler::emit(Bytecode op)
 {
     this->gen->emit(op);
 }
@@ -1004,11 +1004,11 @@ void Compiler::ops_flush()
     }
 }
 
-void Compiler::ops_push(Instruction op)
+void Compiler::ops_push(Bytecode op)
 {
     this->ops_push(op, -1);
 }
-void Compiler::ops_push(Instruction op, int line)
+void Compiler::ops_push(Bytecode op, int line)
 {
     this->ops.push_back(op);
     this->lines.push_back(line);

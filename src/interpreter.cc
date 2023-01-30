@@ -72,7 +72,7 @@ Interpreter::Interpreter()
     }
 }
 
-size_t Interpreter::run(IRuntime *rt, Instruction op)
+size_t Interpreter::run(IRuntime *rt, Bytecode op)
 {
     this->rt = rt;
     this->fetch(op.bytes);

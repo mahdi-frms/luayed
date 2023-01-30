@@ -207,12 +207,12 @@ void MockRuntime::set_args(vector<LuaValue> args)
 {
     this->args = args;
 }
-void MockRuntime::set_text(vector<Instruction> text)
+void MockRuntime::set_text(vector<Bytecode> text)
 {
     this->instructions.clear();
     for (size_t i = 0; i < text.size(); i++)
     {
-        Instruction op = text[i];
+        Bytecode op = text[i];
         for (lbyte j = 0; j < op.count; j++)
         {
             this->instructions.push_back(op.bytes[j]);

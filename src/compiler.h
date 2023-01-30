@@ -11,7 +11,7 @@ class Compiler
 private:
     const char *chunckname = nullptr;
     IGenerator *gen;
-    vector<Instruction> ops;
+    vector<Bytecode> ops;
     vector<int> lines;
     vector<lbyte> vstack;
     vector<size_t> breaks;
@@ -23,13 +23,13 @@ private:
     void hookpush();
     void hookpop();
     size_t len();
-    void emit(Instruction op);
+    void emit(Bytecode op);
     void ops_flush();
     void edit_jmp(size_t opidx, size_t jmp_idx);
     void seti(size_t idx, lbyte b);
     size_t upval(fidx_t fidx, size_t offset, size_t hidx);
-    void ops_push(Instruction op);
-    void ops_push(Instruction op, int line);
+    void ops_push(Bytecode op);
+    void ops_push(Bytecode op, int line);
     size_t const_number(lnumber n);
     size_t const_string(const char *s);
     size_t vstack_nearest_nil();

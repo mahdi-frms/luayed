@@ -27,7 +27,7 @@ protected:
 
 public:
     BaseGenerator(const char *message);
-    void emit(Instruction opcode);
+    void emit(Bytecode opcode);
     size_t len();
     void debug_info(size_t line);
     void seti(size_t idx, lbyte b);
@@ -52,7 +52,7 @@ private:
 public:
     LuaGenerator(LuaRuntime *rt);
 
-    void emit(Instruction opcode);
+    void emit(Bytecode opcode);
     size_t len();
     void seti(size_t idx, lbyte b);
 
