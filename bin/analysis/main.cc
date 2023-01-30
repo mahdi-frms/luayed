@@ -1,7 +1,8 @@
 #include <string>
 #include <unistd.h>
 #include <iostream>
-#include <lyddef.h>
+#include <lexer.h>
+#include <lstrep.h>
 
 namespace cli
 {
@@ -87,15 +88,20 @@ void command_read_file(string path)
     std::cout << read_file(path);
 }
 
-void command_lex_file(string code)
+void command_lex_file(string path)
+{
+    string code = read_file(path);
+    Lexer lexer(code.c_str());
+    vector<Token> tokens = lexer.drain();
+    for (size_t i = 0; i < tokens.size(); i++)
+        std::cout << tokens[i] << "\n";
+}
+
+void cammand_parse_file(string path)
 {
 }
 
-void cammand_parse_file(string code)
-{
-}
-
-void cammand_compile_file(string code)
+void cammand_compile_file(string path)
 {
 }
 
