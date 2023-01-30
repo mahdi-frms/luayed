@@ -132,12 +132,14 @@ string to_string(const Token &t)
 {
     string s;
     s += t.text().c_str();
+    while (s.size() < 16)
+        s.push_back(' ');
     s += " (";
     s += to_string(t.kind);
     s += ") [";
-    s += t.line + 1;
+    s += std::to_string(t.line + 1);
     s += ",";
-    s += t.offset + 1;
+    s += std::to_string(t.offset + 1);
     s += "]";
     return s;
 }
