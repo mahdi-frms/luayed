@@ -4,6 +4,7 @@
 #include <lexer.h>
 #include <parser.h>
 #include <lstrep.h>
+#include <resolve.h>
 
 namespace cli
 {
@@ -84,6 +85,16 @@ string read_file(string path)
     return str;
 }
 
+ast::Ast parse_file(string &code)
+{
+    Lexer lexer(code.c_str());
+    Parser parser(&lexer);
+    ast::Ast tree = parser.parse();
+    if (!tree.root())
+        std::cerr << parser.get_error() << "\n";
+    return tree;
+}
+
 void command_read_file(string path)
 {
     std::cout << read_file(path);
@@ -98,20 +109,30 @@ void command_lex_file(string path)
         std::cout << tokens[i] << "\n";
 }
 
-void cammand_parse_file(string path)
+void command_parse_file(string path)
 {
     string code = read_file(path);
-    Lexer lexer(code.c_str());
-    Parser parser(&lexer);
-    ast::Ast tree = parser.parse();
-    if (tree.root())
-        std::cout << tree.root();
-    else
-        std::cerr << parser.get_error() << "\n";
+    ast::Ast tree = parse_file(code);
+    if (!tree.root())
+        exit(1);
+    std::cout << tree.root();
 }
 
-void cammand_compile_file(string path)
+void command_compile_file(string path)
 {
+    string code = read_file(path);
+    ast::Ast tree = parse_file(code);
+    if (!tree.root())
+        exit(1);
+    Resolver resolver(tree);
+    vector<Lerror> errors = resolver.analyze();
+    if (errors.size())
+    {
+        for (size_t i = 0; i < errors.size(); i++)
+            std::cerr << errors[i];
+        exit(1);
+    }
+    std::cout << "COMPILE IS POSSIBLE!\n";
 }
 
 int main(int argc, char **argv)
@@ -121,9 +142,9 @@ int main(int argc, char **argv)
     if (args.step == cli::Step::Lex)
         command_lex_file(args.path);
     else if (args.step == cli::Step::Parse)
-        cammand_parse_file(args.path);
+        command_parse_file(args.path);
     else if (args.step == cli::Step::Compile)
-        cammand_compile_file(args.path);
+        command_compile_file(args.path);
     else
         command_read_file(args.path);
 
