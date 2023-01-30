@@ -21,7 +21,7 @@ namespace cli
 
     struct Args
     {
-        Step step;
+        Step step = Step::None;
         string path;
 
         static Args parse(int argc, char **argv)
@@ -64,8 +64,27 @@ namespace cli
     };
 }
 
+string read_file(string path)
+{
+    string str = "";
+    int bsize = 1024;
+    FILE *file = fopen(path.c_str(), "r");
+    char buffer[bsize + 1];
+    while (true)
+    {
+        int rsl = fread(buffer, 1, bsize, file);
+        buffer[rsl] = '\0';
+        str += string(buffer);
+        if (rsl < bsize)
+            break;
+    }
+    fclose(file);
+    return str;
+}
+
 void command_read_file(string path)
 {
+    std::cout << read_file(path);
 }
 
 void command_lex_file(string code)
