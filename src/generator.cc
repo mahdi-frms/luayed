@@ -25,17 +25,20 @@ void BaseGenerator::seti(size_t idx, lbyte b)
 }
 size_t BaseGenerator::const_number(lnumber num)
 {
-    return this->current->ccount++;
+    size_t idx = this->current->constants.size();
+    this->current->constants.push_back(std::to_string(num));
+    return idx;
 }
 size_t BaseGenerator::const_string(const char *str)
 {
-    return this->current->ccount++;
+    size_t idx = this->current->constants.size();
+    this->current->constants.push_back(str);
+    return idx;
 }
 fidx_t BaseGenerator::pushf()
 {
     FuncTest *fnt = new FuncTest();
     fidx_t fidx = this->fidx_counter++;
-    fnt->ccount = 0;
     fnt->prev = nullptr;
     fnt->hookmax = 0;
     fnt->parcount = 0;

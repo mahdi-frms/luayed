@@ -62,7 +62,7 @@ public:
     GenTest &test_ccount(size_t ccount)
     {
         char *mes = compiler_test_message(this->message, "constant count");
-        test_case(mes, this->test->ccount == ccount);
+        test_case(mes, this->test->constants.size() == ccount);
         delete[] mes;
         return *this;
     }

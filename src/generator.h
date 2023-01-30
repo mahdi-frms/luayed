@@ -10,7 +10,7 @@ struct FuncTest
     vector<lbyte> text;
     vector<Upvalue> upvalues;
     vector<size_t> debug;
-    size_t ccount;
+    vector<string> constants;
     size_t hookmax;
     size_t parcount;
     fidx_t fidx;
