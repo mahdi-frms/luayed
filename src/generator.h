@@ -3,7 +3,6 @@
 
 #include "runtime.h"
 #include "luabin.h"
-#include <map>
 
 struct FuncTest
 {
@@ -20,7 +19,7 @@ struct FuncTest
 class BaseGenerator : public IGenerator
 {
 protected:
-    std::map<fidx_t, FuncTest *> funcs;
+    vector<FuncTest *> funcs;
     FuncTest *current;
     const char *message;
     FuncTest *test;
@@ -73,6 +72,8 @@ public:
     }
     void popf()
     {
+        while (this->funcs.size() <= this->current->fidx)
+            this->funcs.push_back(nullptr);
         this->funcs[this->current->fidx] = this->current;
         this->current = this->current->prev;
     }
@@ -97,7 +98,7 @@ public:
     ~BaseGenerator()
     {
         for (auto it = this->funcs.begin(); it != this->funcs.end(); it++)
-            delete it->second;
+            delete *it;
     }
 };
 
