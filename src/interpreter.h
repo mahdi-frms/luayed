@@ -46,7 +46,7 @@ class Interpreter : public IInterpreter
 {
 public:
     size_t run(IRuntime *rt);
-    size_t run(IRuntime *rt, Opcode op);
+    size_t run(IRuntime *rt, Instruction op);
     static void optable_init();
     Interpreter();
     void config_error_metadata(bool val);

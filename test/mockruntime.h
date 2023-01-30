@@ -47,7 +47,7 @@ public:
     void set_stack(vector<LuaValue> stack);
     void set_constants(vector<LuaValue> constants);
     void set_args(vector<LuaValue> args);
-    void set_text(vector<Opcode> text);
+    void set_text(vector<Instruction> text);
     bool compare_stack(vector<LuaValue> values);
 
     void table_set(LuaValue t, LuaValue k, LuaValue v);

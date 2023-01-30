@@ -3,7 +3,7 @@
 
 #include "lyddef.h"
 
-enum Instruction
+enum Opcode
 {
     IAdd = 0x10,
     ISub = 0x11,
@@ -74,14 +74,14 @@ struct Upvalue
     friend bool operator==(const Upvalue &l, const Upvalue &r);
 };
 
-struct Opcode
+struct Instruction
 {
     lbyte count;
     lbyte bytes[5];
 
-    Opcode(lbyte op, size_t idx);
-    Opcode(lbyte op, size_t idx1, size_t idx2);
-    Opcode(lbyte op);
+    Instruction(lbyte op, size_t idx);
+    Instruction(lbyte op, size_t idx1, size_t idx2);
+    Instruction(lbyte op);
 };
 
 #define iadd IAdd
@@ -117,20 +117,20 @@ struct Opcode
 #define ifalse IFalse
 #define iupush IUPush
 #define iupop IUPop
-#define itlist(A) Opcode(ITList, A)
-#define iret(A) Opcode(IRet, A)
-#define icall(A, B) Opcode(ICall, A, B)
-#define ivargs(A) Opcode(IVargs, A)
-#define ijmp(A) Opcode(IJmp, A)
-#define icjmp(A) Opcode(ICjmp, A)
-#define iconst(A) Opcode(IConst, A)
-#define ifconst(A) Opcode(IFConst, A)
-#define ilocal(A) Opcode(ILocal, A)
-#define ilstore(A) Opcode(ILStore, A)
-#define iblocal(A) Opcode(IBLocal, A)
-#define iblstore(A) Opcode(IBLStore, A)
-#define iupvalue(A) Opcode(IUpvalue, A)
-#define iustore(A) Opcode(IUStore, A)
-#define ipop(A) Opcode(IPop, A)
+#define itlist(A) Instruction(ITList, A)
+#define iret(A) Instruction(IRet, A)
+#define icall(A, B) Instruction(ICall, A, B)
+#define ivargs(A) Instruction(IVargs, A)
+#define ijmp(A) Instruction(IJmp, A)
+#define icjmp(A) Instruction(ICjmp, A)
+#define iconst(A) Instruction(IConst, A)
+#define ifconst(A) Instruction(IFConst, A)
+#define ilocal(A) Instruction(ILocal, A)
+#define ilstore(A) Instruction(ILStore, A)
+#define iblocal(A) Instruction(IBLocal, A)
+#define iblstore(A) Instruction(IBLStore, A)
+#define iupvalue(A) Instruction(IUpvalue, A)
+#define iustore(A) Instruction(IUStore, A)
+#define ipop(A) Instruction(IPop, A)
 
 #endif

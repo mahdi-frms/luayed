@@ -9,7 +9,7 @@
 class IGenerator
 {
 public:
-    virtual void emit(Opcode opcode) = 0;
+    virtual void emit(Instruction opcode) = 0;
     virtual size_t len() = 0;
     virtual void seti(size_t idx, lbyte b) = 0;
 
@@ -81,7 +81,7 @@ class IInterpreter
 {
 public:
     virtual size_t run(IRuntime *rt) = 0;
-    virtual size_t run(IRuntime *rt, Opcode op) = 0;
+    virtual size_t run(IRuntime *rt, Instruction op) = 0;
 };
 
 class IAllocator

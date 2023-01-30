@@ -44,9 +44,9 @@ public:
         this->rt.set_args(args);
         return *this;
     }
-    InterpreterTestCase &set_text(vector<Opcode> text)
+    InterpreterTestCase &set_text(vector<Instruction> text)
     {
-        if (!text.size() || (text.back().bytes[0] & 0b11111110) != Instruction::IRet)
+        if (!text.size() || (text.back().bytes[0] & 0b11111110) != Opcode::IRet)
         {
             std::cerr << "instructions at text '" << this->message << "' do not end with ret!\n";
             exit(1);
@@ -109,7 +109,7 @@ public:
         }
         return *this;
     }
-    InterpreterTestCase &execute(vector<Opcode> opcodes)
+    InterpreterTestCase &execute(vector<Instruction> opcodes)
     {
         const char *suffix = "(execution)";
         Interpreter intp;

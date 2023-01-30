@@ -44,7 +44,6 @@ add_executable(luaycli
 
 add_executable(luaysis
     bin/analysis/main.cc
-    bin/analysis/generator.cc
 )
 
 set_target_properties(luaycli

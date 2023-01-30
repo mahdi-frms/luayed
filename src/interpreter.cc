@@ -72,7 +72,7 @@ Interpreter::Interpreter()
     }
 }
 
-size_t Interpreter::run(IRuntime *rt, Opcode op)
+size_t Interpreter::run(IRuntime *rt, Instruction op)
 {
     this->rt = rt;
     this->fetch(op.bytes);
@@ -136,7 +136,7 @@ size_t Interpreter::fetch(lbyte *bin)
             this->arg1 += bin[ptr++] << 8;
         }
 
-        if (op == Instruction::ICall)
+        if (op == Opcode::ICall)
         {
             this->arg2 = bin[ptr++];
             if (op & 0x02)

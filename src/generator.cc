@@ -3,7 +3,7 @@
 BaseGenerator::BaseGenerator(const char *message) : current(nullptr), message(message), test(nullptr)
 {
 }
-void BaseGenerator::emit(Opcode opcode)
+void BaseGenerator::emit(Instruction opcode)
 {
     for (size_t i = 0; i < opcode.count; i++)
         this->current->text.push_back(opcode.bytes[i]);
@@ -114,7 +114,7 @@ void LuaGenerator::debug_info(size_t line)
         this->gfn->dbg_lines.push_back(0);
     this->gfn->dbg_lines.back() = line + 1;
 }
-void LuaGenerator::emit(Opcode opcode)
+void LuaGenerator::emit(Instruction opcode)
 {
     for (size_t i = 0; i < opcode.count; i++)
     {
