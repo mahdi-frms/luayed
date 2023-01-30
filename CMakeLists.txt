@@ -39,7 +39,7 @@ add_library(luayed
 )
     
 add_executable(luaycli
-    bin/main.cc
+    bin/luayed/main.cc
 )
 
 set_target_properties(luaycli
