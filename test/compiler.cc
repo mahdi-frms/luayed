@@ -5,19 +5,8 @@
 #include <cstring>
 #include <iostream>
 #include "test.h"
+#include "generator.h"
 #include <lstrep.h>
-
-struct FuncTest
-{
-    FuncTest *prev;
-    vector<lbyte> text;
-    vector<Upvalue> upvalues;
-    vector<size_t> debug;
-    size_t ccount;
-    size_t hookmax;
-    size_t parcount;
-    fidx_t fidx;
-};
 
 typedef void (*test_case_function_t)(const char *, bool);
 
@@ -44,84 +33,13 @@ char *compiler_test_message(const char *item, const char *property)
     return message;
 }
 
-class GenTest final : public IGenerator
+class GenTest : public BaseGenerator
 {
-private:
-    std::map<fidx_t, FuncTest *> funcs;
-    FuncTest *current;
-    const char *message;
-    FuncTest *test;
-    fidx_t fidx_counter = 1;
 
 public:
-    GenTest(const char *message) : current(nullptr), message(message), test(nullptr)
+    GenTest(const char *message) : BaseGenerator(message)
     {
     }
-    void emit(Opcode opcode)
-    {
-        for (size_t i = 0; i < opcode.count; i++)
-            this->current->text.push_back(opcode.bytes[i]);
-    }
-    size_t len()
-    {
-        return this->current->text.size();
-    }
-    void debug_info(size_t line)
-    {
-        line++;
-        while (this->current->debug.size() <= this->current->text.size())
-            this->current->debug.push_back(0);
-        this->current->debug.back() = line;
-    }
-    void seti(size_t idx, lbyte b)
-    {
-        this->current->text[idx] = b;
-    }
-    size_t const_number(lnumber num)
-    {
-        return this->current->ccount++;
-    }
-    size_t const_string(const char *str)
-    {
-        return this->current->ccount++;
-    }
-    fidx_t pushf()
-    {
-        FuncTest *fnt = new FuncTest();
-        fidx_t fidx = this->fidx_counter++;
-        fnt->ccount = 0;
-        fnt->prev = nullptr;
-        fnt->hookmax = 0;
-        fnt->parcount = 0;
-        fnt->prev = this->current;
-        fnt->fidx = fidx;
-        this->current = fnt;
-        return fidx;
-    }
-    void popf()
-    {
-        this->funcs[this->current->fidx] = this->current;
-        this->current = this->current->prev;
-    }
-    size_t upval(fidx_t fidx, size_t offset, size_t hidx)
-    {
-        size_t idx = this->current->upvalues.size();
-        this->current->upvalues.push_back(Upvalue(fidx, offset, hidx));
-        return idx;
-    }
-    void meta_parcount(size_t parcount)
-    {
-        this->current->parcount = parcount;
-    }
-    void meta_hookmax(size_t hookmax)
-    {
-        this->current->hookmax = hookmax;
-    }
-
-    void meta_chunkname(const char *chunkname)
-    {
-    }
-
     GenTest &test_fn(size_t fidx)
     {
         this->test = this->funcs[fidx];
@@ -202,11 +120,6 @@ public:
         test_case(mes, this->test->upvalues == upvalues);
         delete[] mes;
         return *this;
-    }
-    ~GenTest()
-    {
-        for (auto it = this->funcs.begin(); it != this->funcs.end(); it++)
-            delete it->second;
     }
 };
 
