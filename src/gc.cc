@@ -142,9 +142,8 @@ void GarbageCollector::scan()
 #endif
     this->value(rt->table_global());
 }
-void GarbageCollector::mark(LuaRuntime *rt)
+void GarbageCollector::mark()
 {
-    this->rt = rt;
 #ifdef GC_DEBUG
     inspector.init();
 #endif
@@ -155,7 +154,6 @@ void GarbageCollector::mark(LuaRuntime *rt)
         this->scanlifo = obj->scan;
         this->scan(obj);
     }
-    this->rt = nullptr;
 }
 void GarbageCollector::value(LuaValue val)
 {
@@ -189,9 +187,9 @@ GarbageCollector::GarbageCollector()
     this->dummy.alloc_type = AllocType::ATDummy;
     this->scanlifo = &this->dummy;
 }
-void GarbageCollector::sweep(LuaRuntime *rt)
+void GarbageCollector::sweep()
 {
-    gc_header_t *hdptr = rt->gc_headers()->next;
+    gc_header_t *hdptr = this->rt->gc_headers()->next;
     while (hdptr->alloc_type != AllocType::ATDummy)
     {
         gc_header_t *next = hdptr->next;
@@ -208,8 +206,16 @@ void GarbageCollector::sweep(LuaRuntime *rt)
 #ifdef GC_DEBUG
             inspector.dealloc(hdptr + 1, hdptr->alloc_type);
 #endif
-            rt->deallocate(hdptr);
+            this->rt->deallocate(hdptr);
         }
         hdptr = next;
     }
+}
+
+void GarbageCollector::run(LuaRuntime *rt)
+{
+    this->rt = rt;
+    this->mark();
+    this->sweep();
+    this->rt = nullptr;
 }

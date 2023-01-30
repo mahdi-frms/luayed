@@ -281,8 +281,7 @@ void LuaRuntime::heap_destroy()
 void LuaRuntime::collect_garbage()
 {
     GarbageCollector gc;
-    gc.mark(this);
-    gc.sweep(this);
+    gc.run(this);
 }
 void LuaRuntime::check_garbage_collection()
 {
