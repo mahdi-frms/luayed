@@ -1,17 +1,19 @@
 #include <string>
 #include <unistd.h>
 #include <iostream>
+#include <lyddef.h>
 
 namespace cli
 {
     enum class Step
     {
+        None,
         Lex,
         Parse,
         Compile,
     };
 
-    void error_exit(std::string error, int status_code = 1)
+    void error_exit(string error, int status_code = 1)
     {
         std::cerr << error << "\n";
         exit(status_code);
@@ -20,7 +22,7 @@ namespace cli
     struct Args
     {
         Step step;
-        std::string path;
+        string path;
 
         static Args parse(int argc, char **argv)
         {
@@ -29,7 +31,7 @@ namespace cli
             Args args;
             while ((c = getopt(argc, argv, "lpc")) != -1)
             {
-                std::string error;
+                string error;
                 switch (c)
                 {
                 case 'l':
@@ -62,9 +64,34 @@ namespace cli
     };
 }
 
+void command_read_file(string path)
+{
+}
+
+void command_lex_file(string code)
+{
+}
+
+void cammand_parse_file(string code)
+{
+}
+
+void cammand_compile_file(string code)
+{
+}
+
 int main(int argc, char **argv)
 {
     cli::Args args = cli::Args::parse(argc, argv);
-    std::cout << "file: " << args.path << "\n";
+
+    if (args.step == cli::Step::Lex)
+        command_lex_file(args.path);
+    else if (args.step == cli::Step::Parse)
+        cammand_parse_file(args.path);
+    else if (args.step == cli::Step::Compile)
+        cammand_compile_file(args.path);
+    else
+        command_read_file(args.path);
+
     return 0;
 }
