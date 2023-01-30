@@ -66,19 +66,20 @@ public:
         delete[] mes;
         return *this;
     }
-    vector<lbyte> assemble(vector<Bytecode> &opcodes)
+    vector<lbyte> assemble(vector<Instruction> &instructions)
     {
         vector<lbyte> bin;
-        for (size_t i = 0; i < opcodes.size(); i++)
+        for (size_t i = 0; i < instructions.size(); i++)
         {
-            for (lbyte j = 0; j < opcodes[i].count; j++)
-                bin.push_back(opcodes[i].bytes[j]);
+            Bytecode bc = instructions[i].encode();
+            for (lbyte j = 0; j < bc.count; j++)
+                bin.push_back(bc.bytes[j]);
         }
         return bin;
     }
-    GenTest &test_opcodes(vector<Bytecode> opcodes)
+    GenTest &test_opcodes(vector<Instruction> instructions)
     {
-        vector<lbyte> bin = this->assemble(opcodes);
+        vector<lbyte> bin = this->assemble(instructions);
         char *mes = compiler_test_message(this->message, "text");
         vector<lbyte> &gen = this->test->text;
         bool rsl = bin == this->test->text;

@@ -44,14 +44,17 @@ public:
         this->rt.set_args(args);
         return *this;
     }
-    InterpreterTestCase &set_text(vector<Bytecode> text)
+    InterpreterTestCase &set_text(vector<Instruction> text)
     {
-        if (!text.size() || (text.back().bytes[0] & 0b11111110) != Opcode::IRet)
+        if (!text.size() || (text.back().op) != Opcode::IRet)
         {
             std::cerr << "instructions at text '" << this->message << "' do not end with ret!\n";
             exit(1);
         }
-        this->rt.set_text(text);
+        vector<Bytecode> bin;
+        for (size_t i = 0; i < text.size(); i++)
+            bin.push_back(text[i].encode());
+        this->rt.set_text(bin);
         return *this;
     }
     InterpreterTestCase &add_upvalue(LuaValue value)
@@ -109,15 +112,15 @@ public:
         }
         return *this;
     }
-    InterpreterTestCase &execute(vector<Bytecode> opcodes)
+    InterpreterTestCase &execute(vector<Instruction> instructions)
     {
         const char *suffix = "(execution)";
         Interpreter intp;
         intp.config_error_metadata(false);
         try
         {
-            for (size_t i = 0; i < opcodes.size(); i++)
-                this->retarg = intp.run(&this->rt, opcodes[i]);
+            for (size_t i = 0; i < instructions.size(); i++)
+                this->retarg = intp.run(&this->rt, instructions[i].encode());
             this->test(true, suffix);
         }
         catch (int fault_code)
