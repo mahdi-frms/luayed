@@ -44,6 +44,7 @@ add_executable(luaycli
 
 add_executable(luaysis
     bin/analysis/main.cc
+    bin/analysis/generator.cc
 )
 
 set_target_properties(luaycli
@@ -80,5 +81,6 @@ include_directories(dep)
 include_directories(src)
 include_directories(include)
 include_directories(lib)
+include_directories(.)
 
 set_property(TARGET luayed PROPERTY CXX_STANDARD 17)
