@@ -215,12 +215,7 @@ string to_string(const ast::Noderef &n)
     node_to_string(n, 1, buffer);
     return buffer;
 }
-
-string to_string(const vector<lbyte> &bin)
-{
-    return to_string(&bin.front(), bin.size());
-}
-string to_string(const lbyte *text, size_t codelen)
+string to_string(const Opcode &opcode)
 {
     const char *opnames[256];
     opnames[IAdd] = "add";
@@ -272,14 +267,21 @@ string to_string(const lbyte *text, size_t codelen)
     opnames[IUpvalue] = "upvalue";
     opnames[IUStore] = "ustore";
     opnames[IPop] = "pop";
-
+    return opnames[opcode];
+}
+string to_string(const vector<lbyte> &bin)
+{
+    return to_string(&bin.front(), bin.size());
+}
+string to_string(const lbyte *text, size_t codelen)
+{
     string str;
     for (size_t i = 0; i < codelen;)
     {
         size_t rc;
         Instruction ins = Instruction::decode(text + i, &rc);
         i += rc;
-        str.append(opnames[ins.op]);
+        str.append(to_string(ins.op));
         str.push_back(' ');
         str += std::to_string(ins.oprnd1);
         str.push_back(' ');
@@ -484,3 +486,4 @@ WRITE_TO_STREAM_OPERATOR(LuaType)
 WRITE_TO_STREAM_OPERATOR(LuaValue)
 WRITE_TO_STREAM_OPERATOR(Lerror)
 WRITE_TO_STREAM_OPERATOR(vector<LuaValue>)
+WRITE_TO_STREAM_OPERATOR(Opcode)

@@ -68,7 +68,7 @@ private:
     void loop_start();
     void loop_end();
     size_t arglist_count(Noderef arglist);
-    lbyte translate_token(TokenKind kind, bool bin);
+    Opcode translate_token(TokenKind kind, bool bin);
     fidx_t compile(Noderef root, const char *chunckname = nullptr);
     void debug_info(size_t line);
 

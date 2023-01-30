@@ -7,7 +7,7 @@ bool operator==(const Upvalue &l, const Upvalue &r)
 
 Upvalue::Upvalue(fidx_t fidx, size_t offset, size_t hidx) : fidx(fidx), offset(offset), hidx(hidx) {}
 
-Instruction::Instruction(lbyte op, size_t oprnd1, size_t oprnd2)
+Instruction::Instruction(Opcode op, size_t oprnd1, size_t oprnd2)
 {
     this->op = op;
     this->oprnd1 = oprnd1;
@@ -94,5 +94,5 @@ Instruction Instruction::decode(const lbyte *binary, size_t *read_count)
     }
     if (read_count)
         *read_count = rc;
-    return Instruction(op, oprnd1, oprnd2);
+    return Instruction((Opcode)op, oprnd1, oprnd2);
 }

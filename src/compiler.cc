@@ -159,26 +159,26 @@ fidx_t Compiler::compile(Ast ast, const char *chunckname)
     return this->compile(ast.root(), chunckname);
 }
 
-lbyte tkn_binops[] = {
-    IAdd,
-    IMult,
-    IFltDiv,
-    IFlrDiv,
-    IMod,
-    IPow,
-    IBAnd,
-    IBOr,
-    ISHR,
-    ISHL,
-    IConcat,
-    ILt,
-    ILe,
-    IGt,
-    IGe,
-    IEq,
-    INe};
+Opcode tkn_binops[] = {
+    Opcode::IAdd,
+    Opcode::IMult,
+    Opcode::IFltDiv,
+    Opcode::IFlrDiv,
+    Opcode::IMod,
+    Opcode::IPow,
+    Opcode::IBAnd,
+    Opcode::IBOr,
+    Opcode::ISHR,
+    Opcode::ISHL,
+    Opcode::IConcat,
+    Opcode::ILt,
+    Opcode::ILe,
+    Opcode::IGt,
+    Opcode::IGe,
+    Opcode::IEq,
+    Opcode::INe};
 
-lbyte Compiler::translate_token(TokenKind kind, bool bin)
+Opcode Compiler::translate_token(TokenKind kind, bool bin)
 {
     if (TOKEN_IS_BINARY(kind))
     {

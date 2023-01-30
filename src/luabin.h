@@ -84,11 +84,11 @@ struct Bytecode
 
 struct Instruction
 {
-    lbyte op;
+    Opcode op;
     size_t oprnd1;
     size_t oprnd2;
 
-    Instruction(lbyte op, size_t oprnd1 = 0, size_t oprnd2 = 0);
+    Instruction(Opcode op, size_t oprnd1 = 0, size_t oprnd2 = 0);
 
     size_t oprnd_count() const;
     Bytecode encode() const;
