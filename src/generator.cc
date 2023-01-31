@@ -1,4 +1,5 @@
 #include "generator.h"
+#include "lstrep.h"
 
 BaseGenerator::BaseGenerator() : current(nullptr), test(nullptr)
 {
@@ -26,7 +27,7 @@ void BaseGenerator::seti(size_t idx, lbyte b)
 size_t BaseGenerator::const_number(lnumber num)
 {
     size_t idx = this->current->constants.size();
-    this->current->constants.push_back(std::to_string(num));
+    this->current->constants.push_back(to_string(num));
     return idx;
 }
 size_t BaseGenerator::const_string(const char *str)

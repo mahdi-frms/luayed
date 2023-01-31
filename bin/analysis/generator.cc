@@ -40,7 +40,7 @@ void AnalysisGenerator::fn_stringify()
 {
     vector<Instruction> inslist;
     this->append("function: ");
-    this->append(std::to_string(this->fn->fidx));
+    this->append(to_string(this->fn->fidx));
     this->append("\n");
     for (size_t i = 0; i < this->fn->text.size();)
     {
@@ -51,12 +51,15 @@ void AnalysisGenerator::fn_stringify()
         this->hex(i);
         this->append("\t");
         this->append(to_string(ins.op));
-        if (ins.oprnd_count() > 0)
+        if (ins.oprnd_count() >= 1)
         {
             this->append(" ");
-            this->append(to_string(ins.oprnd1));
+            if (ins.op == Opcode::IJmp || ins.op == Opcode::ICjmp)
+                this->hex(ins.oprnd1);
+            else
+                this->append(to_string(ins.oprnd1));
         }
-        if (ins.oprnd_count() > 1)
+        if (ins.oprnd_count() >= 2)
         {
             this->append(" ");
             this->append(to_string(ins.oprnd2));
@@ -73,11 +76,11 @@ void AnalysisGenerator::fn_stringify()
             Upvalue uv = this->fn->upvalues[ins.oprnd1];
             this->append(" <");
             this->append("func idx = ");
-            this->append(std::to_string(uv.fidx));
+            this->append(to_string(uv.fidx));
             this->append("| offset = ");
-            this->append(std::to_string(uv.offset));
+            this->append(to_string(uv.offset));
             this->append("| hook idx = ");
-            this->append(std::to_string(uv.hidx));
+            this->append(to_string(uv.hidx));
             this->append(">");
         }
         this->append("\n");
