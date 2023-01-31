@@ -6,6 +6,8 @@
 #include <iostream>
 #include "luadef.h"
 
+typedef std::string string;
+
 template <typename T>
 using vector = std::vector<T>;
 

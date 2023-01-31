@@ -12,6 +12,7 @@
 #define LUA_TYPE_FUNCTION 5
 
 #include "luadef.h"
+#include <string>
 
 struct LuaConfig
 {
@@ -26,7 +27,7 @@ class Lua
 {
 public:
     static Lua *create(LuaConfig conf = LuaConfig());
-    virtual int compile(const char *lua_code, string &errors, const char *chunkname = nullptr) = 0;
+    virtual int compile(const char *lua_code, std::string &errors, const char *chunkname = nullptr) = 0;
     virtual void push_cppfn(LuaCppFunction cppfn) = 0;
     virtual void push_string(const char *str) = 0;
     virtual void push_nil() = 0;
