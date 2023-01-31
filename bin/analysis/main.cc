@@ -20,7 +20,7 @@ namespace cli
 
     void error_exit(string error, int status_code = 1)
     {
-        std::cerr << error << "\n";
+        std::cerr << "error: " << error << "\n";
         exit(status_code);
     }
 
@@ -63,6 +63,8 @@ namespace cli
                     exit(1);
                 }
             }
+            if (optind >= argc)
+                error_exit("no path provided");
             args.path = argv[optind];
             return args;
         }
@@ -74,6 +76,8 @@ string read_file(string path)
     string str = "";
     int bsize = 1024;
     FILE *file = fopen(path.c_str(), "r");
+    if (!file)
+        cli::error_exit(string("failed to open file '") + path + string("'"));
     char buffer[bsize + 1];
     while (true)
     {
