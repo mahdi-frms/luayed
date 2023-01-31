@@ -28,6 +28,7 @@ class Lua
 {
 public:
     static Lua *create(LuaConfig conf = LuaConfig());
+    void destroy();
     virtual int compile(const char *lua_code, std::string &errors, const char *chunkname = nullptr) = 0;
     virtual void push_cppfn(LuaCppFunction cppfn) = 0;
     virtual void push_string(const char *str) = 0;
@@ -50,6 +51,7 @@ public:
     virtual bool has_error() = 0;
     virtual void push_error() = 0;
     virtual void pop_error() = 0;
+    virtual ~Lua() = 0;
 };
 
 #endif

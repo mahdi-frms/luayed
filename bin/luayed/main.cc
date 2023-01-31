@@ -43,17 +43,20 @@ bool runfile(int argc, char **argv)
     Lua *lua = Lua::create();
     string text = readfile(script);
     string errors;
+    bool rsl;
     if (lua->compile(text.c_str(), errors, script) == LUA_COMPILE_RESULT_OK)
     {
         for (int i = 2; i < argc; i++)
             lua->push_string(argv[i]);
-        return execute(lua, argc - 2);
+        rsl = execute(lua, argc - 2);
     }
     else
     {
         std::cerr << errors;
-        return false;
+        rsl = false;
     }
+    lua->destroy();
+    return rsl;
 }
 
 void repl()
@@ -85,6 +88,7 @@ void repl()
             execute(lua);
         }
     }
+    lua->destroy();
     std::cout << "\n";
 }
 
