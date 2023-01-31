@@ -5,6 +5,23 @@ void AnalysisGenerator::append(string str)
 {
     this->text.append(str);
 }
+char AnalysisGenerator::hex_digit(size_t num)
+{
+    if (num > 9)
+        return 'a' + (num - 10);
+    return '0' + num;
+}
+
+void AnalysisGenerator::hex(size_t num)
+{
+    string s = "0x0000";
+    for (size_t i = 0; i < 4; i++)
+    {
+        s[5 - i] = this->hex_digit(num % 16);
+        num /= 16;
+    }
+    this->append(s);
+}
 
 string AnalysisGenerator::stringify()
 {
@@ -24,12 +41,14 @@ void AnalysisGenerator::fn_stringify()
     vector<Instruction> inslist;
     this->append("function: ");
     this->append(std::to_string(this->fn->fidx));
+    this->append("\n");
     for (size_t i = 0; i < this->fn->text.size();)
     {
         size_t rc;
         Instruction ins = Instruction::decode(this->fn->text.cbegin().base() + i, &rc);
         inslist.push_back(ins);
 
+        this->hex(i);
         this->append("\t");
         this->append(to_string(ins.op));
         if (ins.oprnd_count() > 0)

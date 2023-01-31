@@ -11,6 +11,8 @@ private:
 
     void fn_stringify();
     void append(string str);
+    void hex(size_t num);
+    char hex_digit(size_t num);
 
 public:
     string stringify();
