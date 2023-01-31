@@ -11,6 +11,7 @@
 LuaState::LuaState(LuaConfig conf) : runtime(&this->interpreter)
 {
     this->runtime.set_lua_interface(this);
+    this->interpreter.config_error_metadata(conf.error_metadata);
     if (conf.load_stdlib)
         luastd::libinit(this);
 }

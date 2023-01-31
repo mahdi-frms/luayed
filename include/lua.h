@@ -17,6 +17,7 @@
 struct LuaConfig
 {
     bool load_stdlib = true;
+    bool error_metadata = true;
 };
 
 class Lua;
