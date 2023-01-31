@@ -3,7 +3,7 @@
 
 #include <src/generator.h>
 
-class AnalysisGenerator : BaseGenerator
+class AnalysisGenerator : public BaseGenerator
 {
 private:
     string text;

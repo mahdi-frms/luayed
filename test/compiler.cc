@@ -35,9 +35,10 @@ char *compiler_test_message(const char *item, const char *property)
 
 class GenTest : public BaseGenerator
 {
+    const char *message;
 
 public:
-    GenTest(const char *message) : BaseGenerator(message)
+    GenTest(const char *message) : BaseGenerator(), message(message)
     {
     }
     GenTest &test_fn(size_t fidx)

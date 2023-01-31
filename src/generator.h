@@ -21,12 +21,11 @@ class BaseGenerator : public IGenerator
 protected:
     vector<FuncTest *> funcs;
     FuncTest *current;
-    const char *message;
     FuncTest *test;
     fidx_t fidx_counter = 1;
 
 public:
-    BaseGenerator(const char *message);
+    BaseGenerator();
     void emit(Bytecode opcode);
     size_t len();
     void debug_info(size_t line);

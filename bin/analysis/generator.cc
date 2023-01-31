@@ -11,19 +11,26 @@ string AnalysisGenerator::stringify()
     for (size_t i = 0; i < this->funcs.size(); i++)
     {
         this->fn = this->funcs[i];
-        this->fn_stringify();
+        if (this->fn)
+        {
+            this->fn_stringify();
+            this->append("\n");
+        }
     }
     return std::move(this->text);
 }
 void AnalysisGenerator::fn_stringify()
 {
     vector<Instruction> inslist;
+    this->append("function: ");
+    this->append(std::to_string(this->fn->fidx));
     for (size_t i = 0; i < this->fn->text.size();)
     {
         size_t rc;
         Instruction ins = Instruction::decode(this->fn->text.cbegin().base() + i, &rc);
         inslist.push_back(ins);
 
+        this->append("\t");
         this->append(to_string(ins.op));
         if (ins.oprnd_count() > 0)
         {
@@ -42,7 +49,7 @@ void AnalysisGenerator::fn_stringify()
             this->append(this->fn->constants[ins.oprnd1]);
             this->append(">");
         }
-        else if (ins.op == Opcode::IUpvalue || Opcode::IUStore)
+        else if (ins.op == Opcode::IUpvalue || ins.op == Opcode::IUStore)
         {
             Upvalue uv = this->fn->upvalues[ins.oprnd1];
             this->append(" <");

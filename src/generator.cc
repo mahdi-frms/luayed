@@ -1,6 +1,6 @@
 #include "generator.h"
 
-BaseGenerator::BaseGenerator(const char *message) : current(nullptr), message(message), test(nullptr)
+BaseGenerator::BaseGenerator() : current(nullptr), test(nullptr)
 {
 }
 void BaseGenerator::emit(Bytecode opcode)

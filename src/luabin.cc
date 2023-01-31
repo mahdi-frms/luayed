@@ -62,6 +62,11 @@ size_t op_oprnd_count(lbyte op)
     return 1;
 }
 
+size_t Instruction::oprnd_count() const
+{
+    return op_oprnd_count(this->op);
+}
+
 Instruction Instruction::decode(Bytecode code)
 {
     return Instruction::decode(code.bytes);

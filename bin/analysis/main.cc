@@ -5,6 +5,8 @@
 #include <parser.h>
 #include <lstrep.h>
 #include <resolve.h>
+#include <compiler.h>
+#include "generator.h"
 
 namespace cli
 {
@@ -132,7 +134,10 @@ void command_compile_file(string path)
             std::cerr << errors[i];
         exit(1);
     }
-    std::cout << "COMPILE IS POSSIBLE!\n";
+    AnalysisGenerator gen;
+    Compiler compiler(&gen);
+    compiler.compile(tree, path.c_str());
+    std::cout << gen.stringify();
 }
 
 int main(int argc, char **argv)
