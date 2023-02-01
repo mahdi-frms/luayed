@@ -2,14 +2,70 @@
 
 using namespace ast;
 
-Node::Node(Token token, NodeKind kind) : token(token),
-                                         children(nullptr), count(0), kind(kind)
+Node::Node(NodeKind kind, Token token)
+    : token(token), children(nullptr), count(0), kind(kind)
 {
 }
 
-Node::Node(Noderef *children, size_t count, NodeKind kind)
-    : token(token_none()), children(children), count(count), kind(kind)
+void Node::sib_insertl(Noderef node)
 {
+    if (node->parent->left_child == this)
+    {
+        node->parent->left_child = node;
+        node->right_sib = this;
+        node->left_sib = nullptr;
+        this->left_sib = node;
+    }
+    else
+    {
+        Noderef l = this->left_sib;
+        l->right_sib = node;
+        this->left_sib = node;
+        node->left_sib = l;
+        node->right_sib = this;
+    }
+    this->parent->count++;
+}
+void Node::sib_insertr(Noderef node)
+{
+    if (node->parent->right_child == this)
+    {
+        node->parent->right_child = node;
+        node->left_child = this;
+        node->right_sib = nullptr;
+        this->right_sib = node;
+    }
+    else
+    {
+        Noderef r = this->right_sib;
+        r->left_sib = node;
+        this->right_sib = node;
+        node->right_sib = r;
+        node->left_sib = this;
+    }
+    this->parent->count++;
+}
+void Node::child_pushl(Noderef node)
+{
+    this->left_child->sib_insertl(node);
+}
+void Node::child_pushr(Noderef node)
+{
+    this->right_child->sib_insertr(node);
+}
+void Node::pop()
+{
+    Noderef l = this->left_sib;
+    Noderef r = this->right_sib;
+    if (l)
+        l->right_sib = r;
+    else
+        this->parent->left_child = r;
+    if (r)
+        r->left_sib = l;
+    else
+        this->parent->right_child = l;
+    this->parent->count--;
 }
 
 NodeKind Node::get_kind()
@@ -22,10 +78,6 @@ Token Node::get_token()
     return this->token;
 }
 
-Noderef *Node::get_children()
-{
-    return this->children;
-}
 size_t Node::child_count()
 {
     return this->count;

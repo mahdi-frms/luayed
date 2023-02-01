@@ -141,17 +141,27 @@ namespace ast
         NodeKind kind;
         MetaNode *meta = nullptr;
 
+        Noderef parent;
+        Noderef right_sib;
+        Noderef left_sib;
+        Noderef left_child;
+        Noderef right_child;
+
     public:
         NodeKind get_kind();
         Token get_token();
-        Noderef *get_children();
         Noderef child(size_t index);
         size_t child_count();
-        Node(Token token, NodeKind kind);
-        Node(Noderef *children, size_t count, NodeKind kind);
+        Node(NodeKind kind, Token token = token_none());
         void annotate(MetaNode *md);
         MetaNode *getannot(MetaKind kind);
         int line();
+
+        void sib_insertl(Noderef node);
+        void sib_insertr(Noderef node);
+        void child_pushl(Noderef node);
+        void child_pushr(Noderef node);
+        void pop();
     };
 
     class Ast
