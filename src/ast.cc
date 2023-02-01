@@ -20,7 +20,7 @@ void Node::sib_insert(Noderef l, Noderef r, Noderef s)
     if (l)
         l->right_sib = s;
     if (r)
-        r->right_sib = s;
+        r->left_sib = s;
     s->left_sib = l;
     s->right_sib = r;
 }
@@ -68,6 +68,10 @@ void Node::pop()
     else
         this->parent->right_child = l;
     this->parent->count--;
+
+    this->parent = nullptr;
+    this->right_sib = nullptr;
+    this->left_sib = nullptr;
 }
 
 NodeKind Node::get_kind()
@@ -92,19 +96,24 @@ void Ast::destroy()
 }
 void Ast::destroy_node(Noderef node)
 {
-    while (node->meta)
+    while (node)
     {
-        MetaNode *md = node->meta;
-        node->meta = md->next;
-        delete md;
+        while (node->count)
+        {
+            Noderef ch = node->left_child;
+            ch->pop();
+            node->sib_insertr(ch);
+        }
+        while (node->meta)
+        {
+            MetaNode *md = node->meta;
+            node->meta = md->next;
+            delete md;
+        }
+        Noderef next = node->right_sib;
+        delete node;
+        node = next;
     }
-    // todo
-    // for (size_t i = 0; i < node->child_count(); i++)
-    // {
-    //     Noderef ch = node->child(i);
-    //     this->destroy_node(ch);
-    // }
-    delete node;
 }
 
 Ast::Ast(Noderef tree) : tree(tree), counter(new size_t(1))
