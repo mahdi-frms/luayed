@@ -696,8 +696,10 @@ void Compiler::compile_generic_for(Noderef node)
     this->emit(Instruction(Opcode::ILocal, this->varmem(lvalue)->offset)); // prev
     this->debug_info(arglist->line());
     this->emit(Instruction(Opcode::ICall, 2, varcount + 1));
-    for (size_t i = 0; i < varcount; i++)
+    foreach_node(varlist, _)
+    {
         this->emit(Instruction(Opcode::IBLStore, varcount + 2));
+    }
     //-- loop check
     this->emit(Instruction(Opcode::ILocal, this->varmem(lvalue)->offset));
     this->emit(Opcode::INil);
@@ -851,8 +853,10 @@ void Compiler::compile_decl_var(Noderef node)
     if (node->child_count() == 2)
         this->compile_explist(node->child(1), varlist->child_count());
     else
-        for (size_t i = 0; i < varlist->child_count(); i++)
+        foreach_node(varlist, _)
+        {
             this->emit(Instruction(Opcode::INil));
+        }
     while (upcount--)
     {
         this->emit(Opcode::IUPush);
