@@ -9,49 +9,51 @@ Node::Node(NodeKind kind, Token token)
 
 void Node::sib_insertl(Noderef node)
 {
-    if (node->parent->left_child == this)
-    {
-        node->parent->left_child = node;
-        node->right_sib = this;
-        node->left_sib = nullptr;
-        this->left_sib = node;
-    }
-    else
-    {
-        Noderef l = this->left_sib;
-        l->right_sib = node;
-        this->left_sib = node;
-        node->left_sib = l;
-        node->right_sib = this;
-    }
-    this->parent->count++;
+    Node::sib_insert(this->left_sib, this, node);
 }
 void Node::sib_insertr(Noderef node)
 {
-    if (node->parent->right_child == this)
+    Node::sib_insert(this, this->right_sib, node);
+}
+void Node::sib_insert(Noderef l, Noderef r, Noderef s)
+{
+    if (l)
+        l->right_sib = s;
+    if (r)
+        r->right_sib = s;
+    s->left_sib = l;
+    s->right_sib = r;
+}
+
+void Node::child_pushl(Noderef node)
+{
+    if (this->count)
     {
-        node->parent->right_child = node;
-        node->left_child = this;
-        node->right_sib = nullptr;
-        this->right_sib = node;
+        this->left_child->sib_insertl(node);
     }
     else
     {
-        Noderef r = this->right_sib;
-        r->left_sib = node;
-        this->right_sib = node;
-        node->right_sib = r;
-        node->left_sib = this;
+        node->left_sib = node->right_sib = nullptr;
+        this->right_child = node;
     }
-    this->parent->count++;
-}
-void Node::child_pushl(Noderef node)
-{
-    this->left_child->sib_insertl(node);
+    this->left_child = node;
+    node->parent = this;
+    this->count++;
 }
 void Node::child_pushr(Noderef node)
 {
-    this->right_child->sib_insertr(node);
+    if (this->count)
+    {
+        this->right_child->sib_insertr(node);
+    }
+    else
+    {
+        node->left_sib = node->right_sib = nullptr;
+        this->left_child = node;
+    }
+    this->right_child = node;
+    node->parent = this;
+    this->count++;
 }
 void Node::pop()
 {
@@ -181,7 +183,9 @@ Noderef Ast::make(const vector<Noderef> &nodes, NodeKind kind)
 {
     Noderef node = new Node(kind);
     for (size_t i = 0; i < nodes.size(); i++)
+    {
         node->child_pushr(nodes[i]);
+    }
     return node;
 }
 Noderef Ast::make(vector<Noderef> &&nodes, NodeKind kind)
@@ -195,7 +199,7 @@ Noderef Ast::make(Token token, NodeKind kind)
 }
 Noderef Ast::make(Noderef c1, NodeKind kind)
 {
-    return Ast::make({c1}, kind);
+    return Ast::make(vector<Noderef>{c1}, kind);
 }
 Noderef Ast::make(Noderef c1, Noderef c2, NodeKind kind)
 {

@@ -20,6 +20,8 @@
         "new": "cpp",
         "typeinfo": "cpp",
         "iostream": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "bit": "cpp",
+        "optional": "cpp"
     }
 }

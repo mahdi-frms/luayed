@@ -156,6 +156,7 @@ namespace ast
         MetaNode *getannot(MetaKind kind);
         int line();
 
+        static void sib_insert(Noderef l, Noderef r, Noderef s);
         void sib_insertl(Noderef node);
         void sib_insertr(Noderef node);
         void child_pushl(Noderef node);
