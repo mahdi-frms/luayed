@@ -177,11 +177,6 @@ namespace ast
         static Noderef make(const vector<Noderef> &nodes, NodeKind kind);
         static Noderef make(vector<Noderef> &&nodes, NodeKind kind);
         static Noderef make(Token token, NodeKind kind);
-        static Noderef make(Noderef c1, NodeKind kind);
-        static Noderef make(Noderef c1, Noderef c2, NodeKind kind);
-        static Noderef make(Noderef c1, Noderef c2, Noderef c3, NodeKind kind);
-        static Noderef make(Noderef c1, Noderef c2, Noderef c3, Noderef c4, NodeKind kind);
-        static Noderef make(Noderef c1, Noderef c2, Noderef c3, Noderef c4, Noderef c5, NodeKind kind);
 
         Ast &operator=(const Ast &other);
         Ast(const Ast &other);

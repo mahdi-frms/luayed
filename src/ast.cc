@@ -206,26 +206,6 @@ Noderef Ast::make(Token token, NodeKind kind)
 {
     return new Node(kind, token);
 }
-Noderef Ast::make(Noderef c1, NodeKind kind)
-{
-    return Ast::make(vector<Noderef>{c1}, kind);
-}
-Noderef Ast::make(Noderef c1, Noderef c2, NodeKind kind)
-{
-    return Ast::make({c1, c2}, kind);
-}
-Noderef Ast::make(Noderef c1, Noderef c2, Noderef c3, NodeKind kind)
-{
-    return Ast::make({c1, c2, c3}, kind);
-}
-Noderef Ast::make(Noderef c1, Noderef c2, Noderef c3, Noderef c4, NodeKind kind)
-{
-    return Ast::make({c1, c2, c3, c4}, kind);
-}
-Noderef Ast::make(Noderef c1, Noderef c2, Noderef c3, Noderef c4, Noderef c5, NodeKind kind)
-{
-    return Ast::make({c1, c2, c3, c4, c5}, kind);
-}
 int Node::line()
 {
     if (this->token.kind != TokenKind::None)
