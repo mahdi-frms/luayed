@@ -210,11 +210,23 @@ int Node::line()
 {
     if (this->token.kind != TokenKind::None)
         return this->token.line;
-    for (size_t i = 0; i < this->child_count(); i++)
+    foreach_node(this, ch)
     {
-        int line = this->child(i)->line();
+        int line = ch->line();
         if (line > -1)
             return line;
     }
     return -1;
+}
+Noderef Node::next()
+{
+    return this->right_sib;
+}
+Noderef Node::begin()
+{
+    return this->left_child;
+}
+Noderef Node::end()
+{
+    return this->right_child;
 }

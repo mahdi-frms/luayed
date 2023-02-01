@@ -204,8 +204,8 @@ void node_to_string(ast::Noderef node, int depth, string &buffer)
     }
     if (node->child_count())
     {
-        for (size_t i = 0; i < node->child_count(); i++)
-            node_to_string(node->child(i), depth + 3, buffer);
+        foreach_node(node, ch)
+            node_to_string(ch, depth + 3, buffer);
     }
 }
 

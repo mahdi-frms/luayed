@@ -16,6 +16,8 @@ extern const char *node_names[34];
 #define mem(N) ((MetaMemory *)N->getannot(MetaKind::MMemory))
 #define is_meth(N) (N->get_kind() == NodeKind::MethodBody)
 
+#define foreach_node(PARENT, CHILD) for (ast::Noderef CHILD = PARENT->begin(); CHILD; CHILD = CHILD->next())
+
 namespace ast
 {
     enum NodeKind
@@ -147,6 +149,7 @@ namespace ast
         Noderef right_child = nullptr;
 
     public:
+        Noderef next();
         NodeKind get_kind();
         Token get_token();
         Noderef child(size_t index);
@@ -161,6 +164,8 @@ namespace ast
         void sib_insertr(Noderef node);
         void child_pushl(Noderef node);
         void child_pushr(Noderef node);
+        Noderef begin();
+        Noderef end();
         void pop();
     };
 

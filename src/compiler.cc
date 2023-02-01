@@ -125,9 +125,9 @@ fidx_t Compiler::compile(Noderef root, const char *chunckname)
         Noderef params = root->child(0);
         size_t parcount = root->get_kind() == NodeKind::MethodBody;
         size_t upcount = 0;
-        for (size_t i = 0; i < params->child_count(); i++)
+        foreach_node(params, ch)
         {
-            Noderef par = params->child(i)->child(0);
+            Noderef par = ch->child(0);
             if (par->get_token().kind == TokenKind::DotDotDot)
                 continue;
             parcount++;
@@ -219,9 +219,8 @@ void Compiler::compile_if(Noderef node)
 {
     vector<size_t> jmps;
     size_t cjmp = 0;
-    for (size_t i = 0; i < node->child_count(); i++)
+    foreach_node(node, cls)
     {
-        Noderef cls = node->child(i);
         if (cls->get_kind() == NodeKind::ElseClause)
         {
             this->compile_block(cls->child(0));
@@ -356,9 +355,8 @@ void Compiler::compile_table(Noderef node)
     size_t list_len = 0;
     if (!node->child_count())
         return;
-    for (size_t i = 0; i < node->child_count(); i++)
+    foreach_node(node, ch)
     {
-        Noderef ch = node->child(i);
         if (ch->get_kind() == NodeKind::IdField)
         {
             this->compile_name(ch->child(0));
@@ -369,7 +367,7 @@ void Compiler::compile_table(Noderef node)
             this->compile_exp(ch->child(0));
             this->compile_exp(ch->child(1));
         }
-        else if (i == node->child_count() - 1 && (is_call(ch) || is_vargs(ch)))
+        else if (ch == node->end() && (is_call(ch) || is_vargs(ch)))
         {
             this->compile_exp_e(ch, EXPECT_FREE);
             this->emit(Instruction(Opcode::ITList, list_len));
@@ -546,11 +544,12 @@ void Compiler::compile_explist(Noderef node, size_t vcount)
     {
         if (!node || node->child_count() == 0)
             return;
-        for (size_t i = 0; i < node->child_count() - 1; i++)
+        foreach_node(node, ch)
         {
-            this->compile_exp(node->child(i));
+            if (ch != node->end())
+                this->compile_exp(ch);
         }
-        this->compile_exp_e(node->child(node->child_count() - 1), vcount);
+        this->compile_exp_e(node->end(), vcount);
     }
     else
     {
@@ -561,13 +560,16 @@ void Compiler::compile_explist(Noderef node, size_t vcount)
         }
         else
         {
-            for (size_t i = 0; i < node->child_count() - 1; i++)
+            foreach_node(node, ch)
             {
-                this->compile_exp_e(node->child(i), vcount ? 1 : 0);
-                if (vcount)
-                    vcount--;
+                if (ch != node->end())
+                {
+                    this->compile_exp_e(ch, vcount ? 1 : 0);
+                    if (vcount)
+                        vcount--;
+                }
             }
-            this->compile_exp_e(node->child(node->child_count() - 1), vcount);
+            this->compile_exp_e(node->end(), vcount);
         }
     }
 }
@@ -581,9 +583,9 @@ size_t Compiler::compile_varlist(Noderef node)
     else
     {
         size_t varlc = 0;
-        for (size_t i = 0; i < node->child_count(); i++)
+        foreach_node(node, ch)
         {
-            varlc += this->compile_lvalue(node->child(i)) ? 1 : 0;
+            varlc += this->compile_lvalue(ch) ? 1 : 0;
             this->emit(Instruction(Opcode::INil));
             this->vstack.push_back(0);
         }
@@ -664,9 +666,9 @@ void Compiler::compile_generic_for(Noderef node)
     Noderef arglist = node->child(1);
     size_t varcount = varlist->child_count();
     size_t upcount = 0;
-    for (size_t i = 0; i < varcount; i++)
+    foreach_node(varlist, ch)
     {
-        Noderef var = varlist->child(i)->child(0);
+        Noderef var = ch->child(0);
         this->varmem(var)->offset = this->stack_offset++;
         MetaMemory *mm = this->varmem(var);
         if (mm->is_upvalue)
@@ -815,8 +817,10 @@ void Compiler::compile_logic(Noderef node)
 void Compiler::compile_block(Noderef node)
 {
     MetaScope *md = (MetaScope *)node->getannot(MetaKind::MScope);
-    for (size_t i = 0; i < node->child_count(); i++)
-        this->compile_node(node->child(i));
+    foreach_node(node, ch)
+    {
+        this->compile_node(ch);
+    }
     for (size_t i = 0; i < md->upvalue_size; i++)
     {
         this->hookpop();
@@ -832,9 +836,9 @@ void Compiler::compile_decl_var(Noderef node)
 {
     Noderef varlist = node->child(0);
     size_t upcount = 0;
-    for (size_t i = 0; i < varlist->child_count(); i++)
+    foreach_node(varlist, ch)
     {
-        Noderef var = varlist->child(i)->child(0);
+        Noderef var = ch->child(0);
         MetaMemory *mm = (MetaMemory *)var->getannot(MetaKind::MMemory);
         mm->offset = this->stack_offset++;
         if (mm->is_upvalue)

@@ -141,9 +141,10 @@ void Resolver::analyze_etc(Noderef node)
         this->current = node;
     }
 
-    for (size_t i = 0; i < node->child_count(); i++)
+    // for (size_t i = 0; i < node->child_count(); i++)
+    foreach_node(node, ch)
     {
-        this->analyze_node(node->child(i));
+        this->analyze_node(ch);
     }
     if (new_scope)
     {
