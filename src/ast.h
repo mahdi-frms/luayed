@@ -136,16 +136,15 @@ namespace ast
 
     private:
         Token token;
-        Noderef *children;
-        size_t count;
         NodeKind kind;
+        size_t count = 0;
         MetaNode *meta = nullptr;
 
-        Noderef parent;
-        Noderef right_sib;
-        Noderef left_sib;
-        Noderef left_child;
-        Noderef right_child;
+        Noderef parent = nullptr;
+        Noderef right_sib = nullptr;
+        Noderef left_sib = nullptr;
+        Noderef left_child = nullptr;
+        Noderef right_child = nullptr;
 
     public:
         NodeKind get_kind();
@@ -174,7 +173,8 @@ namespace ast
 
     public:
         static Noderef make(NodeKind kind);
-        static Noderef make(vector<Noderef> &nodes, NodeKind kind);
+        static Noderef make(const vector<Noderef> &nodes, NodeKind kind);
+        static Noderef make(vector<Noderef> &&nodes, NodeKind kind);
         static Noderef make(Token token, NodeKind kind);
         static Noderef make(Noderef c1, NodeKind kind);
         static Noderef make(Noderef c1, Noderef c2, NodeKind kind);

@@ -41,7 +41,7 @@ public:
     }
     void add(Token t, NodeKind kind)
     {
-        Noderef node = new Node(t, kind);
+        Noderef node = new Node(kind, t);
 
         if (nodes.size() == 0)
         {
@@ -54,13 +54,9 @@ public:
     }
     void close()
     {
-        size_t chlen = nodes.back().size();
-        Noderef *ch = new Noderef[chlen];
-        for (size_t i = 0; i < chlen; i++)
-        {
-            ch[i] = nodes.back()[i];
-        }
-        Noderef node = new Node(ch, chlen, this->kinds.back());
+        Noderef node = new Node(this->kinds.back());
+        for (size_t i = 0; i < nodes.back().size(); i++)
+            node->child_pushr(nodes.back()[i]);
         nodes.pop_back();
         kinds.pop_back();
 

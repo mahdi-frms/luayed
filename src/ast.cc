@@ -3,7 +3,7 @@
 using namespace ast;
 
 Node::Node(NodeKind kind, Token token)
-    : token(token), children(nullptr), count(0), kind(kind)
+    : token(token), kind(kind)
 {
 }
 
@@ -96,12 +96,12 @@ void Ast::destroy_node(Noderef node)
         node->meta = md->next;
         delete md;
     }
-    for (size_t i = 0; i < node->child_count(); i++)
-    {
-        Noderef ch = node->child(i);
-        this->destroy_node(ch);
-    }
-    delete[] node->children;
+    // todo
+    // for (size_t i = 0; i < node->child_count(); i++)
+    // {
+    //     Noderef ch = node->child(i);
+    //     this->destroy_node(ch);
+    // }
     delete node;
 }
 
@@ -159,7 +159,10 @@ void Node::annotate(MetaNode *md)
 
 Noderef Node::child(size_t index)
 {
-    return this->children[index];
+    Noderef ch = this->left_child;
+    while (index--)
+        ch = ch->right_sib;
+    return ch;
 }
 
 MetaNode *Node::getannot(MetaKind kind)
@@ -172,58 +175,43 @@ MetaNode *Node::getannot(MetaKind kind)
 
 Noderef Ast::make(NodeKind kind)
 {
-    return new Node(token_none(), kind);
+    return new Node(kind);
 }
-Noderef Ast::make(vector<Noderef> &nodes, NodeKind kind)
+Noderef Ast::make(const vector<Noderef> &nodes, NodeKind kind)
 {
-    Noderef *children = new Noderef[nodes.size()];
+    Noderef node = new Node(kind);
     for (size_t i = 0; i < nodes.size(); i++)
-        children[i] = nodes[i];
-    return new Node(children, nodes.size(), kind);
+        node->child_pushr(nodes[i]);
+    return node;
+}
+Noderef Ast::make(vector<Noderef> &&nodes, NodeKind kind)
+{
+    vector<Noderef> nodelist = nodes;
+    return Ast::make(nodelist, kind);
 }
 Noderef Ast::make(Token token, NodeKind kind)
 {
-    return new Node(token, kind);
+    return new Node(kind, token);
 }
 Noderef Ast::make(Noderef c1, NodeKind kind)
 {
-    Noderef *nodes = new Noderef[1];
-    nodes[0] = c1;
-    return new Node(nodes, 1, kind);
+    return Ast::make({c1}, kind);
 }
 Noderef Ast::make(Noderef c1, Noderef c2, NodeKind kind)
 {
-    Noderef *nodes = new Noderef[2];
-    nodes[0] = c1;
-    nodes[1] = c2;
-    return new Node(nodes, 2, kind);
+    return Ast::make({c1, c2}, kind);
 }
 Noderef Ast::make(Noderef c1, Noderef c2, Noderef c3, NodeKind kind)
 {
-    Noderef *nodes = new Noderef[3];
-    nodes[0] = c1;
-    nodes[1] = c2;
-    nodes[2] = c3;
-    return new Node(nodes, 3, kind);
+    return Ast::make({c1, c2, c3}, kind);
 }
 Noderef Ast::make(Noderef c1, Noderef c2, Noderef c3, Noderef c4, NodeKind kind)
 {
-    Noderef *nodes = new Noderef[4];
-    nodes[0] = c1;
-    nodes[1] = c2;
-    nodes[2] = c3;
-    nodes[3] = c4;
-    return new Node(nodes, 4, kind);
+    return Ast::make({c1, c2, c3, c4}, kind);
 }
 Noderef Ast::make(Noderef c1, Noderef c2, Noderef c3, Noderef c4, Noderef c5, NodeKind kind)
 {
-    Noderef *nodes = new Noderef[5];
-    nodes[0] = c1;
-    nodes[1] = c2;
-    nodes[2] = c3;
-    nodes[3] = c4;
-    nodes[4] = c5;
-    return new Node(nodes, 5, kind);
+    return Ast::make({c1, c2, c3, c4, c5}, kind);
 }
 int Node::line()
 {
