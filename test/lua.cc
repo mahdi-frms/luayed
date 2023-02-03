@@ -43,6 +43,44 @@ LuaValue lua_test_compile(const char *code, LuaRuntime &rt, vector<lbyte> &bin)
     return fn;
 }
 
+void lua_test_case_push(Lua *lua, LuaValue val)
+{
+    if (val.kind == LuaType::LVString)
+        lua->push_string((const char *)val.data.ptr);
+    else if (val.kind == LuaType::LVNumber)
+        lua->push_number(val.data.n);
+    else if (val.kind == LuaType::LVBool)
+        lua->push_boolean(val.data.b);
+    else if (val.kind == LuaType::LVNil)
+        lua->push_nil();
+    else
+        crash("lua-e2e-test push");
+}
+LuaValue lua_test_case_pop(Lua *lua)
+{
+    int kind = lua->kind();
+    if (kind == LUA_TYPE_NIL)
+    {
+        lua->pop();
+        return lvnil();
+    }
+    else if (kind == LUA_TYPE_NUMBER)
+        return lvnumber(lua->pop_number());
+    else if (kind == LUA_TYPE_BOOLEAN)
+        return lvbool(lua->pop_boolean());
+    else if (kind == LUA_TYPE_STRING)
+    {
+        LuaValue val = lvstring(lua->peek_string());
+        lua->pop();
+        return val;
+    }
+    else
+    {
+        crash("lua-e2e-test pop");
+        return lvnil();
+    }
+}
+
 void lua_test_case(
     const char *message,
     const char *code,
@@ -53,23 +91,36 @@ void lua_test_case(
 {
     string mes = "lua : ";
     mes.append(message);
-    Interpreter intp;
-    intp.config_error_metadata(false);
-    LuaRuntime rt(&intp);
-    vector<lbyte> bytecode;
-    LuaValue fn = lua_test_compile(code, rt, bytecode);
-    rt.stack_push(fn);
-    pipe(&rt, args);
-    rt.fncall(args.size(), results.size() + 1);
+
+    LuaConfig conf;
+    conf.error_metadata = false;
+    conf.load_stdlib = false;
+    Lua *lua = Lua::create(conf);
+
+    string errors;
+    if (lua->compile(code, errors, mes.c_str()) == LUA_COMPILE_RESULT_OK)
+    {
+        for (size_t i = 0; i < args.size(); i++)
+            lua_test_case_push(lua, args[i]);
+        lua->call(args.size(), results.size() + 1);
+    }
+    else
+    {
+        std::cerr << errors;
+        crash("compiling test case failed");
+    }
+
     if (has_error)
     {
-        if (rt.error_raised())
+        if (lua->has_error())
         {
-            bool rsl = rt.get_error() == lvclone(&rt, error);
+            lua->push_error();
+            LuaValue lerror = lua_test_case_pop(lua);
+            bool rsl = lerror == error;
             test_assert(rsl, mes.c_str());
             if (!rsl)
             {
-                std::cerr << "thrown: " << rt.get_error() << "\nexpected: " << error << "\n";
+                std::cerr << "thrown: " << lerror << "\nexpected: " << error << "\n";
             }
         }
         else
@@ -80,16 +131,18 @@ void lua_test_case(
     }
     else
     {
-        if (rt.error_raised())
+        if (lua->has_error())
         {
             test_assert(false, mes.c_str());
-            std::cerr << "error raised: " << rt.get_error() << "\n";
+            lua->push_error();
+            LuaValue lerror = lua_test_case_pop(lua);
+            std::cerr << "error raised: " << lerror << "\n";
         }
         else
         {
-            vector<LuaValue> stack = drain(&rt);
-            for (size_t i = 0; i < results.size(); i++)
-                results[i] = lvclone(&rt, results[i]);
+            vector<LuaValue> stack;
+            while (lua->top())
+                stack.insert(stack.begin(), lua_test_case_pop(lua));
             bool rsl = stack == results;
             test_assert(rsl, mes.c_str());
             if (!rsl)
@@ -97,11 +150,7 @@ void lua_test_case(
                 std::cerr << "stack:\n"
                           << stack
                           << "expected:\n"
-                          << results << "\n"
-
-                          << "binary:\n"
-                          << bytecode
-                          << "\n";
+                          << results << "\n";
             }
         }
     }
