@@ -16,7 +16,11 @@ extern const char *node_names[34];
 #define mem(N) ((MetaMemory *)N->getannot(MetaKind::MMemory))
 #define is_meth(N) (N->get_kind() == NodeKind::MethodBody)
 
-#define foreach_node(PARENT, CHILD) for (ast::Noderef CHILD = PARENT->begin(); CHILD; CHILD = CHILD->next())
+#define foreach_node_next(CHILD) (CHILD ? CHILD->next() : nullptr)
+#define foreach_node(PARENT, CHILD) for (                                 \
+    ast::Noderef CHILD = PARENT->begin(), sib = foreach_node_next(CHILD); \
+    CHILD;                                                                \
+    CHILD = sib, sib = foreach_node_next(CHILD))
 
 namespace ast
 {
