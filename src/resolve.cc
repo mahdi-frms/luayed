@@ -177,6 +177,45 @@ void Resolver::analyze_break(Noderef node)
         err.offset = tkn.offset;
         this->errors.push_back(err);
     }
+    else
+    {
+        // add label
+        Token virtual_token = Token(nullptr, 0, 0, 0, TokenKind::Identifier);
+        Noderef virtual_label = ast::Ast::make(virtual_token, NodeKind::LabelStmt);
+        it->child_pushr(virtual_label);
+        // annotate label
+        MetaLabel *lmd = new MetaLabel;
+        lmd->header.kind = MetaKind::MLabel;
+        lmd->header.next = nullptr;
+        lmd->is_compiled = false;
+        lmd->go_to = nullptr;
+        lmd->address = 0;
+        virtual_label->annotate(&lmd->header);
+        // annotate goto
+        Noderef virtual_goto = ast::Ast::make(virtual_token, NodeKind::GotoStmt);
+        MetaGoto *gtmd = new MetaGoto;
+        gtmd->header.kind = MetaKind::MGoto;
+        gtmd->header.next = nullptr;
+        gtmd->address = 0;
+        gtmd->is_compiled = false;
+        gtmd->label = nullptr;
+        virtual_goto->annotate(&gtmd->header);
+        // replace break with goto label
+        node->child_pushr(virtual_goto);
+        node->pop();
+        // link goto with label
+
+        this->link(virtual_goto, virtual_label);
+    }
+}
+
+void Resolver::link(Noderef go_to, Noderef label)
+{
+    MetaLabel *lmd = mdlabel(label);
+    MetaGoto *gmd = mdgoto(go_to);
+    gmd->label = label;
+    gmd->next = lmd->go_to;
+    lmd->go_to = go_to;
 }
 
 void Resolver::analyze_label(Noderef node)
@@ -200,24 +239,27 @@ void Resolver::analyze_label(Noderef node)
     }
 }
 
+void Resolver::analyze_goto(Noderef node)
+{
+    MetaScope *fnmd = scope(this->curscope()->func);
+    Noderef gotolist = fnmd->gotolist;
+    MetaGoto *gtmd = new MetaGoto;
+    gtmd->header.kind = MetaKind::MGoto;
+    gtmd->header.next = nullptr;
+    gtmd->address = 0;
+    gtmd->is_compiled = false;
+    gtmd->label = nullptr;
+    gtmd->next = gotolist;
+    fnmd->gotolist = node;
+    node->annotate(&gtmd->header);
+}
+
 void Resolver::analyze_node(Noderef node)
 {
     if (node->get_kind() == NodeKind::LabelStmt)
         this->analyze_label(node);
     else if (node->get_kind() == NodeKind::GotoStmt)
-    {
-        MetaScope *fnmd = scope(this->curscope()->func);
-        Noderef gotolist = fnmd->gotolist;
-        MetaGoto *gtmd = new MetaGoto;
-        gtmd->header.kind = MetaKind::MGoto;
-        gtmd->header.next = nullptr;
-        gtmd->address = 0;
-        gtmd->is_compiled = false;
-        gtmd->label = nullptr;
-        gtmd->next = gotolist;
-        fnmd->gotolist = node;
-        node->annotate(&gtmd->header);
-    }
+        this->analyze_goto(node);
     else if (node->get_kind() == NodeKind::VarDecl)
         this->analyze_var_decl(node);
     else if (node->get_kind() == NodeKind::Declaration)
@@ -262,11 +304,7 @@ void Resolver::link_labels()
         auto lptr = labels->find(name);
         if (lptr != labels->cend())
         {
-            Noderef lnode = lptr->second;
-            MetaLabel *lmd = mdlabel(lnode);
-            gmd->label = lnode;
-            gmd->next = lmd->go_to;
-            lmd->go_to = node;
+            this->link(node, lptr->second);
         }
         else
         {

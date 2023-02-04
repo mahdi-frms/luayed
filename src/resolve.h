@@ -23,9 +23,11 @@ private:
     void analyze_etc(Noderef node);
     void analyze_break(Noderef node);
     void analyze_label(Noderef node);
+    void analyze_goto(Noderef node);
     void analyze_declaration(Noderef node);
     void reference(Noderef node, Noderef dec, bool func_past);
     void self_ref(Noderef node);
+    void link(Noderef go_to, Noderef label);
     void link_labels();
     MetaScope *curscope();
     Varmap &curmap();
