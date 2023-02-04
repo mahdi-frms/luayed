@@ -1,9 +1,16 @@
 #include "resolve.h"
 
+// FIXME
+#include "lstrep.h"
+
 vector<Lerror> Resolver::analyze()
 {
     this->current = nullptr;
+    //     dbg << "INIT TREE:\n"
+    //         << ast.root() << "\n";
     this->analyze_node(ast.root());
+    //    dbg << "FINAL TREE:\n"
+    //        << ast.root() << "\n";
     return std::move(this->errors);
 }
 void Resolver::analyze_var_decl(Noderef node)
@@ -141,7 +148,6 @@ void Resolver::analyze_etc(Noderef node)
         this->current = node;
     }
 
-    // for (size_t i = 0; i < node->child_count(); i++)
     foreach_node(node, ch)
     {
         this->analyze_node(ch);
@@ -182,7 +188,7 @@ void Resolver::analyze_break(Noderef node)
         // add label
         Token virtual_token = Token(nullptr, 0, 0, 0, TokenKind::Identifier);
         Noderef virtual_label = ast::Ast::make(virtual_token, NodeKind::LabelStmt);
-        it->child_pushr(virtual_label);
+        it->sib_insertr(virtual_label);
         // annotate label
         MetaLabel *lmd = new MetaLabel;
         lmd->header.kind = MetaKind::MLabel;
@@ -191,8 +197,10 @@ void Resolver::analyze_break(Noderef node)
         lmd->go_to = nullptr;
         lmd->address = 0;
         virtual_label->annotate(&lmd->header);
-        // annotate goto
+        // add goto
         Noderef virtual_goto = ast::Ast::make(virtual_token, NodeKind::GotoStmt);
+        node->replace(virtual_goto);
+        // annotate goto
         MetaGoto *gtmd = new MetaGoto;
         gtmd->header.kind = MetaKind::MGoto;
         gtmd->header.next = nullptr;
@@ -200,11 +208,7 @@ void Resolver::analyze_break(Noderef node)
         gtmd->is_compiled = false;
         gtmd->label = nullptr;
         virtual_goto->annotate(&gtmd->header);
-        // replace break with goto label
-        node->child_pushr(virtual_goto);
-        node->pop();
         // link goto with label
-
         this->link(virtual_goto, virtual_label);
     }
 }

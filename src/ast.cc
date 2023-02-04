@@ -10,10 +10,14 @@ Node::Node(NodeKind kind, Token token)
 void Node::sib_insertl(Noderef node)
 {
     Node::sib_insert(this->left_sib, this, node);
+    node->parent = this->parent;
+    this->parent->count++;
 }
 void Node::sib_insertr(Noderef node)
 {
     Node::sib_insert(this, this->right_sib, node);
+    node->parent = this->parent;
+    this->parent->count++;
 }
 void Node::sib_insert(Noderef l, Noderef r, Noderef s)
 {
@@ -29,7 +33,7 @@ void Node::child_pushl(Noderef node)
 {
     if (this->count)
     {
-        this->left_child->sib_insertl(node);
+        Node::sib_insert(nullptr, this->left_child, node);
     }
     else
     {
@@ -44,7 +48,7 @@ void Node::child_pushr(Noderef node)
 {
     if (this->count)
     {
-        this->right_child->sib_insertr(node);
+        Node::sib_insert(this->right_child, nullptr, node);
     }
     else
     {
@@ -102,7 +106,7 @@ void Ast::destroy_node(Noderef node)
         {
             Noderef ch = node->left_child;
             ch->pop();
-            node->sib_insertr(ch);
+            Node::sib_insert(node, node->right_sib, ch);
         }
         while (node->meta)
         {
@@ -229,4 +233,9 @@ Noderef Node::begin()
 Noderef Node::end()
 {
     return this->right_child;
+}
+void Node::replace(Noderef other)
+{
+    this->sib_insertr(other);
+    this->pop();
 }

@@ -167,6 +167,7 @@ namespace ast
         Noderef begin();
         Noderef end();
         void pop();
+        void replace(Noderef other);
     };
 
     class Ast

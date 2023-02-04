@@ -707,10 +707,8 @@ void Compiler::compile_generic_for(Noderef node)
     size_t cjmp = this->len();
     this->emit(Instruction(Opcode::ICjmp, 0x00)); // cjmp to loop end
     //-- block
-    this->loop_start();
     this->compile_node(node->child(2));
     this->emit(Instruction(Opcode::IJmp, loop_beg));
-    this->loop_end();
     size_t loop_end = this->len();
     //-- loop end
     this->emit(Instruction(Opcode::IPop, varcount + 2));
@@ -755,7 +753,6 @@ void Compiler::compile_numeric_for(Noderef node)
     else
         this->emit(Instruction(Opcode::IConst, this->const_number(1)));
     size_t loop_start = this->len();
-    this->loop_start();
     // condition
     this->emit(Instruction(Opcode::IBLocal, 3)); // index
     this->emit(Instruction(Opcode::IBLocal, 3)); // limit
@@ -771,7 +768,6 @@ void Compiler::compile_numeric_for(Noderef node)
     this->emit(Opcode::IAdd);
     this->emit(Instruction(Opcode::IBLStore, 3));
     this->emit(Instruction(Opcode::IJmp, loop_start));
-    this->loop_end();
     this->edit_jmp(jmp, this->len());
     if (md->is_upvalue)
     {
@@ -904,28 +900,18 @@ void Compiler::compile_while(Noderef node)
     this->emit(Opcode::INot);
     size_t cjmp = this->len();
     this->emit(Instruction(Opcode::ICjmp, 0));
-    this->loop_start();
     this->compile_block(node->child(1));
     this->emit(Instruction(Opcode::IJmp, jmp_idx));
-    this->loop_end();
     this->edit_jmp(cjmp, this->len());
 }
 
 void Compiler::compile_repeat(Noderef node)
 {
     size_t cjmp_idx = this->len();
-    this->loop_start();
     this->compile_block(node->child(0));
     this->compile_exp(node->child(1));
     this->emit(Opcode::INot);
     this->emit(Instruction(Opcode::ICjmp, cjmp_idx));
-    this->loop_end();
-}
-
-void Compiler::compile_break()
-{
-    this->breaks.push_back(this->len());
-    this->emit(Instruction(Opcode::IJmp, 0));
 }
 
 void Compiler::compile_goto(Noderef node)
@@ -974,8 +960,6 @@ void Compiler::compile_node(Noderef node)
         this->compile_numeric_for(node);
     else if (node->get_kind() == NodeKind::GenericFor)
         this->compile_generic_for(node);
-    else if (node->get_kind() == NodeKind::BreakStmt)
-        this->compile_break();
     else if (node->get_kind() == NodeKind::GotoStmt)
         this->compile_goto(node);
     else if (node->get_kind() == NodeKind::LabelStmt)
@@ -1020,22 +1004,6 @@ void Compiler::ops_push(Instruction op, int line)
 {
     this->ops.push_back(op);
     this->lines.push_back(line);
-}
-
-void Compiler::loop_start()
-{
-    this->breaks.push_back(0);
-}
-void Compiler::loop_end()
-{
-    size_t idx = this->len();
-    while (this->breaks.back())
-    {
-        size_t brk = this->breaks.back();
-        this->edit_jmp(brk, idx);
-        this->breaks.pop_back();
-    }
-    this->breaks.pop_back();
 }
 
 void Compiler::hookpush()

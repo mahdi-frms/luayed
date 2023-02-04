@@ -14,7 +14,6 @@ private:
     vector<Instruction> ops;
     vector<int> lines;
     vector<lbyte> vstack;
-    vector<size_t> breaks;
     size_t stack_offset = 0;
 
     size_t hooksize = 0;
@@ -61,12 +60,9 @@ private:
     void compile_generic_for(Noderef node);
     void compile_generic_for_swap(size_t varcount);
     void compile_generic_for_swap_pair(size_t back_offset1, size_t back_offset2);
-    void compile_break();
     void compile_goto(Noderef node);
     void compile_label(Noderef node);
     void compile_exp_e(Noderef node, size_t expect);
-    void loop_start();
-    void loop_end();
     size_t arglist_count(Noderef arglist);
     Opcode translate_token(TokenKind kind, bool bin);
     fidx_t compile(Noderef root, const char *chunckname = nullptr);
