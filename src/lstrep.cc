@@ -282,10 +282,16 @@ string to_string(const lbyte *text, size_t codelen)
         Instruction ins = Instruction::decode(text + i, &rc);
         i += rc;
         str.append(to_string(ins.op));
-        str.push_back(' ');
-        str += std::to_string(ins.oprnd1);
-        str.push_back(' ');
-        str += std::to_string(ins.oprnd2);
+        if (ins.oprnd_count() > 0)
+        {
+            str.push_back(' ');
+            str += std::to_string(ins.oprnd1);
+        }
+        if (ins.oprnd_count() > 1)
+        {
+            str.push_back(' ');
+            str += std::to_string(ins.oprnd2);
+        }
         str.push_back('\n');
     }
     return str;
