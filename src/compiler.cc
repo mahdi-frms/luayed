@@ -113,7 +113,7 @@ lnumber token_number(Token t)
 fidx_t Compiler::compile(Noderef root, const char *chunckname)
 {
     this->chunckname = chunckname;
-    MetaScope *fnscp = (MetaScope *)root->getannot(MetaKind::MScope);
+    MetaScope *fnscp = root->metadata_scope();
     fnscp->fidx = this->gen->pushf();
     if (root->get_kind() == NodeKind::Block)
     {
@@ -131,7 +131,7 @@ fidx_t Compiler::compile(Noderef root, const char *chunckname)
             if (par->get_token().kind == TokenKind::DotDotDot)
                 continue;
             parcount++;
-            MetaMemory *md = (MetaMemory *)par->getannot(MetaKind::MMemory);
+            MetaMemory *md = par->metadata_memory();
             md->offset = this->stack_offset++;
             if (md->is_upvalue)
             {
@@ -286,15 +286,15 @@ void Compiler::compile_call(Noderef node, size_t expect)
 }
 void Compiler::compile_identifier(Noderef node)
 {
-    MetaDeclaration *md = (MetaDeclaration *)node->getannot(MetaKind::MDecl);
+    MetaDeclaration *md = (MetaDeclaration *)node->metadata_decl();
     Noderef dec = md ? md->decnode : node;
-    MetaMemory *mm = (MetaMemory *)dec->getannot(MetaKind::MMemory);
+    MetaMemory *mm = (MetaMemory *)dec->metadata_memory();
     if (md)
     {
         if (md->is_upvalue)
         {
-            MetaScope *sc = (MetaScope *)mm->scope->getannot(MetaKind::MScope);
-            MetaScope *fnsc = (MetaScope *)sc->func->getannot(MetaKind::MScope);
+            MetaScope *sc = (MetaScope *)mm->scope->metadata_scope();
+            MetaScope *fnsc = (MetaScope *)sc->func->metadata_scope();
             this->emit(Instruction(Opcode::IUpvalue, this->upval(fnsc->fidx, mm->offset, mm->upoffset)));
         }
         else
@@ -302,7 +302,7 @@ void Compiler::compile_identifier(Noderef node)
             this->emit(Instruction(Opcode::ILocal, mm->offset));
         }
     }
-    else if (node->getannot(MetaKind::MSelf))
+    else if (node->metadata_self())
     {
         this->emit(Instruction(Opcode::ILocal, 0));
     }
@@ -452,7 +452,7 @@ Compiler::Compiler(IGenerator *gen) : gen(gen)
 
 void Compiler::compile_function(Noderef node)
 {
-    MetaScope *fnscp = (MetaScope *)node->getannot(MetaKind::MScope);
+    MetaScope *fnscp = node->metadata_scope();
     Compiler compiler(this->gen);
     compiler.stack_offset = node->get_kind() == NodeKind::MethodBody ? 1 : 0;
     compiler.compile(node, this->chunckname);
@@ -466,22 +466,22 @@ void Compiler::compile_exp(Noderef node)
 
 MetaMemory *Compiler::varmem(Noderef lvalue)
 {
-    MetaDeclaration *md = (MetaDeclaration *)lvalue->getannot(MetaKind::MDecl);
+    MetaDeclaration *md = (MetaDeclaration *)lvalue->metadata_decl();
     Noderef dec = md ? md->decnode : lvalue;
-    return (MetaMemory *)dec->getannot(MetaKind::MMemory);
+    return (MetaMemory *)dec->metadata_memory();
 }
 
 void Compiler::compile_lvalue_primary(Noderef node)
 {
-    MetaDeclaration *md = (MetaDeclaration *)node->getannot(MetaKind::MDecl);
+    MetaDeclaration *md = (MetaDeclaration *)node->metadata_decl();
     Noderef dec = md ? md->decnode : node;
-    MetaMemory *mm = (MetaMemory *)dec->getannot(MetaKind::MMemory);
+    MetaMemory *mm = (MetaMemory *)dec->metadata_memory();
     if (mm)
     {
         if (md && md->is_upvalue)
         {
-            MetaScope *sc = (MetaScope *)mm->scope->getannot(MetaKind::MScope);
-            MetaScope *fnsc = (MetaScope *)sc->func->getannot(MetaKind::MScope);
+            MetaScope *sc = (MetaScope *)mm->scope->metadata_scope();
+            MetaScope *fnsc = (MetaScope *)sc->func->metadata_scope();
             this->ops_push(Instruction(Opcode::IUStore, this->upval(fnsc->fidx, mm->offset, mm->upoffset)));
         }
         else
@@ -489,7 +489,7 @@ void Compiler::compile_lvalue_primary(Noderef node)
             this->ops_push(Instruction(Opcode::ILStore, mm->offset));
         }
     }
-    else if (node->getannot(MetaKind::MSelf))
+    else if (node->metadata_self())
     {
         this->ops_push(Instruction(Opcode::ILStore, 0));
     }
@@ -732,7 +732,7 @@ size_t Compiler::upval(fidx_t fidx, size_t offset, size_t hidx)
 void Compiler::compile_numeric_for(Noderef node)
 {
     Noderef lvalue = node->child(0)->child(0);
-    MetaMemory *md = (MetaMemory *)lvalue->getannot(MetaKind::MMemory);
+    MetaMemory *md = lvalue->metadata_memory();
     md->offset = this->stack_offset++;
     this->stack_offset += 2;
     Noderef from = node->child(1);
@@ -814,7 +814,7 @@ void Compiler::compile_logic(Noderef node)
 
 void Compiler::compile_block(Noderef node)
 {
-    MetaScope *md = (MetaScope *)node->getannot(MetaKind::MScope);
+    MetaScope *md = node->metadata_scope();
     foreach_node(node, ch)
     {
         this->compile_node(ch);
@@ -837,7 +837,7 @@ void Compiler::compile_decl_var(Noderef node)
     foreach_node(varlist, ch)
     {
         Noderef var = ch->child(0);
-        MetaMemory *mm = (MetaMemory *)var->getannot(MetaKind::MMemory);
+        MetaMemory *mm = var->metadata_memory();
         mm->offset = this->stack_offset++;
         if (mm->is_upvalue)
         {
@@ -861,7 +861,7 @@ void Compiler::compile_decl_var(Noderef node)
 void Compiler::compile_decl_func(Noderef node)
 {
     Noderef var = node->child(0)->child(0);
-    MetaMemory *mm = (MetaMemory *)var->getannot(MetaKind::MMemory);
+    MetaMemory *mm = var->metadata_memory();
     mm->offset = this->stack_offset++;
     if (mm->is_upvalue)
     {
@@ -948,9 +948,9 @@ void Compiler::compile_hook_diff(size_t ghs, size_t lhs)
 
 void Compiler::compile_goto(Noderef node)
 {
-    MetaGoto *gtmd = mdgoto(node);
+    MetaGoto *gtmd = node->metadata_goto();
     Noderef label = gtmd->label;
-    MetaLabel *lmd = mdlabel(label);
+    MetaLabel *lmd = label->metadata_label();
     gtmd->is_compiled = true;
     this->compile_stack_diff(gtmd->stack_size, lmd->stack_size);
     this->compile_hook_diff(gtmd->upvalue_size, lmd->upvalue_size);
@@ -959,13 +959,13 @@ void Compiler::compile_goto(Noderef node)
 }
 void Compiler::compile_label(Noderef node)
 {
-    MetaLabel *lmd = mdlabel(node);
+    MetaLabel *lmd = node->metadata_label();
     lmd->is_compiled = true;
     lmd->address = this->len();
     Noderef go_to = lmd->go_to;
     while (go_to)
     {
-        MetaGoto *gtmd = mdgoto(go_to);
+        MetaGoto *gtmd = go_to->metadata_goto();
         if (gtmd->is_compiled)
             this->edit_jmp(gtmd->address, lmd->address);
         go_to = gtmd->next;
