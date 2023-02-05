@@ -76,27 +76,24 @@ namespace ast
         MGoto = 5,
     };
 
-    struct MetaNode
+    struct MetaData
     {
-        MetaNode *next;
-        MetaKind kind;
+        MetaData *next;
+        virtual MetaKind kind() = 0;
     };
 
-    struct MetaSelf
+    struct MetaSelf : public MetaData
     {
-        MetaNode header;
     };
 
-    struct MetaDeclaration
+    struct MetaDeclaration : public MetaData
     {
-        MetaNode header;
         Noderef decnode;
         bool is_upvalue;
     };
 
-    struct MetaLabel
+    struct MetaLabel : public MetaData
     {
-        MetaNode header;
         size_t stack_size;
         size_t upvalue_size;
         Noderef go_to;
@@ -104,9 +101,8 @@ namespace ast
         bool is_compiled;
     };
 
-    struct MetaGoto
+    struct MetaGoto : public MetaData
     {
-        MetaNode header;
         size_t stack_size;
         size_t upvalue_size;
         size_t address;
@@ -115,18 +111,16 @@ namespace ast
         Noderef next;
     };
 
-    struct MetaMemory
+    struct MetaMemory : public MetaData
     {
-        MetaNode header;
         Noderef scope;
         size_t offset;
         bool is_upvalue;
         size_t upoffset;
     };
 
-    struct MetaScope
+    struct MetaScope : public MetaData
     {
-        MetaNode header;
         Noderef func;
         Noderef parent;
         size_t stack_size;
@@ -147,7 +141,7 @@ namespace ast
         Token token;
         NodeKind kind;
         size_t count = 0;
-        MetaNode *meta = nullptr;
+        MetaData *meta = nullptr;
 
         Noderef parent = nullptr;
         Noderef right_sib = nullptr;
@@ -162,11 +156,19 @@ namespace ast
         Noderef child(size_t index);
         size_t child_count();
         Node(NodeKind kind, Token token = token_none());
-        void annotate(MetaNode *md);
-        MetaNode *getannot(MetaKind kind);
+        void annotate(MetaData *md);
+        MetaData *getannot(MetaKind kind);
         int line();
 
-        static void sib_insert(Noderef l, Noderef r, Noderef s);
+        MetaGoto *metadata_goto();
+        MetaLabel *metadata_label();
+        MetaDeclaration *metadata_decl();
+        MetaMemory *metadata_memory();
+        MetaScope *metadata_scope();
+        MetaSelf *metadata_self();
+
+        static void
+        sib_insert(Noderef l, Noderef r, Noderef s);
         void sib_insertl(Noderef node);
         void sib_insertr(Noderef node);
         void child_pushl(Noderef node);
