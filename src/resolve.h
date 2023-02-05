@@ -2,11 +2,8 @@
 #define RESOLVE_h
 
 #include "ast.h"
-#include <map>
 
 using namespace ast;
-
-typedef std::map<std::string, Noderef> Varmap;
 
 #define map(N) (*((Varmap *)(N->metadata_scope()->map)))
 

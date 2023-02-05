@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <vector>
 #include "lexer.h"
+#include <map>
 
 extern const char *node_names[34];
 
@@ -12,13 +13,14 @@ extern const char *node_names[34];
 
 #define is_meth(N) (N->get_kind() == NodeKind::MethodBody)
 
-#define foreach_node(PARENT, CHILD) for ( \
-    ast::Noderef CHILD = PARENT->begin(); \
-    CHILD;                                \
-    CHILD = CHILD->next())
+#define foreach_node(PARENT, CHILD) for (ast::Noderef CHILD = PARENT->begin(); CHILD; CHILD = CHILD->next())
 
 namespace ast
 {
+    class Node;
+    typedef Node *Noderef;
+    typedef std::map<std::string, Noderef> Varmap;
+
     enum NodeKind
     {
         Primary = 0, // token
@@ -58,9 +60,6 @@ namespace ast
         NEND = 34,     // ctrl
         TKN = 35,      // ctrl
     };
-
-    class Node;
-    typedef Node *Noderef;
 
     enum MetaKind
     {
@@ -130,8 +129,8 @@ namespace ast
         size_t stack_size = 0;
         size_t upvalue_size = 0;
         bool variadic = false;
-        void *map = nullptr;
-        void *lmap = nullptr;
+        Varmap map;
+        Varmap lmap;
         Noderef gotolist = nullptr;
         fidx_t fidx = 0;
     };

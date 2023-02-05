@@ -87,7 +87,7 @@ MetaScope *Resolver::curscope()
 }
 Varmap &Resolver::curmap()
 {
-    return map(this->current);
+    return this->current->metadata_scope()->map;
 }
 
 void Resolver::reference(Noderef node, Noderef dec, bool func_past)
@@ -128,7 +128,7 @@ void Resolver::analyze_identifier(Noderef node)
         {
             func_past |= func;
             func = (scptr->get_kind() == NodeKind::FunctionBody);
-            Varmap &vmap = map(scptr);
+            Varmap &vmap = scptr->metadata_scope()->map;
             if (vmap.find(t.text()) != vmap.cend())
             {
                 dec = vmap[t.text()];
@@ -177,8 +177,6 @@ void Resolver::analyze_etc(Noderef node)
         else
             sc->func = node;
 
-        sc->map = new Varmap();
-        sc->lmap = new Varmap();
         sc->variadic = node == this->ast.root();
         sc->parent = this->current;
         sc->stack_size = is_meth(node) ? 1 : 0;
@@ -200,8 +198,6 @@ void Resolver::analyze_etc(Noderef node)
         MetaScope *sc = this->curscope();
         this->stack_ptr -= sc->stack_size;
         this->hook_ptr -= sc->upvalue_size;
-        delete (Varmap *)sc->map;
-        delete (Varmap *)sc->lmap;
         this->current = sc->parent;
         if (node->get_kind() == NodeKind::NumericFor || node->get_kind() == NodeKind::GenericFor)
         {
@@ -264,8 +260,8 @@ void Resolver::link(Noderef go_to, Noderef label)
 void Resolver::analyze_label(Noderef node)
 {
     string name = node->get_token().text();
-    Varmap *labels = (Varmap *)this->curscope()->lmap;
-    if (labels->find(name) != labels->cend())
+    Varmap &labels = this->curscope()->lmap;
+    if (labels.find(name) != labels.cend())
     {
         // todo: generate error
     }
@@ -274,7 +270,7 @@ void Resolver::analyze_label(Noderef node)
         MetaLabel *lmd = node->metadata_label();
         if (!lmd)
         {
-            (*labels)[name] = node;
+            labels[name] = node;
             lmd = new MetaLabel;
             node->annotate(lmd);
         }
@@ -338,7 +334,7 @@ void Resolver::analyze_declaration(Noderef node)
 void Resolver::link_labels()
 {
     MetaScope *sc = this->curscope();
-    Varmap *labels = (Varmap *)sc->lmap;
+    Varmap &labels = sc->lmap;
     Noderef gotolist = sc->gotolist;
     while (gotolist)
     {
@@ -346,8 +342,8 @@ void Resolver::link_labels()
         MetaGoto *gmd = node->metadata_goto();
         Noderef next = gmd->next;
         string name = node->get_token().text();
-        auto lptr = labels->find(name);
-        if (lptr != labels->cend())
+        auto lptr = labels.find(name);
+        if (lptr != labels.cend())
         {
             this->link(node, lptr->second);
         }
