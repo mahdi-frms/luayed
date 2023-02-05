@@ -1041,24 +1041,25 @@ void compiler_tests()
             iblocal(3),
             iblocal(3),
             igt,
-            icjmp(40),
+            icjmp(42),
             // block 15
             inil,
-            ijmp(40),
+            ipop(4),
+            ijmp(44),
             ilocal(0),
             ilocal(4),
             ilocal(1),
             icall(2, 1),
             ipop(1),
-            // increment 30
+            // increment 32
             iblocal(3),
             iblocal(2),
             iadd,
             iblstore(3),
             ijmp(7),
-            // loop end 40
+            // loop end 42
             ipop(3),
-            // end 42
+            // end 44
             inil,
             ilocal(1),
             ilstore(0),
@@ -1121,10 +1122,11 @@ void compiler_tests()
             ilocal(4),
             inil,
             ieq,
-            icjmp(78),
+            icjmp(80),
             // block
             inil,
-            ijmp(78),
+            ipop(6),
+            ijmp(82),
             ilocal(3),
             ilocal(9),
             ilocal(4),
@@ -1133,9 +1135,9 @@ void compiler_tests()
             ipop(1),
             // end of block
             ijmp(36),
-            // loop end 78
+            // loop end 80
             ipop(5),
-            // end of for
+            // end of for 82
             inil,
             ilocal(4),
             ilstore(1),
