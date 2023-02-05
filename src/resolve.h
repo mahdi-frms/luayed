@@ -8,7 +8,7 @@ using namespace ast;
 
 typedef std::map<std::string, Noderef> Varmap;
 
-#define map(N) (*((Varmap *)(scope(N)->map)))
+#define map(N) (*((Varmap *)(N->metadata_scope()->map)))
 
 class Resolver
 {

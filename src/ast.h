@@ -10,10 +10,6 @@ extern const char *node_names[34];
 #define is_call(N) ((N)->get_kind() == NodeKind::Call || (N)->get_kind() == NodeKind::MethodCall)
 #define is_vargs(N) ((N)->get_kind() == NodeKind::Primary && (N)->get_token().kind == TokenKind::DotDotDot)
 
-#define scope(N) ((MetaScope *)N->getannot(MetaKind::MScope))
-#define mdgoto(N) ((MetaGoto *)N->getannot(MetaKind::MGoto))
-#define mdlabel(N) ((MetaLabel *)N->getannot(MetaKind::MLabel))
-#define mem(N) ((MetaMemory *)N->getannot(MetaKind::MMemory))
 #define is_meth(N) (N->get_kind() == NodeKind::MethodBody)
 
 #define foreach_node(PARENT, CHILD) for ( \
@@ -157,6 +153,8 @@ namespace ast
         Noderef left_child = nullptr;
         Noderef right_child = nullptr;
 
+        MetaData *getannot(MetaKind kind);
+
     public:
         Noderef next();
         NodeKind get_kind();
@@ -165,7 +163,6 @@ namespace ast
         size_t child_count();
         Node(NodeKind kind, Token token = token_none());
         void annotate(MetaData *md);
-        MetaData *getannot(MetaKind kind);
         int line();
 
         MetaGoto *metadata_goto();

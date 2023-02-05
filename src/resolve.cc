@@ -86,7 +86,7 @@ MetaSelf *Resolver::metadata_self(Noderef node)
 
 MetaScope *Resolver::curscope()
 {
-    return scope(this->current);
+    return this->current->metadata_scope();
 }
 Varmap &Resolver::curmap()
 {
@@ -101,8 +101,8 @@ void Resolver::reference(Noderef node, Noderef dec, bool func_past)
     node->annotate(meta);
     if (func_past)
     {
-        MetaMemory *mm = mem(dec);
-        MetaScope *sc = scope(mm->scope);
+        MetaMemory *mm = dec->metadata_memory();
+        MetaScope *sc = mm->scope->metadata_scope();
         if (!mm->is_upvalue)
         {
             this->hook_ptr++;
@@ -137,7 +137,7 @@ void Resolver::analyze_identifier(Noderef node)
                 dec = vmap[t.text()];
                 break;
             }
-            scptr = scope(scptr)->parent;
+            scptr = scptr->metadata_scope()->parent;
         }
         if (dec)
             this->reference(node, dec, func_past);
@@ -146,7 +146,7 @@ void Resolver::analyze_identifier(Noderef node)
     }
     else if (t.kind == TokenKind::DotDotDot)
     {
-        if (!scope(this->curscope()->func)->variadic)
+        if (!this->curscope()->func->metadata_scope()->variadic)
         {
             Lerror error = error_vargs_outside_function();
             error.line = t.line;
@@ -228,7 +228,7 @@ void Resolver::analyze_break(Noderef node)
 {
     Noderef it = this->current;
     while (it && !is_loop(it->get_kind()))
-        it = scope(it)->parent;
+        it = it->metadata_scope()->parent;
     if (!it)
     {
         Lerror err = error_breake_outside_loop();
@@ -267,8 +267,8 @@ void Resolver::analyze_break(Noderef node)
 
 void Resolver::link(Noderef go_to, Noderef label)
 {
-    MetaLabel *lmd = mdlabel(label);
-    MetaGoto *gmd = mdgoto(go_to);
+    MetaLabel *lmd = label->metadata_label();
+    MetaGoto *gmd = go_to->metadata_goto();
     gmd->label = label;
     gmd->next = lmd->go_to;
     lmd->go_to = go_to;
@@ -284,7 +284,7 @@ void Resolver::analyze_label(Noderef node)
     }
     else
     {
-        MetaLabel *lmd = (MetaLabel *)node->getannot(MetaKind::MLabel);
+        MetaLabel *lmd = node->metadata_label();
         if (!lmd)
         {
             (*labels)[name] = node;
@@ -301,9 +301,9 @@ void Resolver::analyze_label(Noderef node)
 
 void Resolver::analyze_goto(Noderef node)
 {
-    MetaScope *fnmd = scope(this->curscope()->func);
+    MetaScope *fnmd = this->curscope()->func->metadata_scope();
     Noderef gotolist = fnmd->gotolist;
-    MetaGoto *gtmd = (MetaGoto *)node->getannot(MetaKind::MGoto);
+    MetaGoto *gtmd = node->metadata_goto();
     if (!gtmd)
     {
         gtmd = new MetaGoto;
@@ -362,7 +362,7 @@ void Resolver::link_labels()
     while (gotolist)
     {
         Noderef node = gotolist;
-        MetaGoto *gmd = mdgoto(node);
+        MetaGoto *gmd = node->metadata_goto();
         Noderef next = gmd->next;
         string name = node->get_token().text();
         auto lptr = labels->find(name);
