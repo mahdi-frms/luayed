@@ -15,9 +15,6 @@ void Resolver::analyze_var_decl(Noderef node)
         string name = tkn.text();
         this->curmap()[name] = node;
         MetaMemory *meta = new MetaMemory;
-        meta->offset = 0;
-        meta->is_upvalue = 0;
-        meta->upoffset = 0;
         meta->scope = this->current;
         this->curscope()->stack_size++;
         this->stack_ptr++;
@@ -185,9 +182,6 @@ void Resolver::analyze_etc(Noderef node)
         sc->variadic = node == this->ast.root();
         sc->parent = this->current;
         sc->stack_size = is_meth(node) ? 1 : 0;
-        sc->fidx = 0;
-        sc->upvalue_size = 0;
-        sc->gotolist = nullptr;
         if (node->get_kind() == NodeKind::NumericFor || node->get_kind() == NodeKind::GenericFor)
         {
             this->stack_ptr += 2;
@@ -244,19 +238,12 @@ void Resolver::analyze_break(Noderef node)
         Noderef virtual_label = ast::Ast::make(virtual_token, NodeKind::LabelStmt);
         it->sib_insertr(virtual_label);
         // annotate label
-        MetaLabel *lmd = new MetaLabel;
-        lmd->is_compiled = false;
-        lmd->go_to = nullptr;
-        lmd->address = 0;
-        virtual_label->annotate(lmd);
+        virtual_label->annotate(new MetaLabel);
         // add goto
         Noderef virtual_goto = ast::Ast::make(virtual_token, NodeKind::GotoStmt);
         node->replace(virtual_goto);
         // annotate goto
         MetaGoto *gtmd = new MetaGoto;
-        gtmd->address = 0;
-        gtmd->is_compiled = false;
-        gtmd->label = nullptr;
         gtmd->stack_size = this->stack_ptr;
         gtmd->upvalue_size = this->hook_ptr;
         virtual_goto->annotate(gtmd);
@@ -289,9 +276,6 @@ void Resolver::analyze_label(Noderef node)
         {
             (*labels)[name] = node;
             lmd = new MetaLabel;
-            lmd->is_compiled = false;
-            lmd->go_to = nullptr;
-            lmd->address = 0;
             node->annotate(lmd);
         }
         lmd->stack_size = this->stack_ptr;
@@ -307,9 +291,6 @@ void Resolver::analyze_goto(Noderef node)
     if (!gtmd)
     {
         gtmd = new MetaGoto;
-        gtmd->address = 0;
-        gtmd->is_compiled = false;
-        gtmd->label = nullptr;
         gtmd->next = gotolist;
         gtmd->stack_size = this->stack_ptr;
         gtmd->upvalue_size = this->hook_ptr;

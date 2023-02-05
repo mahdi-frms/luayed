@@ -74,7 +74,7 @@ namespace ast
 
     struct MetaData
     {
-        MetaData *next;
+        MetaData *next = nullptr;
         virtual MetaKind kind() = 0;
         virtual ~MetaData();
     };
@@ -88,52 +88,52 @@ namespace ast
     {
         MetaKind kind();
 
-        Noderef decnode;
-        bool is_upvalue;
+        Noderef decnode = nullptr;
+        bool is_upvalue = false;
     };
 
     struct MetaLabel : public MetaData
     {
         MetaKind kind();
-        size_t stack_size;
-        size_t upvalue_size;
-        Noderef go_to;
-        size_t address;
-        bool is_compiled;
+        size_t stack_size = 0;
+        size_t upvalue_size = 0;
+        Noderef go_to = nullptr;
+        size_t address = 0;
+        bool is_compiled = false;
     };
 
     struct MetaGoto : public MetaData
     {
         MetaKind kind();
-        size_t stack_size;
-        size_t upvalue_size;
-        size_t address;
-        bool is_compiled;
-        Noderef label;
-        Noderef next;
+        size_t stack_size = 0;
+        size_t upvalue_size = 0;
+        size_t address = 0;
+        bool is_compiled = false;
+        Noderef label = nullptr;
+        Noderef next = nullptr;
     };
 
     struct MetaMemory : public MetaData
     {
         MetaKind kind();
-        Noderef scope;
-        size_t offset;
-        bool is_upvalue;
-        size_t upoffset;
+        Noderef scope = nullptr;
+        size_t offset = 0;
+        bool is_upvalue = false;
+        size_t upoffset = 0;
     };
 
     struct MetaScope : public MetaData
     {
         MetaKind kind();
-        Noderef func;
-        Noderef parent;
-        size_t stack_size;
-        size_t upvalue_size;
-        bool variadic;
-        void *map;
-        void *lmap;
-        Noderef gotolist;
-        fidx_t fidx;
+        Noderef func = nullptr;
+        Noderef parent = nullptr;
+        size_t stack_size = 0;
+        size_t upvalue_size = 0;
+        bool variadic = false;
+        void *map = nullptr;
+        void *lmap = nullptr;
+        Noderef gotolist = nullptr;
+        fidx_t fidx = 0;
     };
 
     class Node
