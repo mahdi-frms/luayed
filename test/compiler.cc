@@ -1014,6 +1014,48 @@ void compiler_tests()
             ipop(1),
             iret(0),
         });
+
+    compiler_test_case(
+        "while loop with break",
+
+        "while (true) do break end")
+
+        .test_fn(1)
+        .test_opcodes({
+            // condition 0
+            itrue,
+            inot,
+            icjmp(11),
+            // block 5
+            ijmp(11),
+            // end of block 8
+            ijmp(0),
+            // end of loop 11
+            iret(0),
+        });
+
+    compiler_test_case(
+        "while loop aith local var and break",
+
+        "while (true) do local v break end")
+
+        .test_fn(1)
+        .test_opcodes({
+            // condition 0
+            itrue,
+            inot,
+            icjmp(16),
+            // block 5
+            inil,
+            ipop(1),
+            ijmp(16),
+            ipop(1),
+            // end of block 13
+            ijmp(0),
+            // end of loop 16
+            iret(0),
+        });
+
     compiler_test_case(
         "numeric for",
 

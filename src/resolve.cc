@@ -1,8 +1,5 @@
 #include "resolve.h"
 
-// FIXME
-#include "lstrep.h"
-
 vector<Lerror> Resolver::analyze()
 {
     this->current = nullptr;
