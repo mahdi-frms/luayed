@@ -16,11 +16,10 @@ extern const char *node_names[34];
 #define mem(N) ((MetaMemory *)N->getannot(MetaKind::MMemory))
 #define is_meth(N) (N->get_kind() == NodeKind::MethodBody)
 
-#define foreach_node_next(CHILD) (CHILD ? CHILD->next() : nullptr)
-#define foreach_node(PARENT, CHILD) for (                                 \
-    ast::Noderef CHILD = PARENT->begin(), sib = foreach_node_next(CHILD); \
-    CHILD;                                                                \
-    CHILD = sib, sib = foreach_node_next(CHILD))
+#define foreach_node(PARENT, CHILD) for ( \
+    ast::Noderef CHILD = PARENT->begin(); \
+    CHILD;                                \
+    CHILD = CHILD->next())
 
 namespace ast
 {
@@ -98,6 +97,8 @@ namespace ast
     struct MetaLabel
     {
         MetaNode header;
+        size_t stack_size;
+        size_t upvalue_size;
         Noderef go_to;
         size_t address;
         bool is_compiled;
@@ -106,6 +107,8 @@ namespace ast
     struct MetaGoto
     {
         MetaNode header;
+        size_t stack_size;
+        size_t upvalue_size;
         size_t address;
         bool is_compiled;
         Noderef label;

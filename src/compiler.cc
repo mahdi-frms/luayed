@@ -913,6 +913,38 @@ void Compiler::compile_repeat(Noderef node)
     this->emit(Opcode::INot);
     this->emit(Instruction(Opcode::ICjmp, cjmp_idx));
 }
+void Compiler::compile_stack_diff(size_t gss, size_t lss)
+{
+    if (gss < lss)
+    {
+        for (size_t i = 0; i < lss - gss; i++)
+        {
+            this->emit(Opcode::INil);
+        }
+    }
+    if (gss > lss)
+    {
+        this->emit(Instruction(Opcode::IPop, gss - lss));
+    }
+}
+
+void Compiler::compile_hook_diff(size_t ghs, size_t lhs)
+{
+    if (ghs < lhs)
+    {
+        for (size_t i = 0; i < lhs - ghs; i++)
+        {
+            this->emit(Opcode::IUPush);
+        }
+    }
+    if (ghs > lhs)
+    {
+        for (size_t i = 0; i < ghs - lhs; i++)
+        {
+            this->emit(Opcode::IUPop);
+        }
+    }
+}
 
 void Compiler::compile_goto(Noderef node)
 {
@@ -920,6 +952,8 @@ void Compiler::compile_goto(Noderef node)
     Noderef label = gtmd->label;
     MetaLabel *lmd = mdlabel(label);
     gtmd->is_compiled = true;
+    this->compile_stack_diff(gtmd->stack_size, lmd->stack_size);
+    this->compile_hook_diff(gtmd->upvalue_size, lmd->upvalue_size);
     gtmd->address = this->len();
     this->emit(Instruction(Opcode::IJmp, lmd->is_compiled ? lmd->address : 0));
 }

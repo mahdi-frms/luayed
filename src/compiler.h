@@ -63,6 +63,8 @@ private:
     void compile_goto(Noderef node);
     void compile_label(Noderef node);
     void compile_exp_e(Noderef node, size_t expect);
+    void compile_stack_diff(size_t gss, size_t lss);
+    void compile_hook_diff(size_t ghs, size_t lhs);
     size_t arglist_count(Noderef arglist);
     Opcode translate_token(TokenKind kind, bool bin);
     fidx_t compile(Noderef root, const char *chunckname = nullptr);

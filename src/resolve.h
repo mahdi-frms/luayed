@@ -16,6 +16,8 @@ private:
     vector<Lerror> errors;
     Ast ast;
     Noderef current;
+    size_t stack_ptr = 0;
+    size_t hook_ptr = 0;
 
     void analyze_node(Noderef node);
     void analyze_var_decl(Noderef node);

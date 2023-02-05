@@ -238,4 +238,5 @@ void Node::replace(Noderef other)
 {
     this->sib_insertr(other);
     this->pop();
+    this->right_sib = other;
 }

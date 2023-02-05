@@ -6,11 +6,7 @@
 vector<Lerror> Resolver::analyze()
 {
     this->current = nullptr;
-    //     dbg << "INIT TREE:\n"
-    //         << ast.root() << "\n";
     this->analyze_node(ast.root());
-    //    dbg << "FINAL TREE:\n"
-    //        << ast.root() << "\n";
     return std::move(this->errors);
 }
 void Resolver::analyze_var_decl(Noderef node)
@@ -29,6 +25,7 @@ void Resolver::analyze_var_decl(Noderef node)
         meta->upoffset = 0;
         meta->scope = this->current;
         this->curscope()->stack_size++;
+        this->stack_ptr++;
         node->annotate(&meta->header);
     }
     else // DotDotDot
@@ -59,7 +56,10 @@ void Resolver::reference(Noderef node, Noderef dec, bool func_past)
         MetaMemory *mm = mem(dec);
         MetaScope *sc = scope(mm->scope);
         if (!mm->is_upvalue)
+        {
+            this->hook_ptr++;
             sc->upvalue_size++;
+        }
         mm->is_upvalue = true;
     }
 }
@@ -156,6 +156,8 @@ void Resolver::analyze_etc(Noderef node)
     {
         this->link_labels();
         MetaScope *sc = this->curscope();
+        this->stack_ptr -= sc->stack_size;
+        this->hook_ptr -= sc->upvalue_size;
         delete (Varmap *)sc->map;
         delete (Varmap *)sc->lmap;
         this->current = sc->parent;
@@ -207,6 +209,8 @@ void Resolver::analyze_break(Noderef node)
         gtmd->address = 0;
         gtmd->is_compiled = false;
         gtmd->label = nullptr;
+        gtmd->stack_size = this->stack_ptr;
+        gtmd->upvalue_size = this->hook_ptr;
         virtual_goto->annotate(&gtmd->header);
         // link goto with label
         this->link(virtual_goto, virtual_label);
@@ -232,14 +236,20 @@ void Resolver::analyze_label(Noderef node)
     }
     else
     {
-        (*labels)[name] = node;
-        MetaLabel *lmd = new MetaLabel;
-        lmd->header.kind = MetaKind::MLabel;
-        lmd->header.next = nullptr;
-        lmd->is_compiled = false;
-        lmd->go_to = nullptr;
-        lmd->address = 0;
-        node->annotate(&lmd->header);
+        MetaLabel *lmd = (MetaLabel *)node->getannot(MetaKind::MLabel);
+        if (!lmd)
+        {
+            (*labels)[name] = node;
+            lmd = new MetaLabel;
+            lmd->header.kind = MetaKind::MLabel;
+            lmd->header.next = nullptr;
+            lmd->is_compiled = false;
+            lmd->go_to = nullptr;
+            lmd->address = 0;
+            node->annotate(&lmd->header);
+        }
+        lmd->stack_size = this->stack_ptr;
+        lmd->upvalue_size = this->hook_ptr;
     }
 }
 
@@ -247,15 +257,21 @@ void Resolver::analyze_goto(Noderef node)
 {
     MetaScope *fnmd = scope(this->curscope()->func);
     Noderef gotolist = fnmd->gotolist;
-    MetaGoto *gtmd = new MetaGoto;
-    gtmd->header.kind = MetaKind::MGoto;
-    gtmd->header.next = nullptr;
-    gtmd->address = 0;
-    gtmd->is_compiled = false;
-    gtmd->label = nullptr;
-    gtmd->next = gotolist;
-    fnmd->gotolist = node;
-    node->annotate(&gtmd->header);
+    MetaGoto *gtmd = (MetaGoto *)node->getannot(MetaKind::MGoto);
+    if (!gtmd)
+    {
+        gtmd = new MetaGoto;
+        gtmd->header.kind = MetaKind::MGoto;
+        gtmd->header.next = nullptr;
+        gtmd->address = 0;
+        gtmd->is_compiled = false;
+        gtmd->label = nullptr;
+        gtmd->next = gotolist;
+        gtmd->stack_size = this->stack_ptr;
+        gtmd->upvalue_size = this->hook_ptr;
+        fnmd->gotolist = node;
+        node->annotate(&gtmd->header);
+    }
 }
 
 void Resolver::analyze_node(Noderef node)
