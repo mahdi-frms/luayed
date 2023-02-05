@@ -144,6 +144,10 @@ void Resolver::analyze_etc(Noderef node)
         sc->fidx = 0;
         sc->upvalue_size = 0;
         sc->gotolist = nullptr;
+        if (node->get_kind() == NodeKind::NumericFor || node->get_kind() == NodeKind::GenericFor)
+        {
+            this->stack_ptr += 2;
+        }
 
         this->current = node;
     }
@@ -161,6 +165,10 @@ void Resolver::analyze_etc(Noderef node)
         delete (Varmap *)sc->map;
         delete (Varmap *)sc->lmap;
         this->current = sc->parent;
+        if (node->get_kind() == NodeKind::NumericFor || node->get_kind() == NodeKind::GenericFor)
+        {
+            this->stack_ptr -= 2;
+        }
     }
 }
 
