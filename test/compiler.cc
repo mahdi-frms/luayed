@@ -1303,7 +1303,10 @@ void compiler_tests()
     compiler_test_case(
         "upvalue in numeric for",
 
-        "for i = 1,5,1 do local v = function() local w = i end end")
+        "for i = 1,5,1 do\n"
+        "   local v = function() local w = i end\n"
+        "   break\n"
+        "end")
 
         .test_fn(1)
         .test_parcount(0)
@@ -1320,20 +1323,23 @@ void compiler_tests()
             iblocal(3),
             iblocal(3),
             igt,
-            icjmp(29),
+            icjmp(35),
             // block 15
             ifconst(2),
+            ipop(4),
+            iupop,
+            ijmp(38),
             ipop(1),
-            // increment 19
+            // increment 25
             iblocal(3), // counter
             iblocal(2), // step
             iadd,
             iblstore(3), // store new counter
             ijmp(7),
-            // loop end 29
+            // loop end 35
             iupop,
             ipop(3),
-            // end
+            // end 38
             iret(0),
         })
 
