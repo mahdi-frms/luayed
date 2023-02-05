@@ -22,6 +22,9 @@
         "iostream": "cpp",
         "variant": "cpp",
         "bit": "cpp",
-        "optional": "cpp"
+        "optional": "cpp",
+        "random": "cpp",
+        "cmath": "cpp",
+        "tuple": "cpp"
     }
 }

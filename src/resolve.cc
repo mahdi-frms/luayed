@@ -15,20 +15,73 @@ void Resolver::analyze_var_decl(Noderef node)
         string name = tkn.text();
         this->curmap()[name] = node;
         MetaMemory *meta = new MetaMemory;
-        meta->header.next = nullptr;
-        meta->header.kind = MetaKind::MMemory;
         meta->offset = 0;
         meta->is_upvalue = 0;
         meta->upoffset = 0;
         meta->scope = this->current;
         this->curscope()->stack_size++;
         this->stack_ptr++;
-        node->annotate(&meta->header);
+        node->annotate(meta);
     }
     else // DotDotDot
     {
         this->curscope()->variadic = true;
     }
+}
+
+MetaGoto *Resolver::metadata_goto(Noderef node)
+{
+    MetaGoto *md = node->metadata_goto();
+    if (!md)
+    {
+        md = new MetaGoto;
+    }
+    return md;
+}
+MetaLabel *Resolver::metadata_label(Noderef node)
+{
+    MetaLabel *md = node->metadata_label();
+    if (!md)
+    {
+        md = new MetaLabel;
+    }
+    return md;
+}
+MetaDeclaration *Resolver::metadata_decl(Noderef node)
+{
+    MetaDeclaration *md = node->metadata_decl();
+    if (!md)
+    {
+        md = new MetaDeclaration;
+    }
+    return md;
+}
+MetaMemory *Resolver::metadata_memory(Noderef node)
+{
+    MetaMemory *md = node->metadata_memory();
+    if (!md)
+    {
+        md = new MetaMemory;
+    }
+    return md;
+}
+MetaScope *Resolver::metadata_scope(Noderef node)
+{
+    MetaScope *md = node->metadata_scope();
+    if (!md)
+    {
+        md = new MetaScope;
+    }
+    return md;
+}
+MetaSelf *Resolver::metadata_self(Noderef node)
+{
+    MetaSelf *md = node->metadata_self();
+    if (!md)
+    {
+        md = new MetaSelf;
+    }
+    return md;
 }
 
 MetaScope *Resolver::curscope()
@@ -44,10 +97,8 @@ void Resolver::reference(Noderef node, Noderef dec, bool func_past)
 {
     MetaDeclaration *meta = new MetaDeclaration;
     meta->decnode = dec;
-    meta->header.kind = MetaKind::MDecl;
-    meta->header.next = nullptr;
     meta->is_upvalue = func_past;
-    node->annotate(&meta->header);
+    node->annotate(meta);
     if (func_past)
     {
         MetaMemory *mm = mem(dec);
@@ -64,9 +115,7 @@ void Resolver::reference(Noderef node, Noderef dec, bool func_past)
 void Resolver::self_ref(Noderef node)
 {
     MetaSelf *meta = new MetaSelf;
-    meta->header.kind = MetaKind::MSelf;
-    meta->header.next = nullptr;
-    node->annotate(&meta->header);
+    node->annotate(meta);
 }
 
 void Resolver::analyze_identifier(Noderef node)
@@ -124,9 +173,7 @@ void Resolver::analyze_etc(Noderef node)
     if (new_scope)
     {
         MetaScope *sc = new MetaScope;
-        sc->header.next = nullptr;
-        sc->header.kind = MetaKind::MScope;
-        node->annotate(&sc->header);
+        node->annotate(sc);
 
         if (this->current)
             sc->func = is_fn ? node : this->curscope()->func;
@@ -198,25 +245,21 @@ void Resolver::analyze_break(Noderef node)
         it->sib_insertr(virtual_label);
         // annotate label
         MetaLabel *lmd = new MetaLabel;
-        lmd->header.kind = MetaKind::MLabel;
-        lmd->header.next = nullptr;
         lmd->is_compiled = false;
         lmd->go_to = nullptr;
         lmd->address = 0;
-        virtual_label->annotate(&lmd->header);
+        virtual_label->annotate(lmd);
         // add goto
         Noderef virtual_goto = ast::Ast::make(virtual_token, NodeKind::GotoStmt);
         node->replace(virtual_goto);
         // annotate goto
         MetaGoto *gtmd = new MetaGoto;
-        gtmd->header.kind = MetaKind::MGoto;
-        gtmd->header.next = nullptr;
         gtmd->address = 0;
         gtmd->is_compiled = false;
         gtmd->label = nullptr;
         gtmd->stack_size = this->stack_ptr;
         gtmd->upvalue_size = this->hook_ptr;
-        virtual_goto->annotate(&gtmd->header);
+        virtual_goto->annotate(gtmd);
         // link goto with label
         this->link(virtual_goto, virtual_label);
     }
@@ -246,12 +289,10 @@ void Resolver::analyze_label(Noderef node)
         {
             (*labels)[name] = node;
             lmd = new MetaLabel;
-            lmd->header.kind = MetaKind::MLabel;
-            lmd->header.next = nullptr;
             lmd->is_compiled = false;
             lmd->go_to = nullptr;
             lmd->address = 0;
-            node->annotate(&lmd->header);
+            node->annotate(lmd);
         }
         lmd->stack_size = this->stack_ptr;
         lmd->upvalue_size = this->hook_ptr;
@@ -266,8 +307,6 @@ void Resolver::analyze_goto(Noderef node)
     if (!gtmd)
     {
         gtmd = new MetaGoto;
-        gtmd->header.kind = MetaKind::MGoto;
-        gtmd->header.next = nullptr;
         gtmd->address = 0;
         gtmd->is_compiled = false;
         gtmd->label = nullptr;
@@ -275,7 +314,7 @@ void Resolver::analyze_goto(Noderef node)
         gtmd->stack_size = this->stack_ptr;
         gtmd->upvalue_size = this->hook_ptr;
         fnmd->gotolist = node;
-        node->annotate(&gtmd->header);
+        node->annotate(gtmd);
     }
 }
 

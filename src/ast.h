@@ -80,20 +80,25 @@ namespace ast
     {
         MetaData *next;
         virtual MetaKind kind() = 0;
+        virtual ~MetaData();
     };
 
     struct MetaSelf : public MetaData
     {
+        MetaKind kind();
     };
 
     struct MetaDeclaration : public MetaData
     {
+        MetaKind kind();
+
         Noderef decnode;
         bool is_upvalue;
     };
 
     struct MetaLabel : public MetaData
     {
+        MetaKind kind();
         size_t stack_size;
         size_t upvalue_size;
         Noderef go_to;
@@ -103,6 +108,7 @@ namespace ast
 
     struct MetaGoto : public MetaData
     {
+        MetaKind kind();
         size_t stack_size;
         size_t upvalue_size;
         size_t address;
@@ -113,6 +119,7 @@ namespace ast
 
     struct MetaMemory : public MetaData
     {
+        MetaKind kind();
         Noderef scope;
         size_t offset;
         bool is_upvalue;
@@ -121,6 +128,7 @@ namespace ast
 
     struct MetaScope : public MetaData
     {
+        MetaKind kind();
         Noderef func;
         Noderef parent;
         size_t stack_size;

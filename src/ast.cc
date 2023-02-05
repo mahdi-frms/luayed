@@ -110,7 +110,7 @@ void Ast::destroy_node(Noderef node)
         }
         while (node->meta)
         {
-            MetaNode *md = node->meta;
+            MetaData *md = node->meta;
             node->meta = md->next;
             delete md;
         }
@@ -166,7 +166,7 @@ Noderef Ast::root()
     return this->tree;
 }
 
-void Node::annotate(MetaNode *md)
+void Node::annotate(MetaData *md)
 {
     md->next = this->meta;
     this->meta = md;
@@ -180,10 +180,10 @@ Noderef Node::child(size_t index)
     return ch;
 }
 
-MetaNode *Node::getannot(MetaKind kind)
+MetaData *Node::getannot(MetaKind kind)
 {
-    MetaNode *tmp = this->meta;
-    while (tmp != nullptr && tmp->kind != kind)
+    MetaData *tmp = this->meta;
+    while (tmp != nullptr && tmp->kind() != kind)
         tmp = tmp->next;
     return tmp;
 }
@@ -239,4 +239,56 @@ void Node::replace(Noderef other)
     this->sib_insertr(other);
     this->pop();
     this->right_sib = other;
+}
+
+MetaGoto *Node::metadata_goto()
+{
+    return (MetaGoto *)this->getannot(MetaKind::MGoto);
+}
+MetaLabel *Node::metadata_label()
+{
+    return (MetaLabel *)this->getannot(MetaKind::MLabel);
+}
+MetaDeclaration *Node::metadata_decl()
+{
+    return (MetaDeclaration *)this->getannot(MetaKind::MDecl);
+}
+MetaMemory *Node::metadata_memory()
+{
+    return (MetaMemory *)this->getannot(MetaKind::MMemory);
+}
+MetaScope *Node::metadata_scope()
+{
+    return (MetaScope *)this->getannot(MetaKind::MScope);
+}
+MetaSelf *Node::metadata_self()
+{
+    return (MetaSelf *)this->getannot(MetaKind::MSelf);
+}
+MetaKind MetaGoto::kind()
+{
+    return MetaKind::MGoto;
+}
+MetaKind MetaLabel::kind()
+{
+    return MetaKind::MLabel;
+}
+MetaKind MetaDeclaration::kind()
+{
+    return MetaKind::MDecl;
+}
+MetaKind MetaMemory::kind()
+{
+    return MetaKind::MMemory;
+}
+MetaKind MetaSelf::kind()
+{
+    return MetaKind::MSelf;
+}
+MetaKind MetaScope::kind()
+{
+    return MetaKind::MScope;
+}
+MetaData::~MetaData()
+{
 }

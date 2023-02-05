@@ -19,6 +19,13 @@ private:
     size_t stack_ptr = 0;
     size_t hook_ptr = 0;
 
+    MetaGoto *metadata_goto(Noderef node);
+    MetaLabel *metadata_label(Noderef node);
+    MetaDeclaration *metadata_decl(Noderef node);
+    MetaMemory *metadata_memory(Noderef node);
+    MetaScope *metadata_scope(Noderef node);
+    MetaSelf *metadata_self(Noderef node);
+
     void analyze_node(Noderef node);
     void analyze_var_decl(Noderef node);
     void analyze_identifier(Noderef node);
