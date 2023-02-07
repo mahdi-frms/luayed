@@ -1,47 +1,7 @@
 #include "test.h"
 #include "values.h"
 #include <lua.h>
-#include <parser.h>
-#include <resolve.h>
-#include <generator.h>
-#include <compiler.h>
-#include <interpreter.h>
 #include <lstrep.h>
-
-LuaValue lua_test_compile(const char *code, LuaRuntime &rt, vector<lbyte> &bin)
-{
-    Lexer lexer(code);
-    Parser parser(&lexer);
-    Ast ast = parser.parse();
-    if (ast.root() == nullptr)
-    {
-        std::cerr << "Compiling test case failed: \n"
-                  << parser.get_error();
-        exit(1);
-    }
-    Resolver sem(ast);
-    vector<Lerror> errs = sem.analyze();
-    if (errs.size())
-    {
-        std::cerr << "Compiling test case failed: \n";
-        for (size_t i = 0; i < errs.size(); i++)
-            std::cerr << errs[i] << "\n";
-        exit(1);
-    }
-    LuaGenerator gen(&rt);
-    Compiler compiler(&gen);
-    fidx_t fidx = compiler.compile(ast);
-    LuaValue fn = rt.create_luafn(fidx);
-
-    size_t bytecodelen = rt.bin(fidx)->codelen;
-    bin.resize(bytecodelen);
-    std::copy(
-        rt.bin(fidx)->text(),
-        rt.bin(fidx)->text() + bytecodelen,
-        bin.begin());
-
-    return fn;
-}
 
 void lua_test_case_push(Lua *lua, LuaValue val)
 {
