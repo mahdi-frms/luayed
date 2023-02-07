@@ -123,7 +123,7 @@ size_t luastd::pcall(Lua *lua)
         return 0;
     }
     lua->pop();
-    lua->call(lua->top() - 1, 0);
+    lua->call(lua->top() - 1, LUA_MULTRES);
     if (lua->has_error())
     {
         lua->push_boolean(false);
@@ -223,5 +223,5 @@ void luastd::liblua_init(Lua *lua)
 {
     string err;
     lua->compile(liblua_code, err);
-    lua->call(0, 1);
+    lua->call(0, 0);
 }
