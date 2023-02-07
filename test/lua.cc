@@ -102,7 +102,7 @@ void lua_test_case(
     {
         for (size_t i = 0; i < args.size(); i++)
             lua_test_case_push(lua, args[i]);
-        lua->call(args.size(), results.size() + 1);
+        lua->call(args.size(), results.size());
     }
     else
     {

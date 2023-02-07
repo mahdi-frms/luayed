@@ -84,7 +84,7 @@ void LuaState::push_cppfn(LuaCppFunction cppfn)
 }
 void LuaState::call(size_t arg_count, size_t return_count)
 {
-    this->runtime.fncall(arg_count, return_count);
+    this->runtime.fncall(arg_count, return_count == LUA_MULTRES ? 0 : return_count + 1);
 }
 int LuaState::kind()
 {

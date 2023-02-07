@@ -14,6 +14,8 @@
 #include "luadef.h"
 #include <string>
 
+#define LUA_MULTRES SIZE_MAX
+
 struct LuaConfig
 {
     bool load_stdlib = true;
