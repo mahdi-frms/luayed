@@ -34,7 +34,7 @@ public:
     size_t const_string(const char *str);
     fidx_t pushf();
     void popf();
-    size_t upval(fidx_t fidx, size_t offset, size_t hidx);
+    size_t upval(Upvalue upvalue);
     void meta_parcount(size_t parcount);
     void meta_hookmax(size_t hookmax);
     void meta_chunkname(const char *chunkname);
@@ -62,7 +62,7 @@ public:
     fidx_t pushf();
     void popf();
 
-    size_t upval(fidx_t fidx, size_t offset, size_t hidx);
+    size_t upval(Upvalue upvalue);
 
     void meta_parcount(size_t parcount);
     void meta_hookmax(size_t hookmax);

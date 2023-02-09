@@ -55,10 +55,10 @@ void BaseGenerator::popf()
     this->funcs[this->current->fidx] = this->current;
     this->current = this->current->prev;
 }
-size_t BaseGenerator::upval(fidx_t fidx, size_t offset, size_t hidx)
+size_t BaseGenerator::upval(Upvalue upvalue)
 {
     size_t idx = this->current->upvalues.size();
-    this->current->upvalues.push_back(Upvalue(fidx, offset, hidx));
+    this->current->upvalues.push_back(upvalue);
     return idx;
 }
 void BaseGenerator::meta_parcount(size_t parcount)
@@ -105,7 +105,7 @@ void LuaGenerator::popf()
     {
         Upvalue uv = chups[i];
         if (uv.fidx != parent->fidx)
-            this->upval(uv.fidx, uv.offset, uv.hidx);
+            this->upval(uv);
     }
     delete child;
 }
@@ -144,10 +144,10 @@ size_t LuaGenerator::add_const(LuaValue value)
     this->gfn->rodata.push_back(value);
     return idx;
 }
-size_t LuaGenerator::upval(fidx_t fidx, size_t offset, size_t hidx)
+size_t LuaGenerator::upval(Upvalue upvalue)
 {
     size_t idx = this->gfn->upvalues.size();
-    this->gfn->upvalues.push_back(Upvalue(fidx, offset, hidx));
+    this->gfn->upvalues.push_back(upvalue);
     return idx;
 }
 void LuaGenerator::meta_parcount(size_t parcount)

@@ -726,7 +726,7 @@ void Compiler::seti(size_t idx, lbyte b)
 }
 size_t Compiler::upval(fidx_t fidx, size_t offset, size_t hidx)
 {
-    return this->gen->upval(fidx, offset, hidx);
+    return this->gen->upval(Upvalue(fidx, offset, hidx));
 }
 
 void Compiler::compile_numeric_for(Noderef node)

@@ -20,7 +20,7 @@ public:
     virtual fidx_t pushf() = 0;
     virtual void popf() = 0;
 
-    virtual size_t upval(fidx_t fidx, size_t offset, size_t hidx) = 0;
+    virtual size_t upval(Upvalue upvalue) = 0;
 
     virtual void meta_parcount(size_t parcount) = 0;
     virtual void meta_hookmax(size_t hookmax) = 0;
