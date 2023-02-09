@@ -261,9 +261,14 @@ void Resolver::analyze_label(Noderef node)
 {
     string name = node->get_token().text();
     Varmap &labels = this->curscope()->lmap;
-    if (labels.find(name) != labels.cend())
+    auto prev_def = labels.find(name);
+    if (prev_def != labels.cend())
     {
-        // todo: generate error
+        Token label_token = prev_def->second->get_token();
+        Lerror err = error_label_redefined(label_token.line, label_token.offset);
+        err.line = node->get_token().line;
+        err.offset = node->get_token().offset;
+        this->errors.push_back(err);
     }
     else
     {
@@ -350,7 +355,10 @@ void Resolver::link_labels()
         else
         {
             gmd->next = nullptr;
-            // todo: generate error
+            Lerror err = error_label_undefined();
+            err.line = node->get_token().line;
+            err.offset = node->get_token().offset;
+            this->errors.push_back(err);
         }
         gotolist = next;
     }
