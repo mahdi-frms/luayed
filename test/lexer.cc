@@ -132,9 +132,9 @@ void lxerrr(const char *message, const char *text)
             break;
         }
     }
-    char *mes = concat("lexer : ", message);
-    test_assert(rsl, mes);
-    delete[] mes;
+    string mes = "lexer : ";
+    mes.append(message);
+    test_assert(rsl, mes.c_str());
 }
 
 void lxtest(const char *message, const char *text, ...)
@@ -155,9 +155,9 @@ void lxtest(const char *message, const char *text, ...)
     }
     va_end(list);
 
-    char *mes = concat("lexer : ", message);
-    test_assert(lexer_test(text, kinds), mes);
-    delete[] mes;
+    string mes = "lexer : ";
+    mes.append(message);
+    test_assert(lexer_test(text, kinds), mes.c_str());
 }
 
 void lexer_tests()
