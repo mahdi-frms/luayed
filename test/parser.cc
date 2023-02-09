@@ -99,8 +99,6 @@ Token tokenk(TokenKind k)
     return Token(nullptr, 0, 0, 0, k);
 }
 
-char *concat(const char *s1, const char *s2);
-
 void partest(bool exp, const char *message, ...)
 {
     va_list args;
@@ -144,9 +142,9 @@ void partest(bool exp, const char *message, ...)
     Parser parser = Parser(&mlx);
     Ast parser_ast = exp ? parser.parse_exp() : parser.parse();
     Ast maker_ast = am.get_tree();
-    char *mes = concat("parser : ", message);
-    test_assert(cmp_node(parser_ast.root(), maker_ast.root()), mes);
-    delete[] mes;
+    string mes = "parser : ";
+    mes.append(message);
+    test_assert(cmp_node(parser_ast.root(), maker_ast.root()), mes.c_str());
 }
 
 #define exptest(MES, ...) partest(true, MES, __VA_ARGS__)
