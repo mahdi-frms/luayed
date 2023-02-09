@@ -15,21 +15,13 @@ void test_case(const char *mes, bool rsl)
     test_assert(rsl, mes);
 }
 
-char *compiler_test_message(const char *item, const char *property)
+string compiler_test_message(const char *item, const char *property)
 {
-    const char *title = "compiler : ";
-    size_t ilen = strlen(item);
-    size_t plen = strlen(property);
-    size_t tlen = strlen(title);
-    size_t mlen = ilen + plen + tlen + 4 /* ()\0*/;
-    char *message = new char[mlen];
-    strcpy(message, title);
-    strcpy(message + tlen, item);
-    message[tlen + ilen] = ' ';
-    message[tlen + ilen + 1] = '(';
-    strcpy(message + tlen + ilen + 2, property);
-    message[tlen + ilen + plen + 2] = ')';
-    message[tlen + ilen + plen + 3] = '\0';
+    string message = "compiler : ";
+    message.append(item);
+    message.append(" (");
+    message.append(property);
+    message.push_back(')');
     return message;
 }
 
@@ -48,23 +40,20 @@ public:
     }
     GenTest &test_parcount(size_t parcount)
     {
-        char *mes = compiler_test_message(this->message, "parameter count");
-        test_case(mes, this->test->parcount == parcount);
-        delete[] mes;
+        string mes = compiler_test_message(this->message, "parameter count");
+        test_case(mes.c_str(), this->test->parcount == parcount);
         return *this;
     }
     GenTest &test_hookmax(size_t hookmax)
     {
-        char *mes = compiler_test_message(this->message, "hook LIFO max size");
-        test_case(mes, this->test->hookmax == hookmax);
-        delete[] mes;
+        string mes = compiler_test_message(this->message, "hook LIFO max size");
+        test_case(mes.c_str(), this->test->hookmax == hookmax);
         return *this;
     }
     GenTest &test_ccount(size_t ccount)
     {
-        char *mes = compiler_test_message(this->message, "constant count");
-        test_case(mes, this->test->constants.size() == ccount);
-        delete[] mes;
+        string mes = compiler_test_message(this->message, "constant count");
+        test_case(mes.c_str(), this->test->constants.size() == ccount);
         return *this;
     }
     vector<lbyte> assemble(vector<Instruction> &instructions)
@@ -81,10 +70,10 @@ public:
     GenTest &test_opcodes(vector<Instruction> instructions)
     {
         vector<lbyte> bin = this->assemble(instructions);
-        char *mes = compiler_test_message(this->message, "text");
+        string mes = compiler_test_message(this->message, "text");
         vector<lbyte> &gen = this->test->text;
         bool rsl = bin == this->test->text;
-        test_case(mes, rsl);
+        test_case(mes.c_str(), rsl);
         if (!rsl)
         {
             std::cerr << "generated and expected binaries do not match!\nin: "
@@ -94,16 +83,15 @@ public:
                       << "generated binary:\n"
                       << to_string(&gen[0], gen.size());
         }
-        delete[] mes;
         return *this;
     }
 
     GenTest &test_debug_info(size_t opidx, size_t line)
     {
-        char *mes = compiler_test_message(this->message, "debug info");
+        string mes = compiler_test_message(this->message, "debug info");
         size_t gline = this->test->debug.size() > opidx ? this->test->debug[opidx] : 0;
         bool rsl = gline == line;
-        test_case(mes, rsl);
+        test_case(mes.c_str(), rsl);
         if (!rsl)
         {
             std::cerr << "generated and expected debug info do not match!\nin: "
@@ -113,14 +101,12 @@ public:
                       << "\ngenerated binary: "
                       << gline << "\n";
         }
-        delete[] mes;
         return *this;
     }
     GenTest &test_upvalues(vector<Upvalue> upvalues)
     {
-        char *mes = compiler_test_message(this->message, "upvalue table");
-        test_case(mes, this->test->upvalues == upvalues);
-        delete[] mes;
+        string mes = compiler_test_message(this->message, "upvalue table");
+        test_case(mes.c_str(), this->test->upvalues == upvalues);
         return *this;
     }
 };
