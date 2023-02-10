@@ -478,8 +478,7 @@ LuaValue LuaRuntime::lua_type_to_string(LuaType t)
     };
     return this->create_string(texts[t]);
 }
-
-void LuaRuntime::fncall(size_t argc, size_t retc)
+Fnresult LuaRuntime::calling(size_t argc, size_t retc)
 {
     Frame *prev = this->frame;
     size_t total_argc = argc + prev->ret_count;
@@ -488,7 +487,9 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
     {
         Lerror err = error_not_enough_args(prev->sp - prev->ret_count, argc);
         this->set_error(this->error_to_string(err));
-        return;
+        Fnresult rs;
+        rs.kind = Fnresult::Fail;
+        return rs;
     }
     LuaValue *fn = prev->stack() + prev->sp - total_argc - 1;
     // check if pushed value is a function
@@ -496,7 +497,9 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
     {
         Lerror err = error_call_non_function(fn->kind);
         this->set_error(this->error_to_string(err));
-        return;
+        Fnresult rs;
+        rs.kind = Fnresult::Fail;
+        return rs;
     }
     bool is_lua = fn->as<LuaFunction *>()->is_lua;
     Lfunction *bin = is_lua ? fn->as<LuaFunction *>()->binary() : nullptr;
@@ -532,7 +535,17 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
         return_count = cppfn(this->lua_interface);
     }
     this->check_garbage_collection();
-    this->fnret(this->frame->has_error ? 0 : return_count);
+    Fnresult rs;
+    rs.kind = this->frame->has_error ? Fnresult::Error : Fnresult::Ret;
+    if (!this->frame->has_error)
+        rs.retc = return_count;
+    return rs;
+}
+void LuaRuntime::fncall(size_t argc, size_t retc)
+{
+    Fnresult rs = this->calling(argc, retc);
+    if (rs.kind != Fnresult::Fail)
+        this->fnret(rs.kind == Fnresult::Ret ? rs.retc : 0);
 }
 bool LuaRuntime::error_raised()
 {

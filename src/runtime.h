@@ -115,6 +115,20 @@ struct lstr_t
 
 typedef lstr_t *lstr_p;
 
+struct Fnresult
+{
+    enum
+    {
+        Call,
+        Ret,
+        Error,
+        Fail,
+    } kind;
+
+    size_t argc;
+    size_t retc;
+};
+
 class LuaRuntime : public IRuntime, public IAllocator
 {
 private:
@@ -177,6 +191,7 @@ public:
     LuaValue table_global();
     bool table_check(LuaValue t, LuaValue k, bool is_set);
 
+    Fnresult calling(size_t argc, size_t retc);
     void fncall(size_t argc, size_t retc);
     void fnret(size_t count);
     void set_error(LuaValue value);
