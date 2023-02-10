@@ -97,4 +97,11 @@ public:
     virtual void reference(void *ptr) = 0;
 };
 
+class ISourceReader
+{
+public:
+    virtual char readch() = 0;
+    virtual char peekch() = 0;
+};
+
 #endif
