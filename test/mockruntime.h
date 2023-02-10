@@ -35,6 +35,7 @@ private:
     LuaValue error = lvnil();
     LuaValue global = lvtable();
     bool has_error = false;
+    size_t ip;
 
     size_t back_stack(size_t idx);
 
@@ -91,6 +92,8 @@ public:
     uint16_t *dbgmd();
     LuaValue chunkname();
     void check_garbage_collection();
+    void store_ip(size_t ip);
+    size_t load_ip();
 };
 
 #endif

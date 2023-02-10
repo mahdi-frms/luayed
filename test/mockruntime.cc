@@ -219,6 +219,15 @@ void MockRuntime::set_text(vector<Bytecode> text)
         }
     }
 }
+void MockRuntime::store_ip(size_t ip)
+{
+    this->ip = ip;
+}
+size_t MockRuntime::load_ip()
+{
+    return this->ip;
+}
+
 vector<LuaValue> &MockRuntime::get_stack()
 {
     return this->stack;

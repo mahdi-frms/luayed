@@ -69,6 +69,7 @@ struct Frame
     LuaValue error;
     Frame *prev;
     size_t hookptr;
+    size_t ip;
     bool has_error;
     bool has_error_meta;
     // number of args this frame is supposed to return
@@ -189,6 +190,8 @@ public:
     bool error_metadata();
     void error_metadata(bool md);
     void set_test_mode(bool mode);
+    void store_ip(size_t ip);
+    size_t load_ip();
 
     LuaValue stack_pop();
     void stack_push(LuaValue value);

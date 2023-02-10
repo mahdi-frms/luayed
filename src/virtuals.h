@@ -46,6 +46,9 @@ public:
     virtual LuaValue create_table() = 0;
     virtual LuaValue create_luafn(fidx_t fidx) = 0;
 
+    virtual void store_ip(size_t ip) = 0;
+    virtual size_t load_ip() = 0;
+
     virtual void table_set(LuaValue t, LuaValue k, LuaValue v) = 0;
     virtual LuaValue table_get(LuaValue t, LuaValue k) = 0;
     virtual LuaValue table_global() = 0;

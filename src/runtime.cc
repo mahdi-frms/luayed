@@ -562,7 +562,14 @@ Frame *LuaRuntime::topframe()
 {
     return this->frame;
 }
-
+void LuaRuntime::store_ip(size_t ip)
+{
+    this->frame->ip = ip;
+}
+size_t LuaRuntime::load_ip()
+{
+    return this->frame->ip;
+}
 void LuaRuntime::fnret(size_t count)
 {
     while (this->frame->hookptr)
