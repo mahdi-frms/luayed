@@ -35,7 +35,7 @@ private:
     LuaValue error = lvnil();
     LuaValue global = lvtable();
     bool has_error = false;
-    size_t ip;
+    size_t ip = 0;
 
     size_t back_stack(size_t idx);
 

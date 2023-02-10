@@ -76,8 +76,15 @@ Interpreter::Interpreter()
 Fnresult Interpreter::run(IRuntime *rt, Bytecode op)
 {
     this->rt = rt;
-    this->fetch(op.bytes);
-    this->exec();
+    if (rt->error_raised())
+    {
+        this->state = InterpreterState::Error;
+    }
+    else
+    {
+        this->fetch(op.bytes);
+        this->exec();
+    }
 
     Fnresult rs;
     if (this->state == InterpreterState::Error)
@@ -96,7 +103,11 @@ Fnresult Interpreter::run(IRuntime *rt, Bytecode op)
 Fnresult Interpreter::run(IRuntime *rt)
 {
     this->rt = rt;
-    this->ip = 0;
+    this->ip = rt->load_ip();
+    if (rt->error_raised())
+    {
+        this->state = InterpreterState::Error;
+    }
     while (this->state == InterpreterState::Run)
     {
         this->pip = this->ip;
@@ -122,6 +133,12 @@ Fnresult Interpreter::run(IRuntime *rt)
     {
         rs.kind = Fnresult::Ret;
         rs.retc = this->retc;
+    }
+    if (this->state == InterpreterState::Call)
+    {
+        rs.kind = Fnresult::Call;
+        rs.retc = this->retc;
+        rs.argc = this->argc;
     }
     this->retc = 0;
     this->state = InterpreterState::Run;
@@ -533,10 +550,9 @@ void Interpreter::i_ret()
 void Interpreter::i_call()
 {
     this->rt->store_ip(this->ip);
-    this->rt->fncall(this->arg1, this->arg2);
-    if (this->rt->error_raised())
-        this->state = InterpreterState::Error;
-    this->ip = this->rt->load_ip();
+    this->argc = this->arg1;
+    this->retc = this->arg2;
+    this->state = InterpreterState::Call;
 }
 void Interpreter::i_vargs()
 {

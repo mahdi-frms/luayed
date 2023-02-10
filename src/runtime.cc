@@ -344,6 +344,7 @@ void LuaRuntime::new_frame()
     frame->prev = this->frame;
     frame->hookptr = 0;
     frame->sp = 0;
+    frame->ip = 0;
     frame->ret_count = 0;
     frame->fn = this->create_nil();
     frame->has_error = false;
@@ -542,9 +543,30 @@ Fnresult LuaRuntime::calling(size_t argc, size_t retc)
 }
 void LuaRuntime::fncall(size_t argc, size_t retc)
 {
-    Fnresult rs = this->calling(argc, retc);
-    if (rs.kind != Fnresult::Fail)
-        this->fnret(rs.kind == Fnresult::Ret ? rs.retc : 0);
+    size_t depth = 0;
+    Fnresult rs;
+    rs.kind = Fnresult::Call;
+    rs.argc = argc;
+    rs.retc = retc;
+    do
+    {
+        if (rs.kind == Fnresult::Call)
+        {
+            depth++;
+            rs = this->calling(rs.argc, rs.retc);
+        }
+        else if (rs.kind == Fnresult::Ret || rs.kind == Fnresult::Error)
+        {
+            depth--;
+            this->fnret(rs.kind == Fnresult::Ret ? rs.retc : 0);
+            if (depth)
+                rs = this->interpreter->run(this);
+        }
+        else // failed to call
+        {
+            depth--;
+        }
+    } while (depth);
 }
 bool LuaRuntime::error_raised()
 {

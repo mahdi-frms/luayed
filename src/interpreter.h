@@ -13,6 +13,7 @@ enum class InterpreterState
     Run,
     End,
     Error,
+    Call,
 };
 
 enum class Comparison
@@ -64,6 +65,7 @@ private:
     bool config_error_metadata_v = true;
 
     size_t retc = 0;
+    size_t argc = 0;
     InterpreterState state = InterpreterState::Run;
 
     IRuntime *rt = nullptr;

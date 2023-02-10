@@ -101,7 +101,11 @@ public:
         Interpreter intp;
         try
         {
-            this->retarg = intp.run(&this->rt).retc;
+            Fnresult rs = intp.run(&this->rt);
+            if (rs.kind == Fnresult::Ret)
+                this->retarg = rs.retc;
+            else if (rs.kind == Fnresult::Call)
+                this->rt.fncall(rs.argc, rs.retc);
             this->test(true, suffix);
         }
         catch (int fault_code)
