@@ -101,7 +101,7 @@ public:
         Interpreter intp;
         try
         {
-            this->retarg = intp.run(&this->rt);
+            this->retarg = intp.run(&this->rt).retc;
             this->test(true, suffix);
         }
         catch (int fault_code)
@@ -120,7 +120,7 @@ public:
         try
         {
             for (size_t i = 0; i < instructions.size(); i++)
-                this->retarg = intp.run(&this->rt, instructions[i].encode());
+                this->retarg = intp.run(&this->rt, instructions[i].encode()).retc;
             this->test(true, suffix);
         }
         catch (int fault_code)

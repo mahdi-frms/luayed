@@ -80,8 +80,8 @@ public:
 class IInterpreter
 {
 public:
-    virtual size_t run(IRuntime *rt) = 0;
-    virtual size_t run(IRuntime *rt, Bytecode op) = 0;
+    virtual Fnresult run(IRuntime *rt) = 0;
+    virtual Fnresult run(IRuntime *rt, Bytecode op) = 0;
 };
 
 class IAllocator

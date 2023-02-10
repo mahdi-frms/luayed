@@ -524,21 +524,20 @@ Fnresult LuaRuntime::calling(size_t argc, size_t retc)
     prev->sp--;
     prev->ret_count = 0;
     // execute function
-    size_t return_count = 0;
+    Fnresult rs;
     if (is_lua)
     {
-        return_count = this->interpreter->run(this);
+        rs = this->interpreter->run(this);
     }
     else
     {
         LuaRTCppFunction cppfn = fn->as<LuaFunction *>()->native();
-        return_count = cppfn(this->lua_interface);
+        size_t return_count = cppfn(this->lua_interface);
+        rs.kind = this->frame->has_error ? Fnresult::Error : Fnresult::Ret;
+        if (!this->frame->has_error)
+            rs.retc = return_count;
     }
     this->check_garbage_collection();
-    Fnresult rs;
-    rs.kind = this->frame->has_error ? Fnresult::Error : Fnresult::Ret;
-    if (!this->frame->has_error)
-        rs.retc = return_count;
     return rs;
 }
 void LuaRuntime::fncall(size_t argc, size_t retc)

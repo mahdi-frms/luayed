@@ -115,20 +115,6 @@ struct lstr_t
 
 typedef lstr_t *lstr_p;
 
-struct Fnresult
-{
-    enum
-    {
-        Call,
-        Ret,
-        Error,
-        Fail,
-    } kind;
-
-    size_t argc;
-    size_t retc;
-};
-
 class LuaRuntime : public IRuntime, public IAllocator
 {
 private:

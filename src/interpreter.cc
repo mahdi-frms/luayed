@@ -73,17 +73,27 @@ Interpreter::Interpreter()
     }
 }
 
-size_t Interpreter::run(IRuntime *rt, Bytecode op)
+Fnresult Interpreter::run(IRuntime *rt, Bytecode op)
 {
     this->rt = rt;
     this->fetch(op.bytes);
     this->exec();
-    size_t retc = this->retc;
+
+    Fnresult rs;
+    if (this->state == InterpreterState::Error)
+    {
+        rs.kind = Fnresult::Error;
+    }
+    if (this->state == InterpreterState::End)
+    {
+        rs.kind = Fnresult::Ret;
+        rs.retc = this->retc;
+    }
     this->retc = 0;
     this->state = InterpreterState::Run;
-    return retc;
+    return rs;
 }
-size_t Interpreter::run(IRuntime *rt)
+Fnresult Interpreter::run(IRuntime *rt)
 {
     this->rt = rt;
     this->ip = 0;
@@ -103,10 +113,19 @@ size_t Interpreter::run(IRuntime *rt)
             this->rt->error_metadata(true);
         }
     }
-    size_t retc = this->retc;
+    Fnresult rs;
+    if (this->state == InterpreterState::Error)
+    {
+        rs.kind = Fnresult::Error;
+    }
+    if (this->state == InterpreterState::End)
+    {
+        rs.kind = Fnresult::Ret;
+        rs.retc = this->retc;
+    }
     this->retc = 0;
     this->state = InterpreterState::Run;
-    return retc;
+    return rs;
 }
 LuaValue Interpreter::error_add_meta(LuaValue e)
 {

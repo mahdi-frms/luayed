@@ -45,8 +45,8 @@ enum class Calculation
 class Interpreter : public IInterpreter
 {
 public:
-    size_t run(IRuntime *rt);
-    size_t run(IRuntime *rt, Bytecode op);
+    Fnresult run(IRuntime *rt);
+    Fnresult run(IRuntime *rt, Bytecode op);
     static void optable_init();
     Interpreter();
     void config_error_metadata(bool val);

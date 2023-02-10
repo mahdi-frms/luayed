@@ -58,6 +58,20 @@ struct Hook
     LuaValue val;
 };
 
+struct Fnresult
+{
+    enum
+    {
+        Call,
+        Ret,
+        Error,
+        Fail,
+    } kind;
+
+    size_t argc;
+    size_t retc;
+};
+
 bool operator==(const LuaValue &v1, const LuaValue &v2);
 bool operator!=(const LuaValue &v1, const LuaValue &v2);
 
