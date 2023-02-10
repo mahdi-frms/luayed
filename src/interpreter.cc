@@ -532,11 +532,11 @@ void Interpreter::i_ret()
 }
 void Interpreter::i_call()
 {
-    size_t ip = this->ip;
+    this->rt->store_ip(this->ip);
     this->rt->fncall(this->arg1, this->arg2);
     if (this->rt->error_raised())
         this->state = InterpreterState::Error;
-    this->ip = ip;
+    this->ip = this->rt->load_ip();
 }
 void Interpreter::i_vargs()
 {
