@@ -88,14 +88,14 @@ enum TokenKind
 
 struct Token
 {
-    const char *str;
+    size_t ptr;
     size_t len;
     size_t line;
     size_t offset;
     TokenKind kind;
 
-    Token(const char *str, size_t len, size_t line, size_t offset, TokenKind kind);
-    string text() const;
+    Token(size_t ptr, size_t len, size_t line, size_t offset, TokenKind kind);
+    string text(const char *str) const;
 };
 
 Token token_none();

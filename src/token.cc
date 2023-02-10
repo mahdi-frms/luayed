@@ -1,9 +1,9 @@
 #include "token.h"
 #include <cstring>
 
-Token::Token(const char *str, size_t len, size_t line, size_t offset, TokenKind kind)
+Token::Token(size_t ptr, size_t len, size_t line, size_t offset, TokenKind kind)
 {
-    this->str = str;
+    this->ptr = ptr;
     this->len = len;
     this->line = line;
     this->offset = offset;
@@ -11,12 +11,12 @@ Token::Token(const char *str, size_t len, size_t line, size_t offset, TokenKind 
 }
 Token token_none()
 {
-    return Token(nullptr, 0, 0, 0, TokenKind::None);
+    return Token(0, 0, 0, 0, TokenKind::None);
 }
 
-string Token::text() const
+string Token::text(const char *source) const
 {
     string str = string(this->len, 0);
-    memcpy((void *)str.c_str(), this->str, this->len);
+    memcpy((void *)str.c_str(), source + this->ptr, this->len);
     return str;
 }
