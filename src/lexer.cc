@@ -45,81 +45,36 @@ TokenKind single_op(char c)
         return TokenKind::Comma;
     return TokenKind::None;
 }
-TokenKind Lexer::kw(const char *str, size_t idx, TokenKind kind)
+TokenKind Lexer::kw(const char *str, const string &tkn, TokenKind kind)
 {
-    if (this->pos - this->prev_pos != strlen(str))
-        return TokenKind::None;
-    for (size_t i = 0; i < this->pos - this->prev_pos - idx; i++)
-        if (this->ch(idx + i) != str[idx + i])
-            return TokenKind::None;
-    return kind;
+    if (tkn == str)
+        return kind;
+    return TokenKind::None;
 }
-TokenKind Lexer::keyword()
+TokenKind Lexer::keyword(const string &tkn)
 {
-    if (this->ch(0) == 'a')
-    {
-        return this->kw("and", 1, TokenKind::And);
-    }
-    else if (this->ch(0) == 'b')
-    {
-        return this->kw("break", 1, TokenKind::Break);
-    }
-    else if (this->ch(0) == 'd')
-    {
-        return this->kw("do", 1, TokenKind::Do);
-    }
-    else if (this->ch(0) == 'e')
-    {
-        RETK(this->kw("end", 1, TokenKind::End));
-        RETK(this->kw("else", 1, TokenKind::Else));
-        return this->kw("elseif", 1, TokenKind::ElseIf);
-    }
-    else if (this->ch(0) == 'f')
-    {
-        RETK(this->kw("for", 1, TokenKind::For));
-        RETK(this->kw("false", 1, TokenKind::False));
-        return this->kw("function", 1, TokenKind::Function);
-    }
-    else if (this->ch(0) == 'g')
-    {
-        return this->kw("goto", 1, TokenKind::Goto);
-    }
-    else if (this->ch(0) == 'i')
-    {
-        RETK(this->kw("in", 1, TokenKind::In));
-        return this->kw("if", 1, TokenKind::If);
-    }
-    else if (this->ch(0) == 'l')
-    {
-        return this->kw("local", 1, TokenKind::Local);
-    }
-    else if (this->ch(0) == 'n')
-    {
-        RETK(this->kw("not", 1, TokenKind::Not));
-        return this->kw("nil", 1, TokenKind::Nil);
-    }
-    else if (this->ch(0) == 'o')
-    {
-        return this->kw("or", 1, TokenKind::Or);
-    }
-    else if (this->ch(0) == 'r')
-    {
-        RETK(this->kw("return", 1, TokenKind::Return));
-        return this->kw("repeat", 1, TokenKind::Repeat);
-    }
-    else if (this->ch(0) == 't')
-    {
-        RETK(this->kw("then", 1, TokenKind::Then));
-        return this->kw("true", 1, TokenKind::True);
-    }
-    else if (this->ch(0) == 'u')
-    {
-        return this->kw("until", 1, TokenKind::Until);
-    }
-    else if (this->ch(0) == 'w')
-    {
-        return this->kw("while", 1, TokenKind::While);
-    }
+    RETK(this->kw("end", tkn, TokenKind::End));
+    RETK(this->kw("and", tkn, TokenKind::And));
+    RETK(this->kw("break", tkn, TokenKind::Break));
+    RETK(this->kw("do", tkn, TokenKind::Do));
+    RETK(this->kw("else", tkn, TokenKind::Else));
+    RETK(this->kw("elseif", tkn, TokenKind::ElseIf));
+    RETK(this->kw("for", tkn, TokenKind::For));
+    RETK(this->kw("false", tkn, TokenKind::False));
+    RETK(this->kw("function", tkn, TokenKind::Function));
+    RETK(this->kw("goto", tkn, TokenKind::Goto));
+    RETK(this->kw("in", tkn, TokenKind::In));
+    RETK(this->kw("if", tkn, TokenKind::If));
+    RETK(this->kw("local", tkn, TokenKind::Local));
+    RETK(this->kw("not", tkn, TokenKind::Not));
+    RETK(this->kw("nil", tkn, TokenKind::Nil));
+    RETK(this->kw("or", tkn, TokenKind::Or));
+    RETK(this->kw("return", tkn, TokenKind::Return));
+    RETK(this->kw("repeat", tkn, TokenKind::Repeat));
+    RETK(this->kw("then", tkn, TokenKind::Then));
+    RETK(this->kw("true", tkn, TokenKind::True));
+    RETK(this->kw("until", tkn, TokenKind::Until));
+    RETK(this->kw("while", tkn, TokenKind::While));
     return TokenKind::None;
 }
 
@@ -150,12 +105,12 @@ bool is_alphanumeric(char c)
 
 Token Lexer::empty()
 {
-    return Token(nullptr, 0, 0, 0, TokenKind::Empty);
+    return Token(0, 0, 0, 0, TokenKind::Empty);
 }
 
 char Lexer::pop()
 {
-    char c = this->text[this->pos];
+    char c = this->reader->readch();
     if (c == '\n')
     {
         this->offset = 0;
@@ -175,10 +130,10 @@ char Lexer::pop()
 
 char Lexer::peek()
 {
-    return this->text[this->pos];
+    return this->reader->peekch();
 }
 
-Lexer::Lexer(const char *text) : text(text)
+Lexer::Lexer(ISourceReader *reader) : reader(reader)
 {
     this->pos = 0;
     this->line = 0;
@@ -186,6 +141,7 @@ Lexer::Lexer(const char *text) : text(text)
     this->prev_pos = 0;
     this->prev_line = 0;
     this->prev_offset = 0;
+    this->buffer_count = 0;
     this->err = error_ok();
 }
 
@@ -216,6 +172,11 @@ bool is_space(char c)
 Token Lexer::read()
 {
     this->err = error_ok();
+    if (this->buffer_count)
+    {
+        this->buffer_count--;
+        return Token(this->buffer_pos++, 1, this->buffer_line, this->buffer_offset++, TokenKind::Equal);
+    }
     char c = this->pop();
     if (c == '\0')
     {
@@ -255,26 +216,33 @@ Token Lexer::read()
     }
     if (c == '[')
     {
-        if (this->look_ahead())
+        Token t = this->token(TokenKind::LeftBracket);
+        size_t level = 0;
+        while (this->peek() == '=')
         {
-            return this->long_string();
+            level++;
+            this->pop();
+        }
+        if (this->peek() == '[')
+        {
+            this->pop();
+            return this->long_string(level);
         }
         else
         {
+            this->buffer_count = level;
+            this->buffer_pos = t.ptr + 1;
+            this->buffer_offset = t.offset + 1;
+            this->buffer_line = t.line;
+
             return this->token(TokenKind::LeftBracket);
         }
     }
     return this->error(error_invalid_char(c));
 }
 
-Token Lexer::long_string()
+Token Lexer::long_string(size_t level)
 {
-    size_t level = 0;
-    while (this->pop() != '[')
-    {
-        level++;
-    }
-
     while (true)
     {
         char c = this->peek();
@@ -311,10 +279,9 @@ Token Lexer::long_string()
 
 bool Lexer::look_ahead()
 {
-    size_t pos = this->pos;
     while (true)
     {
-        char c = this->text[pos];
+        char c = this->peek();
         if (c == '[')
         {
             return true;
@@ -323,7 +290,7 @@ bool Lexer::look_ahead()
         {
             return false;
         }
-        pos++;
+        this->pop();
     }
 }
 
@@ -478,7 +445,7 @@ Token Lexer::number(char c)
 
 Token Lexer::error(Lerror err)
 {
-    Token errtok = Token(nullptr, 0, this->prev_line, this->prev_offset, TokenKind::Error);
+    Token errtok = Token(0, 0, this->prev_line, this->prev_offset, TokenKind::Error);
     this->err = err;
     this->err.line = errtok.line;
     this->err.offset = errtok.offset;
@@ -487,11 +454,13 @@ Token Lexer::error(Lerror err)
 
 Token Lexer::keyword_identifier(char c)
 {
+    string str;
+    str.push_back(c);
     while (is_alphanumeric(this->peek()))
     {
-        this->pop();
+        str.push_back(this->pop());
     }
-    TokenKind tk = this->keyword();
+    TokenKind tk = this->keyword(str);
     if (tk != TokenKind::None)
     {
         return this->token(tk);
@@ -517,12 +486,7 @@ vector<Token> Lexer::drain()
 
 Token Lexer::token(TokenKind kind)
 {
-    return Token((char *)this->text + this->prev_pos, this->pos - this->prev_pos, this->prev_line, this->prev_offset, kind);
-}
-
-char Lexer::ch(size_t offset)
-{
-    return this->text[this->prev_pos + offset];
+    return Token(this->prev_pos, this->pos - this->prev_pos, this->prev_line, this->prev_offset, kind);
 }
 
 void Lexer::skip_line()
@@ -540,14 +504,8 @@ Lerror Lexer::get_error()
     return this->err;
 }
 
-Token Lexer::skip_comment_block()
+Token Lexer::skip_comment_block(size_t level)
 {
-    size_t level = 0;
-    while (this->peek() == '=')
-    {
-        this->pop();
-        level++;
-    }
     while (true)
     {
         char c = this->pop();
@@ -641,9 +599,15 @@ Token Lexer::op_minus(char c)
             if (this->peek() == '[')
             {
                 this->pop();
-                if (this->look_ahead())
+                size_t lvl = 0;
+                while (this->peek() == '=')
                 {
-                    return this->skip_comment_block();
+                    lvl++;
+                    this->pop();
+                }
+                if (this->peek() == '[')
+                {
+                    return this->skip_comment_block(lvl);
                 }
                 else
                 {

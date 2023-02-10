@@ -11,10 +11,15 @@
 class Lexer : public ILexer
 {
 private:
-    const char *text;
+    ISourceReader *reader;
     size_t pos;
     size_t offset;
     size_t line;
+
+    size_t buffer_pos;
+    size_t buffer_line;
+    size_t buffer_offset;
+    size_t buffer_count;
 
     size_t prev_offset;
     size_t prev_line;
@@ -24,20 +29,19 @@ private:
 
     char peek();
     char pop();
-    char ch(size_t offset);
     void skip_line();
     Token keyword_identifier(char c);
-    TokenKind keyword();
-    TokenKind kw(const char *str, size_t idx, TokenKind kind);
+    TokenKind keyword(const string &tkn);
+    TokenKind kw(const char *str, const string &tkn, TokenKind kind);
     Token short_string(char c);
-    Token long_string();
+    Token long_string(size_t level);
     Token long_string(char c);
     Token number(char c);
     Token integer();
     Token decimal();
     Token power();
     Token hex();
-    Token skip_comment_block();
+    Token skip_comment_block(size_t level);
     void sync();
     Token read();
     Token op_equal(char c);
@@ -57,7 +61,7 @@ private:
     bool look_ahead();
 
 public:
-    Lexer(const char *text);
+    Lexer(ISourceReader *reader);
     Token next();
     Lerror get_error();
     vector<Token> drain();
