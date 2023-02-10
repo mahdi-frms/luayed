@@ -96,7 +96,7 @@ bool cmp_node(Noderef n1, Noderef n2)
 
 Token tokenk(TokenKind k)
 {
-    return Token(nullptr, 0, 0, 0, k);
+    return Token(0, 0, 0, 0, k);
 }
 
 void partest(bool exp, const char *message, ...)

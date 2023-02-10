@@ -11,11 +11,12 @@ int cdec(char c)
     return (c <= '9' && c >= '0') ? (c - '0') : -1;
 }
 
-string scan_lua_multiline_string(Token t)
+string Compiler::scan_lua_multiline_string(Token t)
 {
+    string tstr = t.text(this->source);
     string str;
     size_t level = 0;
-    const char *ptr = t.str + 1;
+    const char *ptr = tstr.c_str() + 1;
     while (*ptr == '=')
     {
         ptr++;
@@ -24,14 +25,14 @@ string scan_lua_multiline_string(Token t)
     ptr++;
     if (*ptr == '\n')
         ptr++;
-    for (; ptr != t.str + t.len - 2 - level; ptr++)
+    for (; ptr != tstr.c_str() + t.len - 2 - level; ptr++)
         str.push_back(*ptr);
     return str;
 }
 
-string scan_lua_singleline_string(Token t)
+string Compiler::scan_lua_singleline_string(Token t)
 {
-    string text = t.text();
+    string text = t.text(this->source);
     string str = "";
     bool escape = false;
     for (size_t i = 1; i < text.size() - 1; i++)
@@ -91,22 +92,19 @@ string scan_lua_singleline_string(Token t)
     return str;
 }
 
-string scan_lua_string(Token t)
+string Compiler::scan_lua_string(Token t)
 {
-    if (*t.str == '[')
+    string tstr = t.text(this->source);
+    if (tstr[0] == '[')
         return scan_lua_multiline_string(t);
     else
         return scan_lua_singleline_string(t);
 }
 
-lnumber token_number(Token t)
+lnumber Compiler::token_number(Token t)
 {
-    char *str = new char[t.len + 1];
-    for (size_t i = 0; i < t.len; i++)
-        str[i] = t.str[i];
-    str[t.len] = '\0';
-    lnumber num = atof(str);
-    delete[] str;
+    string tstr = t.text(this->source);
+    lnumber num = atof(tstr.c_str());
     return num;
 }
 
@@ -154,8 +152,9 @@ fidx_t Compiler::compile(Noderef root, const char *chunckname)
     return fnscp->fidx;
 }
 
-fidx_t Compiler::compile(Ast ast, const char *chunckname)
+fidx_t Compiler::compile(Ast ast, const char *source, const char *chunckname)
 {
+    this->source = source;
     return this->compile(ast.root(), chunckname);
 }
 
@@ -258,7 +257,7 @@ void Compiler::compile_methcall(Noderef node, size_t expect)
     this->emit(Opcode::INil);
     this->compile_exp(object);
     this->emit(Instruction(Opcode::IBLocal, 1));
-    size_t idx = this->const_string(fname.text().c_str());
+    size_t idx = this->const_string(fname.text(this->source).c_str());
     this->emit(Instruction(Opcode::IConst, idx));
     this->emit(Instruction(Opcode::ITGet));
     this->emit(Instruction(Opcode::IBLStore, 2));
@@ -308,7 +307,7 @@ void Compiler::compile_identifier(Noderef node)
     }
     else
     {
-        size_t idx = this->const_string(node->get_token().text().c_str());
+        size_t idx = this->const_string(node->get_token().text(this->source).c_str());
         this->emit(Instruction(Opcode::IConst, idx));
         this->emit(Opcode::IGGet);
     }
@@ -345,7 +344,7 @@ void Compiler::compile_primary(Noderef node, size_t expect)
 void Compiler::compile_name(Noderef node)
 {
     Token tkn = node->get_token();
-    size_t idx = this->const_string(tkn.text().c_str());
+    size_t idx = this->const_string(tkn.text(this->source).c_str());
     this->emit(Instruction(Opcode::IConst, idx));
 }
 
@@ -421,7 +420,7 @@ void Compiler::compile_exp_e(Noderef node, size_t expect)
     else if (node->get_kind() == NodeKind::Property)
     {
         this->compile_exp(node->child(0));
-        size_t idx = this->const_string(node->child(1)->get_token().text().c_str());
+        size_t idx = this->const_string(node->child(1)->get_token().text(this->source).c_str());
         this->emit(Instruction(IConst, idx));
         this->emit(ITGet);
     }
@@ -455,6 +454,7 @@ void Compiler::compile_function(Noderef node)
     MetaScope *fnscp = node->metadata_scope();
     Compiler compiler(this->gen);
     compiler.stack_offset = node->get_kind() == NodeKind::MethodBody ? 1 : 0;
+    compiler.source = this->source;
     compiler.compile(node, this->chunckname);
     compiler.emit(Instruction(Opcode::IFConst, fnscp->fidx));
 }
@@ -495,7 +495,7 @@ void Compiler::compile_lvalue_primary(Noderef node)
     }
     else
     {
-        const char *str = node->get_token().text().c_str();
+        const char *str = node->get_token().text(this->source).c_str();
         size_t idx = this->const_string(str);
         this->emit(Instruction(Opcode::IConst, idx));
         this->ops_push(Opcode::IGSet);
@@ -516,7 +516,7 @@ bool Compiler::compile_lvalue(Noderef node)
         Noderef prop = node->child(1);
         this->compile_exp(lexp);
         Token prop_tkn = prop->get_token();
-        const char *prop_str = prop_tkn.text().c_str();
+        const char *prop_str = prop_tkn.text(this->source).c_str();
         size_t idx = this->const_string(prop_str);
         this->emit(Instruction(Opcode::IConst, idx));
         this->ops_push(Instruction(Opcode::ITSet), prop_tkn.line);

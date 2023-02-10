@@ -6,9 +6,9 @@
 #include "ast.h"
 
 string to_string(const TokenKind &tk);
-string to_string(const Token &t);
+string to_string(const Token &t, const char *source);
 string to_string(const ast::NodeKind &nk);
-string to_string(const ast::Noderef &n);
+string to_string(const ast::Noderef &n, const char *source);
 string to_string(const vector<lbyte> &bin);
 string to_string(const LuaType &lt);
 string to_string(const LuaValue &lv);

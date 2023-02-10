@@ -7,6 +7,7 @@
 #include "luastate.h"
 #include "lstrep.h"
 #include "luastd.h"
+#include "reader.h"
 
 LuaState::LuaState(LuaConfig conf) : runtime(&this->interpreter)
 {
@@ -18,7 +19,8 @@ LuaState::LuaState(LuaConfig conf) : runtime(&this->interpreter)
 int LuaState::compile(const char *lua_code, string &errors, const char *chunkname)
 {
     errors.clear();
-    Lexer lexer(lua_code);
+    StringSourceReader reader(lua_code);
+    Lexer lexer(&reader);
     Parser parser(&lexer);
     Ast ast = parser.parse();
     if (ast.root() == nullptr)
@@ -26,7 +28,7 @@ int LuaState::compile(const char *lua_code, string &errors, const char *chunknam
         errors.append(to_string(parser.get_error()));
         return LUA_COMPILE_RESULT_FAILED;
     }
-    Resolver sem(ast);
+    Resolver sem(ast, lua_code);
     vector<Lerror> errs = sem.analyze();
     if (errs.size())
     {
@@ -40,7 +42,7 @@ int LuaState::compile(const char *lua_code, string &errors, const char *chunknam
     }
     LuaGenerator gen(&this->runtime);
     Compiler compiler(&gen);
-    fidx_t fidx = compiler.compile(ast, chunkname);
+    fidx_t fidx = compiler.compile(ast, lua_code, chunkname);
     LuaValue fn = this->runtime.create_luafn(fidx);
     this->runtime.stack_push(fn);
     return LUA_COMPILE_RESULT_OK;

@@ -5,6 +5,7 @@
 #include <cstring>
 #include <iostream>
 #include "test.h"
+#include "reader.h"
 #include "generator.h"
 #include <lstrep.h>
 
@@ -114,7 +115,8 @@ public:
 GenTest compiler_test_case(const char *message, const char *text)
 {
     GenTest gentest(message);
-    Lexer lexer(text);
+    StringSourceReader reader(text);
+    Lexer lexer(&reader);
     Parser parser(&lexer);
     Ast ast = parser.parse();
     if (ast.root() == nullptr)
@@ -123,10 +125,10 @@ GenTest compiler_test_case(const char *message, const char *text)
                   << parser.get_error() << "\n";
         exit(1);
     }
-    Resolver analyzer(ast);
+    Resolver analyzer(ast, text);
     analyzer.analyze();
     Compiler compiler(&gentest);
-    compiler.compile(ast);
+    compiler.compile(ast, text, nullptr);
     return gentest;
 }
 

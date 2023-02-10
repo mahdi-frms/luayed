@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <lexer.h>
+#include <reader.h>
 #include <parser.h>
 #include <lstrep.h>
 #include <resolve.h>
@@ -93,7 +94,8 @@ string read_file(string path)
 
 ast::Ast parse_file(string &code)
 {
-    Lexer lexer(code.c_str());
+    StringSourceReader reader(code.c_str());
+    Lexer lexer(&reader);
     Parser parser(&lexer);
     ast::Ast tree = parser.parse();
     if (!tree.root())
@@ -109,10 +111,11 @@ void command_read_file(string path)
 void command_lex_file(string path)
 {
     string code = read_file(path);
-    Lexer lexer(code.c_str());
+    StringSourceReader reader(code.c_str());
+    Lexer lexer(&reader);
     vector<Token> tokens = lexer.drain();
     for (size_t i = 0; i < tokens.size(); i++)
-        std::cout << tokens[i] << "\n";
+        std::cout << to_string(tokens[i], code.c_str()) << "\n";
 }
 
 void command_parse_file(string path)
@@ -121,7 +124,7 @@ void command_parse_file(string path)
     ast::Ast tree = parse_file(code);
     if (!tree.root())
         exit(1);
-    std::cout << tree.root();
+    std::cout << to_string(tree.root(), code.c_str());
 }
 
 void command_compile_file(string path)
@@ -130,7 +133,7 @@ void command_compile_file(string path)
     ast::Ast tree = parse_file(code);
     if (!tree.root())
         exit(1);
-    Resolver resolver(tree);
+    Resolver resolver(tree, code.c_str());
     vector<Lerror> errors = resolver.analyze();
     if (errors.size())
     {
@@ -140,7 +143,7 @@ void command_compile_file(string path)
     }
     AnalysisGenerator gen;
     Compiler compiler(&gen);
-    compiler.compile(tree, path.c_str());
+    compiler.compile(tree, code.c_str(), path.c_str());
     std::cout << gen.stringify();
 }
 

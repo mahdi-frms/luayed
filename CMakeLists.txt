@@ -15,6 +15,7 @@ add_library(luaydbg
 add_library(luayed
     # interpreter
     src/lexer.cc
+    src/reader.cc
     src/ast.cc
     src/parser.cc
     src/resolve.cc

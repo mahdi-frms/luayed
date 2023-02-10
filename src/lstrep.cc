@@ -128,10 +128,10 @@ string to_string(const TokenKind &tk)
         return "until";
     return "while";
 }
-string to_string(const Token &t)
+string to_string(const Token &t, const char *source)
 {
     string s;
-    s += t.text().c_str();
+    s += t.text(source).c_str();
     while (s.size() < 16)
         s.push_back(' ');
     s += " (";
@@ -195,24 +195,24 @@ string node_to_string_at_depth(string text, int depth)
     return t;
 }
 
-void node_to_string(ast::Noderef node, int depth, string &buffer)
+void node_to_string(ast::Noderef node, int depth, string &buffer, const char *source)
 {
     buffer += node_to_string_at_depth(node_names[node->get_kind()], depth);
     if (node->get_token().kind != TokenKind::None)
     {
-        buffer += node_to_string_at_depth(node->get_token().text(), depth + 3);
+        buffer += node_to_string_at_depth(node->get_token().text(source), depth + 3);
     }
     if (node->child_count())
     {
         foreach_node(node, ch)
-            node_to_string(ch, depth + 3, buffer);
+            node_to_string(ch, depth + 3, buffer, source);
     }
 }
 
-string to_string(const ast::Noderef &n)
+string to_string(const ast::Noderef &n, const char *source)
 {
     string buffer;
-    node_to_string(n, 1, buffer);
+    node_to_string(n, 1, buffer, source);
     return buffer;
 }
 string to_string(const Opcode &opcode)
@@ -484,9 +484,7 @@ string to_string(const vector<LuaValue> &vv)
     }
 
 WRITE_TO_STREAM_OPERATOR(vector<lbyte>)
-WRITE_TO_STREAM_OPERATOR(ast::Noderef)
 WRITE_TO_STREAM_OPERATOR(ast::NodeKind)
-WRITE_TO_STREAM_OPERATOR(Token)
 WRITE_TO_STREAM_OPERATOR(TokenKind)
 WRITE_TO_STREAM_OPERATOR(LuaType)
 WRITE_TO_STREAM_OPERATOR(LuaValue)

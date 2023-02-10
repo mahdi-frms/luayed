@@ -10,6 +10,7 @@ class Compiler
 {
 private:
     const char *chunckname = nullptr;
+    const char *source = nullptr;
     IGenerator *gen;
     vector<Instruction> ops;
     vector<int> lines;
@@ -69,10 +70,14 @@ private:
     Opcode translate_token(TokenKind kind, bool bin);
     fidx_t compile(Noderef root, const char *chunckname = nullptr);
     void debug_info(size_t line);
+    string scan_lua_multiline_string(Token t);
+    string scan_lua_singleline_string(Token t);
+    string scan_lua_string(Token t);
+    lnumber token_number(Token t);
 
 public:
     Compiler(IGenerator *gen);
-    fidx_t compile(Ast ast, const char *chunckname = nullptr);
+    fidx_t compile(Ast ast, const char *source, const char *chunckname);
 };
 
 #endif

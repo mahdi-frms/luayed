@@ -1,4 +1,5 @@
 #include "test.h"
+#include "reader.h"
 #include <lexer.h>
 #include <cstring>
 #include <stdarg.h>
@@ -34,7 +35,7 @@ char *tokenize_test(const char *text, vector<TokenKind> &kinds, vector<Token> &t
                 else
                 {
                     is_token = 0;
-                    tokens.push_back(Token(orig + cur_ptr, ptr - cur_ptr, cur_line, cur_offset, kinds[kidx++]));
+                    tokens.push_back(Token(cur_ptr, ptr - cur_ptr, cur_line, cur_offset, kinds[kidx++]));
                 }
             }
         }
@@ -71,7 +72,7 @@ bool tcmp(Token &t1, Token &t2)
            t1.len == t2.len &&
            t1.line == t2.line &&
            t1.offset == t2.offset &&
-           t1.str == t2.str;
+           t1.ptr == t2.ptr;
 }
 
 bool lexer_test(const char *text, vector<TokenKind> kinds)
@@ -83,7 +84,8 @@ bool lexer_test(const char *text, vector<TokenKind> kinds)
         std::cerr << "LEXER TEST CRASH!\n";
         exit(1);
     }
-    Lexer lxr = Lexer(orig);
+    StringSourceReader reader(orig);
+    Lexer lxr = Lexer(&reader);
     size_t tidx = 0;
     bool rsl = true;
     while (true)
@@ -122,7 +124,8 @@ char *concat(const char *s1, const char *s2)
 void lxerrr(const char *message, const char *text)
 {
     bool rsl = false;
-    Lexer lxr = Lexer(text);
+    StringSourceReader reader(text);
+    Lexer lxr = Lexer(&reader);
     while (true)
     {
         Token t = lxr.next();

@@ -3,6 +3,7 @@
 #include "interpreter.h"
 #include <cmath>
 #include "lexer.h"
+#include "reader.h"
 
 #define LUA_MAX_INTEGER 9223372036854775807
 #define LUA_MIN_INTEGER -9223372036854775807
@@ -164,7 +165,8 @@ lnumber Interpreter::arith_calc(Calculation ar, lnumber a, lnumber b)
 
 LuaValue Interpreter::parse_number(const char *str)
 {
-    Lexer lx(str);
+    StringSourceReader reader(str);
+    Lexer lx(&reader);
     if (lx.next().kind != TokenKind::Number)
         return this->rt->create_nil();
     if (lx.next().kind != TokenKind::Eof)

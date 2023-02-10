@@ -12,9 +12,10 @@ class Resolver
 private:
     vector<Lerror> errors;
     Ast ast;
-    Noderef current;
+    Noderef current = nullptr;
     size_t stack_ptr = 0;
     size_t hook_ptr = 0;
+    const char *source;
 
     MetaGoto *metadata_goto(Noderef node);
     MetaLabel *metadata_label(Noderef node);
@@ -39,7 +40,7 @@ private:
     Varmap &curmap();
 
 public:
-    Resolver(Ast ast);
+    Resolver(Ast ast, const char *source);
     vector<Lerror> analyze();
 };
 

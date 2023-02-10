@@ -12,7 +12,7 @@ void Resolver::analyze_var_decl(Noderef node)
     Token tkn = node->get_token();
     if (tkn.kind == TokenKind::Identifier)
     {
-        string name = tkn.text();
+        string name = tkn.text(this->source);
         this->curmap()[name] = node;
         MetaMemory *meta = new MetaMemory;
         meta->scope = this->current;
@@ -129,16 +129,16 @@ void Resolver::analyze_identifier(Noderef node)
             func_past |= func;
             func = (scptr->get_kind() == NodeKind::FunctionBody);
             Varmap &vmap = scptr->metadata_scope()->map;
-            if (vmap.find(t.text()) != vmap.cend())
+            if (vmap.find(t.text(this->source)) != vmap.cend())
             {
-                dec = vmap[t.text()];
+                dec = vmap[t.text(this->source)];
                 break;
             }
             scptr = scptr->metadata_scope()->parent;
         }
         if (dec)
             this->reference(node, dec, func_past);
-        else if (is_meth(this->curscope()->func) && t.text() == "self")
+        else if (is_meth(this->curscope()->func) && t.text(this->source) == "self")
             this->self_ref(node);
     }
     else if (t.kind == TokenKind::DotDotDot)
@@ -230,7 +230,7 @@ void Resolver::analyze_break(Noderef node)
     else
     {
         // add label
-        Token virtual_token = Token(nullptr, 0, 0, 0, TokenKind::Identifier);
+        Token virtual_token = Token(0, 0, 0, 0, TokenKind::Identifier);
         Noderef virtual_label = ast::Ast::make(virtual_token, NodeKind::LabelStmt);
         it->sib_insertr(virtual_label);
         // annotate label
@@ -259,7 +259,7 @@ void Resolver::link(Noderef go_to, Noderef label)
 
 void Resolver::analyze_label(Noderef node)
 {
-    string name = node->get_token().text();
+    string name = node->get_token().text(this->source);
     Varmap &labels = this->curscope()->lmap;
     auto prev_def = labels.find(name);
     if (prev_def != labels.cend())
@@ -346,7 +346,7 @@ void Resolver::link_labels()
         Noderef node = gotolist;
         MetaGoto *gmd = node->metadata_goto();
         Noderef next = gmd->next;
-        string name = node->get_token().text();
+        string name = node->get_token().text(this->source);
         auto lptr = labels.find(name);
         if (lptr != labels.cend())
         {
@@ -364,6 +364,6 @@ void Resolver::link_labels()
     }
 }
 
-Resolver::Resolver(Ast ast) : ast(ast)
+Resolver::Resolver(Ast ast, const char *source) : ast(ast), source(source)
 {
 }
