@@ -50,7 +50,7 @@ public:
     lbyte *text();
     Upvalue *ups();
     LuaValue *rodata();
-    fidx_t *innerfns();
+    Lfunction **innerfns();
     uint16_t *dbs();
 
     ~Lfunction();
@@ -97,7 +97,7 @@ struct GenFunction
     vector<lbyte> text;
     vector<LuaValue> rodata;
     vector<Upvalue> upvalues;
-    vector<fidx_t> innerfns;
+    vector<Lfunction *> innerfns;
     vector<size_t> dbg_lines;
     fidx_t fidx;
     size_t parcount;

@@ -32,9 +32,9 @@ LuaValue *Lfunction::rodata()
 {
     return (LuaValue *)(this->text() + this->codelen);
 }
-fidx_t *Lfunction::innerfns()
+Lfunction **Lfunction::innerfns()
 {
-    return (fidx_t *)(this->rodata() + this->rolen);
+    return (Lfunction **)(this->rodata() + this->rolen);
 }
 uint16_t *Lfunction::dbs()
 {
@@ -232,7 +232,7 @@ Lfunction *LuaRuntime::create_binary(GenFunction *gfn)
                       gfn->rodata.size() * sizeof(LuaValue) +
                       gfn->upvalues.size() * sizeof(Upvalue) +
                       gfn->dbg_lines.size() * sizeof(uint16_t) +
-                      gfn->innerfns.size() * sizeof(fidx_t);
+                      gfn->innerfns.size() * sizeof(Lfunction *);
 
     Lfunction *fn = (Lfunction *)this->allocate(bin_size, AllocType::ATBinary);
 

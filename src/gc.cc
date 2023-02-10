@@ -25,12 +25,12 @@ void GarbageCollector::scan(Lfunction *bin)
 {
     for (size_t i = 0; i < bin->inlen; i++)
     {
-        size_t fidx = bin->innerfns()[i];
+        Lfunction *included_bin = bin->innerfns()[i];
 
 #ifdef GC_DEBUG
         inspector.label("included binary");
 #endif
-        this->reference(this->rt->bin(fidx));
+        this->reference(included_bin);
     }
     for (size_t i = 0; i < bin->rolen; i++)
     {
