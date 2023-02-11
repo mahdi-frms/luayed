@@ -42,9 +42,8 @@ int LuaState::compile(const char *lua_code, string &errors, const char *chunknam
     }
     LuaGenerator gen(&this->runtime);
     Compiler compiler(&gen);
-    fidx_t fidx = compiler.compile(ast, lua_code, chunkname);
-    LuaValue fn = this->runtime.create_luafn(fidx);
-    this->runtime.stack_push(fn);
+    compiler.compile(ast, lua_code, chunkname);
+    this->runtime.push_compiled_bin();
     return LUA_COMPILE_RESULT_OK;
 }
 void LuaState::push_number(lnumber num)

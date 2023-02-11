@@ -160,9 +160,24 @@ LuaValue LuaRuntime::create_number(lnumber n)
     val.data.n = n;
     return val;
 }
+void LuaRuntime::set_compiled_bin(Lfunction *bin)
+{
+    this->compiled_bin = bin;
+}
+void LuaRuntime::push_compiled_bin()
+{
+    LuaFunction *fobj = (LuaFunction *)this->allocate(sizeof(LuaFunction), AllocType::ATFunction);
+    fobj->is_lua = true;
+    fobj->fn = (void *)this->compiled_bin;
+    LuaValue val;
+    val.kind = LuaType::LVFunction;
+    val.data.ptr = (void *)fobj;
+    this->stack_push(val);
+}
+
 LuaValue LuaRuntime::create_luafn(fidx_t fidx)
 {
-    Lfunction *lbin = this->bin(fidx);
+    Lfunction *lbin = this->bin()->innerfns()[fidx];
     size_t funcsize = sizeof(LuaFunction) + sizeof(Hook *) * lbin->uplen;
     LuaFunction *fobj = (LuaFunction *)this->allocate(funcsize, AllocType::ATFunction);
     fobj->is_lua = true;
@@ -257,7 +272,6 @@ Lfunction *LuaRuntime::create_binary(GenFunction *gfn)
     for (size_t i = 0; i < gfn->dbg_lines.size(); i++)
         fn->dbs()[i] = gfn->dbg_lines[i];
 
-    this->functable[gfn->fidx] = fn;
     return fn;
 }
 void LuaRuntime::heap_init()
@@ -357,7 +371,6 @@ LuaRuntime::LuaRuntime(IInterpreter *interpreter) : interpreter(interpreter)
     this->heap_init();
     this->stack_buffer = this->allocate_raw(STACK_BUFFER_SIZE);
     this->lstrset.init(lstr_compare, lstr_hash, this);
-    this->functable = (Lfunction **)this->allocate_raw(sizeof(Lfunction *) * 256 * 256);
     this->func_count = 0;
     this->new_frame();
     this->global = this->create_table();
@@ -369,7 +382,6 @@ LuaRuntime::~LuaRuntime()
     this->collect_garbage();
     this->heap_destroy();
     this->deallocate_raw(this->stack_buffer);
-    this->deallocate_raw(this->functable);
     this->lstrset.destroy();
 }
 gc_header_t *LuaRuntime::gc_headers()
@@ -537,8 +549,8 @@ Fnresult LuaRuntime::calling(size_t argc, size_t retc)
         rs.kind = this->frame->has_error ? Fnresult::Error : Fnresult::Ret;
         if (!this->frame->has_error)
             rs.retc = return_count;
+        this->check_garbage_collection();
     }
-    this->check_garbage_collection();
     return rs;
 }
 void LuaRuntime::fncall(size_t argc, size_t retc)
@@ -745,10 +757,6 @@ LuaValue LuaRuntime::arg(size_t idx)
         return this->create_nil();
     else
         return this->frame->vargs()[idx];
-}
-Lfunction *LuaRuntime::bin(size_t fidx)
-{
-    return this->functable[fidx];
 }
 Hook *LuaRuntime::upvalue(size_t idx)
 {

@@ -126,13 +126,13 @@ private:
     Frame *frame;
     void *stack_buffer;
     IInterpreter *interpreter;
-    Lfunction **functable;
     size_t func_count;
     void *lua_interface = nullptr;
     LuaValue global;
     bool test_mode = false;
     gc_header_t *heap_head;
     gc_header_t *heap_tail;
+    Lfunction *compiled_bin;
 
     void new_frame();
     void collect_garbage();
@@ -172,6 +172,8 @@ public:
     Lfunction *create_binary(GenFunction *gfn);
     LuaValue create_cppfn(LuaRTCppFunction fn);
     LuaValue create_luafn(fidx_t fidx);
+    void set_compiled_bin(Lfunction *bin);
+    void push_compiled_bin();
 
     void table_set(LuaValue t, LuaValue k, LuaValue v);
     LuaValue table_get(LuaValue t, LuaValue k);
@@ -185,7 +187,6 @@ public:
     LuaValue get_error();
     void remove_error();
     fidx_t gen_fidx();
-    Lfunction *bin(size_t fidx);
     bool error_raised();
     bool error_metadata();
     void error_metadata(bool md);

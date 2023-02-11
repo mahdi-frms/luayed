@@ -85,7 +85,7 @@ LuaGenerator::LuaGenerator(LuaRuntime *rt) : rt(rt), gfn(nullptr)
 
 fidx_t LuaGenerator::pushf()
 {
-    fidx_t fidx = this->rt->gen_fidx();
+    fidx_t fidx = this->gfn ? this->gfn->innerfns.size() : 0;
     GenFunction *gfn = new GenFunction();
     gfn->fidx = fidx;
     gfn->prev = this->gfn;
@@ -99,6 +99,8 @@ void LuaGenerator::popf()
     GenFunction *parent = child->prev;
     if (parent)
         parent->innerfns.push_back(bin);
+    else
+        this->rt->set_compiled_bin(bin);
     vector<Upvalue> &chups = child->upvalues;
     this->gfn = parent;
     for (size_t i = 0; i < chups.size(); i++)
