@@ -79,15 +79,15 @@ add_test(NAME "luayedtests" COMMAND luaytest)
 
 include_directories(include)
 
-target_include_directories(luayed PRIVATE dep)
-target_include_directories(luayed PRIVATE src)
-target_include_directories(luayed PRIVATE lib)
-target_include_directories(luayed PRIVATE .)
+target_include_directories(luayed INTERFACE dep)
+target_include_directories(luayed INTERFACE src)
+target_include_directories(luayed INTERFACE lib)
+target_include_directories(luayed INTERFACE .)
 
-target_include_directories(luaydbg PRIVATE dep)
-target_include_directories(luaydbg PRIVATE src)
-target_include_directories(luaydbg PRIVATE lib)
-target_include_directories(luaydbg PRIVATE .)
+target_include_directories(luaydbg INTERFACE dep)
+target_include_directories(luaydbg INTERFACE src)
+target_include_directories(luaydbg INTERFACE lib)
+target_include_directories(luaydbg INTERFACE .)
 
 target_include_directories(luaysis PRIVATE dep)
 target_include_directories(luaysis PRIVATE src)
