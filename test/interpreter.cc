@@ -1,6 +1,6 @@
 #include <iostream>
 #include <luadef.h>
-#include <luabin.h>
+#include "luabin.h"
 #include <interpreter.h>
 #include <generator.h>
 #include <generator.h>

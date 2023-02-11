@@ -1,7 +1,7 @@
 #ifndef ANALYSIS_GENERATOR_H
 #define ANALYSIS_GENERATOR_H
 
-#include <src/generator.h>
+#include <generator.h>
 
 class AnalysisGenerator : public BaseGenerator
 {

@@ -77,10 +77,26 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall")
 enable_testing()
 add_test(NAME "luayedtests" COMMAND luaytest)
 
-include_directories(dep)
-include_directories(src)
 include_directories(include)
-include_directories(lib)
-include_directories(.)
+
+target_include_directories(luayed PRIVATE dep)
+target_include_directories(luayed PRIVATE src)
+target_include_directories(luayed PRIVATE lib)
+target_include_directories(luayed PRIVATE .)
+
+target_include_directories(luaydbg PRIVATE dep)
+target_include_directories(luaydbg PRIVATE src)
+target_include_directories(luaydbg PRIVATE lib)
+target_include_directories(luaydbg PRIVATE .)
+
+target_include_directories(luaysis PRIVATE dep)
+target_include_directories(luaysis PRIVATE src)
+target_include_directories(luaysis PRIVATE lib)
+target_include_directories(luaysis PRIVATE .)
+
+target_include_directories(luaytest PRIVATE dep)
+target_include_directories(luaytest PRIVATE src)
+target_include_directories(luaytest PRIVATE lib)
+target_include_directories(luaytest PRIVATE .)
 
 set_property(TARGET luayed PROPERTY CXX_STANDARD 17)

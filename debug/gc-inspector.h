@@ -1,7 +1,7 @@
 #ifndef GC_INSPECTOR_H
 #define GC_INSPECTOR_H
 
-#include "../src/runtime.h"
+#include "runtime.h"
 #include <map>
 
 class GCInspector
