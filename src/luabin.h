@@ -1,7 +1,7 @@
 #ifndef LUABIN_h
 #define LUABIN_h
 
-#include "lyddef.h"
+#include "luadef.h"
 
 size_t op_oprnd_count(lbyte op);
 

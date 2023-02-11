@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "lyddef.h"
+#include "luadef.h"
 #include "lerror.h"
 #include "token.h"
 #include "virtuals.h"

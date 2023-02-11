@@ -1,7 +1,7 @@
 #ifndef VIRTUALS_H
 #define VIRTUALS_H
 
-#include "lyddef.h"
+#include "luadef.h"
 #include "luabin.h"
 #include "token.h"
 #include "lerror.h"

@@ -1,4 +1,4 @@
-#include "lyddef.h"
+#include "luadef.h"
 #include <iostream>
 
 std::ostream &dbg = std::cout;

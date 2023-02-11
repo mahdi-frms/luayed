@@ -1,7 +1,7 @@
 #ifndef TEST_VALUES_H
 #define TEST_VALUES_H
 
-#include <lyddef.h>
+#include <luadef.h>
 #include <set>
 #include <map>
 #include "values.h"

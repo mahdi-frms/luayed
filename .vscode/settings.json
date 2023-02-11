@@ -27,6 +27,7 @@
         "cmath": "cpp",
         "tuple": "cpp",
         "istream": "cpp",
-        "numeric": "cpp"
+        "numeric": "cpp",
+        "iosfwd": "cpp"
     }
 }

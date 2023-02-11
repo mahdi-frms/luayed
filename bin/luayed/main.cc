@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cstring>
-#include <lyddef.h>
+#include <luadef.h>
 #include <lua.h>
 
 string readfile(const char *path)
