@@ -5,7 +5,6 @@
         "src",
         "include",
         "lib",
-        ".",
     ],
     "files.associations": {
         "*.js": "javascript",
