@@ -32,7 +32,6 @@ add_library(luayed
     src/generator.cc
     src/table.cc
     src/hash.cc
-    src/luastate.cc
     src/lua.cc
     # stdlib
     lib/luastd.cc

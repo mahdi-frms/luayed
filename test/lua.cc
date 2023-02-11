@@ -3,35 +3,35 @@
 #include <lua.h>
 #include <lstrep.h>
 
-void lua_test_case_push(Lua *lua, LuaValue val)
+void lua_test_case_push(Lua &lua, LuaValue val)
 {
     if (val.kind == LuaType::LVString)
-        lua->push_string((const char *)val.data.ptr);
+        lua.push_string((const char *)val.data.ptr);
     else if (val.kind == LuaType::LVNumber)
-        lua->push_number(val.data.n);
+        lua.push_number(val.data.n);
     else if (val.kind == LuaType::LVBool)
-        lua->push_boolean(val.data.b);
+        lua.push_boolean(val.data.b);
     else if (val.kind == LuaType::LVNil)
-        lua->push_nil();
+        lua.push_nil();
     else
         crash("lua-e2e-test push");
 }
-LuaValue lua_test_case_pop(Lua *lua)
+LuaValue lua_test_case_pop(Lua &lua)
 {
-    int kind = lua->kind();
+    int kind = lua.kind();
     if (kind == LUA_TYPE_NIL)
     {
-        lua->pop();
+        lua.pop();
         return lvnil();
     }
     else if (kind == LUA_TYPE_NUMBER)
-        return lvnumber(lua->pop_number());
+        return lvnumber(lua.pop_number());
     else if (kind == LUA_TYPE_BOOLEAN)
-        return lvbool(lua->pop_boolean());
+        return lvbool(lua.pop_boolean());
     else if (kind == LUA_TYPE_STRING)
     {
-        LuaValue val = lvstring(lua->peek_string());
-        lua->pop();
+        LuaValue val = lvstring(lua.peek_string());
+        lua.pop();
         return val;
     }
     else
@@ -55,14 +55,14 @@ void lua_test_case(
     LuaConfig conf;
     conf.error_metadata = false;
     conf.load_stdlib = false;
-    Lua *lua = Lua::create(conf);
+    Lua lua(conf);
 
     string errors;
-    if (lua->compile(code, errors, mes.c_str()) == LUA_COMPILE_RESULT_OK)
+    if (lua.compile(code, errors, mes.c_str()) == LUA_COMPILE_RESULT_OK)
     {
         for (size_t i = 0; i < args.size(); i++)
             lua_test_case_push(lua, args[i]);
-        lua->call(args.size(), results.size());
+        lua.call(args.size(), results.size());
     }
     else
     {
@@ -72,9 +72,9 @@ void lua_test_case(
 
     if (has_error)
     {
-        if (lua->has_error())
+        if (lua.has_error())
         {
-            lua->push_error();
+            lua.push_error();
             LuaValue lerror = lua_test_case_pop(lua);
             bool rsl = lerror == error;
             test_assert(rsl, mes.c_str());
@@ -91,17 +91,17 @@ void lua_test_case(
     }
     else
     {
-        if (lua->has_error())
+        if (lua.has_error())
         {
             test_assert(false, mes.c_str());
-            lua->push_error();
+            lua.push_error();
             LuaValue lerror = lua_test_case_pop(lua);
             std::cerr << "error raised: " << lerror << "\n";
         }
         else
         {
             vector<LuaValue> stack;
-            while (lua->top())
+            while (lua.top())
                 stack.insert(stack.begin(), lua_test_case_pop(lua));
             bool rsl = stack == results;
             test_assert(rsl, mes.c_str());

@@ -12,6 +12,8 @@
 #define LUA_TYPE_FUNCTION 5
 
 #include "luadef.h"
+#include "runtime.h"
+#include "interpreter.h"
 #include <string>
 
 #define LUA_MULTRES SIZE_MAX
@@ -28,32 +30,34 @@ typedef size_t (*LuaCppFunction)(Lua *);
 
 class Lua
 {
+private:
+    LuaRuntime runtime;
+    Interpreter interpreter;
+
 public:
-    static Lua *create(LuaConfig conf = LuaConfig());
-    void destroy();
-    virtual int compile(const char *lua_code, std::string &errors, const char *chunkname = nullptr) = 0;
-    virtual void push_cppfn(LuaCppFunction cppfn) = 0;
-    virtual void push_string(const char *str) = 0;
-    virtual void push_nil() = 0;
-    virtual void push_number(lnumber num) = 0;
-    virtual void push_boolean(bool b) = 0;
-    virtual void insert(size_t index) = 0;
-    virtual void call(size_t arg_count, size_t return_count) = 0;
-    virtual int kind() = 0;
-    virtual void set_global(const char *key) = 0;
-    virtual void set_table() = 0;
-    virtual void get_table() = 0;
-    virtual void pop() = 0;
-    virtual size_t top() = 0;
-    virtual lnumber pop_number() = 0;
-    virtual bool pop_boolean() = 0;
-    virtual const char *peek_string() = 0;
-    virtual void fetch_local(int idx) = 0;
-    virtual void store_local(int idx) = 0;
-    virtual bool has_error() = 0;
-    virtual void push_error() = 0;
-    virtual void pop_error() = 0;
-    virtual ~Lua() = 0;
+    Lua(LuaConfig config = LuaConfig());
+    int compile(const char *lua_code, std::string &errors, const char *chunkname = nullptr);
+    void push_cppfn(LuaCppFunction cppfn);
+    void push_string(const char *str);
+    void push_nil();
+    void push_number(lnumber num);
+    void push_boolean(bool b);
+    void insert(size_t index);
+    void call(size_t arg_count, size_t return_count);
+    int kind();
+    void set_global(const char *key);
+    void set_table();
+    void get_table();
+    void pop();
+    size_t top();
+    lnumber pop_number();
+    bool pop_boolean();
+    const char *peek_string();
+    void fetch_local(int idx);
+    void store_local(int idx);
+    bool has_error();
+    void push_error();
+    void pop_error();
 };
 
 #endif
