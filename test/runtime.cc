@@ -4,6 +4,8 @@
 #include <lstrep.h>
 #include <cstring>
 
+using namespace luayed;
+
 void rt_assert(bool rsl, const char *message, size_t idx = 0)
 {
     string mes = "runtime : ";

@@ -1,5 +1,8 @@
 #include "resolve.h"
 
+using namespace luayed;
+using namespace luayed::ast;
+
 vector<Lerror> Resolver::analyze()
 {
     this->current = nullptr;

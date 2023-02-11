@@ -5,54 +5,57 @@
 #include <variant>
 #include <memory>
 
-using namespace ast;
-
-enum class BlockEnd
+namespace luayed
 {
-    Eof,
-    End,
-    Else,
-    Until,
-};
+    using namespace ast;
 
-class Parser
-{
-private:
-    ILexer *lexer;
-    Token current;
-    Lerror err;
+    enum class BlockEnd
+    {
+        Eof,
+        End,
+        Else,
+        Until,
+    };
 
-    Noderef expr();
-    Noderef expr(Token t);
-    Noderef fncall(Token op);
-    Noderef expr_p(uint8_t pwr, Token tt);
-    Noderef primary();
-    Token pop();
-    Token peek();
-    Noderef table();
-    Noderef id_field(Token t);
-    Noderef expr_field();
-    Noderef block(BlockEnd end);
-    Noderef statement();
-    Noderef while_stmt();
-    Noderef repeat_stmt();
-    Noderef vardecl();
-    void error(Lerror err, Token token);
-    Noderef name_attrib();
-    Noderef if_stmt();
-    Noderef generic_for_stmt(Token identifier);
-    Noderef numeric_for_stmt(Token identifier);
-    Noderef arglist();
-    Noderef varlist(Noderef var);
-    Noderef explist();
-    Noderef function_body(bool is_method);
-    Token consume(TokenKind kind);
+    class Parser
+    {
+    private:
+        ILexer *lexer;
+        Token current;
+        Lerror err;
 
-public:
-    Parser(ILexer *lexer);
-    Ast parse();
-    Lerror get_error();
-    Ast parse_exp();
+        Noderef expr();
+        Noderef expr(Token t);
+        Noderef fncall(Token op);
+        Noderef expr_p(uint8_t pwr, Token tt);
+        Noderef primary();
+        Token pop();
+        Token peek();
+        Noderef table();
+        Noderef id_field(Token t);
+        Noderef expr_field();
+        Noderef block(BlockEnd end);
+        Noderef statement();
+        Noderef while_stmt();
+        Noderef repeat_stmt();
+        Noderef vardecl();
+        void error(Lerror err, Token token);
+        Noderef name_attrib();
+        Noderef if_stmt();
+        Noderef generic_for_stmt(Token identifier);
+        Noderef numeric_for_stmt(Token identifier);
+        Noderef arglist();
+        Noderef varlist(Noderef var);
+        Noderef explist();
+        Noderef function_body(bool is_method);
+        Token consume(TokenKind kind);
+
+    public:
+        Parser(ILexer *lexer);
+        Ast parse();
+        Lerror get_error();
+        Ast parse_exp();
+    };
 };
 
 #endif

@@ -6,10 +6,12 @@
 #include <map>
 #include "values.h"
 
+using namespace luayed;
+
 std::set<string> strset;
 std::vector<vector<LuaValue> *> tabset;
 
-void tabset_detroy()
+void luayed::tabset_detroy()
 {
     while (tabset.size())
     {
@@ -18,27 +20,27 @@ void tabset_detroy()
     }
 }
 
-LuaValue lvnil()
+LuaValue luayed::lvnil()
 {
     LuaValue v;
     v.kind = LuaType::LVNil;
     return v;
 }
-LuaValue lvbool(bool b)
+LuaValue luayed::lvbool(bool b)
 {
     LuaValue v;
     v.kind = LuaType::LVBool;
     v.data.b = b;
     return v;
 }
-LuaValue lvnumber(lnumber n)
+LuaValue luayed::lvnumber(lnumber n)
 {
     LuaValue v;
     v.kind = LuaType::LVNumber;
     v.data.n = n;
     return v;
 }
-LuaValue lvstring(const char *s)
+LuaValue luayed::lvstring(const char *s)
 {
     string str = s;
     auto it = strset.cend();
@@ -56,7 +58,7 @@ LuaValue lvstring(const char *s)
     v.data.ptr = (void *)s;
     return v;
 }
-LuaValue lvtable()
+LuaValue luayed::lvtable()
 {
     LuaValue v;
     v.kind = LuaType::LVTable;

@@ -3,6 +3,8 @@
 #include <luadef.h>
 #include <lua.h>
 
+using namespace luayed;
+
 string readfile(const char *path)
 {
     string str = "";

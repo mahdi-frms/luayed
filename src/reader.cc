@@ -1,5 +1,7 @@
 #include "reader.h"
 
+using namespace luayed;
+
 char StringSourceReader::readch()
 {
     char c = this->text[this->pointer];

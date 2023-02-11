@@ -11,6 +11,8 @@
 #define MOCK_RUNTIME_FAULT_ARGIDX 4
 #define MOCK_RUNTIME_FAULT_CONSTIDX 5
 
+using namespace luayed;
+
 void Intercept::enable()
 {
     this->used = true;

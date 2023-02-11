@@ -1,5 +1,7 @@
 #include "table.h"
 
+using namespace luayed;
+
 TableElement::TableElement(LuaValue key, LuaValue value) : key(key), value(value)
 {
 }

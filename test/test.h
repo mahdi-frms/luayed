@@ -3,6 +3,9 @@
 
 #include <runtime.h>
 
-void test_assert(bool result, const char *message);
+namespace luayed
+{
+    void test_assert(bool result, const char *message);
+};
 
 #endif

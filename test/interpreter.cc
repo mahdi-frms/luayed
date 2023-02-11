@@ -8,6 +8,8 @@
 #include "mockruntime.h"
 #include "lstrep.h"
 
+using namespace luayed;
+
 class InterpreterTestCase
 {
 private:

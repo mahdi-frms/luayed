@@ -1,9 +1,11 @@
 #include "luadef.h"
 #include <iostream>
 
+using namespace luayed;
+
 std::ostream &dbg = std::cout;
 
-bool operator==(const LuaValue &v1, const LuaValue &v2)
+bool luayed::operator==(const LuaValue &v1, const LuaValue &v2)
 {
     if (v1.kind != v2.kind)
         return false;
@@ -16,7 +18,7 @@ bool operator==(const LuaValue &v1, const LuaValue &v2)
     else
         return v1.data.ptr == v2.data.ptr;
 }
-bool operator!=(const LuaValue &v1, const LuaValue &v2)
+bool luayed::operator!=(const LuaValue &v1, const LuaValue &v2)
 {
     return !(v1 == v2);
 }
@@ -26,7 +28,7 @@ LuaValue::LuaValue()
     this->kind = LuaType::LVNil;
 }
 
-void crash(string message)
+void luayed::crash(string message)
 {
     std::cerr << "LUAYED CRASH: " << message << "\n";
     exit(1);

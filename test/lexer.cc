@@ -5,6 +5,8 @@
 #include <stdarg.h>
 #include <iostream>
 
+using namespace luayed;
+
 char *tokenize_test(const char *text, vector<TokenKind> &kinds, vector<Token> &tokens)
 {
     const char marker = '$';

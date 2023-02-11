@@ -6,6 +6,8 @@
 
 #define LV_AS_FUNC(V) ((LuaFunction *)((V)->data.ptr))
 
+using namespace luayed;
+
 int lstr_compare(const lstr_p &a, const lstr_p &b)
 {
     return strcmp(a->cstr(), b->cstr());

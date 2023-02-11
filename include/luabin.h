@@ -3,97 +3,102 @@
 
 #include "luadef.h"
 
-size_t op_oprnd_count(lbyte op);
-
-enum Opcode
+namespace luayed
 {
-    IAdd = 0x10,
-    ISub = 0x11,
-    IMult = 0x12,
-    IFlrDiv = 0x13,
-    IFltDiv = 0x14,
-    IMod = 0x15,
-    IPow = 0x16,
-    IConcat = 0x17,
-    IBOr = 0x18,
-    IBAnd = 0x19,
-    IBXor = 0x1a,
-    ISHR = 0x1b,
-    ISHL = 0x1c,
 
-    ILength = 0x20,
-    INegate = 0x21,
-    INot = 0x22,
-    IBNot = 0x23,
+    size_t op_oprnd_count(lbyte op);
 
-    IEq = 0x30,
-    INe = 0x31,
-    IGe = 0x32,
-    IGt = 0x33,
-    ILe = 0x34,
-    ILt = 0x35,
+    enum Opcode
+    {
+        IAdd = 0x10,
+        ISub = 0x11,
+        IMult = 0x12,
+        IFlrDiv = 0x13,
+        IFltDiv = 0x14,
+        IMod = 0x15,
+        IPow = 0x16,
+        IConcat = 0x17,
+        IBOr = 0x18,
+        IBAnd = 0x19,
+        IBXor = 0x1a,
+        ISHR = 0x1b,
+        ISHL = 0x1c,
 
-    ITGet = 0x40,
-    ITSet = 0x41,
-    ITNew = 0x42,
-    IGGet = 0x43,
-    IGSet = 0x44,
-    INil = 0x45,
-    ITrue = 0x46,
-    IFalse = 0x47,
+        ILength = 0x20,
+        INegate = 0x21,
+        INot = 0x22,
+        IBNot = 0x23,
 
-    IUPush = 0x50,
-    IUPop = 0x51,
+        IEq = 0x30,
+        INe = 0x31,
+        IGe = 0x32,
+        IGt = 0x33,
+        ILe = 0x34,
+        ILt = 0x35,
 
-    ITList = 0xc0,
-    IRet = 0xc2,
+        ITGet = 0x40,
+        ITSet = 0x41,
+        ITNew = 0x42,
+        IGGet = 0x43,
+        IGSet = 0x44,
+        INil = 0x45,
+        ITrue = 0x46,
+        IFalse = 0x47,
 
-    ICall = 0xd0,
-    IVargs = 0xd4,
-    IJmp = 0xd6,
-    ICjmp = 0xd8,
+        IUPush = 0x50,
+        IUPop = 0x51,
 
-    IConst = 0xe0,
-    IFConst = 0xe2,
+        ITList = 0xc0,
+        IRet = 0xc2,
 
-    ILocal = 0xf0,
-    ILStore = 0xf2,
-    IBLocal = 0xf4,
-    IBLStore = 0xf6,
-    IUpvalue = 0xf8,
-    IUStore = 0xfa,
+        ICall = 0xd0,
+        IVargs = 0xd4,
+        IJmp = 0xd6,
+        ICjmp = 0xd8,
 
-    IPop = 0xfe
-};
+        IConst = 0xe0,
+        IFConst = 0xe2,
 
-struct Upvalue
-{
-    fidx_t fidx;
-    size_t offset;
-    size_t hidx;
+        ILocal = 0xf0,
+        ILStore = 0xf2,
+        IBLocal = 0xf4,
+        IBLStore = 0xf6,
+        IUpvalue = 0xf8,
+        IUStore = 0xfa,
 
-    Upvalue(fidx_t fidx, size_t offset, size_t hidx);
-    friend bool operator==(const Upvalue &l, const Upvalue &r);
-};
+        IPop = 0xfe
+    };
 
-struct Bytecode
-{
-    lbyte count;
-    lbyte bytes[5];
-};
+    struct Upvalue
+    {
+        fidx_t fidx;
+        size_t offset;
+        size_t hidx;
 
-struct Instruction
-{
-    Opcode op;
-    size_t oprnd1;
-    size_t oprnd2;
+        Upvalue(fidx_t fidx, size_t offset, size_t hidx);
+        friend bool operator==(const Upvalue &l, const Upvalue &r);
+    };
 
-    Instruction(Opcode op, size_t oprnd1 = 0, size_t oprnd2 = 0);
+    struct Bytecode
+    {
+        lbyte count;
+        lbyte bytes[5];
+    };
 
-    size_t oprnd_count() const;
-    Bytecode encode() const;
-    static Instruction decode(Bytecode code);
-    static Instruction decode(const lbyte *binary, size_t *read_count = nullptr);
+    struct Instruction
+    {
+        Opcode op;
+        size_t oprnd1;
+        size_t oprnd2;
+
+        Instruction(Opcode op, size_t oprnd1 = 0, size_t oprnd2 = 0);
+
+        size_t oprnd_count() const;
+        Bytecode encode() const;
+        static Instruction decode(Bytecode code);
+        static Instruction decode(const lbyte *binary, size_t *read_count = nullptr);
+    };
+    bool operator==(const Upvalue &l, const Upvalue &r);
 };
 
 #define iadd IAdd

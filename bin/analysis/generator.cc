@@ -1,6 +1,8 @@
 #include "generator.h"
 #include "lstrep.h"
 
+using namespace luayed;
+
 void AnalysisGenerator::append(string str)
 {
     this->text.append(str);

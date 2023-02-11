@@ -9,6 +9,8 @@
 #include <compiler.h>
 #include "generator.h"
 
+using namespace luayed;
+
 namespace cli
 {
     enum class Step

@@ -2,7 +2,9 @@
 #include "luabin.h"
 #include <sstream>
 
-string to_string(const TokenKind &tk)
+using namespace luayed;
+
+string luayed::to_string(const TokenKind &tk)
 {
     if (tk == TokenKind::And)
         return "and";
@@ -128,14 +130,14 @@ string to_string(const TokenKind &tk)
         return "until";
     return "while";
 }
-string to_string(const Token &t, const char *source)
+string luayed::to_string(const Token &t, const char *source)
 {
     string s;
     s += t.text(source).c_str();
     while (s.size() < 16)
         s.push_back(' ');
     s += " (";
-    s += to_string(t.kind);
+    s += luayed::to_string(t.kind);
     s += ") [";
     s += std::to_string(t.line + 1);
     s += ",";
@@ -181,7 +183,7 @@ const char *node_names[34] = {
     "Operator",
 };
 
-string to_string(const ast::NodeKind &nk)
+string luayed::to_string(const ast::NodeKind &nk)
 {
     return node_names[nk];
 }
@@ -209,13 +211,13 @@ void node_to_string(ast::Noderef node, int depth, string &buffer, const char *so
     }
 }
 
-string to_string(const ast::Noderef &n, const char *source)
+string luayed::to_string(const ast::Noderef &n, const char *source)
 {
     string buffer;
     node_to_string(n, 1, buffer, source);
     return buffer;
 }
-string to_string(const Opcode &opcode)
+string luayed::to_string(const Opcode &opcode)
 {
     const char *opnames[256];
     opnames[IAdd] = "add";
@@ -269,11 +271,11 @@ string to_string(const Opcode &opcode)
     opnames[IPop] = "pop";
     return opnames[opcode];
 }
-string to_string(const vector<lbyte> &bin)
+string luayed::to_string(const vector<lbyte> &bin)
 {
-    return to_string(&bin.front(), bin.size());
+    return luayed::to_string(&bin.front(), bin.size());
 }
-string to_string(const lbyte *text, size_t codelen)
+string luayed::to_string(const lbyte *text, size_t codelen)
 {
     string str;
     for (size_t i = 0; i < codelen;)
@@ -281,7 +283,7 @@ string to_string(const lbyte *text, size_t codelen)
         size_t rc;
         Instruction ins = Instruction::decode(text + i, &rc);
         i += rc;
-        str.append(to_string(ins.op));
+        str.append(luayed::to_string(ins.op));
         if (ins.oprnd_count() > 0)
         {
             str.push_back(' ');
@@ -296,9 +298,9 @@ string to_string(const lbyte *text, size_t codelen)
     }
     return str;
 }
-string to_string(const LuaValue &lv)
+string luayed::to_string(const LuaValue &lv)
 {
-    string s = to_string(lv.kind);
+    string s = luayed::to_string(lv.kind);
     if (lv.kind == LuaType::LVBool)
     {
         s += "(";
@@ -320,7 +322,7 @@ string to_string(const LuaValue &lv)
     return s;
 }
 
-string to_string(lnumber n)
+string luayed::to_string(lnumber n)
 {
     string str = std::to_string(n);
     str.erase(str.find_last_not_of('0') + 1);
@@ -328,7 +330,7 @@ string to_string(lnumber n)
     return str;
 }
 
-string to_string(const LuaType &lt)
+string luayed::to_string(const LuaType &lt)
 {
     if (lt == LuaType::LVNil)
         return "nil";
@@ -345,12 +347,12 @@ string to_string(const LuaType &lt)
     return "";
 }
 
-string to_string(const Lerror &err)
+string luayed::to_string(const Lerror &err)
 {
-    return to_string(err, false);
+    return luayed::to_string(err, false);
 }
 
-string to_string(const Lerror &err, bool pure)
+string luayed::to_string(const Lerror &err, bool pure)
 {
     std::stringstream os;
     if (err.kind == Lerror::LE_OK)
@@ -395,7 +397,7 @@ string to_string(const Lerror &err, bool pure)
     }
     else if (err.kind == Lerror::LE_ExpectedToken)
     {
-        os << "expected token '" << to_string(err.as.expected_token.token_kind) << "'";
+        os << "expected token '" << luayed::to_string(err.as.expected_token.token_kind) << "'";
     }
     else if (err.kind == Lerror::LE_ExpectedVariable)
     {
@@ -465,12 +467,12 @@ string to_string(const Lerror &err, bool pure)
     return os.str();
 }
 
-string to_string(const vector<LuaValue> &vv)
+string luayed::to_string(const vector<LuaValue> &vv)
 {
     string text;
     for (size_t i = 0; i < vv.size(); i++)
     {
-        text.append(to_string(vv[i]));
+        text.append(luayed::to_string(vv[i]));
         text.push_back('\n');
     }
     return text;
@@ -479,7 +481,7 @@ string to_string(const vector<LuaValue> &vv)
 #define WRITE_TO_STREAM_OPERATOR(TYPE)                        \
     std::ostream &operator<<(std::ostream &os, const TYPE &o) \
     {                                                         \
-        os << to_string(o);                                   \
+        os << luayed::to_string(o);                           \
         return os;                                            \
     }
 

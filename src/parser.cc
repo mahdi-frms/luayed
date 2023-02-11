@@ -1,6 +1,8 @@
 #include "parser.h"
 #include <utility>
-using namespace ast;
+
+using namespace luayed;
+using namespace luayed::ast;
 
 #define BINPWR(L, R) (L * 256 + R)
 

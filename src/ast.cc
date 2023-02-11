@@ -1,6 +1,7 @@
 #include "ast.h"
 
-using namespace ast;
+using namespace luayed;
+using namespace luayed::ast;
 
 Node::Node(NodeKind kind, Token token)
     : token(token), kind(kind)

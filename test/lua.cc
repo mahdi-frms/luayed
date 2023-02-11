@@ -3,6 +3,8 @@
 #include <lua.h>
 #include <lstrep.h>
 
+using namespace luayed;
+
 void lua_test_case_push(Lua &lua, LuaValue val)
 {
     if (val.kind == LuaType::LVString)

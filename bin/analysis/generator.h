@@ -3,6 +3,8 @@
 
 #include <generator.h>
 
+using namespace luayed;
+
 class AnalysisGenerator : public BaseGenerator
 {
 private:

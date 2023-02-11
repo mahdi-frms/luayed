@@ -5,46 +5,50 @@
 #include "runtime.h"
 #include "hash.h"
 
-class Table;
-class TableIterator;
-
-struct TableElement
+namespace luayed
 {
-    LuaValue key;
-    LuaValue value;
 
-    TableElement(LuaValue key, LuaValue value);
-};
+    class Table;
+    class TableIterator;
 
-class Table
-{
-private:
-    Set<TableElement> vset;
+    struct TableElement
+    {
+        LuaValue key;
+        LuaValue value;
 
-public:
-    Table(LuaRuntime *rt);
-    void clean();
-    void init(LuaRuntime *rt);
-    void destroy();
+        TableElement(LuaValue key, LuaValue value);
+    };
 
-    void set(LuaValue key, LuaValue value);
-    LuaValue get(LuaValue key) const;
-    TableElement *next(int &idx) const;
-    TableIterator iter() const;
-};
+    class Table
+    {
+    private:
+        Set<TableElement> vset;
 
-class TableIterator
-{
-private:
-    const Table *table = nullptr;
-    int idx = -1;
-    TableElement *el = nullptr;
+    public:
+        Table(LuaRuntime *rt);
+        void clean();
+        void init(LuaRuntime *rt);
+        void destroy();
 
-public:
-    TableIterator(const Table *table);
-    bool next();
-    LuaValue key() const;
-    LuaValue value() const;
+        void set(LuaValue key, LuaValue value);
+        LuaValue get(LuaValue key) const;
+        TableElement *next(int &idx) const;
+        TableIterator iter() const;
+    };
+
+    class TableIterator
+    {
+    private:
+        const Table *table = nullptr;
+        int idx = -1;
+        TableElement *el = nullptr;
+
+    public:
+        TableIterator(const Table *table);
+        bool next();
+        LuaValue key() const;
+        LuaValue value() const;
+    };
 };
 
 #endif

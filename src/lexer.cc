@@ -15,6 +15,8 @@
             return tmp;             \
     }
 
+using namespace luayed;
+
 TokenKind single_op(char c)
 {
     if (c == '+')

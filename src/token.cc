@@ -1,6 +1,8 @@
 #include "token.h"
 #include <cstring>
 
+using namespace luayed;
+
 Token::Token(size_t ptr, size_t len, size_t line, size_t offset, TokenKind kind)
 {
     this->ptr = ptr;
@@ -9,7 +11,7 @@ Token::Token(size_t ptr, size_t len, size_t line, size_t offset, TokenKind kind)
     this->offset = offset;
     this->kind = kind;
 }
-Token token_none()
+Token luayed::token_none()
 {
     return Token(0, 0, 0, 0, TokenKind::None);
 }

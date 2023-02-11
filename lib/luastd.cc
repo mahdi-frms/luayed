@@ -1,6 +1,8 @@
 #include "luastd.h"
 #include <lstrep.h>
 
+using namespace luayed;
+
 string luastd::luavalue_to_string(Lua *lua)
 {
     int k = lua->kind();
@@ -16,7 +18,7 @@ string luastd::luavalue_to_string(Lua *lua)
     else if (k == LUA_TYPE_NUMBER)
     {
         poped = true;
-        str = to_string(lua->pop_number());
+        str = luayed::to_string(lua->pop_number());
     }
     else if (k == LUA_TYPE_STRING)
     {
@@ -90,7 +92,7 @@ size_t luastd::type(Lua *lua)
     }
     lua->fetch_local(0);
     LuaType t = (LuaType)lua->kind();
-    lua->push_string(to_string(t).c_str());
+    lua->push_string(luayed::to_string(t).c_str());
     lua->store_local(0);
     while (lua->top() > 1)
         lua->pop();

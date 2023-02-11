@@ -6,76 +6,82 @@
 #include <iostream>
 #include <stddef.h>
 
-typedef double lnumber;
+#define is_obj(V) ((V).kind > 2)
+
 typedef std::string string;
 
 template <typename T>
 using vector = std::vector<T>;
 
-typedef unsigned char lbyte;
 extern std::ostream &dbg;
-typedef size_t fidx_t;
 
-enum LuaType
+namespace luayed
 {
-    LVNil = 0,
-    LVBool = 1,
-    LVNumber = 2,
-    LVString = 3,
-    LVTable = 4,
-    LVFunction = 5,
-};
+    typedef double lnumber;
 
-#define is_obj(V) ((V).kind > 2)
+    typedef unsigned char lbyte;
+    typedef size_t fidx_t;
 
-class LuaValue
-{
-public:
-    LuaType kind;
-    union
+    enum LuaType
     {
-        bool b;
-        lnumber n;
-        void *ptr;
-    } data;
+        LVNil = 0,
+        LVBool = 1,
+        LVNumber = 2,
+        LVString = 3,
+        LVTable = 4,
+        LVFunction = 5,
+    };
 
-    LuaValue();
-
-    bool truth()
+    class LuaValue
     {
-        return this->kind != LuaType::LVNil && (this->kind != LuaType::LVBool || this->data.b);
-    }
-    template <typename T>
-    T as() const
+    public:
+        LuaType kind;
+        union
+        {
+            bool b;
+            lnumber n;
+            void *ptr;
+        } data;
+
+        LuaValue();
+
+        bool truth()
+        {
+            return this->kind != LuaType::LVNil && (this->kind != LuaType::LVBool || this->data.b);
+        }
+        template <typename T>
+        T as() const
+        {
+            return ((T)this->data.ptr);
+        }
+    };
+
+    struct Hook
     {
-        return ((T)this->data.ptr);
-    }
-};
+        bool is_detached;
+        LuaValue *original;
+        LuaValue val;
+    };
 
-struct Hook
-{
-    bool is_detached;
-    LuaValue *original;
-    LuaValue val;
-};
-
-struct Fnresult
-{
-    enum
+    struct Fnresult
     {
-        Call,
-        Ret,
-        Error,
-        Fail,
-    } kind;
+        enum
+        {
+            Call,
+            Ret,
+            Error,
+            Fail,
+        } kind;
 
-    size_t argc;
-    size_t retc;
+        size_t argc;
+        size_t retc;
+    };
+
+    void crash(string message);
+
+    bool operator==(const LuaValue &v1, const LuaValue &v2);
+    bool operator!=(const LuaValue &v1, const LuaValue &v2);
+
 };
-
-bool operator==(const LuaValue &v1, const LuaValue &v2);
-bool operator!=(const LuaValue &v1, const LuaValue &v2);
-
-void crash(string message);
 
 #endif

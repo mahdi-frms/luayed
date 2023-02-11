@@ -1,6 +1,8 @@
 #include "generator.h"
 #include "lstrep.h"
 
+using namespace luayed;
+
 BaseGenerator::BaseGenerator() : current(nullptr), test(nullptr)
 {
 }

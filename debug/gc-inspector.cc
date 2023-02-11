@@ -1,6 +1,8 @@
 #include "gc-inspector.h"
 #include <iostream>
 
+using namespace luayed;
+
 std::ostream &gc_dbg_output = std::cout;
 
 const char *inspect_linebeg = "GC-INSPECT >>>> ";

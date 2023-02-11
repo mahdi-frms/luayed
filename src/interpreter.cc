@@ -8,6 +8,8 @@
 #define LUA_MAX_INTEGER 9223372036854775807
 #define LUA_MIN_INTEGER -9223372036854775807
 
+using namespace luayed;
+
 opimpl Interpreter::optable[256] = {};
 bool Interpreter::is_initialized = false;
 

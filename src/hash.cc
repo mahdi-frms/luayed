@@ -1,6 +1,6 @@
 #include "hash.h"
 
-uint32_t adler32(const void *buf, size_t buflength)
+uint32_t luayed::adler32(const void *buf, size_t buflength)
 {
     const uint8_t *buffer = (const uint8_t *)buf;
 

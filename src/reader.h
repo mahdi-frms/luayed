@@ -3,16 +3,19 @@
 
 #include "virtuals.h"
 
-class StringSourceReader : public ISourceReader
+namespace luayed
 {
-private:
-    const char *text;
-    size_t pointer;
+    class StringSourceReader : public ISourceReader
+    {
+    private:
+        const char *text;
+        size_t pointer;
 
-public:
-    char readch();
-    char peekch();
-    StringSourceReader(const char *text);
+    public:
+        char readch();
+        char peekch();
+        StringSourceReader(const char *text);
+    };
 };
 
 #endif

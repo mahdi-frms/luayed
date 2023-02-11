@@ -5,6 +5,8 @@
 
 #define T(K) NodeKind::TKN, K
 
+using namespace luayed;
+
 class MockLexer : public ILexer
 {
 private:

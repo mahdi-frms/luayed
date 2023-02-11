@@ -2,6 +2,8 @@
 #include "values.h"
 #include <tap/tap.h>
 
+using namespace luayed;
+
 void lexer_tests();
 void parser_tests();
 void compiler_tests();
@@ -9,12 +11,12 @@ void interpreter_tests();
 void lua_tests();
 void runtime_tests();
 
-void test_assert(bool result, const char *message)
+void luayed::test_assert(bool result, const char *message)
 {
     ok(result, message);
 }
 
-vector<LuaValue> drain(LuaRuntime *rt)
+vector<LuaValue> luayed::drain(LuaRuntime *rt)
 {
     vector<LuaValue> stack;
     while (rt->stack_size())
@@ -22,7 +24,7 @@ vector<LuaValue> drain(LuaRuntime *rt)
     return stack;
 }
 
-LuaValue lvclone(LuaRuntime *rt, const LuaValue &v)
+LuaValue luayed::lvclone(LuaRuntime *rt, const LuaValue &v)
 {
     if (v.kind == LuaType::LVString)
         return rt->create_string(v.as<const char *>());
@@ -32,11 +34,11 @@ LuaValue lvclone(LuaRuntime *rt, const LuaValue &v)
         return v;
 }
 
-void pipe(LuaRuntime *rt, vector<LuaValue> values)
+void luayed::pipe(LuaRuntime *rt, vector<LuaValue> values)
 {
     for (size_t i = 0; i < values.size(); i++)
     {
-        rt->stack_push(lvclone(rt, values[i]));
+        rt->stack_push(luayed::lvclone(rt, values[i]));
     }
 }
 

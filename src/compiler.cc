@@ -2,6 +2,8 @@
 
 #define EXPECT_FREE 0xffff
 
+using namespace luayed;
+
 int chex(char c)
 {
     return c > 'a' ? (c - 'a' + 10) : (c - '0');

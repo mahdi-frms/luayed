@@ -9,6 +9,8 @@
 #include "luastd.h"
 #include "reader.h"
 
+using namespace luayed;
+
 Lua::Lua(LuaConfig conf) : runtime(&this->interpreter)
 {
     this->runtime.set_lua_interface(this);

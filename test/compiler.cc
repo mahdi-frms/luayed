@@ -9,6 +9,8 @@
 #include "generator.h"
 #include <lstrep.h>
 
+using namespace luayed;
+
 typedef void (*test_case_function_t)(const char *, bool);
 
 void test_case(const char *mes, bool rsl)

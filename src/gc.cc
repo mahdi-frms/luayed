@@ -7,6 +7,8 @@
 GCInspector inspector;
 #endif
 
+using namespace luayed;
+
 void GarbageCollector::scan(gc_header_t *obj)
 {
 #ifdef GC_DEBUG

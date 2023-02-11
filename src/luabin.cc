@@ -1,6 +1,8 @@
 #include "luabin.h"
 
-bool operator==(const Upvalue &l, const Upvalue &r)
+using namespace luayed;
+
+bool luayed::operator==(const Upvalue &l, const Upvalue &r)
 {
     return l.fidx == r.fidx && l.offset == r.offset && l.hidx == r.hidx;
 }
@@ -14,7 +16,7 @@ Instruction::Instruction(Opcode op, size_t oprnd1, size_t oprnd2)
     this->oprnd2 = oprnd2;
 }
 
-Bytecode Instruction::encode() const
+Bytecode luayed::Instruction::encode() const
 {
     Bytecode bc;
     lbyte op = this->op;
@@ -51,7 +53,7 @@ Bytecode Instruction::encode() const
     return bc;
 }
 
-size_t op_oprnd_count(lbyte op)
+size_t luayed::op_oprnd_count(lbyte op)
 {
     if (op < 0x80)
         return 0;
@@ -62,17 +64,17 @@ size_t op_oprnd_count(lbyte op)
     return 1;
 }
 
-size_t Instruction::oprnd_count() const
+size_t luayed::Instruction::oprnd_count() const
 {
     return op_oprnd_count(this->op);
 }
 
-Instruction Instruction::decode(Bytecode code)
+Instruction luayed::Instruction::decode(Bytecode code)
 {
     return Instruction::decode(code.bytes);
 }
 
-Instruction Instruction::decode(const lbyte *binary, size_t *read_count)
+Instruction luayed::Instruction::decode(const lbyte *binary, size_t *read_count)
 {
     size_t rc = 1;
     lbyte op = binary[0];
