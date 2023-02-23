@@ -383,7 +383,7 @@ void Interpreter::i_len()
 {
     LuaValue s = this->rt->stack_pop();
     if (s.kind == LuaType::LVString)
-        this->rt->stack_push(this->rt->create_number(strlen(s.as<const char *>())));
+        this->rt->stack_push(this->rt->create_number(this->rt->length(s.as<const char *>())));
     else if (s.kind == LuaType::LVTable)
     {
         LuaValue l = this->rt->create_number(1);
