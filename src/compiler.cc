@@ -671,7 +671,7 @@ void Compiler::compile_generic_for(Noderef node)
     foreach_node(varlist, ch)
     {
         Noderef var = ch->child(0);
-        this->varmem(var)->offset = this->stack_offset++;
+        this->stack_offset++;
         MetaMemory *mm = this->varmem(var);
         if (mm->is_upvalue)
         {
@@ -735,7 +735,7 @@ void Compiler::compile_numeric_for(Noderef node)
 {
     Noderef lvalue = node->child(0)->child(0);
     MetaMemory *md = lvalue->metadata_memory();
-    md->offset = this->stack_offset++;
+    this->stack_offset++;
     this->stack_offset += 2;
     Noderef from = node->child(1);
     Noderef to = node->child(2);
@@ -840,7 +840,7 @@ void Compiler::compile_decl_var(Noderef node)
     {
         Noderef var = ch->child(0);
         MetaMemory *mm = var->metadata_memory();
-        mm->offset = this->stack_offset++;
+        this->stack_offset++;
         if (mm->is_upvalue)
         {
             mm->upoffset = this->hooksize;
@@ -864,7 +864,7 @@ void Compiler::compile_decl_func(Noderef node)
 {
     Noderef var = node->child(0)->child(0);
     MetaMemory *mm = var->metadata_memory();
-    mm->offset = this->stack_offset++;
+    this->stack_offset++;
     if (mm->is_upvalue)
     {
         mm->upoffset = this->hooksize;

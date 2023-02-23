@@ -12,6 +12,7 @@
 #define is_meth(N) (N->get_kind() == NodeKind::MethodBody)
 
 #define foreach_node(PARENT, CHILD) for (ast::Noderef CHILD = PARENT->begin(); CHILD; CHILD = CHILD->next())
+#define foreach_node_from(PARENT, CHILD, IDX) for (ast::Noderef CHILD = PARENT->child(IDX); CHILD; CHILD = CHILD->next())
 
 namespace luayed
 {

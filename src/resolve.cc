@@ -193,11 +193,6 @@ void Resolver::analyze_etc(Noderef node)
         sc->variadic = node == this->ast.root();
         sc->parent = this->current;
         sc->stack_size = is_meth(node) ? 1 : 0;
-        if (node->get_kind() == NodeKind::NumericFor || node->get_kind() == NodeKind::GenericFor)
-        {
-            this->stack_ptr += 2;
-        }
-
         this->current = node;
 
         if (is_fn)
@@ -207,9 +202,22 @@ void Resolver::analyze_etc(Noderef node)
         }
     }
 
-    foreach_node(node, ch)
+    if (node->get_kind() == NodeKind::NumericFor || node->get_kind() == NodeKind::GenericFor)
     {
-        this->analyze_node(ch);
+        this->analyze_node(node->child(0));
+        this->new_var();
+        this->new_var();
+        foreach_node_from(node, ch, 1)
+        {
+            this->analyze_node(ch);
+        }
+    }
+    else
+    {
+        foreach_node(node, ch)
+        {
+            this->analyze_node(ch);
+        }
     }
 
     if (new_scope)
@@ -219,11 +227,7 @@ void Resolver::analyze_etc(Noderef node)
         this->stack_ptr -= sc->stack_size;
         this->hook_ptr -= sc->upvalue_size;
         this->current = sc->parent;
-        if (node->get_kind() == NodeKind::NumericFor || node->get_kind() == NodeKind::GenericFor)
-        {
-            this->stack_ptr -= 2;
-        }
-        else if (is_fn)
+        if (is_fn)
         {
             this->stack_ptr = previous_stack_ptr;
         }
