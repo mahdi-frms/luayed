@@ -18,7 +18,6 @@ namespace luayed
         vector<Instruction> ops;
         vector<int> lines;
         vector<lbyte> vstack;
-        size_t stack_offset = 0;
 
         size_t hooksize = 0;
         size_t hookmax = 0;

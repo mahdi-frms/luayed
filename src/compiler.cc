@@ -132,7 +132,6 @@ fidx_t Compiler::compile(Noderef root, const char *chunckname)
                 continue;
             parcount++;
             MetaMemory *md = par->metadata_memory();
-            this->stack_offset++;
             if (md->is_upvalue)
             {
                 this->emit(Opcode::IUPush);
@@ -454,7 +453,6 @@ void Compiler::compile_function(Noderef node)
 {
     MetaScope *fnscp = node->metadata_scope();
     Compiler compiler(this->gen);
-    compiler.stack_offset = node->get_kind() == NodeKind::MethodBody ? 1 : 0;
     compiler.source = this->source;
     compiler.compile(node, this->chunckname);
     compiler.emit(Instruction(Opcode::IFConst, fnscp->fidx));
@@ -670,14 +668,12 @@ void Compiler::compile_generic_for(Noderef node)
     foreach_node(varlist, ch)
     {
         Noderef var = ch->child(0);
-        this->stack_offset++;
         MetaMemory *mm = this->varmem(var);
         if (mm->is_upvalue)
         {
             upcount++;
         }
     }
-    this->stack_offset += 2;
     //-- push args
     this->compile_explist(arglist, 3);
     for (size_t i = 0; i < varcount - 1; i++)
@@ -713,7 +709,6 @@ void Compiler::compile_generic_for(Noderef node)
     size_t loop_end = this->len();
     //-- loop end
     this->emit(Instruction(Opcode::IPop, varcount + 2));
-    this->stack_offset -= (varcount + 2);
     this->edit_jmp(cjmp, loop_end);
     for (size_t i = 0; i < upcount; i++)
     {
@@ -734,8 +729,6 @@ void Compiler::compile_numeric_for(Noderef node)
 {
     Noderef lvalue = node->child(0)->child(0);
     MetaMemory *md = lvalue->metadata_memory();
-    this->stack_offset++;
-    this->stack_offset += 2;
     Noderef from = node->child(1);
     Noderef to = node->child(2);
     this->compile_exp(from);
@@ -776,7 +769,6 @@ void Compiler::compile_numeric_for(Noderef node)
         this->emit(Opcode::IUPop);
     }
     this->emit(Instruction(Opcode::IPop, 3));
-    this->stack_offset -= 3;
 }
 
 void Compiler::compile_assignment(Noderef node)
@@ -828,7 +820,6 @@ void Compiler::compile_block(Noderef node)
     if (md->stack_size)
     {
         this->emit(Instruction(Opcode::IPop, md->stack_size));
-        this->stack_offset -= md->stack_size;
     }
 }
 void Compiler::compile_decl_var(Noderef node)
@@ -839,7 +830,6 @@ void Compiler::compile_decl_var(Noderef node)
     {
         Noderef var = ch->child(0);
         MetaMemory *mm = var->metadata_memory();
-        this->stack_offset++;
         if (mm->is_upvalue)
         {
             this->hookpush();
@@ -862,7 +852,6 @@ void Compiler::compile_decl_func(Noderef node)
 {
     Noderef var = node->child(0)->child(0);
     MetaMemory *mm = var->metadata_memory();
-    this->stack_offset++;
     if (mm->is_upvalue)
     {
         this->hookpush();
