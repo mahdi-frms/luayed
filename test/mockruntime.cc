@@ -69,6 +69,10 @@ LuaValue MockRuntime::create_string(lnumber n)
 {
     return lvstring(to_string(n).c_str());
 }
+size_t MockRuntime::length(const char *str)
+{
+    return strlen(str);
+}
 LuaValue MockRuntime::create_table()
 {
     return lvtable();

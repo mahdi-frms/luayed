@@ -216,6 +216,7 @@ namespace luayed
         void extras(size_t count);
         LuaValue chunkname();
         void check_garbage_collection();
+        size_t length(const char *str);
 
         Frame *topframe();
         gc_header_t *gc_headers();

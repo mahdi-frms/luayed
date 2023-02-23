@@ -78,6 +78,7 @@ namespace luayed
         virtual Hook *upvalue(size_t idx) = 0;
         virtual LuaValue rodata(size_t idx) = 0;
         virtual lbyte *text() = 0;
+        virtual size_t length(const char *str) = 0;
         virtual uint16_t *dbgmd() = 0;
         virtual LuaValue chunkname() = 0;
         virtual void check_garbage_collection() = 0;

@@ -808,3 +808,8 @@ void LuaRuntime::extras(size_t count)
 {
     this->frame->ret_count = count;
 }
+size_t LuaRuntime::length(const char *str)
+{
+    lstr_p header = ((lstr_p)str) - 1;
+    return header->len;
+}

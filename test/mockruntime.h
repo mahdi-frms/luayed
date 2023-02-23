@@ -97,6 +97,7 @@ namespace luayed
         void check_garbage_collection();
         void store_ip(size_t ip);
         size_t load_ip();
+        size_t length(const char *str);
     };
 };
 
