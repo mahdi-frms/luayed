@@ -113,7 +113,7 @@ void Resolver::reference(Noderef node, Noderef dec, bool func_past)
         MetaScope *sc = mm->scope->metadata_scope();
         if (!mm->is_upvalue)
         {
-            this->new_upvalue();
+            mm->upoffset = this->new_upvalue();
             sc->upvalue_size++;
         }
         mm->is_upvalue = true;

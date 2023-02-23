@@ -135,7 +135,6 @@ fidx_t Compiler::compile(Noderef root, const char *chunckname)
             this->stack_offset++;
             if (md->is_upvalue)
             {
-                md->upoffset = this->hooksize;
                 this->emit(Opcode::IUPush);
                 this->hookpush();
                 upcount++;
@@ -843,7 +842,6 @@ void Compiler::compile_decl_var(Noderef node)
         this->stack_offset++;
         if (mm->is_upvalue)
         {
-            mm->upoffset = this->hooksize;
             this->hookpush();
             upcount++;
         }
@@ -867,7 +865,6 @@ void Compiler::compile_decl_func(Noderef node)
     this->stack_offset++;
     if (mm->is_upvalue)
     {
-        mm->upoffset = this->hooksize;
         this->hookpush();
         this->emit(Opcode::IUPush);
     }
