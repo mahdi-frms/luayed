@@ -38,6 +38,8 @@ namespace luayed
         void self_ref(Noderef node);
         void link(Noderef go_to, Noderef label);
         void link_labels();
+        size_t new_var();
+        size_t new_upvalue();
         MetaScope *curscope();
         Varmap &curmap();
 

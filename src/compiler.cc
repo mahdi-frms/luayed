@@ -132,7 +132,7 @@ fidx_t Compiler::compile(Noderef root, const char *chunckname)
                 continue;
             parcount++;
             MetaMemory *md = par->metadata_memory();
-            md->offset = this->stack_offset++;
+            this->stack_offset++;
             if (md->is_upvalue)
             {
                 md->upoffset = this->hooksize;

@@ -9,6 +9,15 @@ vector<Lerror> Resolver::analyze()
     this->analyze_node(ast.root());
     return std::move(this->errors);
 }
+size_t Resolver::new_var()
+{
+    this->curscope()->stack_size++;
+    return this->stack_ptr++;
+}
+size_t Resolver::new_upvalue()
+{
+    return this->hook_ptr++;
+}
 void Resolver::analyze_var_decl(Noderef node)
 {
     node = node->child(0);
@@ -19,8 +28,7 @@ void Resolver::analyze_var_decl(Noderef node)
         this->curmap()[name] = node;
         MetaMemory *meta = new MetaMemory;
         meta->scope = this->current;
-        this->curscope()->stack_size++;
-        this->stack_ptr++;
+        meta->offset = this->new_var();
         node->annotate(meta);
     }
     else // DotDotDot
@@ -105,7 +113,7 @@ void Resolver::reference(Noderef node, Noderef dec, bool func_past)
         MetaScope *sc = mm->scope->metadata_scope();
         if (!mm->is_upvalue)
         {
-            this->hook_ptr++;
+            this->new_upvalue();
             sc->upvalue_size++;
         }
         mm->is_upvalue = true;
@@ -170,6 +178,8 @@ void Resolver::analyze_etc(Noderef node)
         node->get_kind() == NodeKind::ElseClause ||
         node->get_kind() == NodeKind::ElseIfClause || is_fn;
 
+    size_t previous_stack_ptr;
+
     if (new_scope)
     {
         MetaScope *sc = new MetaScope;
@@ -189,12 +199,19 @@ void Resolver::analyze_etc(Noderef node)
         }
 
         this->current = node;
+
+        if (is_fn)
+        {
+            previous_stack_ptr = this->stack_ptr;
+            this->stack_ptr = is_meth(node) ? 1 : 0;
+        }
     }
 
     foreach_node(node, ch)
     {
         this->analyze_node(ch);
     }
+
     if (new_scope)
     {
         this->link_labels();
@@ -205,6 +222,10 @@ void Resolver::analyze_etc(Noderef node)
         if (node->get_kind() == NodeKind::NumericFor || node->get_kind() == NodeKind::GenericFor)
         {
             this->stack_ptr -= 2;
+        }
+        else if (is_fn)
+        {
+            this->stack_ptr = previous_stack_ptr;
         }
     }
 }
