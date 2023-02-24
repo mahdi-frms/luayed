@@ -328,6 +328,18 @@ void Resolver::analyze_goto(Noderef node)
     }
 }
 
+void Resolver::analyze_return(Noderef node)
+{
+    if (!node->child_count())
+        return;
+    Noderef explist = node->child(0);
+    if (explist->child_count() == 1 && is_call(explist->child(0)))
+    {
+        explist->child(0)->annotate(new MetaTail());
+    }
+    this->analyze_node(explist);
+}
+
 void Resolver::analyze_node(Noderef node)
 {
     if (node->get_kind() == NodeKind::LabelStmt)
@@ -342,6 +354,8 @@ void Resolver::analyze_node(Noderef node)
         this->analyze_identifier(node);
     else if (node->get_kind() == NodeKind::BreakStmt)
         this->analyze_break(node);
+    else if (node->get_kind() == NodeKind::ReturnStmt)
+        this->analyze_return(node);
     else
         this->analyze_etc(node);
 }

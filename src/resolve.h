@@ -30,6 +30,7 @@ namespace luayed
         void analyze_var_decl(Noderef node);
         void analyze_identifier(Noderef node);
         void analyze_etc(Noderef node);
+        void analyze_return(Noderef node);
         void analyze_break(Noderef node);
         void analyze_label(Noderef node);
         void analyze_goto(Noderef node);
