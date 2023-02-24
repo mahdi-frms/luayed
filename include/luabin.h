@@ -55,6 +55,7 @@ namespace luayed
         IVargs = 0xd4,
         IJmp = 0xd6,
         ICjmp = 0xd8,
+        ITCall = 0xda,
 
         IConst = 0xe0,
         IFConst = 0xe2,
@@ -138,6 +139,7 @@ namespace luayed
 #define iret(A) Instruction(IRet, A)
 #define icall(A, B) Instruction(ICall, A, B)
 #define ivargs(A) Instruction(IVargs, A)
+#define itcall(A) Instruction(ITCall, A)
 #define ijmp(A) Instruction(IJmp, A)
 #define icjmp(A) Instruction(ICjmp, A)
 #define iconst(A) Instruction(IConst, A)
