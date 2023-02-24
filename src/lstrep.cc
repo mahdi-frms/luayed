@@ -260,6 +260,7 @@ string luayed::to_string(const Opcode &opcode)
     opnames[IVargs] = "vargs";
     opnames[ITList] = "tlist";
     opnames[ICall] = "call";
+    opnames[ITCall] = "tcall";
     opnames[IConst] = "C";
     opnames[IFConst] = "FC";
     opnames[ILocal] = "local";
