@@ -9,7 +9,7 @@ class AnalysisGenerator : public BaseGenerator
 {
 private:
     string text;
-    FuncTest *fn;
+    FuncTemplate *fn;
 
     void fn_stringify();
     void append(string str);

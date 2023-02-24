@@ -40,7 +40,7 @@ size_t BaseGenerator::const_string(const char *str)
 }
 fidx_t BaseGenerator::pushf()
 {
-    FuncTest *fnt = new FuncTest();
+    FuncTemplate *fnt = new FuncTemplate();
     fidx_t fidx = this->fidx_counter++;
     fnt->prev = nullptr;
     fnt->hookmax = 0;

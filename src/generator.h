@@ -6,9 +6,9 @@
 
 namespace luayed
 {
-    struct FuncTest
+    struct FuncTemplate
     {
-        FuncTest *prev;
+        FuncTemplate *prev;
         vector<lbyte> text;
         vector<Upvalue> upvalues;
         vector<size_t> debug;
@@ -21,9 +21,9 @@ namespace luayed
     class BaseGenerator : public IGenerator
     {
     protected:
-        vector<FuncTest *> funcs;
-        FuncTest *current;
-        FuncTest *test;
+        vector<FuncTemplate *> funcs;
+        FuncTemplate *current;
+        FuncTemplate *test;
         fidx_t fidx_counter = 1;
 
     public:
