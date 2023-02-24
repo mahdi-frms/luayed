@@ -70,6 +70,7 @@ namespace luayed
             MScope = 3,
             MSelf = 4,
             MGoto = 5,
+            MTail = 6,
         };
 
         struct MetaData
@@ -80,6 +81,11 @@ namespace luayed
         };
 
         struct MetaSelf : public MetaData
+        {
+            MetaKind kind();
+        };
+
+        struct MetaTail : public MetaData
         {
             MetaKind kind();
         };
@@ -171,6 +177,7 @@ namespace luayed
             MetaMemory *metadata_memory();
             MetaScope *metadata_scope();
             MetaSelf *metadata_self();
+            MetaSelf *metadata_tail();
 
             static void
             sib_insert(Noderef l, Noderef r, Noderef s);
