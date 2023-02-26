@@ -265,11 +265,17 @@ void Compiler::compile_methcall(Noderef node, size_t expect)
     this->compile_explist(arglist, EXPECT_FREE);
     size_t argcount = this->arglist_count(arglist) + 1;
     this->debug_info(fname.line);
-    bool is_tailcall = node->metadata_tail();
-    if (expect == EXPECT_FREE)
-        this->emit(Instruction(is_tailcall ? Opcode::ITCall : Opcode::ICall, argcount, 0));
+    if (node->metadata_tail())
+    {
+        this->emit(Instruction(Opcode::ITCall, argcount));
+    }
     else
-        this->emit(Instruction(is_tailcall ? Opcode::ITCall : Opcode::ICall, argcount, expect + 1));
+    {
+        if (expect == EXPECT_FREE)
+            this->emit(Instruction(Opcode::ICall, argcount, 0));
+        else
+            this->emit(Instruction(Opcode::ICall, argcount, expect + 1));
+    }
 }
 void Compiler::compile_call(Noderef node, size_t expect)
 {
@@ -279,11 +285,17 @@ void Compiler::compile_call(Noderef node, size_t expect)
     size_t argcount = this->arglist_count(arglist);
     this->compile_explist(arglist, EXPECT_FREE);
     this->debug_info(fn->line());
-    bool is_tailcall = node->metadata_tail();
-    if (expect == EXPECT_FREE)
-        this->emit(Instruction(is_tailcall ? Opcode::ITCall : Opcode::ICall, argcount, 0));
+    if (node->metadata_tail())
+    {
+        this->emit(Instruction(Opcode::ITCall, argcount));
+    }
     else
-        this->emit(Instruction(is_tailcall ? Opcode::ITCall : Opcode::ICall, argcount, expect + 1));
+    {
+        if (expect == EXPECT_FREE)
+            this->emit(Instruction(Opcode::ICall, argcount, 0));
+        else
+            this->emit(Instruction(Opcode::ICall, argcount, expect + 1));
+    }
 }
 void Compiler::compile_identifier(Noderef node)
 {
@@ -875,7 +887,8 @@ void Compiler::compile_ret(Noderef node)
     {
         Noderef vals = node->child(0);
         this->compile_explist(vals, EXPECT_FREE);
-        this->emit(Instruction(Opcode::IRet, this->arglist_count(vals)));
+        if (!node->metadata_tail())
+            this->emit(Instruction(Opcode::IRet, this->arglist_count(vals)));
     }
     else
     {

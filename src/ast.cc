@@ -266,9 +266,9 @@ MetaSelf *Node::metadata_self()
 {
     return (MetaSelf *)this->getannot(MetaKind::MSelf);
 }
-MetaSelf *Node::metadata_tail()
+MetaTail *Node::metadata_tail()
 {
-    return (MetaSelf *)this->getannot(MetaKind::MTail);
+    return (MetaTail *)this->getannot(MetaKind::MTail);
 }
 MetaKind MetaGoto::kind()
 {

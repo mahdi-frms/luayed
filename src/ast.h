@@ -177,7 +177,7 @@ namespace luayed
             MetaMemory *metadata_memory();
             MetaScope *metadata_scope();
             MetaSelf *metadata_self();
-            MetaSelf *metadata_tail();
+            MetaTail *metadata_tail();
 
             static void
             sib_insert(Noderef l, Noderef r, Noderef s);

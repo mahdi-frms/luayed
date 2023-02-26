@@ -2135,4 +2135,18 @@ void compiler_tests()
             ijmp(3),
             iret(0),
         });
+
+    compiler_test_case(
+        "tailcall",
+
+        "local f return f()")
+
+        .test_fn(1)
+        .test_opcodes({
+            inil,
+            ilocal(0),
+            itcall(0),
+            ipop(1),
+            iret(0),
+        });
 }

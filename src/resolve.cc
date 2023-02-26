@@ -336,6 +336,7 @@ void Resolver::analyze_return(Noderef node)
     if (explist->child_count() == 1 && is_call(explist->child(0)))
     {
         explist->child(0)->annotate(new MetaTail());
+        node->annotate(new MetaTail());
     }
     this->analyze_node(explist);
 }
