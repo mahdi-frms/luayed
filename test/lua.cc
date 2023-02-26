@@ -443,6 +443,20 @@ void lua_tests()
         });
 
     lua_test_case(
+        "recursion with tailcall",
+
+        "local function fib(n)\n"
+        "    if n == 0 then\n"
+        "        return 10\n"
+        "    end\n"
+        "    return fib(n - 1)\n"
+        "end\n"
+        "return fib(5)\n",
+        {
+            lvnumber(10),
+        });
+
+    lua_test_case(
         "general case 1",
 
         "function push(arr, val)\n"
