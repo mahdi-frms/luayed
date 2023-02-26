@@ -107,7 +107,9 @@ public:
             if (rs.kind == Fnresult::Ret)
                 this->retarg = rs.retc;
             else if (rs.kind == Fnresult::Call)
-                this->rt.icp_fncall.enable(rs.argc, rs.retc);
+                this->rt.icp_call.enable(rs.argc, rs.retc);
+            else if (rs.kind == Fnresult::Tail)
+                this->rt.icp_tailcall.enable(rs.argc);
             this->test(true, suffix);
         }
         catch (int fault_code)
@@ -149,7 +151,12 @@ public:
     }
     InterpreterTestCase &test_call(size_t argc, size_t retc)
     {
-        this->test(this->rt.icp_fncall.check(argc, retc), "(call [fncall])");
+        this->test(this->rt.icp_call.check(argc, retc), "(call)");
+        return *this;
+    }
+    InterpreterTestCase &test_tailcall(size_t argc)
+    {
+        this->test(this->rt.icp_tailcall.check(argc, 0), "(tailcall)");
         return *this;
     }
     InterpreterTestCase &test_call_hookpush()
@@ -1109,4 +1116,10 @@ void interpreter_tests()
         .test_stack({
             lvstring("mahdi"),
         });
+
+    InterpreterTestCase("tailcall")
+        .execute({
+            itcall(3),
+        })
+        .test_tailcall(3);
 }

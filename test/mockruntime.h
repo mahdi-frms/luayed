@@ -44,7 +44,8 @@ namespace luayed
 
     public:
         Intercept icp_luafn;
-        Intercept icp_fncall;
+        Intercept icp_call;
+        Intercept icp_tailcall;
         Intercept icp_hookpush;
         Intercept icp_hookpop;
 

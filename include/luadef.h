@@ -68,6 +68,7 @@ namespace luayed
         enum
         {
             Call,
+            Tail,
             Ret,
             Error,
             Fail,
