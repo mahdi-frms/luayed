@@ -85,7 +85,7 @@ void test_cxx_calls_cxx_extra()
              rt.create_number(0),
              rt.create_number(600),
          });
-    rt.fncall(5, 5);
+    rt.call(5, 5);
 
     rt_assert(rt.stack_size() == 4, mes, 1);
     vector<LuaValue> stack = drain(&rt);
@@ -129,7 +129,7 @@ void test_cxx_calls_cxx_less()
              rt.create_number(0),
              rt.create_number(600),
          });
-    rt.fncall(5, 5);
+    rt.call(5, 5);
 
     rt_assert(rt.stack_size() == 5, mes, 1);
     vector<LuaValue> stack = drain(&rt);
@@ -186,8 +186,8 @@ size_t lfcxx5(void *r)
     rt->stack_push(rt->create_cppfn(lfcxx4));
     rt->stack_push(rt->create_cppfn(lfcxx3));
     rt->stack_push(rt->create_number(3));
-    rt->fncall(1, 0);
-    rt->fncall(0, 0);
+    rt->call(1, 0);
+    rt->call(0, 0);
     return 0;
 }
 
@@ -197,7 +197,7 @@ void test_lua_calls_cxx()
     rt.set_test_mode(true);
     rt.set_lua_interface(&rt);
     rt.stack_push(rt.create_cppfn(lfcxx5));
-    rt.fncall(0, 6);
+    rt.call(0, 6);
     vector<LuaValue> stack = drain(&rt);
     vector<LuaValue> expected = {
         rt.create_number(-1),

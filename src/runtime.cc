@@ -493,7 +493,26 @@ LuaValue LuaRuntime::lua_type_to_string(LuaType t)
     };
     return this->create_string(texts[t]);
 }
-Fnresult LuaRuntime::calling(size_t argc, size_t retc, bool is_tail)
+Fnresult LuaRuntime::fncall_execute()
+{
+    Fnresult rs;
+    LuaFunction *fn = this->frame->fn.as<LuaFunction *>();
+    if (fn->is_lua)
+    {
+        rs = this->interpreter->run(this);
+    }
+    else
+    {
+        LuaRTCppFunction cppfn = fn->native();
+        size_t return_count = cppfn(this->lua_interface);
+        rs.kind = this->frame->has_error ? Fnresult::Error : Fnresult::Ret;
+        if (!this->frame->has_error)
+            rs.retc = return_count;
+        this->check_garbage_collection();
+    }
+    return rs;
+}
+Fnresult LuaRuntime::fncall(size_t argc, size_t retc, bool is_tail)
 {
     Frame *prev = this->frame;
     if (is_tail)
@@ -541,23 +560,9 @@ Fnresult LuaRuntime::calling(size_t argc, size_t retc, bool is_tail)
     prev->sp--;
     prev->ret_count = 0;
     // execute function
-    Fnresult rs;
-    if (is_lua)
-    {
-        rs = this->interpreter->run(this);
-    }
-    else
-    {
-        LuaRTCppFunction cppfn = fn->as<LuaFunction *>()->native();
-        size_t return_count = cppfn(this->lua_interface);
-        rs.kind = this->frame->has_error ? Fnresult::Error : Fnresult::Ret;
-        if (!this->frame->has_error)
-            rs.retc = return_count;
-        this->check_garbage_collection();
-    }
-    return rs;
+    return this->fncall_execute();
 }
-void LuaRuntime::fncall(size_t argc, size_t retc)
+void LuaRuntime::call(size_t argc, size_t retc)
 {
     size_t depth = 0;
     Fnresult rs;
@@ -569,11 +574,11 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
         if (rs.kind == Fnresult::Call)
         {
             depth++;
-            rs = this->calling(rs.argc, rs.retc, false);
+            rs = this->fncall(rs.argc, rs.retc, false);
         }
         else if (rs.kind == Fnresult::Tail)
         {
-            rs = this->calling(rs.argc, this->frame->ret_count, true);
+            rs = this->fncall(rs.argc, this->frame->ret_count, true);
         }
         else if (rs.kind == Fnresult::Ret || rs.kind == Fnresult::Error)
         {

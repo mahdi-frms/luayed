@@ -183,8 +183,9 @@ namespace luayed
         LuaValue table_global();
         bool table_check(LuaValue t, LuaValue k, bool is_set);
 
-        Fnresult calling(size_t argc, size_t retc, bool is_tail);
-        void fncall(size_t argc, size_t retc);
+        Fnresult fncall(size_t argc, size_t retc, bool is_tail);
+        Fnresult fncall_execute();
+        void call(size_t argc, size_t retc);
         void fnret(size_t count);
         void set_error(LuaValue value);
         LuaValue get_error();
