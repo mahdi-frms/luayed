@@ -46,7 +46,6 @@ Luayed is still under development, and currently misses the following features:
 + Variable attributes
 + Standard library
 + Debug info & debugger
-+ Tailcalls
 + A documented C++ API
 + Metatables
 
