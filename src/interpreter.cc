@@ -49,6 +49,7 @@ void Interpreter::optable_init()
     Interpreter::optable[IFalse] = &Interpreter::i_false;
     Interpreter::optable[IRet] = &Interpreter::i_ret;
     Interpreter::optable[ICall] = &Interpreter::i_call;
+    Interpreter::optable[ITCall] = &Interpreter::i_tcall;
     Interpreter::optable[IVargs] = &Interpreter::i_vargs;
     Interpreter::optable[IJmp] = &Interpreter::i_jmp;
     Interpreter::optable[ICjmp] = &Interpreter::i_cjmp;
@@ -140,6 +141,11 @@ Fnresult Interpreter::run(IRuntime *rt)
     {
         rs.kind = Fnresult::Call;
         rs.retc = this->retc;
+        rs.argc = this->argc;
+    }
+    if (this->state == InterpreterState::Tail)
+    {
+        rs.kind = Fnresult::Tail;
         rs.argc = this->argc;
     }
     this->retc = 0;
@@ -555,6 +561,12 @@ void Interpreter::i_call()
     this->argc = this->arg1;
     this->retc = this->arg2;
     this->state = InterpreterState::Call;
+}
+void Interpreter::i_tcall()
+{
+    this->rt->store_ip(this->ip);
+    this->argc = this->arg1;
+    this->state = InterpreterState::Tail;
 }
 void Interpreter::i_vargs()
 {

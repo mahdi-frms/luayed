@@ -16,6 +16,7 @@ namespace luayed
         End,
         Error,
         Call,
+        Tail,
     };
 
     enum class Comparison
@@ -134,6 +135,7 @@ namespace luayed
         void i_ret();
 
         void i_call();
+        void i_tcall();
         void i_vargs();
         void i_jmp();
         void i_cjmp();
