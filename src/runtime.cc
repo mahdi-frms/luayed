@@ -516,7 +516,7 @@ Fnresult LuaRuntime::fncall(size_t argc, size_t retc, bool is_tail)
 {
     Frame *prev = this->frame;
     if (is_tail)
-        retc = prev->prev->ret_count;
+        retc = prev->exp_count;
     size_t total_argc = argc + prev->ret_count;
     // check if there are enough values on the stack
     if (total_argc + 1 > prev->sp)
@@ -539,26 +539,45 @@ Fnresult LuaRuntime::fncall(size_t argc, size_t retc, bool is_tail)
     }
     bool is_lua = fn->as<LuaFunction *>()->is_lua;
     Lfunction *bin = is_lua ? fn->as<LuaFunction *>()->binary() : nullptr;
-    this->new_frame();
-    Frame *frame = this->frame;
-    // move values between frames
-    frame->fn = *fn;
-    frame->exp_count = retc;
-    frame->vargs_count = 0;
-
-    this->copy_values(prev, frame, total_argc);
-    prev->sp -= total_argc;
-    frame->sp += total_argc;
-    if (is_lua && bin->parcount > total_argc)
+    if (!is_tail)
     {
-        this->push_nils(frame, bin->parcount - total_argc);
+        // create new frame
+        this->new_frame();
+        Frame *frame = this->frame;
+        frame->fn = *fn;
+        frame->exp_count = retc;
+        frame->vargs_count = 0;
+        // move values between frames
+        this->copy_values(prev, frame, total_argc);
+        prev->sp -= total_argc;
+        frame->sp += total_argc;
+        if (is_lua && bin->parcount > total_argc)
+        {
+            this->push_nils(frame, bin->parcount - total_argc);
+        }
+        else
+        {
+            frame->vargs_count += total_argc - (is_lua ? bin->parcount : 0);
+        }
+        prev->sp--;
+        prev->ret_count = 0;
     }
     else
     {
-        frame->vargs_count += total_argc - (is_lua ? bin->parcount : 0);
+        while (this->frame->hookptr)
+            this->hookpop();
+        frame->ip = 0;
+        LuaValue *old_stack = frame->stack();
+        frame->fn = *fn;
+        for (size_t i = 0; i < total_argc; i++)
+        {
+            frame->stack()[i] = old_stack[frame->sp - total_argc + i];
+        }
+        frame->sp = total_argc;
+        frame->vargs_count = total_argc - (is_lua ? bin->parcount : 0);
+        frame->exp_count = retc;
+        frame->ret_count = 0;
     }
-    prev->sp--;
-    prev->ret_count = 0;
     // execute function
     return this->fncall_execute();
 }
