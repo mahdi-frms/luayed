@@ -56,7 +56,6 @@ namespace luayed
         virtual LuaValue table_get(LuaValue t, LuaValue k) = 0;
         virtual LuaValue table_global() = 0;
 
-        virtual void fncall(size_t argc, size_t retc) = 0;
         virtual void set_error(LuaValue value) = 0;
         virtual LuaValue get_error() = 0;
         virtual bool error_raised() = 0;

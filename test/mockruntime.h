@@ -71,7 +71,6 @@ namespace luayed
         LuaValue create_string(const char *s1, const char *s2);
         LuaValue create_table();
         LuaValue create_luafn(fidx_t fidx);
-        void fncall(size_t argc, size_t retc);
         LuaValue stack_pop();
         void stack_push(LuaValue value);
         LuaValue stack_read(size_t idx);

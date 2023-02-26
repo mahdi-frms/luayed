@@ -82,10 +82,6 @@ LuaValue MockRuntime::create_luafn(fidx_t fidx)
     this->icp_luafn.enable(fidx);
     return lvnil();
 }
-void MockRuntime::fncall(size_t argc, size_t retc)
-{
-    this->icp_fncall.enable(argc, retc);
-}
 
 LuaValue MockRuntime::stack_pop()
 {

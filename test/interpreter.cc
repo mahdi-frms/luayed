@@ -107,7 +107,7 @@ public:
             if (rs.kind == Fnresult::Ret)
                 this->retarg = rs.retc;
             else if (rs.kind == Fnresult::Call)
-                this->rt.fncall(rs.argc, rs.retc);
+                this->rt.icp_fncall.enable(rs.argc, rs.retc);
             this->test(true, suffix);
         }
         catch (int fault_code)
@@ -147,7 +147,7 @@ public:
         this->test(this->rt.icp_luafn.check(fidx, 0), "(call [luafn])");
         return *this;
     }
-    InterpreterTestCase &test_call_fncall(size_t argc, size_t retc)
+    InterpreterTestCase &test_call(size_t argc, size_t retc)
     {
         this->test(this->rt.icp_fncall.check(argc, retc), "(call [fncall])");
         return *this;
@@ -323,7 +323,7 @@ void interpreter_tests()
             iret(0),
         })
         .execute()
-        .test_call_fncall(4, 2);
+        .test_call(4, 2);
 
     InterpreterTestCase("local")
         .set_stack({
