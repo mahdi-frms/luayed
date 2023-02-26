@@ -178,7 +178,7 @@ void Resolver::analyze_etc(Noderef node)
         node->get_kind() == NodeKind::ElseClause ||
         node->get_kind() == NodeKind::ElseIfClause || is_fn;
 
-    size_t previous_stack_ptr;
+    size_t previous_stack_ptr = 0;
 
     if (new_scope)
     {
