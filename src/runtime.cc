@@ -493,9 +493,11 @@ LuaValue LuaRuntime::lua_type_to_string(LuaType t)
     };
     return this->create_string(texts[t]);
 }
-Fnresult LuaRuntime::calling(size_t argc, size_t retc)
+Fnresult LuaRuntime::calling(size_t argc, size_t retc, bool is_tail)
 {
     Frame *prev = this->frame;
+    if (is_tail)
+        retc = prev->prev->ret_count;
     size_t total_argc = argc + prev->ret_count;
     // check if there are enough values on the stack
     if (total_argc + 1 > prev->sp)
@@ -567,7 +569,11 @@ void LuaRuntime::fncall(size_t argc, size_t retc)
         if (rs.kind == Fnresult::Call)
         {
             depth++;
-            rs = this->calling(rs.argc, rs.retc);
+            rs = this->calling(rs.argc, rs.retc, false);
+        }
+        else if (rs.kind == Fnresult::Tail)
+        {
+            rs = this->calling(rs.argc, this->frame->ret_count, true);
         }
         else if (rs.kind == Fnresult::Ret || rs.kind == Fnresult::Error)
         {

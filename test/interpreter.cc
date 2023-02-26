@@ -1118,8 +1118,10 @@ void interpreter_tests()
         });
 
     InterpreterTestCase("tailcall")
-        .execute({
+        .set_text({
             itcall(3),
+            iret(0),
         })
+        .execute()
         .test_tailcall(3);
 }
