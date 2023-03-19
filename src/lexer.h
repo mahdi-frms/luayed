@@ -7,9 +7,16 @@
 #include "lerror.h"
 #include "token.h"
 #include "virtuals.h"
+#include "reader.h"
 
 namespace luayed
 {
+    class ILexer
+    {
+    public:
+        virtual Lerror get_error() = 0;
+        virtual Token next() = 0;
+    };
 
     class Lexer : public ILexer
     {

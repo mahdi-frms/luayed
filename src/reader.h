@@ -5,6 +5,14 @@
 
 namespace luayed
 {
+
+    class ISourceReader
+    {
+    public:
+        virtual char readch() = 0;
+        virtual char peekch() = 0;
+    };
+
     class StringSourceReader : public ISourceReader
     {
     private:

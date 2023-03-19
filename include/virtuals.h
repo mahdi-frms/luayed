@@ -30,13 +30,6 @@ namespace luayed
         virtual void meta_chunkname(const char *chunkname) = 0;
     };
 
-    class ILexer
-    {
-    public:
-        virtual Lerror get_error() = 0;
-        virtual Token next() = 0;
-    };
-
     class IRuntime
     {
     public:
@@ -101,13 +94,6 @@ namespace luayed
     {
     public:
         virtual void reference(void *ptr) = 0;
-    };
-
-    class ISourceReader
-    {
-    public:
-        virtual char readch() = 0;
-        virtual char peekch() = 0;
     };
 };
 
