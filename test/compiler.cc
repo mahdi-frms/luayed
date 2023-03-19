@@ -18,16 +18,6 @@ void test_case(const char *mes, bool rsl)
     test_assert(rsl, mes);
 }
 
-string compiler_test_message(const char *item, const char *property)
-{
-    string message = "compiler : ";
-    message.append(item);
-    message.append(" (");
-    message.append(property);
-    message.push_back(')');
-    return message;
-}
-
 class GenTest : public BaseGenerator
 {
     const char *message;
@@ -35,6 +25,18 @@ class GenTest : public BaseGenerator
 public:
     GenTest(const char *message) : BaseGenerator(), message(message)
     {
+    }
+    string compiler_test_message(const char *item, const char *property)
+    {
+        string message = "compiler : ";
+        message.append(item);
+        message.append(" [");
+        message.append(to_string(this->test->fidx));
+        message.push_back(']');
+        message.append(" (");
+        message.append(property);
+        message.push_back(')');
+        return message;
     }
     GenTest &test_fn(size_t fidx)
     {
