@@ -1017,8 +1017,15 @@ size_t Compiler::const_string(const char *s)
 
 void Compiler::emit(Instruction op)
 {
-    this->binsize += op.encode().count;
-    this->instructions.push_back(op);
+    if (op.op == Opcode::IPop && this->instructions.size() && this->instructions.back().op == Opcode::IPop)
+    {
+        this->instructions.back().oprnd1 += op.oprnd1;
+    }
+    else
+    {
+        this->binsize += op.encode().count;
+        this->instructions.push_back(op);
+    }
 }
 
 void Compiler::ops_flush()

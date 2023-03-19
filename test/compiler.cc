@@ -799,9 +799,7 @@ void compiler_tests()
             iadd,
             ilstore(0),
             // end
-            ipop(3),
-            ipop(1),
-            ipop(2),
+            ipop(6),
             iret(0),
         });
 
@@ -1703,9 +1701,10 @@ void compiler_tests()
             iconst(1),
             ifalse,
             itset,
-            ipop(1),
+            //-- ipop(1),
             // end
-            ipop(1),
+            //-- ipop(1),
+            ipop(2),
             iret(0),
         });
 
@@ -1742,9 +1741,10 @@ void compiler_tests()
             itset,
             itset,
             // pop
-            ipop(2),
+            // -- ipop(2),
             // end
-            ipop(1),
+            // -- ipop(1),
+            ipop(3),
             iret(0),
         });
 
@@ -1828,8 +1828,7 @@ void compiler_tests()
             iconst(0),
             ifconst(2),
             itset,
-            ipop(1),
-            ipop(1),
+            ipop(2),
             iret(0),
         })
 
@@ -1870,8 +1869,7 @@ void compiler_tests()
             iconst(0),
             ifconst(2),
             itset,
-            ipop(1),
-            ipop(1),
+            ipop(2),
             iret(0),
         })
 
