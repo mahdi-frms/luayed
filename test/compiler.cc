@@ -984,6 +984,32 @@ void compiler_tests()
         });
 
     compiler_test_case(
+        "while loop",
+
+        "local a,b = false,100 while (true) do a() end")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(1)
+        .test_upvalues({})
+        .test_opcodes({
+            ifalse,
+            iconst(0),
+            // while 1
+            itrue,
+            inot,
+            icjmp(16),
+            // do
+            ilocal(0),
+            icall(0, 1),
+            ijmp(3),
+            // end 14
+            ipop(2),
+            iret(0),
+        });
+
+    compiler_test_case(
         "repeat loop",
 
         "local a repeat a() until( false )")
@@ -1002,6 +1028,30 @@ void compiler_tests()
             ifalse,
             inot,
             icjmp(1),
+            // end
+            ipop(1),
+            iret(0),
+        });
+
+    compiler_test_case(
+        "repeat loop - jump index",
+
+        "local a = 5 repeat a() until( false )")
+
+        .test_fn(1)
+        .test_parcount(0)
+        .test_hookmax(0)
+        .test_ccount(1)
+        .test_upvalues({})
+        .test_opcodes({
+            iconst(0),
+            // repeat 1
+            ilocal(0),
+            icall(0, 1),
+            // until
+            ifalse,
+            inot,
+            icjmp(2),
             // end
             ipop(1),
             iret(0),

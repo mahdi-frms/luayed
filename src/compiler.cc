@@ -702,7 +702,7 @@ void Compiler::compile_generic_for(Noderef node)
     //-- swap args
     this->compile_generic_for_swap(varcount);
     //-- loop start
-    size_t loop_beg = this->len();
+    size_t loop_beg = this->binsize;
     this->emit(Instruction(Opcode::IBLocal, 1));                           // iterator
     this->emit(Instruction(Opcode::IBLocal, 3));                           // state
     this->emit(Instruction(Opcode::ILocal, this->varmem(lvalue)->offset)); // prev
@@ -757,7 +757,7 @@ void Compiler::compile_numeric_for(Noderef node)
     }
     else
         this->emit(Instruction(Opcode::IConst, this->const_number(1)));
-    size_t loop_start = this->len();
+    size_t loop_start = this->binsize;
     // condition
     this->emit(Instruction(Opcode::IBLocal, 3)); // index
     this->emit(Instruction(Opcode::IBLocal, 3)); // limit
@@ -895,7 +895,7 @@ void Compiler::compile_ret(Noderef node)
 
 void Compiler::compile_while(Noderef node)
 {
-    size_t jmp_idx = this->len();
+    size_t jmp_idx = this->binsize;
     this->compile_exp(node->child(0));
     this->emit(Opcode::INot);
     size_t cjmp = this->len();
@@ -907,7 +907,7 @@ void Compiler::compile_while(Noderef node)
 
 void Compiler::compile_repeat(Noderef node)
 {
-    size_t cjmp_idx = this->len();
+    size_t cjmp_idx = this->binsize;
     this->compile_block(node->child(0));
     this->compile_exp(node->child(1));
     this->emit(Opcode::INot);
