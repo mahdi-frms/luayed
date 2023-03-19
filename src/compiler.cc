@@ -148,6 +148,8 @@ fidx_t Compiler::compile(Noderef root, const char *chunckname)
     this->gen->meta_hookmax(this->hookmax);
     this->gen->meta_chunkname(chunckname);
     this->emit(Instruction(Opcode::IRet, 0));
+    for (size_t i = 0; i < this->instructions.size(); i++)
+        this->gen->emit(this->instructions[i].encode());
     this->gen->popf();
     return fnscp->fidx;
 }
@@ -211,7 +213,7 @@ size_t Compiler::arglist_count(Noderef arglist)
 }
 size_t Compiler::len()
 {
-    return this->gen->len();
+    return this->instructions.size();
 }
 
 void Compiler::compile_if(Noderef node)
@@ -233,11 +235,11 @@ void Compiler::compile_if(Noderef node)
             this->compile_block(cls->child(1));
             jmps.push_back(this->len());
             this->emit(Instruction(Opcode::IJmp, 0));
-            size_t cjmp_idx = this->len();
+            size_t cjmp_idx = this->binsize;
             this->edit_jmp(cjmp, cjmp_idx);
         }
     }
-    size_t jmp_idx = this->len();
+    size_t jmp_idx = this->binsize;
     for (size_t i = 0; i < jmps.size(); i++)
     {
         this->edit_jmp(jmps[i], jmp_idx);
@@ -246,8 +248,7 @@ void Compiler::compile_if(Noderef node)
 
 void Compiler::edit_jmp(size_t opidx, size_t jmp_idx)
 {
-    this->seti(opidx + 1, jmp_idx % 256);
-    this->seti(opidx + 2, jmp_idx >> 8);
+    this->instructions[opidx].oprnd1 = jmp_idx;
 }
 
 void Compiler::compile_methcall(Noderef node, size_t expect)
@@ -469,7 +470,7 @@ void Compiler::compile_function(Noderef node)
     Compiler compiler(this->gen);
     compiler.source = this->source;
     compiler.compile(node, this->chunckname);
-    compiler.emit(Instruction(Opcode::IFConst, fnscp->fidx));
+    this->emit(Instruction(Opcode::IFConst, fnscp->fidx));
 }
 
 void Compiler::compile_exp(Noderef node)
@@ -720,7 +721,7 @@ void Compiler::compile_generic_for(Noderef node)
     //-- block
     this->compile_node(node->child(2));
     this->emit(Instruction(Opcode::IJmp, loop_beg));
-    size_t loop_end = this->len();
+    size_t loop_end = this->binsize;
     //-- loop end
     this->emit(Instruction(Opcode::IPop, varcount + 2));
     this->edit_jmp(cjmp, loop_end);
@@ -729,10 +730,6 @@ void Compiler::compile_generic_for(Noderef node)
         this->hookpop();
         this->emit(Opcode::IUPop);
     }
-}
-void Compiler::seti(size_t idx, lbyte b)
-{
-    this->gen->seti(idx, b);
 }
 size_t Compiler::upval(fidx_t fidx, size_t offset, size_t hidx)
 {
@@ -776,7 +773,7 @@ void Compiler::compile_numeric_for(Noderef node)
     this->emit(Opcode::IAdd);
     this->emit(Instruction(Opcode::IBLStore, 3));
     this->emit(Instruction(Opcode::IJmp, loop_start));
-    this->edit_jmp(jmp, this->len());
+    this->edit_jmp(jmp, this->binsize);
     if (md->is_upvalue)
     {
         this->hookpop();
@@ -816,7 +813,7 @@ void Compiler::compile_logic(Noderef node)
     this->emit(Instruction(Opcode::ICjmp, 0));
     this->emit(Instruction(Opcode::IPop, 1));
     this->compile_exp(node->child(2));
-    this->edit_jmp(cjmp, this->len());
+    this->edit_jmp(cjmp, this->binsize);
 }
 
 void Compiler::compile_block(Noderef node)
@@ -905,7 +902,7 @@ void Compiler::compile_while(Noderef node)
     this->emit(Instruction(Opcode::ICjmp, 0));
     this->compile_block(node->child(1));
     this->emit(Instruction(Opcode::IJmp, jmp_idx));
-    this->edit_jmp(cjmp, this->len());
+    this->edit_jmp(cjmp, this->binsize);
 }
 
 void Compiler::compile_repeat(Noderef node)
@@ -964,7 +961,7 @@ void Compiler::compile_label(Noderef node)
 {
     MetaLabel *lmd = node->metadata_label();
     lmd->is_compiled = true;
-    lmd->address = this->len();
+    lmd->address = this->binsize;
     Noderef go_to = lmd->go_to;
     while (go_to)
     {
@@ -1017,7 +1014,8 @@ size_t Compiler::const_string(const char *s)
 
 void Compiler::emit(Instruction op)
 {
-    this->gen->emit(op.encode());
+    this->binsize += op.encode().count;
+    this->instructions.push_back(op);
 }
 
 void Compiler::ops_flush()

@@ -16,11 +16,13 @@ namespace luayed
         const char *source = nullptr;
         IGenerator *gen;
         vector<Instruction> ops;
+        vector<Instruction> instructions;
         vector<int> lines;
         vector<lbyte> vstack;
 
         size_t hooksize = 0;
         size_t hookmax = 0;
+        size_t binsize = 0;
 
         void hookpush();
         void hookpop();
@@ -28,7 +30,6 @@ namespace luayed
         void emit(Instruction op);
         void ops_flush();
         void edit_jmp(size_t opidx, size_t jmp_idx);
-        void seti(size_t idx, lbyte b);
         size_t upval(fidx_t fidx, size_t offset, size_t hidx);
         void ops_push(Instruction op);
         void ops_push(Instruction op, int line);
