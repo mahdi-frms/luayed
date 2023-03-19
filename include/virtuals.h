@@ -14,7 +14,6 @@ namespace luayed
     public:
         virtual void emit(Bytecode opcode) = 0;
         virtual size_t len() = 0;
-        virtual void seti(size_t idx, lbyte b) = 0;
 
         virtual size_t const_number(lnumber num) = 0;
         virtual size_t const_string(const char *str) = 0;

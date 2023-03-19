@@ -31,7 +31,6 @@ namespace luayed
         void emit(Bytecode opcode);
         size_t len();
         void debug_info(size_t line);
-        void seti(size_t idx, lbyte b);
         size_t const_number(lnumber num);
         size_t const_string(const char *str);
         fidx_t pushf();
@@ -55,8 +54,6 @@ namespace luayed
 
         void emit(Bytecode opcode);
         size_t len();
-        void seti(size_t idx, lbyte b);
-
         size_t const_number(lnumber num);
         size_t const_string(const char *str);
         void debug_info(size_t line);

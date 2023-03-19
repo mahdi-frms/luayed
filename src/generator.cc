@@ -22,10 +22,6 @@ void BaseGenerator::debug_info(size_t line)
         this->current->debug.push_back(0);
     this->current->debug.back() = line;
 }
-void BaseGenerator::seti(size_t idx, lbyte b)
-{
-    this->current->text[idx] = b;
-}
 size_t BaseGenerator::const_number(lnumber num)
 {
     size_t idx = this->current->constants.size();
@@ -129,10 +125,6 @@ void LuaGenerator::emit(Bytecode opcode)
 size_t LuaGenerator::len()
 {
     return this->gfn->text.size();
-}
-void LuaGenerator::seti(size_t idx, lbyte b)
-{
-    this->gfn->text[idx] = b;
 }
 size_t LuaGenerator::const_number(lnumber num)
 {
