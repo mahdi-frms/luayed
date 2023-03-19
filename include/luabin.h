@@ -91,6 +91,7 @@ namespace luayed
         Opcode op;
         size_t oprnd1;
         size_t oprnd2;
+        size_t line;
 
         Instruction(Opcode op, size_t oprnd1 = 0, size_t oprnd2 = 0);
 

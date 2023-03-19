@@ -14,6 +14,7 @@ Instruction::Instruction(Opcode op, size_t oprnd1, size_t oprnd2)
     this->op = op;
     this->oprnd1 = oprnd1;
     this->oprnd2 = oprnd2;
+    this->line = 0;
 }
 
 Bytecode luayed::Instruction::encode() const
