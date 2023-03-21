@@ -193,7 +193,7 @@ LuaValue MockRuntime::chunkname()
 void MockRuntime::check_garbage_collection()
 {
 }
-uint16_t *MockRuntime::dbgmd()
+dbginfo_t *MockRuntime::dbgmd()
 {
     return nullptr;
 }

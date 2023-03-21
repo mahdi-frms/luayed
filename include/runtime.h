@@ -4,6 +4,7 @@
 #include "luabin.h"
 #include "virtuals.h"
 #include "set.h"
+#include "debug.h"
 
 #define STACK_BUFFER_SIZE 1024 * 1024
 
@@ -54,7 +55,7 @@ namespace luayed
         Upvalue *ups();
         LuaValue *rodata();
         Lfunction **innerfns();
-        uint16_t *dbs();
+        dbginfo_t *dbs();
 
         ~Lfunction();
         Lfunction &operator=(const Lfunction &other) = delete;
@@ -210,7 +211,7 @@ namespace luayed
         Hook *upvalue(size_t idx);
         LuaValue rodata(size_t idx);
         lbyte *text();
-        uint16_t *dbgmd();
+        dbginfo_t *dbgmd();
         size_t stack_size();
         size_t argcount();
         size_t extras();

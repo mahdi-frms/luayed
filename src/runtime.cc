@@ -38,9 +38,9 @@ Lfunction **Lfunction::innerfns()
 {
     return (Lfunction **)(this->rodata() + this->rolen);
 }
-uint16_t *Lfunction::dbs()
+dbginfo_t *Lfunction::dbs()
 {
-    return (uint16_t *)(this->ups() + this->uplen);
+    return (dbginfo_t *)(this->ups() + this->uplen);
 }
 LuaValue LuaRuntime::create_nil()
 {
@@ -248,7 +248,7 @@ Lfunction *LuaRuntime::create_binary(GenFunction *gfn)
                       gfn->text.size() * sizeof(lbyte) +
                       gfn->rodata.size() * sizeof(LuaValue) +
                       gfn->upvalues.size() * sizeof(Upvalue) +
-                      gfn->dbg_lines.size() * sizeof(uint16_t) +
+                      gfn->dbg_lines.size() * sizeof(dbginfo_t) +
                       gfn->innerfns.size() * sizeof(Lfunction *);
 
     Lfunction *fn = (Lfunction *)this->allocate(bin_size, AllocType::ATBinary);
@@ -806,7 +806,7 @@ lbyte *LuaRuntime::text()
 {
     return this->bin()->text();
 }
-uint16_t *LuaRuntime::dbgmd()
+dbginfo_t *LuaRuntime::dbgmd()
 {
     return this->bin()->dbs();
 }
