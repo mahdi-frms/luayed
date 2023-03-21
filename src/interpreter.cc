@@ -159,8 +159,13 @@ LuaValue Interpreter::error_add_meta(LuaValue e)
     {
         s1 = this->rt->create_string("[?]");
     }
+    dbginfo_t dbginfo = this->rt->dbgmd()[this->pip];
+    if (DEBUG_INFO_GET_TYPE(dbginfo) == DEBUG_INFO_TYPE_NUMFOR)
+        s1 = this->concat(s1, this->rt->create_string(" [numeric for]"));
+    else if (DEBUG_INFO_GET_TYPE(dbginfo) == DEBUG_INFO_TYPE_GENFOR)
+        s1 = this->concat(s1, this->rt->create_string(" [generic for]"));
     LuaValue s2 = this->rt->create_string(":");
-    LuaValue s3 = this->rt->create_string(this->rt->dbgmd()[this->pip]);
+    LuaValue s3 = this->rt->create_string(DEBUG_INFO_GET_LINE(dbginfo));
     LuaValue s4 = this->rt->create_string(": ");
     s1 = this->concat(s1, s2);
     s1 = this->concat(s1, s3);

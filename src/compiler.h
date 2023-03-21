@@ -72,7 +72,7 @@ namespace luayed
         size_t arglist_count(Noderef arglist);
         Opcode translate_token(TokenKind kind, bool bin);
         fidx_t compile(Noderef root, const char *chunckname = nullptr);
-        void debug_info(size_t line);
+        void debug_info(int type, size_t line);
         string scan_lua_multiline_string(Token t);
         string scan_lua_singleline_string(Token t);
         string scan_lua_string(Token t);

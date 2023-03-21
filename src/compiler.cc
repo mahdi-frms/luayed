@@ -150,7 +150,7 @@ fidx_t Compiler::compile(Noderef root, const char *chunckname)
     this->emit(Instruction(Opcode::IRet, 0));
     for (size_t i = 0; i < this->instructions.size(); i++)
     {
-        this->gen->debug_info(this->instructions[i].line);
+        this->gen->debug_info(this->instructions[i].dbg);
         this->gen->emit(this->instructions[i].encode());
     }
     this->gen->popf();
@@ -279,7 +279,7 @@ void Compiler::compile_methcall(Noderef node, size_t expect)
         else
             this->emit(Instruction(Opcode::ICall, argcount, expect + 1));
     }
-    this->debug_info(fname.line);
+    this->debug_info(DEBUG_INFO_TYPE_NORMAL, fname.line);
 }
 void Compiler::compile_call(Noderef node, size_t expect)
 {
@@ -299,7 +299,7 @@ void Compiler::compile_call(Noderef node, size_t expect)
         else
             this->emit(Instruction(Opcode::ICall, argcount, expect + 1));
     }
-    this->debug_info(fn->line());
+    this->debug_info(DEBUG_INFO_TYPE_NORMAL, fn->line());
 }
 void Compiler::compile_identifier(Noderef node)
 {
@@ -399,12 +399,12 @@ void Compiler::compile_table(Noderef node)
         }
         this->emit(Opcode::ITSet);
         if (ch->get_kind() == NodeKind::ExprField)
-            this->debug_info(ch->child(0)->line());
+            this->debug_info(DEBUG_INFO_TYPE_NORMAL, ch->child(0)->line());
     }
 }
-void Compiler::debug_info(size_t line)
+void Compiler::debug_info(int type, size_t line)
 {
-    this->instructions.back().line = line;
+    this->instructions.back().dbg = DEBUG_INFO(type, line);
 }
 
 void Compiler::compile_exp_e(Noderef node, size_t expect)
@@ -425,7 +425,7 @@ void Compiler::compile_exp_e(Noderef node, size_t expect)
             this->compile_exp(node->child(2));
             Token op = node->child(1)->get_token();
             this->emit(this->translate_token(op.kind, true));
-            this->debug_info(op.line);
+            this->debug_info(DEBUG_INFO_TYPE_NORMAL, op.line);
         }
     }
     else if (node->get_kind() == NodeKind::Unary)
@@ -433,7 +433,7 @@ void Compiler::compile_exp_e(Noderef node, size_t expect)
         this->compile_exp(node->child(1));
         Token op = node->child(0)->get_token();
         this->emit(this->translate_token(op.kind, false));
-        this->debug_info(op.line);
+        this->debug_info(DEBUG_INFO_TYPE_NORMAL, op.line);
     }
     else if (node->get_kind() == NodeKind::Property)
     {
@@ -710,7 +710,7 @@ void Compiler::compile_generic_for(Noderef node)
     this->emit(Instruction(Opcode::IBLocal, 3));                           // state
     this->emit(Instruction(Opcode::ILocal, this->varmem(lvalue)->offset)); // prev
     this->emit(Instruction(Opcode::ICall, 2, varcount + 1));
-    this->debug_info(arglist->line());
+    this->debug_info(DEBUG_INFO_TYPE_GENFOR, arglist->line());
     foreach_node(varlist, _)
     {
         this->emit(Instruction(Opcode::IBLStore, varcount + 2));
@@ -765,6 +765,7 @@ void Compiler::compile_numeric_for(Noderef node)
     this->emit(Instruction(Opcode::IBLocal, 3)); // index
     this->emit(Instruction(Opcode::IBLocal, 3)); // limit
     this->emit(Opcode::IGt);
+    this->debug_info(DEBUG_INFO_TYPE_NUMFOR, lvalue->line());
     // jmp to end
     size_t jmp = this->len();
     this->emit(Instruction(Opcode::ICjmp, 0));
@@ -774,6 +775,7 @@ void Compiler::compile_numeric_for(Noderef node)
     this->emit(Instruction(Opcode::IBLocal, 3)); // index
     this->emit(Instruction(Opcode::IBLocal, 2)); // step
     this->emit(Opcode::IAdd);
+    this->debug_info(DEBUG_INFO_TYPE_NUMFOR, lvalue->line());
     this->emit(Instruction(Opcode::IBLStore, 3));
     this->emit(Instruction(Opcode::IJmp, loop_start));
     this->edit_jmp(jmp, this->binsize);
@@ -1035,7 +1037,7 @@ void Compiler::ops_flush()
         int line = this->lines.back();
         this->emit(this->ops.back());
         if (line != -1)
-            this->debug_info(line);
+            this->debug_info(DEBUG_INFO_TYPE_NORMAL, line);
         this->ops.pop_back();
         this->lines.pop_back();
     }

@@ -2,6 +2,7 @@
 #define LUABIN_h
 
 #include "luadef.h"
+#include "debug.h"
 
 namespace luayed
 {
@@ -91,7 +92,7 @@ namespace luayed
         Opcode op;
         size_t oprnd1;
         size_t oprnd2;
-        size_t line;
+        dbginfo_t dbg;
 
         Instruction(Opcode op, size_t oprnd1 = 0, size_t oprnd2 = 0);
 

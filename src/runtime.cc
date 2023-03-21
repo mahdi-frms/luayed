@@ -599,17 +599,15 @@ void LuaRuntime::call(size_t argc, size_t retc)
         {
             rs = this->fncall(rs.argc, this->frame->ret_count, true);
         }
-        else if (rs.kind == Fnresult::Ret || rs.kind == Fnresult::Error)
+        else
         {
             depth--;
-            this->fnret(rs.kind == Fnresult::Ret ? rs.retc : 0);
+            if (rs.kind != Fnresult::Fail)
+                this->fnret(rs.kind == Fnresult::Ret ? rs.retc : 0);
             if (depth)
                 rs = this->interpreter->run(this);
         }
-        else // failed to call
-        {
-            depth--;
-        }
+
     } while (depth);
 }
 bool LuaRuntime::error_raised()

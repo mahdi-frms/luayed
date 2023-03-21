@@ -91,18 +91,18 @@ public:
         return *this;
     }
 
-    GenTest &test_debug_info(size_t opidx, size_t line)
+    GenTest &test_debug_info(size_t opidx, dbginfo_t dbg)
     {
         string mes = compiler_test_message(this->message, "debug info");
         size_t gline = this->test->debug.size() > opidx ? this->test->debug[opidx] : 0;
-        bool rsl = gline == line;
+        bool rsl = gline == dbg;
         test_case(mes.c_str(), rsl);
         if (!rsl)
         {
             std::cerr << "generated and expected debug info do not match!\nin: "
                       << this->message << "\n"
                       << "expected line: "
-                      << line
+                      << dbg
                       << "\ngenerated binary: "
                       << gline << "\n";
         }
@@ -2158,7 +2158,7 @@ void compiler_tests()
             ipop(4),     // 57
             iret(0),     // 59
         })
-        .test_debug_info(40, 6);
+        .test_debug_info(40, DEBUG_INFO(DEBUG_INFO_TYPE_GENFOR, 6));
 
     compiler_test_case(
         "goto & label",
